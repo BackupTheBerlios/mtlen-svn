@@ -375,8 +375,21 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				TreeView_Expand(hTreeControl, hItem, TVE_EXPAND);
 			}
 
-			CheckDlgButton(hwndDlg, IDC_SENDONENTER, Options::getChatWindowOptions() & ChatWindow::FLAG_OPT_SENDONENTER);
+			tvis.item.pszText = Translate("Default Window Flashing");
+			hItem = TreeView_InsertItem(hTreeControl, &tvis);
+			bCheckParent = 1;
+			bCheckParent &= addOption(hTreeControl, hItem, "Messages", ChatWindow::FLAG_FLASH_MESSAGES);
+			bCheckParent &= addOption(hTreeControl, hItem, "User has joined", ChatWindow::FLAG_FLASH_JOINED);
+			bCheckParent &= addOption(hTreeControl, hItem, "User has left", ChatWindow::FLAG_FLASH_LEFT);
+			bCheckParent &= addOption(hTreeControl, hItem, "Topic changes", ChatWindow::FLAG_FLASH_TOPIC);
+			tvi.state = (bCheckParent ? INDEXTOSTATEIMAGEMASK(2) : INDEXTOSTATEIMAGEMASK(1));
+			tvi.hItem = hItem;
+			TreeView_SetItem(hTreeControl, &tvi);
+			if (expandFlags & 16) {
+				TreeView_Expand(hTreeControl, hItem, TVE_EXPAND);
+			}
 
+			CheckDlgButton(hwndDlg, IDC_SENDONENTER, Options::getChatWindowOptions() & ChatWindow::FLAG_OPT_SENDONENTER);
 			CheckDlgButton(hwndDlg, IDC_USETABS, Options::getChatContainerOptions() & ChatContainer::FLAG_USE_TABS);
 
 		}

@@ -426,8 +426,8 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 			tvis.item.lParam = (LPARAM) NULL;
 			tvis.item.cChildren = 1;
 			tvis.item.pszText = (char *)Translate(groupNames[group]);
-			tvis.item.state = INDEXTOSTATEIMAGEMASK(1);
-			tvis.item.stateMask = TVIS_STATEIMAGEMASK ;
+			//tvis.item.state = INDEXTOSTATEIMAGEMASK(1);
+			//tvis.item.stateMask = TVIS_STATEIMAGEMASK ;
 			setTreeItem(group, TreeView_InsertItem(GetDlgItem(hWnd, IDC_TREELIST), &tvis));
 		}
 		tvis.hParent = getTreeItem(group);
@@ -598,8 +598,19 @@ int ChatWindow::logEvent(const MUCCEVENT *event) {
 	if (event->iType == MUCC_EVENT_MESSAGE) {
 		wasFirstMessage = 1;
 		appendMessage(event);
+		container->remoteSetUnread(this, 1);
+		if (getOptions() & ChatWindow::FLAG_FLASH_MESSAGES) {
+			container->remoteFlashWindow();
+		}
 	} else {
 		appendEvent(event);
+		if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_ONLINE && getOptions() & FLAG_FLASH_JOINED) {
+			container->remoteFlashWindow();
+		} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_OFFLINE && getOptions() & FLAG_FLASH_LEFT) {
+			container->remoteFlashWindow();
+		} else if (event->iType==MUCC_EVENT_TOPIC && getOptions() & FLAG_FLASH_TOPIC) {
+			container->remoteFlashWindow();
+		}
 	}
 	if (ServiceExists(MS_SMILEYADD_REPLACESMILEYS)) PostMessage(getHWND(), WM_TLEN_SMILEY, 0, 0);
 	hwndLog = GetDlgItem(getHWND(), IDC_LOG);
@@ -1087,7 +1098,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 
 			SetWindowLong(GetDlgItem(hwndDlg,IDC_TREELIST),GWL_STYLE,GetWindowLong(GetDlgItem(hwndDlg,IDC_TREELIST),GWL_STYLE)|TVS_NOHSCROLL);
 			SendDlgItemMessage(hwndDlg,IDC_TREELIST, CCM_SETVERSION,(WPARAM)5,0);
-			TreeView_SetImageList(GetDlgItem(hwndDlg, IDC_TREELIST), hImageList, TVSIL_STATE);
+			//TreeView_SetImageList(GetDlgItem(hwndDlg, IDC_TREELIST), hImageList, TVSIL_STATE);
 			TreeView_SetItemHeight(GetDlgItem(hwndDlg, IDC_TREELIST), 16);
 			TreeView_SetIndent(GetDlgItem(hwndDlg, IDC_TREELIST), 16);
 			for(i=0;i<chatWindow->getFontSizeNum();i++) {
@@ -1271,6 +1282,10 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						CheckMenuItem(hMenu, ID_OPTIONMENU_LOGJOINED, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_LOG_JOINED ? MF_CHECKED : MF_UNCHECKED);
 						CheckMenuItem(hMenu, ID_OPTIONMENU_LOGLEFT, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_LOG_LEFT ? MF_CHECKED : MF_UNCHECKED);
 						CheckMenuItem(hMenu, ID_OPTIONMENU_LOGTOPIC, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_LOG_TOPIC ? MF_CHECKED : MF_UNCHECKED);
+						CheckMenuItem(hMenu, ID_OPTIONMENU_FLASHMESSAGES, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_FLASH_MESSAGES  ? MF_CHECKED : MF_UNCHECKED);
+						CheckMenuItem(hMenu, ID_OPTIONMENU_FLASHJOINED, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_FLASH_JOINED ? MF_CHECKED : MF_UNCHECKED);
+						CheckMenuItem(hMenu, ID_OPTIONMENU_FLASHLEFT, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_FLASH_LEFT ? MF_CHECKED : MF_UNCHECKED);
+						CheckMenuItem(hMenu, ID_OPTIONMENU_FLASHTOPIC, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_FLASH_TOPIC ? MF_CHECKED : MF_UNCHECKED);
 						iSelection = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, rc.left, rc.bottom, 0, hwndDlg, NULL);
 						DestroyMenu(hMenu);
 						switch (iSelection) {
@@ -1315,6 +1330,18 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 								break;
 							case ID_OPTIONMENU_LOGTOPIC:
 								chatWindow->setOptions(chatWindow->getOptions()^ChatWindow::FLAG_LOG_TOPIC);
+								break;
+							case ID_OPTIONMENU_FLASHMESSAGES:
+								chatWindow->setOptions(chatWindow->getOptions()^ChatWindow::FLAG_FLASH_MESSAGES);
+								break;
+							case ID_OPTIONMENU_FLASHJOINED:
+								chatWindow->setOptions(chatWindow->getOptions()^ChatWindow::FLAG_FLASH_JOINED);
+								break;
+							case ID_OPTIONMENU_FLASHLEFT:
+								chatWindow->setOptions(chatWindow->getOptions()^ChatWindow::FLAG_FLASH_LEFT);
+								break;
+							case ID_OPTIONMENU_FLASHTOPIC:
+								chatWindow->setOptions(chatWindow->getOptions()^ChatWindow::FLAG_FLASH_TOPIC);
 								break;
 							case ID_OPTIONMENU_SAVEDEFAULT:
 								Options::setChatWindowOptions(chatWindow->getOptions());

@@ -29,6 +29,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DM_CHANGECHILDDATA	(WM_USER+13)
 #define DM_REMOVECHILD		(WM_USER+14)
 
+#define DM_SETUNREAD		(WM_USER+15)
+#define DM_FLASHWINDOW		(WM_USER+16)
+
+#define TIMERID_FLASHWND     1
+#define TIMEOUT_FLASHWND     900
+
 ChatContainer *	ChatContainer::list = NULL;
 bool ChatContainer::released = false;
 CRITICAL_SECTION ChatContainer::mutex;
@@ -72,6 +78,8 @@ ChatContainer::ChatContainer() {
 	prev = next =NULL;
 	active = NULL;
 	childCount = 0;
+	nFlash = 0;
+	nFlashMax = 3;
 	Utils::forkThread((void (__cdecl *)(void *))StartThread, 0, (void *) this);
 	WaitForSingleObject(hEvent, INFINITE);
 	EnterCriticalSection(&mutex);
@@ -137,6 +145,22 @@ ChatWindow * ChatContainer::getActive() {
 	return active;
 }
 
+int ChatContainer::getFlash() {
+	return nFlash;
+}
+
+int ChatContainer::getFlashMax() {
+	return nFlashMax;
+}
+
+int ChatContainer::getFlashTimeout() {
+	return TIMEOUT_FLASHWND;
+}
+
+void ChatContainer::setFlash(int n) {
+	nFlash = n;
+}
+
 void ChatContainer::activateChild(ChatWindow *window) {
 	RECT rcChild;
 	getChildWindowRect(&rcChild);
@@ -154,6 +178,10 @@ void ChatContainer::activateChild(ChatWindow *window) {
 		}
 		SetWindowText(hWnd, window->getRoomName());
 	}
+	TCITEM tci;
+	tci.mask = TCIF_IMAGE;
+	tci.iImage = -1;
+	TabCtrl_SetItem(GetDlgItem(hWnd, IDC_TABS), getChildTab(window), &tci);
 	SendMessage(active->getHWND(), WM_ACTIVATE, WA_ACTIVE, 0);
 	SetFocus(active->getHWND());
 }
@@ -209,6 +237,19 @@ void ChatContainer::removeChild(ChatWindow *child) {
 		}
 	} else {//if (!released) {
 		SendMessage(hWnd, WM_CLOSE, 0, 0);
+	}
+}
+
+void ChatContainer::setUnread(ChatWindow *child, int unread) {
+	if (!unread || child != active) {
+		TCITEM tci;
+		tci.mask = TCIF_IMAGE;
+		if (unread) {
+			tci.iImage = 0;
+		} else {
+			tci.iImage = -1;
+		}
+		TabCtrl_SetItem(GetDlgItem(hWnd, IDC_TABS), getChildTab(child), &tci);
 	}
 }
 
@@ -271,6 +312,14 @@ void ChatContainer::remoteRemoveChild(ChatWindow *ptr) {
 	SendMessage(hWnd, DM_REMOVECHILD, (WPARAM)0, (LPARAM) ptr);
 }
 
+void ChatContainer::remoteSetUnread(ChatWindow *ptr, int unread) {
+	SendMessage(hWnd, DM_SETUNREAD, (WPARAM)unread, (LPARAM) ptr);
+}
+
+void ChatContainer::remoteFlashWindow() {
+	SendMessage(hWnd, DM_FLASHWINDOW, 0, 0);
+}
+
 BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	ChatContainer *container;
@@ -281,6 +330,7 @@ BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lPa
 			SendMessage(hwndDlg, WM_SETICON, ICON_BIG, (LPARAM) muccIcon[MUCC_IDI_CHAT]);
 			container = (ChatContainer *) lParam;
 			container->setHWND(hwndDlg);
+			TabCtrl_SetImageList(GetDlgItem(hwndDlg, IDC_TABS), hImageList);
 			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) container);
 			ShowWindow(hwndDlg, SW_SHOW);
 			SetEvent(container->getEvent());
@@ -331,6 +381,15 @@ BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lPa
 		case DM_CHANGECHILDDATA:
 			container->removeChild((ChatWindow *) lParam);
 			return TRUE;
+		case DM_SETUNREAD:
+			container->setUnread((ChatWindow *) lParam, (int)wParam);
+			return TRUE;
+		case DM_FLASHWINDOW:
+			if (GetActiveWindow() != hwndDlg && GetForegroundWindow() != hwndDlg) {
+				container->setFlash(0);
+				SetTimer(hwndDlg, TIMERID_FLASHWND, container->getFlashTimeout(), NULL);
+			}
+			return TRUE;
 		case WM_NOTIFY:
 			{
 				NMHDR* pNMHDR = (NMHDR*) lParam;
@@ -375,13 +434,29 @@ BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lPa
 			if (LOWORD(wParam) != WA_ACTIVE)
 				break;
 		case WM_MOUSEACTIVATE:
-			if (container->getActive()!=NULL) {
-				SendMessage(container->getActive()->getHWND(), WM_ACTIVATE, WA_ACTIVE, 0);
+			if (KillTimer(hwndDlg, TIMERID_FLASHWND)) {
+				FlashWindow(hwndDlg, FALSE);
 			}
+			/*
+			if (container->getActive()!=NULL) {
+				container->setUnread(container->getActive(), 0);
+				SendMessage(container->getActive()->getHWND(), WM_ACTIVATE, WA_ACTIVE, 0);
+			}*/
 			break;
 		case WM_CLOSE:
 			EndDialog(hwndDlg, 0);
 			return FALSE;
+		case WM_TIMER:
+			if (wParam == TIMERID_FLASHWND) {
+				if ((container->getFlash() > container->getFlashMax()) || (GetActiveWindow() == hwndDlg) || (GetForegroundWindow() == hwndDlg)) {
+					KillTimer(hwndDlg, TIMERID_FLASHWND);
+					FlashWindow(hwndDlg, FALSE);
+				} else if (container->getFlash() < container->getFlashMax()) {
+					FlashWindow(hwndDlg, TRUE);
+					container->setFlash(container->getFlash()+1);
+				}
+			}
+			break;
 		case WM_DESTROY:
 			SetWindowLong(hwndDlg, GWL_USERDATA, 0);
 			delete container;

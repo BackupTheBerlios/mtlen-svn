@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDI_ADMINISTRATION				116
 #define IDI_GLOBALOWNER                 117
 #define IDI_SMILEY						118
+#define IDI_MESSAGE						119
 
 #define IDD_CHATMANAGER                 150
 #define IDD_GROUPCHAT_LOG               151
@@ -162,6 +163,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ID_OPTIONMENU_LOGJOINED         40032
 #define ID_OPTIONMENU_LOGLEFT           40033
 #define ID_OPTIONMENU_LOGTOPIC          40034
+#define ID_OPTIONMENU_FLASHMESSAGES     40035
+#define ID_OPTIONMENU_FLASHJOINED       40036
+#define ID_OPTIONMENU_FLASHLEFT         40037
+#define ID_OPTIONMENU_FLASHTOPIC        40038
 #define ID_OPTIONMENU_SAVEDEFAULT       40040
 #define ID_USERMENU_MESSAGE             40050
 #define ID_USERMENU_KICK_POPUP          40051

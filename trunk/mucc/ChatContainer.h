@@ -45,6 +45,7 @@ private:
 	HANDLE			hEvent;
 	int				childCount;
 	int				width, height;
+	int				nFlash, nFlashMax;
 	ChatContainer  *next, *prev;
 	ChatWindow * active;
 	ChatContainer();
@@ -54,6 +55,7 @@ protected:
 	void			activateChild(ChatWindow *);
 	void			changeChildData(ChatWindow *);
 	void			removeChild(ChatWindow *);
+	void			setUnread(ChatWindow *child, int unread);
 	void			getChildWindowRect(RECT *rcChild);
 	ChatWindow *	getChildFromTab(int tabId);
 	int				getChildTab(ChatWindow *);
@@ -69,6 +71,10 @@ protected:
 	int				lastClickTab;
 	HANDLE			getEvent();
 	void			setHWND(HWND);
+	int				getFlash();
+	int				getFlashMax();
+	int				getFlashTimeout();
+	void			setFlash(int);
 public:
 	enum FLAGS {
 		FLAG_USE_TABS	= 0x00000001,
@@ -86,6 +92,8 @@ public:
 	void			remoteAddChild(ChatWindow *);
 	void			remoteChangeChildData(ChatWindow *);
 	void			remoteRemoveChild(ChatWindow *);
+	void			remoteSetUnread(ChatWindow *ptr, int unread);
+	void			remoteFlashWindow();
 };
 
 

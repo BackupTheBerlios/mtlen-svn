@@ -27,8 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 char *muccModuleName;
 HINSTANCE hInst;
 PLUGINLINK *pluginLink;
-HANDLE hHookEvent;
-HIMAGELIST hImageList;
+HANDLE hHookEvent = NULL;
+HIMAGELIST hImageList = NULL;
 HICON muccIcon[MUCC_ICON_TOTAL];
 static int ModulesLoaded(WPARAM wParam, LPARAM lParam);
 static int PreShutdown(WPARAM wParam, LPARAM lParam);
@@ -62,10 +62,7 @@ extern "C" __declspec(dllexport) PLUGININFO *MirandaPluginInfo(DWORD mirandaVers
 }
 
 
-extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
-{
-	char text[_MAX_PATH];
-	char *p, *q;
+static void LoadIcons() {
 	int i;
 	static int iconList[] = {
 		IDI_CHAT,
@@ -85,9 +82,27 @@ extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 		IDI_OPTIONS,
 		IDI_INVITE,
 		IDI_ADMINISTRATION,
-		IDI_SMILEY
-	};
+		IDI_SMILEY,
+		IDI_MESSAGE
 
+	};
+	for (i=0; i<MUCC_ICON_TOTAL; i++) {
+		muccIcon[i] = (HICON) LoadImage(hInst, MAKEINTRESOURCE(iconList[i]), IMAGE_ICON, 0, 0, 0);
+	}
+	if (hImageList != NULL) {
+		ImageList_Destroy(hImageList);
+	} 
+	hImageList = ImageList_Create(GetSystemMetrics(SM_CXSMICON),GetSystemMetrics(SM_CYSMICON),ILC_COLOR32|ILC_MASK,0,3);
+//	ImageList_AddIcon(hImageList, LoadIcon(hInst, MAKEINTRESOURCE(IDI_BLANK)));
+//	ImageList_AddIcon(hImageList, LoadIcon(hInst, MAKEINTRESOURCE(IDI_BLANK)));
+	ImageList_AddIcon(hImageList, muccIcon[MUCC_IDI_MESSAGE]);
+
+}
+
+extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
+{
+	char text[_MAX_PATH];
+	char *p, *q;
 	GetModuleFileName(hInst, text, sizeof(text));
 	p = strrchr(text, '\\');
 	p++;
@@ -109,12 +124,7 @@ extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(MS_MUCC_EVENT, MUCCEvent);
 	hHookEvent = CreateHookableEvent(ME_MUCC_EVENT);
 
-	for (i=0; i<MUCC_ICON_TOTAL; i++) {
-		muccIcon[i] = (HICON) LoadImage(hInst, MAKEINTRESOURCE(iconList[i]), IMAGE_ICON, 0, 0, 0);
-	}
-	hImageList = ImageList_Create(GetSystemMetrics(SM_CXSMICON),GetSystemMetrics(SM_CYSMICON),ILC_COLOR32|ILC_MASK,0,3);
-	ImageList_AddIcon(hImageList,(HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_BLANK),IMAGE_ICON,0,0,0));
-	ImageList_AddIcon(hImageList,(HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_BLANK),IMAGE_ICON,0,0,0));
+	LoadIcons();
 	return 0;
 }
 
