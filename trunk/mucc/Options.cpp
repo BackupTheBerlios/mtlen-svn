@@ -157,7 +157,7 @@ void Options::loadSettings() {
 	setChatContainerOptions(DBGetContactSettingDword(NULL, muccModuleName, "ChatContainerOptions", ChatContainer::getDefaultOptions()));
 	setChatWindowOptions(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowOptions", ChatWindow::getDefaultOptions()));
 	setChatWindowFont(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFont", 0));
-	setChatWindowFontSize(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontSize", 12));
+	setChatWindowFontSize(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontSize", 5));
 	setChatWindowFontStyle(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontStyle", 0));
 	setChatWindowFontColor(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontColor", 0));
 }
@@ -299,7 +299,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			for (i=0;i<Options::getFontNum();i++) {
 				SendDlgItemMessage(hwndDlg, IDC_FONTLIST, LB_ADDSTRING, 0, i + 1);
 			}
-		
+
 			SendDlgItemMessage(hwndDlg, IDC_FONTLIST, LB_SETSEL, TRUE, 0);
 			SendDlgItemMessage(hwndDlg, IDC_COLORTXT, CPM_SETCOLOUR, 0, Options::getFontSettings(0)->getColor());
 			SendDlgItemMessage(hwndDlg, IDC_COLORBKG, CPM_SETCOLOUR, 0, Options::getLogBgColor());
@@ -332,7 +332,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			if (expandFlags & 1) {
 				TreeView_Expand(hTreeControl, hItem, TVE_EXPAND);
 			}
-		
+
 			tvis.item.pszText = Translate("Default Timestamp Settings");
 			hItem = TreeView_InsertItem(hTreeControl, &tvis);
 			bCheckParent = 1;
@@ -374,7 +374,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			if (expandFlags & 8) {
 				TreeView_Expand(hTreeControl, hItem, TVE_EXPAND);
 			}
-			
+
 			CheckDlgButton(hwndDlg, IDC_SENDONENTER, Options::getChatWindowOptions() & ChatWindow::FLAG_OPT_SENDONENTER);
 
 			CheckDlgButton(hwndDlg, IDC_USETABS, Options::getChatContainerOptions() & ChatContainer::FLAG_USE_TABS);
@@ -424,10 +424,10 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				hBrush = CreateSolidBrush(color);
 				hFont = CreateFont(font->getSize(), 0, 0, 0,
 								   font->getStyle() & Font::BOLD ? FW_BOLD : FW_NORMAL,
-								   font->getStyle() & Font::ITALIC ? 1 : 0, 
+								   font->getStyle() & Font::ITALIC ? 1 : 0,
 								   font->getStyle() & Font::UNDERLINE ? 1 : 0, 0,
 								   font->getCharSet(),
-								   OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+								   OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
 								   font->getFace());
 				hFont = (HFONT) SelectObject(lpDis->hDC, hFont);
 				SetBkMode(lpDis->hDC, TRANSPARENT);
@@ -634,7 +634,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			}
 		}
 		break;
-	}	
+	}
 	return FALSE;
 }
 
@@ -647,7 +647,7 @@ static void MailPopupPreview(DWORD colorBack, DWORD colorText, char *title, char
 	char * lpzContactName;
 	char * lpzText;
 
-	lpzContactName = title; 
+	lpzContactName = title;
 	lpzText = emailInfo;
 	ZeroMemory(&ppd, sizeof(ppd));
 	ppd.lchContact = NULL;
@@ -710,10 +710,10 @@ static BOOL CALLBACK MUCCPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					} else {
 						delay=GetDlgItemInt(hwndDlg, IDC_DELAY, NULL, FALSE);
 					}
-					MailPopupPreview((DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0), 
-									 (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0), 
-									 "New mail", 
-									 "From: test@test.test\nSubject: test", 
+					MailPopupPreview((DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0),
+									 (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0),
+									 "New mail",
+									 "From: test@test.test\nSubject: test",
 									 delay);
 				}
 
@@ -723,7 +723,7 @@ static BOOL CALLBACK MUCCPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 
 		case WM_NOTIFY:
 			switch (((LPNMHDR) lParam)->code) {
-				case PSN_APPLY: 
+				case PSN_APPLY:
 				{
 					BYTE delayMode;
 					DBWriteContactSettingByte(NULL, jabberProtoName, "MailPopupEnabled", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ENABLEPOPUP));

@@ -534,6 +534,7 @@ IDI_PREV                ICON    DISCARDABLE     "icos\\prev.ico"
 IDI_NEXT                ICON    DISCARDABLE     "icos\\next.ico"
 IDI_INVITE              ICON    DISCARDABLE     "icos\\invite.ico"
 IDI_ADMINISTRATION      ICON    DISCARDABLE     "icos\\administration.ico"
+IDI_SMILEY				ICON    DISCARDABLE     "icos\\smile.ico"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
