@@ -39,6 +39,9 @@ ChatWindow *	ChatWindow::list = NULL;
 bool ChatWindow::released = false;
 CRITICAL_SECTION ChatWindow::mutex;
 
+static	WNDPROC	oldSplitterWndProc, oldEditWndProc;
+static  HCURSOR hCurSplitNS, hCurSplitWE;
+
 void ChatWindow::release() {
 	released = true;
 	for (ChatWindow *ptr2, *ptr = list; ptr!=NULL; ptr=ptr2) {
@@ -49,6 +52,8 @@ void ChatWindow::release() {
 }
 
 void ChatWindow::init() {
+	hCurSplitNS = LoadCursor(NULL, IDC_SIZENS);
+	hCurSplitWE = LoadCursor(NULL, IDC_SIZEWE);
 	released = false;
 	InitializeCriticalSection(&mutex);
 }
@@ -956,10 +961,10 @@ static BOOL CALLBACK EditWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 		}
 		break;
 	}
-	return CallWindowProc(chat->oldEditWndProc, hwnd, msg, wParam, lParam);
+	return CallWindowProc(oldEditWndProc, hwnd, msg, wParam, lParam);
 }
 
-static BOOL CALLBACK LogHSplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+static BOOL CALLBACK SplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	ChatWindow *chat;
 	chat = (ChatWindow *) GetWindowLong(GetParent(hwnd), GWL_USERDATA);
@@ -967,7 +972,9 @@ static BOOL CALLBACK LogHSplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 	case WM_NCHITTEST:
 		return HTCLIENT;
 	case WM_SETCURSOR:
-		SetCursor(LoadCursor(NULL, IDC_SIZENS));//hCursorSizeNS);
+		RECT rc;
+		GetClientRect(hwnd, &rc);
+		SetCursor(rc.right > rc.bottom ? hCurSplitNS : hCurSplitWE);
 		return TRUE;
 	case WM_LBUTTONDOWN:
 		SetCapture(hwnd);
@@ -978,16 +985,31 @@ static BOOL CALLBACK LogHSplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 			RECT rc;
 			POINT pt;
 			hParent = GetParent(hwnd);
-			pt.y = HIWORD(GetMessagePos());
-			GetClientRect(hParent, &rc);
-			ScreenToClient(hParent, &pt);
-			if (pt.y < chat->hSplitterMinTop)
-				pt.y = chat->hSplitterMinTop;
-			if (rc.bottom-pt.y < chat->hSplitterMinBottom)
-				pt.y = rc.bottom-chat->hSplitterMinBottom;
-			if (chat->hSplitterPos != rc.bottom-pt.y) {
-				chat->hSplitterPos = rc.bottom-pt.y;
-				SendMessage(hParent, WM_SIZE, SIZE_RESTORED, (rc.bottom<<16)+rc.right);
+			GetClientRect(hwnd, &rc);
+			if (rc.right < rc.bottom) {
+				pt.x = LOWORD(GetMessagePos());
+				GetClientRect(hParent, &rc);
+				ScreenToClient(hParent, &pt);
+				if (pt.x < chat->vSplitterMinLeft)
+					pt.x = chat->vSplitterMinLeft;
+				if (rc.right-pt.x < chat->vSplitterMinRight)
+					pt.x = rc.right-chat->vSplitterMinRight;
+				if (chat->vSplitterPos != rc.right-pt.x) {
+					chat->vSplitterPos = rc.right-pt.x;
+					SendMessage(hParent, WM_SIZE, SIZE_RESTORED, (rc.bottom<<16)+rc.right);
+				}
+			} else {
+				pt.y = HIWORD(GetMessagePos());
+				GetClientRect(hParent, &rc);
+				ScreenToClient(hParent, &pt);
+				if (pt.y < chat->hSplitterMinTop)
+					pt.y = chat->hSplitterMinTop;
+				if (rc.bottom-pt.y < chat->hSplitterMinBottom)
+					pt.y = rc.bottom-chat->hSplitterMinBottom;
+				if (chat->hSplitterPos != rc.bottom-pt.y) {
+					chat->hSplitterPos = rc.bottom-pt.y;
+					SendMessage(hParent, WM_SIZE, SIZE_RESTORED, (rc.bottom<<16)+rc.right);
+				}
 			}
 		}
 		return 0;
@@ -995,46 +1017,7 @@ static BOOL CALLBACK LogHSplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 		ReleaseCapture();
 		return 0;
 	}
-	return CallWindowProc(chat->oldHSplitterWndProc, hwnd, msg, wParam, lParam);
-}
-
-static BOOL CALLBACK LogVSplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	ChatWindow *chat;
-	chat = (ChatWindow *) GetWindowLong(GetParent(hwnd), GWL_USERDATA);
-	switch (msg) {
-	case WM_NCHITTEST:
-		return HTCLIENT;
-	case WM_SETCURSOR:
-		SetCursor(LoadCursor(NULL, IDC_SIZEWE));//hCursorSizeNS);
-		return TRUE;
-	case WM_LBUTTONDOWN:
-		SetCapture(hwnd);
-		return 0;
-	case WM_MOUSEMOVE:
-		if (GetCapture() == hwnd) {
-			HWND hParent;
-			RECT rc;
-			POINT pt;
-			hParent = GetParent(hwnd);
-			pt.x = LOWORD(GetMessagePos());
-			GetClientRect(hParent, &rc);
-			ScreenToClient(hParent, &pt);
-			if (pt.x < chat->vSplitterMinLeft)
-				pt.x = chat->vSplitterMinLeft;
-			if (rc.right-pt.x < chat->vSplitterMinRight)
-				pt.x = rc.right-chat->vSplitterMinRight;
-			if (chat->vSplitterPos != rc.right-pt.x) {
-				chat->vSplitterPos = rc.right-pt.x;
-				SendMessage(hParent, WM_SIZE, SIZE_RESTORED, (rc.bottom<<16)+rc.right);
-			}
-		}
-		return 0;
-	case WM_LBUTTONUP:
-		ReleaseCapture();
-		return 0;
-	}
-	return CallWindowProc(chat->oldVSplitterWndProc, hwnd, msg, wParam, lParam);
+	return CallWindowProc(oldSplitterWndProc, hwnd, msg, wParam, lParam);
 }
 
 
@@ -1061,12 +1044,9 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			chatWindow = (ChatWindow *) lParam;
 			chatWindow->setHWND(hwndDlg);
 			ChatWindow::refreshSettings(0);
-			chatWindow->oldHSplitterWndProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC);
-			chatWindow->oldVSplitterWndProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC);
-			chatWindow->oldEditWndProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) LogHSplitterWndProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) EditWndProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) LogVSplitterWndProc);
+			oldSplitterWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) SplitterWndProc);
+			oldSplitterWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) SplitterWndProc);
+			oldEditWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) EditWndProc);
 			ShowWindow(GetDlgItem(hwndDlg, IDC_LIST), SW_HIDE);
 			chatWindow->hSplitterMinTop = 90;
 			chatWindow->hSplitterMinBottom = 40;
@@ -1249,9 +1229,9 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			muce.pszID = chatWindow->getRoomId();
 			NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
 			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) NULL);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) chatWindow->oldHSplitterWndProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) chatWindow->oldVSplitterWndProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) chatWindow->oldEditWndProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) oldEditWndProc);
 			delete chatWindow;
 			break;
 		case WM_TLEN_SMILEY:

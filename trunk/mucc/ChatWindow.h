@@ -112,9 +112,6 @@ public:
 	int				hSplitterMinTop;
 	int				vSplitterMinLeft;
 	int				vSplitterMinRight;
-	WNDPROC			oldHSplitterWndProc;
-	WNDPROC			oldVSplitterWndProc;
-	WNDPROC			oldEditWndProc;
 	ChatWindow (MUCCWINDOW *);
 	~ChatWindow ();
 	ChatWindow *	getNext();
