@@ -117,6 +117,8 @@ BEGIN
 //        MENUITEM "Browse Users",                	ID_ADMINMENU_BROWSE, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "Destroy Chat Room",           	ID_ADMINMENU_DESTROY, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "Save Log",           				ID_ADMINMENU_SAVELOG
     END
     POPUP "", MENUBREAK
     BEGIN

@@ -209,6 +209,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ID_ADMINMENU_DESTROY			40080
 #define ID_ADMINMENU_ADMIN				40081
 #define ID_ADMINMENU_BROWSE				40082
+#define ID_ADMINMENU_SAVELOG			40083
 
 // Next default values for new objects
 //
