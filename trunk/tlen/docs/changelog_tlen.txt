@@ -1,3 +1,9 @@
+1.0.6.0 Stable
+---------
++ group chat window flashing
++ message icons in tabbed mode
++ web messages grouped as a single contact
+* offline message timestamp handling fixed (again)
 1.0.5.10 RC2
 ---------
 + tabbed mode available in group chat window

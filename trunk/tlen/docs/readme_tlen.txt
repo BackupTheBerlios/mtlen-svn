@@ -8,8 +8,8 @@ Introduction:
   necessary helps to create this Tlen plugin are from Adam Strzelecki.
 
 Installation:
-  Copy tlen.dll to Miranda's plugins directory.
-	
+  Copy tlen.dll and mucc.dll to Miranda's plugins directory.
+
   If you want to have multiple Tlen accounts online at the same time,
   you need to have multiple copies of tlen.dll, each with different name,
   all in Miranda's plugins directory. Note that all configurations for a
@@ -20,20 +20,19 @@ Installation:
   database categories are already in use).
 
 More information:
-  Web: http://jabber.au.edu/miranda
-  E-mail: keh@au.edu
+  Web: http://mtlen.berlios.de
+  E-mail: the_leech@users.berlios.de
 
-Copyright (c) 2002-2004 Santithorn Bunchua (keh@au.edu)
+Copyright (c) 2002-2005 Santithorn Bunchua (keh@au.edu), Piotr Piastucki
 
 Acknowledgement:
-  I would like to thank the following people for their helps and/or comments
+  We would like to thank the following people for their helps and/or comments
   (alphabetically listed):
     Dmitry Balabanov
     Nikola Dachev
     Sam Kothari
     Adam Libura
     Jörgen Persson
-    Piotr Piastucki
     Robert Rainwater
     Adam Strzelecki
     Michal Wojciechowski
@@ -41,7 +40,7 @@ Acknowledgement:
 ================================================================
 
 Tlen Protocol Plugin for Miranda IM
-Copyright (C) 2002-2004  Santithorn Bunchua
+Copyright (C) 2002-2005  Santithorn Bunchua, Piotr Piastucki
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
