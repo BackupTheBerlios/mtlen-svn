@@ -937,13 +937,15 @@ char *JabberGetVersionText()
 time_t  TlenTimeToUTC(time_t time) {
 	struct tm *timestamp;
 	timestamp = gmtime(&time);
-	if ( (timestamp->tm_mon > 3 && timestamp->tm_mon < 10) ||
-		 (timestamp->tm_mon == 3 && timestamp->tm_mday - timestamp->tm_wday >= 25) ||
-		 (timestamp->tm_mon == 10 && timestamp->tm_mday - timestamp->tm_wday < 25)) {
+	if ( (timestamp->tm_mon > 2 && timestamp->tm_mon < 9) ||
+		 (timestamp->tm_mon == 2 && timestamp->tm_mday - timestamp->tm_wday >= 25) ||
+		 (timestamp->tm_mon == 9 && timestamp->tm_mday - timestamp->tm_wday < 25)) {
+	} else {
 		time += 3600;
-	} 
+	}
 	return time;
 }
+
 time_t JabberIsoToUnixTime(char *stamp)
 {
 	struct tm timestamp;
@@ -987,11 +989,10 @@ time_t JabberIsoToUnixTime(char *stamp)
 		return (time_t) 0;
 
 	timestamp.tm_isdst = 0;	// DST is already present in _timezone below
-	t = mktime(&timestamp);
-	t = TlenTimeToUTC(t) + 3600;
 	_tzset();
+	t = mktime(&timestamp);
 	t -= _timezone;
-
+	t = TlenTimeToUTC(t);
 	JabberLog("%s is %s", stamp, ctime(&t));
 
 	if (t >= 0)

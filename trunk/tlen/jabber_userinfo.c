@@ -219,7 +219,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, "");
 					break;
 			} 
-			i = DBGetContactSettingByte(hContact, jabberProtoName, "Occupation", 0);
+			i = DBGetContactSettingWord(hContact, jabberProtoName, "Occupation", 0);
 			if (i>0 && i<13) {
 				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, Translate(tlenFieldOccupation[i-1].name));
 				SendDlgItemMessage(hwndDlg, IDC_OCCUPATION, CB_SETCURSEL, i, 0);
@@ -227,7 +227,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, "");
 				SendDlgItemMessage(hwndDlg, IDC_OCCUPATION, CB_SETCURSEL, 0, 0);
 			}
-			i = DBGetContactSettingByte(hContact, jabberProtoName, "LookingFor", 0);
+			i = DBGetContactSettingWord(hContact, jabberProtoName, "LookingFor", 0);
 			if (i>0 && i<6) {
 				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, Translate(tlenFieldLookfor[i-1].name));
 				SendDlgItemMessage(hwndDlg, IDC_LOOKFOR, CB_SETCURSEL, i, 0);
@@ -235,7 +235,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, "");
 				SendDlgItemMessage(hwndDlg, IDC_LOOKFOR, CB_SETCURSEL, 0, 0);
 			}
-			i = DBGetContactSettingByte(hContact, jabberProtoName, "VoiceChat", 0);
+			i = DBGetContactSettingWord(hContact, jabberProtoName, "VoiceChat", 0);
 			CheckDlgButton(hwndDlg, IDC_VOICECONVERSATIONS, i);
 			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 				jid = JabberTextDecode(dbv.pszVal);
