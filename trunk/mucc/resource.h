@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDI_INVITE                      115
 #define IDI_ADMINISTRATION				116
 #define IDI_GLOBALOWNER                 117
+#define IDI_SMILEY						118
 
 #define IDD_CHATMANAGER                 150
 #define IDD_GROUPCHAT_LOG               151
@@ -68,32 +69,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDC_LOGLIMITSPIN                1008
 #define IDC_LOGLIMIT                    1009
 #define IDC_SENDONENTER                 1010
+#define IDC_USETABS						1011
 #define IDC_REGISTER                    1020
 #define IDC_NAME                        1021
-#define IDC_SUBMIT                      1023
-#define IDC_AGENT_BROWSE                1029
-#define IDC_INSTRUCTION                 1030
 #define IDC_FRAME                       1037
-#define IDC_FRAME_TEXT                  1038
-#define IDC_SUBSCRIPTION                1039
-#define IDC_REGISTERACCOUNT             1040
 #define IDC_SIMPLE                      1041
-#define IDC_KEEPALIVE                   1042
-#define IDC_HOST                        1043
-#define IDC_HOSTPORT                    1044
-#define IDC_USE_SSL                     1045
-#define IDC_MANUAL                      1046
-#define IDC_RESOURCE_T                  1047
-#define IDC_SAVEPASSWORD                1048
-#define IDC_MSGLANG                     1049
 #define IDC_PASSWORD                    1050
 #define IDC_JID                         1051
-#define IDC_ROSTER_SYNC                 1052
-#define IDC_OLDPASSWD                   1053
-#define IDC_ADDRESS1                    1056
-#define IDC_ADDRESS2                    1057
-#define IDC_CITY                        1058
-#define IDC_STATE                       1059
 #define IDC_COUNTRY                     1060
 #define IDC_NICKNAME                    1062
 #define IDC_MSG                         1084
@@ -101,9 +83,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDC_DESC                        1090
 #define IDC_DELETE                      1092
 #define IDC_LOAD                        1093
-#define IDC_USE_EXT_ADDRESS             1121
-#define IDC_REG_STATUS                  1122
-#define IDC_MSG_ACK                     1122
 #define IDC_JOIN                        1123
 #define IDC_ROOM                        1124
 #define IDC_ROOM_LABEL                  1125
@@ -139,11 +118,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDC_DELAY_PERMANENT             1185
 #define IDC_DELAY_CUSTOM                1186
 #define IDC_DELAY_POPUP                 1187
-#define IDC_EDIT1                       1195
-#define IDC_FILE_PROXY_PASSWORD         1195
-#define IDC_GENDER_TEXT                 1195
-#define IDC_OCCUPATION_TEXT             1199
-#define IDC_LOOKFOR_TEXT                1200
 #define IDC_GROUP                       1203
 #define IDC_BOLD                        1204
 #define IDC_SMILEY                      1205
@@ -170,6 +144,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDC_STATUS                      1414
 #define IDC_PLAN                        1415
 #define IDC_SHOW						1416
+
 #define IDC_PERSONALGROUP               1434
 #define IDC_EXTRAGROUP                  1436
 

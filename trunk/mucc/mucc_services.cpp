@@ -58,29 +58,10 @@ int MUCCQueryUserNicks(MUCCQUERYRESULT *queryResult)
 	return 1;
 }
 
-int MUCCQueryResultContacts(MUCCQUERYRESULT *queryResult) 
-{
-	ChatWindow *chatWindow=ChatWindow::getWindow(queryResult->pszModule, queryResult->pszParent);
-	if (chatWindow!=NULL) {
-		SendMessage(chatWindow->getHWND(), DM_CHAT_QUERY, (WPARAM) 0, (LPARAM) queryResult);
-		chatWindow->queryResultContacts(queryResult);
-	}
-	return 1;
-}
-
-int MUCCQueryUsers(MUCCQUERYRESULT *queryResult) 
-{
-	ChatWindow *chatWindow=ChatWindow::getWindow(queryResult->pszModule, queryResult->pszParent);
-	if (chatWindow!=NULL) {
-		SendMessage(chatWindow->getHWND(), DM_CHAT_QUERY, (WPARAM) 0, (LPARAM) queryResult);
-		chatWindow->queryResultUsers(queryResult);
-	}
-	return 1;
-}
-
 int MUCCQueryResult(WPARAM wParam, LPARAM lParam)
 {
 	MUCCQUERYRESULT *queryResult=(MUCCQUERYRESULT *)lParam;
+	ChatWindow * chatWindow = NULL;
 	switch (queryResult->iType) {
 		case MUCC_EVENT_QUERY_GROUPS:
 			MUCCQueryChatGroups(queryResult);
@@ -94,11 +75,12 @@ int MUCCQueryResult(WPARAM wParam, LPARAM lParam)
 		case MUCC_EVENT_QUERY_USER_NICKS:
 			MUCCQueryUserNicks(queryResult);
 			break;
-		case MUCC_EVENT_QUERY_USERS:
-			MUCCQueryUsers(queryResult);
-			break;
 		case MUCC_EVENT_QUERY_CONTACTS:
-			MUCCQueryResultContacts(queryResult);
+		case MUCC_EVENT_QUERY_USERS:
+			chatWindow=ChatWindow::getWindow(queryResult->pszModule, queryResult->pszParent);
+			if (chatWindow!=NULL) {
+				SendMessage(chatWindow->getHWND(), DM_CHAT_QUERY, (WPARAM) 0, (LPARAM) queryResult);
+			}
 			break;
 	}
 	return 0;

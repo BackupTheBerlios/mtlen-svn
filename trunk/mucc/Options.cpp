@@ -33,7 +33,7 @@ static BOOL CALLBACK MUCCPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 
 COLORREF Options::colorListBg, Options::colorInputBg, Options::colorLogBg, Options::chatWindowFontColor;
 HBRUSH   Options::brushListBg=NULL, Options::brushInputBg=NULL, Options::brushLogBg=NULL;
-int		 Options::logLimit, Options::chatWindowOptions;
+int		 Options::logLimit, Options::chatWindowOptions, Options::chatContainerOptions;
 int		 Options::chatWindowFont, Options::chatWindowFontSize, Options::chatWindowFontStyle;
 
 void Options::setListBgColor(COLORREF c) {
@@ -132,6 +132,14 @@ int Options::getChatWindowOptions() {
 	return chatWindowOptions;
 }
 
+void Options::setChatContainerOptions(int o) {
+	chatContainerOptions = o;
+}
+
+int Options::getChatContainerOptions() {
+	return chatContainerOptions;
+}
+
 void Options::setExpandFlags(int o) {
 	DBWriteContactSettingDword(NULL, muccModuleName, "ExpandFlags", o);
 }
@@ -146,6 +154,7 @@ void Options::loadSettings() {
 	setListBgColor((COLORREF)DBGetContactSettingDword(NULL, muccModuleName, "BackgroundList", 0xFFFFFF));
 	setInputBgColor((COLORREF)DBGetContactSettingDword(NULL, muccModuleName, "BackgroundTyping", 0xFFFFFF));
 	setLogLimit(DBGetContactSettingDword(NULL, muccModuleName, "LogSizeLimit", 100));
+	setChatContainerOptions(DBGetContactSettingDword(NULL, muccModuleName, "ChatContainerOptions", ChatContainer::getDefaultOptions()));
 	setChatWindowOptions(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowOptions", ChatWindow::getDefaultOptions()));
 	setChatWindowFont(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFont", 0));
 	setChatWindowFontSize(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontSize", 12));
@@ -159,6 +168,7 @@ void Options::saveSettings() {
 	DBWriteContactSettingDword(NULL, muccModuleName, "BackgroundList", colorListBg);
 	DBWriteContactSettingDword(NULL, muccModuleName, "BackgroundTyping", colorInputBg);
 	DBWriteContactSettingDword(NULL, muccModuleName, "LogSizeLimit", logLimit);
+	DBWriteContactSettingDword(NULL, muccModuleName, "ChatContainerOptions", chatContainerOptions);
 	DBWriteContactSettingDword(NULL, muccModuleName, "ChatWindowOptions", chatWindowOptions);
 	DBWriteContactSettingDword(NULL, muccModuleName, "ChatWindowFont", chatWindowFont);
 	DBWriteContactSettingDword(NULL, muccModuleName, "ChatWindowFontSize", chatWindowFontSize);
@@ -366,6 +376,9 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			}
 			
 			CheckDlgButton(hwndDlg, IDC_SENDONENTER, Options::getChatWindowOptions() & ChatWindow::FLAG_OPT_SENDONENTER);
+
+			CheckDlgButton(hwndDlg, IDC_USETABS, Options::getChatContainerOptions() & ChatContainer::FLAG_USE_TABS);
+
 		}
 	 case WM_MEASUREITEM:
 		if (wParam == IDC_FONTLIST) {
@@ -469,6 +482,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			case IDC_COLORINPUT:
 				InvalidateRect(GetDlgItem(hwndDlg, IDC_FONTLIST), NULL, FALSE);
 			case IDC_SENDONENTER:
+			case IDC_USETABS:
 				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 				break;
 			case IDC_FONTLIST:
@@ -560,6 +574,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				Options::setLogLimit(SendDlgItemMessage(hwndDlg, IDC_LOGLIMITSPIN, UDM_GETPOS, 0, 0));
 				Options::setChatWindowOptions(getOptions(GetDlgItem(hwndDlg, IDC_TREELIST), TreeView_GetRoot(GetDlgItem(hwndDlg, IDC_TREELIST)), 0));
 				Options::setChatWindowOptions(Options::getChatWindowOptions() | (IsDlgButtonChecked(hwndDlg, IDC_SENDONENTER) ? ChatWindow::FLAG_OPT_SENDONENTER : 0));
+				Options::setChatContainerOptions(IsDlgButtonChecked(hwndDlg, IDC_USETABS) ? ChatContainer::FLAG_USE_TABS : 0);
 				Options::saveSettings();
 				ChatWindow::refreshSettings(1);
 				break;

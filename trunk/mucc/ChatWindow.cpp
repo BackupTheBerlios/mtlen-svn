@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "HelperDialog.h"
 #include "Utils.h"
 #include "Options.h"
+#include "m_smileyadd.h"
 
 static int logPixelSY;
 static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -42,7 +43,7 @@ void ChatWindow::release() {
 	released = true;
 	for (ChatWindow *ptr2, *ptr = list; ptr!=NULL; ptr=ptr2) {
 		ptr2 = ptr->getNext();
-		SendMessage(ptr->getHWND(), WM_CLOSE, 0, 0);
+		//SendMessage(ptr->getHWND(), WM_CLOSE, 0, 0);
 	}
 	DeleteCriticalSection(&mutex);
 }
@@ -91,7 +92,7 @@ ChatWindow::~ChatWindow () {
 		EnterCriticalSection(&mutex);
 		if (getPrev()!=NULL) {
 			getPrev()->setNext(next);
-		} else {
+		} else if (list==this) {
 			list = getNext();
 		}
 		if (getNext()!=NULL) {
@@ -102,11 +103,6 @@ ChatWindow::~ChatWindow () {
 	if (adminWindow!=NULL) {
 		delete adminWindow;
 	}
-//	if (hWnd!=NULL) {
-//		DestroyWindow(list->getHWND());
-	//	DestroyWindow(hWnd);
-//		EndDialog(hWnd, 0);
-//	}
 	if (hEvent!=NULL) {
 		CloseHandle(hEvent);
 	}
@@ -1086,20 +1082,12 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg, IDC_BOLD, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_BOLD]);
 			SendDlgItemMessage(hwndDlg, IDC_ITALIC, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_ITALIC]);
 			SendDlgItemMessage(hwndDlg, IDC_UNDERLINE, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_UNDERLINE]);
+			SendDlgItemMessage(hwndDlg, IDC_SMILEYBTN, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_SMILEY]);
 
 			SendDlgItemMessage(hwndDlg, IDC_LOG, EM_SETEVENTMASK, 0, ENM_MOUSEEVENTS | ENM_LINK);
 			SendDlgItemMessage(hwndDlg, IDC_LOG, EM_SETUNDOLIMIT, 0, 0);
 			SendDlgItemMessage(hwndDlg, IDC_LOG, EM_AUTOURLDETECT, (WPARAM) TRUE, 0);
 
-			/*
-			SMADD_GETICON smadd_iconinfo;
-            smadd_iconinfo.cbSize = sizeof(smadd_iconinfo);
-            smadd_iconinfo.Protocolname = (char *)chatWindow->getModule();
-            smadd_iconinfo.SmileySequence = ":)";
-            smadd_iconinfo.Smileylength = 0;
-            CallService(MS_SMILEYADD_GETSMILEYICON, 0, (LPARAM)&smadd_iconinfo);
-			SendDlgItemMessage(hwndDlg, IDC_SMILEYBTN, BM_SETIMAGE, IMAGE_ICON, (LPARAM) smadd_iconinfo.SmileyIcon);
-*/
 			//	LoadImage(hInst, smadd_iconinfo.SmileyIcon, IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0));
 			SendDlgItemMessage(hwndDlg, IDC_OPTIONS, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_OPTIONS]);
 			SendDlgItemMessage(hwndDlg, IDC_INVITE, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_INVITE]);
@@ -1114,8 +1102,8 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg, IDC_ITALIC, BUTTONSETASPUSHBTN, 0, 0);
 			SendDlgItemMessage(hwndDlg, IDC_UNDERLINE, BUTTONSETASFLATBTN, 0, 0);
 			SendDlgItemMessage(hwndDlg, IDC_UNDERLINE, BUTTONSETASPUSHBTN, 0, 0);
-			SendDlgItemMessage(hwndDlg, IDC_OPTIONS, BUTTONSETASFLATBTN, 0, 0); // options
-			SendDlgItemMessage(hwndDlg, IDC_SMILEYBTN, BUTTONSETASFLATBTN, 0, 0); // options
+			SendDlgItemMessage(hwndDlg, IDC_OPTIONS, BUTTONSETASFLATBTN, 0, 0); 
+			SendDlgItemMessage(hwndDlg, IDC_SMILEYBTN, BUTTONSETASFLATBTN, 0, 0);
 
 			SetWindowLong(GetDlgItem(hwndDlg,IDC_TREELIST),GWL_STYLE,GetWindowLong(GetDlgItem(hwndDlg,IDC_TREELIST),GWL_STYLE)|TVS_NOHSCROLL);
 			SendDlgItemMessage(hwndDlg,IDC_TREELIST, CCM_SETVERSION,(WPARAM)5,0);
@@ -1127,19 +1115,23 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				sprintf(str, "%d", chatWindow->getFontSize(i));
 				int n = SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_ADDSTRING, 0, (LPARAM) str);
 				SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_SETITEMDATA, n, chatWindow->getFontSize(i));
-				if (i==5) {
-					SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_SETCURSEL, n, 0);
-				}
 			}
+			SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_SETCURSEL, Options::getChatWindowFontSize(), 0);
 			for(i=0;i<chatWindow->getFontNameNum();i++) {
 				int n = SendDlgItemMessage(hwndDlg, IDC_FONT, CB_ADDSTRING, 0, (LPARAM) chatWindow->getFontName(i));
 				SendDlgItemMessage(hwndDlg, IDC_FONT, CB_SETITEMDATA, n, i);
-				if (i==0) {
-					SendDlgItemMessage(hwndDlg, IDC_FONT, CB_SETCURSEL, n, 0);
-				}
 			}
-			chatWindow->setFont(Options::getChatWindowFont(), chatWindow->getFontSize(Options::getChatWindowFontSize()), 
-								0, 0, 0, Options::getChatWindowFontColor());
+			SendDlgItemMessage(hwndDlg, IDC_FONT, CB_SETCURSEL, Options::getChatWindowFont(), 0);
+			CheckDlgButton(hwndDlg, IDC_BOLD, Options::getChatWindowFontStyle()&Font::BOLD ? TRUE : FALSE);
+			CheckDlgButton(hwndDlg, IDC_ITALIC, Options::getChatWindowFontStyle()&Font::ITALIC ? TRUE : FALSE);
+			CheckDlgButton(hwndDlg, IDC_UNDERLINE, Options::getChatWindowFontStyle()&Font::UNDERLINE ? TRUE : FALSE);
+			SendDlgItemMessage(hwndDlg, IDC_COLOR, CPM_SETCOLOUR, 0, (LPARAM)Options::getChatWindowFontColor());
+			chatWindow->setFont(Options::getChatWindowFont(), 
+								chatWindow->getFontSize(Options::getChatWindowFontSize()), 
+								Options::getChatWindowFontStyle()&Font::BOLD ? 1 : 0,
+								Options::getChatWindowFontStyle()&Font::ITALIC ? 1 : 0,
+								Options::getChatWindowFontStyle()&Font::UNDERLINE ? 1 : 0,
+								Options::getChatWindowFontColor());
 			SetWindowPos(hwndDlg, HWND_TOP, 0, 0, 540, 370, SWP_NOMOVE | SWP_SHOWWINDOW);
 			SetFocus(GetDlgItem(hwndDlg, IDC_EDIT));
 			SetEvent(chatWindow->getEvent());
@@ -1170,6 +1162,17 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			}
 			return TRUE;
 		case DM_CHAT_QUERY:
+			MUCCQUERYRESULT *queryResult;
+			queryResult = (MUCCQUERYRESULT *)lParam;
+			switch (queryResult->iType) {
+				case MUCC_EVENT_QUERY_CONTACTS:
+					chatWindow->queryResultContacts(queryResult);
+					break;
+				case MUCC_EVENT_QUERY_USERS:
+					chatWindow->queryResultUsers(queryResult);
+					break;
+
+			}
 			return TRUE;
 		case WM_SETFOCUS:
 			SetFocus(GetDlgItem(hwndDlg, IDC_EDIT));
@@ -1178,7 +1181,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			MINMAXINFO *mmi;
 			mmi = (MINMAXINFO *) lParam;
 			mmi->ptMinTrackSize.x = 380;
-			mmi->ptMinTrackSize.y = 160;
+			mmi->ptMinTrackSize.y = 130;
 			return FALSE;
 		case WM_SIZE:
 			if (wParam!=SIZE_MINIMIZED) {
@@ -1186,8 +1189,8 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				RECT rc;
 				HDWP hdwp;
 				GetClientRect(hwndDlg, &rc);
-				dlgWidth = rc.right-rc.left;//LOWORD(lParam);
-				dlgHeight = rc.bottom-rc.top;//HIWORD(lParam);
+				dlgWidth = rc.right-rc.left;
+				dlgHeight = rc.bottom-rc.top;
 				if (dlgHeight-chatWindow->hSplitterPos < chatWindow->hSplitterMinTop) {
 					chatWindow->hSplitterPos = dlgHeight-chatWindow->hSplitterMinTop;
 				}
@@ -1205,7 +1208,6 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_TOPIC), 0, 70, 7, dlgWidth-140, 18, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_LOG), 0, 0, 30, dlgWidth-(chatWindow->vSplitterPos)-2, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_TREELIST), 0, dlgWidth-(chatWindow->vSplitterPos)+2, 30, (chatWindow->vSplitterPos)-2, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
-//				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_LIST), 0, dlgWidth-(chatWindow->vSplitterPos)+2, 30, (chatWindow->vSplitterPos)-5, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_EDIT), 0, 0, dlgHeight-(chatWindow->hSplitterPos)+2, dlgWidth, (chatWindow->hSplitterPos)-5, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_INVITE), 0, dlgWidth-31, dlgHeight-(chatWindow->hSplitterPos)-26, 31, 24, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_ROOMADMIN), 0, dlgWidth-55, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
@@ -1215,8 +1217,8 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_COLOR), 0, 73, dlgHeight-(chatWindow->hSplitterPos)-25, 22, 22, SWP_NOZORDER );
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_FONT), 0, 98, dlgHeight-(chatWindow->hSplitterPos)-24, 110, 13, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_FONTSIZE), 0, 213, dlgHeight-(chatWindow->hSplitterPos)-24, 38, 13, SWP_NOZORDER);
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_SMILEYBTN), 0, 254, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_OPTIONS), 0, 285, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_SMILEYBTN), 0, 265, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_OPTIONS), 0, dlgWidth-79, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_VSPLIT), 0, dlgWidth-(chatWindow->vSplitterPos)-2, 30, 4, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_HSPLIT), 0, 0, dlgHeight-(chatWindow->hSplitterPos)-2, dlgWidth-8, 4, SWP_NOZORDER);
 				EndDeferWindowPos(hdwp);
@@ -1336,10 +1338,32 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 								break;
 							case ID_OPTIONMENU_SAVEDEFAULT:
 								Options::setChatWindowOptions(chatWindow->getOptions());
+								Options::setChatWindowFont((int)SendDlgItemMessage(hwndDlg, IDC_FONT, CB_GETCURSEL, 0, 0));
+								Options::setChatWindowFontSize((int)SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_GETCURSEL, 0, 0));
+								Options::setChatWindowFontStyle(
+									(IsDlgButtonChecked(hwndDlg, IDC_BOLD) ? Font::BOLD : 0) |
+									(IsDlgButtonChecked(hwndDlg, IDC_ITALIC) ? Font::ITALIC : 0) |
+									(IsDlgButtonChecked(hwndDlg, IDC_UNDERLINE) ? Font::UNDERLINE : 0)
+									);
+								Options::setChatWindowFontColor((COLORREF) SendDlgItemMessage(hwndDlg, IDC_COLOR, CPM_GETCOLOUR,0,0));
 								Options::saveSettings();
 								break;
 						}
 					}
+					break;
+				case IDC_SMILEYBTN:
+					SMADD_SHOWSEL smaddInfo;
+					RECT rc;
+					smaddInfo.cbSize = sizeof(SMADD_SHOWSEL);
+					smaddInfo.hwndTarget = GetDlgItem(hwndDlg, IDC_EDIT);
+					smaddInfo.targetMessage = EM_REPLACESEL;
+					smaddInfo.targetWParam = TRUE;
+					smaddInfo.Protocolname = chatWindow->getModule();
+					GetWindowRect(GetDlgItem(hwndDlg, IDC_SMILEYBTN), &rc);
+					smaddInfo.Direction = 0;
+					smaddInfo.xPosition = rc.left;
+					smaddInfo.yPosition = rc.top + 24;
+					CallService(MS_SMILEYADD_SHOWSELECTION, 0, (LPARAM) &smaddInfo);
 					break;
 				case IDC_INVITE:
 					{

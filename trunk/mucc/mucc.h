@@ -67,8 +67,6 @@ typedef struct _settextex
 #include <m_popup.h>
 #include <m_button.h>
 
-#include <m_smileyadd.h>
-
 #include "resource.h"
 
 enum {
@@ -89,7 +87,9 @@ enum {
 	MUCC_IDI_OPTIONS,
 	MUCC_IDI_INVITE,
 	MUCC_IDI_ADMINISTRATION,
+	MUCC_IDI_SMILEY,
 	MUCC_ICON_TOTAL
+
 };
 
 extern PLUGINLINK * pluginLink;

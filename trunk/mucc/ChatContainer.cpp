@@ -39,8 +39,7 @@ static void __cdecl StartThread(void *vContainer);
 void ChatContainer::release() {
 	released = true;
 	for (ChatContainer *ptr2, *ptr = list; ptr!=NULL; ptr=ptr2) {
-//		ptr2 = ptr->getNext();
-		ptr2 = ptr->next;
+		ptr2 = ptr->getNext();
 		SendMessage(ptr->getHWND(), WM_CLOSE, 0, 0);
 	}
 	DeleteCriticalSection(&mutex);
@@ -51,15 +50,18 @@ void ChatContainer::init() {
 	InitializeCriticalSection(&mutex);
 }
 
+int ChatContainer::getDefaultOptions() {
+	return FLAG_USE_TABS;
+}
+
 ChatContainer * ChatContainer::getWindow() {
 	ChatContainer *ptr;
 	EnterCriticalSection(&mutex);
-	if (list == NULL) {
+	if (list == NULL || !(Options::getChatContainerOptions() & ChatContainer::FLAG_USE_TABS)) {
 		ptr = new ChatContainer();
 	} else {
 		ptr = list;
 	}
-	list = ptr;
 	LeaveCriticalSection(&mutex);
 	return ptr;
 }
@@ -72,13 +74,31 @@ ChatContainer::ChatContainer() {
 	childCount = 0;
 	Utils::forkThread((void (__cdecl *)(void *))StartThread, 0, (void *) this);
 	WaitForSingleObject(hEvent, INFINITE);
+	EnterCriticalSection(&mutex);
+	setNext(list);
+	if (next!=NULL) {
+		next->setPrev(this);
+	}
+	list = this;
+	LeaveCriticalSection(&mutex);
 }
 
 ChatContainer::~ChatContainer() {
+	if (!released) {
+		EnterCriticalSection(&mutex);
+		if (getPrev()!=NULL) {
+			getPrev()->setNext(next);
+		} else if (list==this) {
+			list = getNext();
+		}
+		if (getNext()!=NULL) {
+			getNext()->setPrev(prev);
+		}
+		LeaveCriticalSection(&mutex);
+	}
 	if (hEvent!=NULL) {
 		CloseHandle(hEvent);
 	}
-	list = NULL;
 }
 
 void ChatContainer::setHWND(HWND hWnd) {
@@ -91,6 +111,22 @@ HWND ChatContainer::getHWND() {
 
 HANDLE ChatContainer::getEvent() {
 	return hEvent;
+}
+
+ChatContainer * ChatContainer::getNext() {
+	return next;
+}
+
+void ChatContainer::setNext(ChatContainer * next) {
+	this->next = next;
+}
+
+ChatContainer * ChatContainer::getPrev() {
+	return prev;
+}
+
+void ChatContainer::setPrev(ChatContainer * prev) {
+	this->prev = prev;
 }
 
 void ChatContainer::show(bool bShow) {
@@ -135,6 +171,8 @@ void ChatContainer::addChild(ChatWindow *child) {
 	TabCtrl_SetCurSel(hwndTabs, tabId);
 	activateChild(child);
 	SendMessage(hWnd, WM_SIZE, 0, 0);
+	ShowWindow(hWnd, SW_SHOWNORMAL);
+	SetForegroundWindow(hWnd);
 }
 
 void ChatContainer::changeChildData(ChatWindow *child) {
@@ -169,7 +207,7 @@ void ChatContainer::removeChild(ChatWindow *child) {
 			child = (ChatWindow *)tci.lParam;
 			activateChild(child);
 		}
-	} else {
+	} else {//if (!released) {
 		SendMessage(hWnd, WM_CLOSE, 0, 0);
 	}
 }
@@ -249,20 +287,34 @@ BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lPa
 			return TRUE;
 		case WM_GETMINMAXINFO:
 			MINMAXINFO *mmi;
+			RECT rcChild, rcWindow;
 			mmi = (MINMAXINFO *) lParam;
+			GetWindowRect(hwndDlg, &rcWindow);
+			container->getChildWindowRect(&rcChild);
 			mmi->ptMinTrackSize.x = 380;
-			mmi->ptMinTrackSize.y = 160;
+			mmi->ptMinTrackSize.y = 130 + (rcWindow.bottom - rcWindow.top) - (rcChild.bottom - rcChild.top);
 			return FALSE;
 		case WM_SIZE:
 			if (IsIconic(hwndDlg) || wParam == SIZE_MINIMIZED) break;
 			{
-				RECT rc, rcChild;
+				RECT rc, rcChild, rcWindow;
 				GetClientRect(hwndDlg, &rc);
 				HWND hwndTabs = GetDlgItem(hwndDlg, IDC_TABS);
 				MoveWindow(hwndTabs, 0, 0, (rc.right - rc.left), (rc.bottom - rc.top) - 0,	FALSE);
 				RedrawWindow(hwndTabs, NULL, NULL, RDW_INVALIDATE | RDW_FRAME | RDW_ERASE);
-				if (container->getActive()!=NULL) {
+				container->getChildWindowRect(&rcChild);
+				if ((rcChild.bottom-rcChild.top) < 130 || (rcChild.right-rcChild.left) < 380) {
+					GetWindowRect(hwndDlg, &rcWindow);
+					if ((rcChild.bottom-rcChild.top) < 130) {
+						rcWindow.bottom = rcWindow.top + 130 + (rcWindow.bottom - rcWindow.top) - (rcChild.bottom - rcChild.top);
+					} 
+					if ((rcChild.right-rcChild.left) < 380) {
+						rcWindow.right = rcWindow.left + 380;
+					}
+					MoveWindow(hwndDlg, rcWindow.left, rcWindow.top, rcWindow.right - rcWindow.left, rcWindow.bottom - rcWindow.top, TRUE);
 					container->getChildWindowRect(&rcChild);
+				}
+				if (container->getActive()!=NULL) {
 					MoveWindow(container->getActive()->getHWND(), rcChild.left, rcChild.top, rcChild.right-rcChild.left, rcChild.bottom - rcChild.top, TRUE);
 				}
 			}
@@ -329,13 +381,11 @@ BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lPa
 			break;
 		case WM_CLOSE:
 			EndDialog(hwndDlg, 0);
-//			MessageBox(NULL, "close window", "A", MB_OK);
-//			DestroyWindow(hwndDlg);
-			return TRUE;
+			return FALSE;
 		case WM_DESTROY:
 			SetWindowLong(hwndDlg, GWL_USERDATA, 0);
 			delete container;
-			return FALSE;
+			return TRUE;
 
 	}
 	return FALSE;
@@ -345,7 +395,7 @@ BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lPa
 static void __cdecl StartThread(void *vContainer) {
 	OleInitialize(NULL);
 	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_GROUPCHAT_CONTAINER), NULL, ContainerDlgProc, (LPARAM) vContainer);
-//	MessageBox(NULL, "ChatContainer dies.", "MW", MB_OK);
+	//MessageBox(NULL, "ChatContainer dies.", "MW", MB_OK);
 	OleUninitialize();
 
 }

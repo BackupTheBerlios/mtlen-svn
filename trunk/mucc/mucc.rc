@@ -154,13 +154,15 @@ BEGIN
                     TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP,11,
                     23,146,162,WS_EX_STATICEDGE
     GROUPBOX        "Other",IDC_SIMPLE,5,193,310,57
+    CONTROL         "Use tabbed mode",IDC_USETABS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,206,200,10
     CONTROL         "Send message on 'Enter'",IDC_SENDONENTER,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,208,200,10
-    LTEXT           "Limit log history to (events):",IDC_STATIC,13,226,110,8
-    EDITTEXT        IDC_LOGLIMIT,123,223,40,14,ES_RIGHT | ES_NUMBER
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,220,200,10
+    LTEXT           "Limit log history to (events):",IDC_STATIC,13,234,110,8
+    EDITTEXT        IDC_LOGLIMIT,123,232,40,14,ES_RIGHT | ES_NUMBER
     CONTROL         "",IDC_LOGLIMITSPIN,"msctls_updown32",UDS_SETBUDDYINT |
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS |
-                    UDS_NOTHOUSANDS | UDS_HOTTRACK,250,213,11,14
+                    UDS_NOTHOUSANDS | UDS_HOTTRACK,250,218,11,14
 END
 
 IDD_CHATMANAGER DIALOGEX 0, 0, 473, 234
@@ -222,6 +224,8 @@ BEGIN
     CONTROL         "",IDC_COLOR,"ColourPicker",WS_TABSTOP,57,140,16,16
     COMBOBOX        IDC_FONTSIZE,154,142,27,80,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
+    CONTROL         "",IDC_SMILEYBTN,"MButtonClass", WS_TABSTOP,185,140,16,16,
+					0x18000000L
     CONTROL         "Admin",IDC_ROOMADMIN,"MButtonClass",WS_TABSTOP,220,141,
                     16,16,0x18000000L
     CONTROL         "Invite",IDC_INVITE,"MButtonClass",WS_TABSTOP,259,141,16,
@@ -232,8 +236,6 @@ BEGIN
                     0x18000000L
     COMBOBOX        IDC_FONT,77,142,74,90,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
-    CONTROL         "",IDC_SMILEYBTN,"MButtonClass",NOT WS_VISIBLE |
-                    WS_TABSTOP,185,140,16,16,0x18000000L
 	PUSHBUTTON      "Close",IDCANCEL,0,0,20,20,NOT WS_VISIBLE
 	//,NOT WS_VISIBLE
 END

@@ -45,8 +45,7 @@ private:
 	HANDLE			hEvent;
 	int				childCount;
 	int				width, height;
-	ChatContainer  *next;
-	ChatContainer  *prev;
+	ChatContainer  *next, *prev;
 	ChatWindow * active;
 	ChatContainer();
 protected:
@@ -62,15 +61,24 @@ protected:
 	void			setChildCount(int);
 	ChatWindow *	getActive();
 	ChatContainerChild *getChildren();
+	ChatContainer *	getNext();
+	void			setNext(ChatContainer *);
+	ChatContainer * getPrev();
+	void			setPrev(ChatContainer *);
 	int				lastClickTime;
 	int				lastClickTab;
 	HANDLE			getEvent();
 	void			setHWND(HWND);
 public:
+	enum FLAGS {
+		FLAG_USE_TABS	= 0x00000001,
+	};
+
 	~ChatContainer();
 	static void		init();
 	static void		release();
 	static ChatContainer * getWindow();
+	static int		getDefaultOptions();
 	void			show(bool bShow);
 	HWND			getHWND();
 

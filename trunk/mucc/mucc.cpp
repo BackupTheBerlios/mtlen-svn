@@ -84,7 +84,8 @@ extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 		IDI_UNDERLINE,
 		IDI_OPTIONS,
 		IDI_INVITE,
-		IDI_ADMINISTRATION
+		IDI_ADMINISTRATION,
+		IDI_SMILEY
 	};
 
 	GetModuleFileName(hInst, text, sizeof(text));

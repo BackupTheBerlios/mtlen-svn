@@ -111,9 +111,6 @@ HelperDialog::HelperDialog(ChatWindow *chat) {
 
 HelperDialog::~HelperDialog() 
 {
-	if (hWnd!=NULL) {
-		EndDialog(hWnd, 0);
-	}
 	EnterCriticalSection(&mutex);
 	if (getPrev()!=NULL) {
 		getPrev()->setNext(next);
@@ -130,7 +127,8 @@ HelperDialog::~HelperDialog()
 	if (roomName!=NULL) delete roomName;
 	if (nick!=NULL) delete nick;
 	if (reason!=NULL) delete reason;
-	for (HelperContact *ptr=contactList;ptr!=NULL;ptr=ptr->getNext()) {
+	for (HelperContact *ptr2, *ptr=contactList;ptr!=NULL;ptr=ptr2) {
+		ptr2 =  ptr->getNext();
 		delete ptr;
 	}
 }
@@ -205,13 +203,12 @@ void HelperDialog::setContactList(MUCCQUERYRESULT *queryResult) {
 	lastptr = NULL;
 	for (int i=0;i<queryResult->iItemsNum;i++) {
 		ptr = new HelperContact(queryResult->pItems[i].pszID, queryResult->pItems[i].pszName);
-		if (lastptr !=NULL) {
+		if (lastptr != NULL) {
 			lastptr->setNext(ptr);
 		} else {
-			contactList=ptr;
+			contactList = ptr;
 		}
-		lastptr=ptr;
-
+		lastptr = ptr;
 	}
 }
 
@@ -327,14 +324,15 @@ static BOOL CALLBACK InviteDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM
 			NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
 		case IDCANCEL:
 		case IDCLOSE:
-			delete dialog;
-			//EndDialog(hwndDlg, 0);
+			EndDialog(hwndDlg, 0);
 			return TRUE;
 		}
 		break;
 	case WM_CLOSE:
+		EndDialog(hwndDlg, 0);
+		break;
+	case WM_DESTROY:
 		delete dialog;
-		//EndDialog(hwndDlg, 0);
 		break;
 	}
 	return FALSE;
@@ -395,14 +393,15 @@ static BOOL CALLBACK AcceptInvitationDlgProc(HWND hwndDlg, UINT msg, WPARAM wPar
 			NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
 		case IDCANCEL:
 		case IDCLOSE:
-			delete dialog;
-			//EndDialog(hwndDlg, 0);
+			EndDialog(hwndDlg, 0);
 			return TRUE;
 		}
 		break;
 	case WM_CLOSE:
+		EndDialog(hwndDlg, 0);
+		break;
+	case WM_DESTROY:
 		delete dialog;
-		//EndDialog(hwndDlg, 0);
 		break;
 	}
 
@@ -464,14 +463,15 @@ static BOOL CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM l
 			muce.dwFlags = dialog->getRoomFlags();
 			NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
 		case IDCANCEL:
-			delete dialog;
-			//EndDialog(hwndDlg, 0);
+			EndDialog(hwndDlg, 0);
 			return TRUE;
 		}
 		break;
 	case WM_CLOSE:
+		EndDialog(hwndDlg, 0);
+		break;
+	case WM_DESTROY:
 		delete dialog;
-		//EndDialog(hwndDlg, 0);
 		break;
 	}
 	return FALSE;
@@ -532,14 +532,15 @@ static BOOL CALLBACK ErrorDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM 
 				dialog->setNick(NULL);
 			}
 		case IDCANCEL:
-			delete dialog;
-			//EndDialog(hwndDlg, 0);
+			EndDialog(hwndDlg, 0);
 			return TRUE;
 		}
 		break;
 	case WM_CLOSE:
+		EndDialog(hwndDlg, 0);
+		break;
+	case WM_DESTROY:
 		delete dialog;
-		//EndDialog(hwndDlg, 0);
 		break;
 	}
 	return FALSE;
@@ -570,14 +571,15 @@ static BOOL CALLBACK TopicDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM 
 			muce.pszText = dialog->getReason();
 			NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
 		case IDCANCEL:
-			delete dialog;
-			//EndDialog(hwndDlg, 0);
+			EndDialog(hwndDlg, 0);
 			return TRUE;
 		}
 		break;
 	case WM_CLOSE:
+		EndDialog(hwndDlg, 0);
+		break;
+	case WM_DESTROY:
 		delete dialog;
-		//EndDialog(hwndDlg, 0);
 		break;
 	}
 	return FALSE;

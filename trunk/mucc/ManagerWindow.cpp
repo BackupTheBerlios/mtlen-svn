@@ -236,24 +236,24 @@ int ManagerWindow::start()
 void ManagerWindow::queryResultGroups(MUCCQUERYRESULT *queryResult)
 {
 	TVINSERTSTRUCT tvis;
-	ChatGroup * par;
+	ChatGroup * par = NULL;
 	ChatGroup * group;
+	if (queryResult->pszParent != NULL) {
+		par = findGroup(queryResult->pszParent);
+		if (par!=NULL) {
+			if (par->getChild()!=NULL) return;
+		}
+	}
 	for (int i=0; i<queryResult->iItemsNum; i++) {
 		group = new ChatGroup();
 		group->setId(queryResult->pItems[i].pszID);
 		group->setName(queryResult->pItems[i].pszName);
-		par = NULL;
-		if (queryResult->pszParent == NULL) {
-			tvis.hParent = NULL;
+		if (par!=NULL) {
+			par->addChild(group);
+			//group->setParent(par);
+			tvis.hParent = par->getTreeItem();
 		} else {
-			par = findGroup(queryResult->pszParent);
-			if (par!=NULL) {
-				par->addChild(group);
-				//group->setParent(par);
-				tvis.hParent = par->getTreeItem(); //TreeView_GetRoot(GetDlgItem(hWnd, IDC_GROUP));
-			} else {
-				tvis.hParent = NULL;
-			}
+			tvis.hParent = NULL;
 		}
 		tvis.hInsertAfter = TVI_SORT;
 		tvis.item.mask = TVIF_TEXT | TVIF_CHILDREN | TVIF_PARAM;
