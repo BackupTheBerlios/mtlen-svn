@@ -1417,8 +1417,12 @@ static void TlenProcessW(XmlNode *node, void *userdata)
 	if ((body=node->text) == NULL) return;
 
 	if ((f=JabberXmlGetAttrValue(node, "f")) != NULL) {
-		if ((hContact=JabberHContactFromJID(f)) == NULL)
-			hContact = JabberDBCreateContact(f, f, TRUE, FALSE);
+
+		localMessage = JabberTextDecode(f);
+		if ((hContact=JabberHContactFromJID(localMessage)) == NULL) {
+			hContact = JabberDBCreateContact(localMessage, localMessage, TRUE, FALSE);
+		}
+		free(localMessage);
 
 		s = JabberXmlGetAttrValue(node, "s");
 		e = JabberXmlGetAttrValue(node, "e");
