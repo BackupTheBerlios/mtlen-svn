@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <limits.h>
 
+#ifdef __MINGW32__
 #define EM_SETTEXTEX	(WM_USER + 97)
 #define ST_DEFAULT		0
 #define ST_KEEPUNDO		1
@@ -46,7 +47,9 @@ typedef struct _settextex
 	DWORD	flags;
 	UINT	codepage;
 } SETTEXTEX;
-
+#else
+#include <win2k.h>
+#endif
 #include <newpluginapi.h>
 #include <m_system.h>
 #include <m_netlib.h>
@@ -95,7 +98,6 @@ extern HINSTANCE hInst;
 extern HANDLE hHookEvent;
 extern HIMAGELIST hImageList;
 extern HICON muccIcon[MUCC_ICON_TOTAL];
-extern HANDLE hNetlibUser;
 
 #include "m_mucc.h"
 

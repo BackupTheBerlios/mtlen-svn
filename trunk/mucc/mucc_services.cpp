@@ -40,15 +40,6 @@ int MUCCQueryChatRooms(MUCCQUERYRESULT *queryResult)
 	return 1;
 }
 
-int MUCCQueryResultContacts(MUCCQUERYRESULT *queryResult) 
-{
-	ChatWindow *chatWindow=ChatWindow::getWindow(queryResult->pszModule, queryResult->pszParent);
-	if (chatWindow!=NULL) {
-		chatWindow->queryResultContacts(queryResult);
-	}
-	return 1;
-}
-
 int MUCCQueryUserRooms(MUCCQUERYRESULT *queryResult) 
 {
 	ManagerWindow *managerWnd=ManagerWindow::getWindow(queryResult->pszModule);
@@ -67,10 +58,21 @@ int MUCCQueryUserNicks(MUCCQUERYRESULT *queryResult)
 	return 1;
 }
 
+int MUCCQueryResultContacts(MUCCQUERYRESULT *queryResult) 
+{
+	ChatWindow *chatWindow=ChatWindow::getWindow(queryResult->pszModule, queryResult->pszParent);
+	if (chatWindow!=NULL) {
+		SendMessage(chatWindow->getHWND(), DM_CHAT_QUERY, (WPARAM) 0, (LPARAM) queryResult);
+		chatWindow->queryResultContacts(queryResult);
+	}
+	return 1;
+}
+
 int MUCCQueryUsers(MUCCQUERYRESULT *queryResult) 
 {
 	ChatWindow *chatWindow=ChatWindow::getWindow(queryResult->pszModule, queryResult->pszParent);
 	if (chatWindow!=NULL) {
+		SendMessage(chatWindow->getHWND(), DM_CHAT_QUERY, (WPARAM) 0, (LPARAM) queryResult);
 		chatWindow->queryResultUsers(queryResult);
 	}
 	return 1;
@@ -110,7 +112,6 @@ int MUCCNewWindow(WPARAM wParam, LPARAM lParam)
 		if (chat == NULL) {
 			chat = new ChatWindow(mucWindow);
 		}
-		chat->start();
 	} else if (mucWindow->iType == MUCC_WINDOW_CHATLIST) {
 		ManagerWindow *manager = ManagerWindow::getWindow(mucWindow->pszModule);
 		if (manager == NULL) {
@@ -126,51 +127,32 @@ int MUCCNewWindow(WPARAM wParam, LPARAM lParam)
 int MUCCEvent(WPARAM wParam, LPARAM lParam)  
 {
 	MUCCEVENT* mucEvent = (MUCCEVENT *) lParam;
-	ChatWindow * chatWindow;
+	ChatWindow * chatWindow = NULL;
 	switch (mucEvent->iType) {
+		case MUCC_EVENT_STATUS:
 		case MUCC_EVENT_MESSAGE:
-			chatWindow = ChatWindow::getWindow(mucEvent->pszModule, mucEvent->pszID);
-			if (chatWindow!=NULL) {
-				chatWindow->logEvent(mucEvent);
-			}
-			break;
+		case MUCC_EVENT_ROOM_INFO:
+		case MUCC_EVENT_LEAVE:
 		case MUCC_EVENT_TOPIC:
 			chatWindow = ChatWindow::getWindow(mucEvent->pszModule, mucEvent->pszID);
 			if (chatWindow!=NULL) {
-				chatWindow->changeTopic(mucEvent);
+				SendMessage(chatWindow->getHWND(), DM_CHAT_EVENT, (WPARAM) 0, (LPARAM) mucEvent);
 			}
-			break;
-		case MUCC_EVENT_STATUS:
-			chatWindow = ChatWindow::getWindow(mucEvent->pszModule, mucEvent->pszID);
-			if (chatWindow!=NULL) {
-				chatWindow->changePresence(mucEvent);
-			}
-			break;
-		case MUCC_EVENT_INVITATION:
-			HelperDialog::acceptDlg(mucEvent);
 			break;
 		case MUCC_EVENT_ERROR:
 			chatWindow = ChatWindow::getWindow(mucEvent->pszModule, mucEvent->pszID);
 			if (chatWindow!=NULL) {
+				SendMessage(chatWindow->getHWND(), DM_CHAT_EVENT, (WPARAM) 0, (LPARAM) mucEvent);
 				chatWindow->logEvent(mucEvent);
 			} else {
 				HelperDialog::errorDlg(mucEvent);
 			}
 			break;
+		case MUCC_EVENT_INVITATION:
+			HelperDialog::acceptDlg(mucEvent);
+			break;
 		case MUCC_EVENT_JOIN:
 			HelperDialog::joinDlg(mucEvent);
-			break;
-		case MUCC_EVENT_LEAVE:
-			chatWindow = ChatWindow::getWindow(mucEvent->pszModule, mucEvent->pszID);
-			if (chatWindow!=NULL) {
-				delete chatWindow;
-			}
-			break;
-		case MUCC_EVENT_ROOM_INFO:
-			chatWindow = ChatWindow::getWindow(mucEvent->pszModule, mucEvent->pszID);
-			if (chatWindow!=NULL) {
-				chatWindow->changeRoomInfo(mucEvent);
-			}
 			break;
 	}
 	return 0;

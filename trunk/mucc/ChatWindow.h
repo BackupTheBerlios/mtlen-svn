@@ -27,15 +27,21 @@ class ChatWindow;
 #include "ChatEvent.h"
 #include "ChatUser.h"
 #include "AdminWindow.h"
+#include "ChatContainer.h"
+
+#define DM_CHAT_EVENT   (WM_USER+1)
+#define DM_CHAT_QUERY   (WM_USER+2)
+#define WM_TLEN_SMILEY  (WM_USER+200)
 
 class ChatWindow{
 private:
 	static ChatWindow *	list;
 	static CRITICAL_SECTION mutex;
+	static bool		released;
 	static HFONT	hListGroupFont, hListFont;
 	static COLORREF colorListBg, colorListText, colorListGroupText;
 	static COLORREF colorInputBg, colorLogBg;
-
+	ChatContainer *	container;
 	HANDLE			hEvent;
 	HWND			hWnd;
 	HFONT			hEditFont;
@@ -92,6 +98,7 @@ public:
 		FLAG_LOG_ALL		= 0x0000F000,
 
 		FLAG_OPT_SENDONENTER= 0x01000000
+
 	};
 
 	enum ADMINMODES {
@@ -113,6 +120,7 @@ public:
 	ChatWindow *	getNext();
 	void			setNext(ChatWindow *);
 	ChatWindow *	getPrev();
+	ChatContainer*	getContainer();
 	void			setPrev(ChatWindow *);
 	void			setHWND(HWND);
 	HWND			getHWND();
@@ -165,7 +173,6 @@ public:
 	static COLORREF getListTextColor();
 	static COLORREF getListGroupTextColor();
 	static int		getDefaultOptions();
-
 
 	static void		init();
 	static void		release();

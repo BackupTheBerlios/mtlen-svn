@@ -4,10 +4,9 @@
 CPP  = g++.exe
 CC   = gcc.exe
 WINDRES = windres.exe
-DLLWRAP = dllwrap.exe
 RM = rm
 UPX = upx -9 -q --compress-icons=0
-SRC = AdminWindow.cpp ChatEvent.cpp ChatGroup.cpp ChatRoom.cpp ChatUser.cpp ChatWindow.cpp FontList.cpp HelperDialog.cpp ManagerWindow.cpp mucc.cpp Options.cpp mucc_services.cpp Utils.cpp
+SRC = AdminWindow.cpp ChatContainer.cpp ChatEvent.cpp ChatGroup.cpp ChatRoom.cpp ChatUser.cpp ChatWindow.cpp FontList.cpp HelperDialog.cpp ManagerWindow.cpp mucc.cpp Options.cpp mucc_services.cpp Utils.cpp
 RES  = mucc.res
 OBJ = $(SRC:.cpp=.o) $(RES)
 BIN  = mucc.dll

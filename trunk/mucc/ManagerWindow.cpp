@@ -27,7 +27,23 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
 ManagerWindow *	ManagerWindow::list = NULL;
+bool ManagerWindow::released = false;
 CRITICAL_SECTION ManagerWindow::mutex;
+
+void ManagerWindow::init() {
+	released = false;
+	InitializeCriticalSection(&mutex);
+}
+
+void ManagerWindow::release() {
+	released = true;
+	for (ManagerWindow *ptr2, *ptr = list; ptr!=NULL; ptr=ptr2) {
+		ptr2 = ptr->getNext();
+		delete ptr;
+//		SendMessage(ptr->getHWND(), WM_CLOSE, 0, 0);
+	}
+	DeleteCriticalSection(&mutex);
+}
 
 ManagerWindow::ManagerWindow(const char *module)
 {
@@ -56,16 +72,18 @@ ManagerWindow::ManagerWindow(const char *module)
 
 ManagerWindow::~ManagerWindow()
 {
-	EnterCriticalSection(&mutex);
-	if (getPrev()!=NULL) {
-		getPrev()->setNext(next);
-	} else {
-		list = getNext();
+	if (!released) {
+		EnterCriticalSection(&mutex);
+		if (getPrev()!=NULL) {
+			getPrev()->setNext(next);
+		} else {
+			list = getNext();
+		}
+		if (getNext()!=NULL) {
+			getNext()->setPrev(prev);
+		}
+		LeaveCriticalSection(&mutex);
 	}
-	if (getNext()!=NULL) {
-		getNext()->setPrev(prev);
-	}
-	LeaveCriticalSection(&mutex);
 	if (hWnd!=NULL) {
 		EndDialog(hWnd, 0);
 	}
@@ -766,6 +784,7 @@ static BOOL CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 	RECT rc2;
 
 	manager = (ManagerWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	if (manager==NULL && msg!=WM_INITDIALOG) return FALSE;
 	switch (msg) {
 	case WM_INITDIALOG:
 		// lParam is the initial conference server (if any)
@@ -1023,16 +1042,5 @@ ManagerWindow* ManagerWindow::getWindow(const char *module) {
 		ptr = new ManagerWindow(module);
 	}
 	return ptr;
-}
-
-void ManagerWindow::release() {
-	for (;list!=NULL;) {
-		delete list;
-	}
-	DeleteCriticalSection(&mutex);
-}
-
-void ManagerWindow::init() {
-	InitializeCriticalSection(&mutex);
 }
 

@@ -31,9 +31,10 @@ static BOOL CALLBACK MUCCLogOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 static BOOL CALLBACK MUCCPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-COLORREF Options::colorListBg, Options::colorInputBg, Options::colorLogBg;
+COLORREF Options::colorListBg, Options::colorInputBg, Options::colorLogBg, Options::chatWindowFontColor;
 HBRUSH   Options::brushListBg=NULL, Options::brushInputBg=NULL, Options::brushLogBg=NULL;
 int		 Options::logLimit, Options::chatWindowOptions;
+int		 Options::chatWindowFont, Options::chatWindowFontSize, Options::chatWindowFontStyle;
 
 void Options::setListBgColor(COLORREF c) {
 	colorListBg = c;
@@ -91,6 +92,38 @@ int Options::getLogLimit() {
 	return logLimit;
 }
 
+void Options::setChatWindowFont(int o) {
+	chatWindowFont = o;
+}
+
+int Options::getChatWindowFont() {
+	return chatWindowFont;
+}
+
+void Options::setChatWindowFontSize(int o) {
+	chatWindowFontSize = o;
+}
+
+int Options::getChatWindowFontSize() {
+	return chatWindowFontSize;
+}
+
+void Options::setChatWindowFontStyle(int o) {
+	chatWindowFontStyle = o;
+}
+
+int Options::getChatWindowFontStyle() {
+	return chatWindowFontStyle;
+}
+
+void Options::setChatWindowFontColor(COLORREF o) {
+	chatWindowFontColor = o;
+}
+
+COLORREF Options::getChatWindowFontColor() {
+	return chatWindowFontColor;
+}
+
 void Options::setChatWindowOptions(int o) {
 	chatWindowOptions = o;
 }
@@ -114,6 +147,10 @@ void Options::loadSettings() {
 	setInputBgColor((COLORREF)DBGetContactSettingDword(NULL, muccModuleName, "BackgroundTyping", 0xFFFFFF));
 	setLogLimit(DBGetContactSettingDword(NULL, muccModuleName, "LogSizeLimit", 100));
 	setChatWindowOptions(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowOptions", ChatWindow::getDefaultOptions()));
+	setChatWindowFont(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFont", 0));
+	setChatWindowFontSize(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontSize", 12));
+	setChatWindowFontStyle(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontStyle", 0));
+	setChatWindowFontColor(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontColor", 0));
 }
 
 void Options::saveSettings() {
@@ -123,6 +160,10 @@ void Options::saveSettings() {
 	DBWriteContactSettingDword(NULL, muccModuleName, "BackgroundTyping", colorInputBg);
 	DBWriteContactSettingDword(NULL, muccModuleName, "LogSizeLimit", logLimit);
 	DBWriteContactSettingDword(NULL, muccModuleName, "ChatWindowOptions", chatWindowOptions);
+	DBWriteContactSettingDword(NULL, muccModuleName, "ChatWindowFont", chatWindowFont);
+	DBWriteContactSettingDword(NULL, muccModuleName, "ChatWindowFontSize", chatWindowFontSize);
+	DBWriteContactSettingDword(NULL, muccModuleName, "ChatWindowFontStyle", chatWindowFontStyle);
+	DBWriteContactSettingDword(NULL, muccModuleName, "ChatWindowFontColor", chatWindowFontColor);
 }
 
 void Options::init()
@@ -581,117 +622,6 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 	}	
 	return FALSE;
 }
-
-/*	char text[256];
-static BOOL CALLBACK MUCCLogOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	BOOL bChecked;
-
-	switch (msg) {
-	case WM_INITDIALOG:
-		{
-			DBVARIANT dbv;
-			TranslateDialogDefault(hwndDlg);
-			// File transfer options
-			bChecked = FALSE;
-			if (DBGetContactSettingByte(NULL, jabberProtoName, "UseFileProxy", FALSE) == TRUE) {
-			    bChecked = TRUE;
-				CheckDlgButton(hwndDlg, IDC_FILE_USE_PROXY, TRUE);
-			}
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_TYPE_LABEL), bChecked);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_TYPE), bChecked);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_HOST_LABEL), bChecked);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_HOST), bChecked);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PORT_LABEL), bChecked);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PORT), bChecked);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USE_AUTH), bChecked);
-			if (DBGetContactSettingByte(NULL, jabberProtoName, "FileProxyAuth", FALSE) == TRUE) {
-				CheckDlgButton(hwndDlg, IDC_FILE_PROXY_USE_AUTH, TRUE);
-			} else {
-			    bChecked = FALSE;
-			}    
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USER_LABEL), bChecked);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USER), bChecked);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD_LABEL), bChecked);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD), bChecked);
-			
-			SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)Translate("Forwarding"));
-            SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)Translate("SOCKS4"));    
-            SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)Translate("SOCKS5"));    
-			SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "FileProxyType", 0), 0);
-			if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyHost", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, dbv.pszVal);
-				DBFreeVariant(&dbv);
-			}
-			SetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, DBGetContactSettingWord(NULL, jabberProtoName, "FileProxyPort", 0), FALSE);
-			if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyUsername", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_USER, dbv.pszVal);
-				DBFreeVariant(&dbv);
-			}
-			if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyPassword", &dbv)) {
-				CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
-				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_PASSWORD, dbv.pszVal);
-				DBFreeVariant(&dbv);
-			}
-			return TRUE;
-		}
-	case WM_COMMAND:
-		{
-			switch (LOWORD(wParam)) {
-			case IDC_FILE_PROXY_HOST:
-			case IDC_FILE_PROXY_PORT:
-				if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
-					SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
-				break;
-			case IDC_FILE_USE_PROXY:
-				bChecked = IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_TYPE_LABEL), bChecked);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_TYPE), bChecked);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_HOST_LABEL), bChecked);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_HOST), bChecked);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PORT_LABEL), bChecked);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PORT), bChecked);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USE_AUTH), bChecked);
-			case IDC_FILE_PROXY_USE_AUTH:
-				bChecked = IsDlgButtonChecked(hwndDlg, IDC_FILE_PROXY_USE_AUTH) & IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USER_LABEL), bChecked);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USER), bChecked);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD_LABEL), bChecked);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD), bChecked);
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
-				break;
-			default:
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
-				break;
-			}
-		}
-		break;
-	case WM_NOTIFY:
-		{
-			switch (((LPNMHDR) lParam)->code) {
-			case PSN_APPLY:
-				// File transfer options
-				DBWriteContactSettingByte(NULL, jabberProtoName, "UseFileProxy", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "FileProxyType", (WORD) SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_GETCURSEL, 0, 0));
-				GetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, text, sizeof(text));
-				DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyHost", text);
-				DBWriteContactSettingWord(NULL, jabberProtoName, "FileProxyPort", (WORD) GetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, NULL, FALSE));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "FileProxyAuth", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_PROXY_USE_AUTH));
-				GetDlgItemText(hwndDlg, IDC_FILE_PROXY_USER, text, sizeof(text));
-				DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyUsername", text);
-				GetDlgItemText(hwndDlg, IDC_FILE_PROXY_PASSWORD, text, sizeof(text));
-				CallService(MS_DB_CRYPT_ENCODESTRING, sizeof(text), (LPARAM) text);
-				DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyPassword", text);
-				return TRUE;
-			}
-		}
-		break;
-	case WM_DESTROY:
-		break;
-	}
-	return FALSE;
-}
-*/
 
 /*
 #define POPUP_DEFAULT_COLORBKG 0xDCBDA5

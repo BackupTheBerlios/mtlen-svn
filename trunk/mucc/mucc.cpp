@@ -27,7 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 char *muccModuleName;
 HINSTANCE hInst;
 PLUGINLINK *pluginLink;
-HANDLE hNetlibUser;
 HANDLE hHookEvent;
 HIMAGELIST hImageList;
 HICON muccIcon[MUCC_ICON_TOTAL];
@@ -120,21 +119,11 @@ extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 
 static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 {
-	NETLIBUSER nlu = {0};
-	char name[128];
-
-	sprintf(name, "%s %s", muccModuleName, Translate("connection"));
-	nlu.cbSize = sizeof(nlu);
-	nlu.flags = NUF_OUTGOING | NUF_NOOPTIONS;
-	nlu.szDescriptiveName = name;
-	nlu.szSettingsModule = muccModuleName;
-	hNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
-
 	Options::init();
 	HelperDialog::init();
 	ManagerWindow::init();
 	ChatWindow::init();
-
+	ChatContainer::init();
 
 	/*
 	**	HookEvent(ME_USERINFO_INITIALISE, TlenUserInfoInit);
@@ -145,6 +134,7 @@ static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 
 static int PreShutdown(WPARAM wParam, LPARAM lParam)
 {
+	ChatContainer::release();	
 	ChatWindow::release();
 	ManagerWindow::release();
 	HelperDialog::release();
@@ -153,7 +143,6 @@ static int PreShutdown(WPARAM wParam, LPARAM lParam)
 
 extern "C" int __declspec(dllexport) Unload(void)
 {
-	if (hNetlibUser!=NULL) Netlib_CloseHandle(hNetlibUser);
 	return 0;
 }
 

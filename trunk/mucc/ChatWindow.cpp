@@ -24,8 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 #include "Options.h"
 
-#define WM_TLEN_SMILEY WM_USER+200
-
 static int logPixelSY;
 static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static void __cdecl StartThread(void *vChat);
@@ -36,10 +34,23 @@ COLORREF ChatWindow::colorListBg, ChatWindow::colorListText, ChatWindow::colorLi
 HFONT ChatWindow::hListGroupFont=NULL;
 HFONT ChatWindow::hListFont=NULL;
 
-
 ChatWindow *	ChatWindow::list = NULL;
+bool ChatWindow::released = false;
 CRITICAL_SECTION ChatWindow::mutex;
 
+void ChatWindow::release() {
+	released = true;
+	for (ChatWindow *ptr2, *ptr = list; ptr!=NULL; ptr=ptr2) {
+		ptr2 = ptr->getNext();
+		SendMessage(ptr->getHWND(), WM_CLOSE, 0, 0);
+	}
+	DeleteCriticalSection(&mutex);
+}
+
+void ChatWindow::init() {
+	released = false;
+	InitializeCriticalSection(&mutex);
+}
 
 ChatWindow::ChatWindow(MUCCWINDOW *mucw)  {
 	prev = next = NULL;
@@ -69,25 +80,33 @@ ChatWindow::ChatWindow(MUCCWINDOW *mucw)  {
 	}
 	list = this;
 	LeaveCriticalSection(&mutex);
+	container = ChatContainer::getWindow();
+	hWnd = container->remoteCreateChild(LogDlgProc, this);
+	container->remoteAddChild(this);
+
 }
 
 ChatWindow::~ChatWindow () {
-	EnterCriticalSection(&mutex);
+	if (!released) {
+		EnterCriticalSection(&mutex);
+		if (getPrev()!=NULL) {
+			getPrev()->setNext(next);
+		} else {
+			list = getNext();
+		}
+		if (getNext()!=NULL) {
+			getNext()->setPrev(prev);
+		}
+		LeaveCriticalSection(&mutex);
+	}
 	if (adminWindow!=NULL) {
 		delete adminWindow;
 	}
-	if (getPrev()!=NULL) {
-		getPrev()->setNext(next);
-	} else {
-		list = getNext();
-	}
-	if (getNext()!=NULL) {
-		getNext()->setPrev(prev);
-	}
-	LeaveCriticalSection(&mutex);
-	if (hWnd!=NULL) {
-		EndDialog(hWnd, 0);
-	}
+//	if (hWnd!=NULL) {
+//		DestroyWindow(list->getHWND());
+	//	DestroyWindow(hWnd);
+//		EndDialog(hWnd, 0);
+//	}
 	if (hEvent!=NULL) {
 		CloseHandle(hEvent);
 	}
@@ -108,7 +127,9 @@ ChatWindow::~ChatWindow () {
 	if (topic!=NULL) {
 		delete topic;
 	}
+	container->remoteRemoveChild(this);
 };
+
 
 void ChatWindow::setPrev(ChatWindow *prev) {
 	this->prev = prev;
@@ -136,6 +157,10 @@ HWND ChatWindow::getHWND() {
 
 HANDLE ChatWindow::getEvent() {
 	return hEvent;
+}
+
+ChatContainer * ChatWindow::getContainer() {
+	return container;
 }
 
 void ChatWindow::setAdminWindow(AdminWindow *aw) {
@@ -197,6 +222,7 @@ int ChatWindow::getOptions() {
 }
 
 static void __cdecl StartThread(void *vChat) {
+
 	OleInitialize(NULL);
 	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_GROUPCHAT_LOG), NULL, LogDlgProc, (LPARAM) vChat);
 	OleUninitialize();
@@ -205,14 +231,6 @@ static void __cdecl StartThread(void *vChat) {
 static void __cdecl StartAdminThread(void *vChat) {
 	ChatWindow *chat = (ChatWindow *)vChat;
 	chat->getAdminWindow()->start();
-}
-
-int ChatWindow::start() {
-	if (isStarted) return 0;
-	isStarted = 1;
-	Utils::forkThread((void (__cdecl *)(void *))StartThread, 0, (void *) this);
-	WaitForSingleObject(hEvent, INFINITE);
-	return 0;
 }
 
 void ChatWindow::startAdminDialog(int mode) {
@@ -888,7 +906,6 @@ void ChatWindow ::queryResultContacts(MUCCQUERYRESULT *queryResult) {
 
 void ChatWindow ::queryResultUsers(MUCCQUERYRESULT *queryResult) {
 	if (adminWindow!=NULL) {
-		Utils::log("ChatWindow::queryResultUsers");
 		adminWindow->queryResultUsers(queryResult);
 	}
 }
@@ -903,17 +920,6 @@ ChatWindow * ChatWindow::getWindow(const char *module, const char *roomId) {
 	}
 	LeaveCriticalSection(&mutex);
 	return ptr;
-}
-
-void ChatWindow::release() {
-	for (;list!=NULL;) {
-		delete list;
-	}
-	DeleteCriticalSection(&mutex);
-}
-
-void ChatWindow::init() {
-	InitializeCriticalSection(&mutex);
 }
 
 
@@ -932,11 +938,11 @@ static DWORD CALLBACK EditStreamCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG
 
 static BOOL CALLBACK EditWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	ChatWindow *gcLogInfo;
-
+	ChatWindow *chat;
+	chat = (ChatWindow *) GetWindowLong(GetParent(hwnd), GWL_USERDATA);
 	switch (msg) {
-	case WM_GETDLGCODE:
-		return DLGC_WANTALLKEYS; //DLGC_WANTARROWS|DLGC_WANTCHARS|DLGC_HASSETSEL|DLGC_WANTALLKEYS;
+//	case WM_GETDLGCODE:
+//		return DLGC_WANTALLKEYS; //DLGC_WANTARROWS|DLGC_WANTCHARS|DLGC_HASSETSEL|DLGC_WANTALLKEYS;
 	case WM_CHAR:
 		if (wParam=='\r' || wParam=='\n') {
 			if (((GetKeyState(VK_CONTROL)&0x8000)==0) == ((Options::getChatWindowOptions() & ChatWindow::FLAG_OPT_SENDONENTER) != 0)) {
@@ -944,10 +950,17 @@ static BOOL CALLBACK EditWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 				return FALSE;
 			}
 		}
+		if (wParam == 1 && GetKeyState(VK_CONTROL) & 0x8000) {      //ctrl-a
+			SendMessage(hwnd, EM_SETSEL, 0, -1);
+			return 0;
+		}
+		if (wParam == 23 && GetKeyState(VK_CONTROL) & 0x8000) {     // ctrl-w
+			SendMessage(GetParent(hwnd), WM_CLOSE, 0, 0);
+			return 0;
+		}
 		break;
 	}
-	gcLogInfo = (ChatWindow *) GetWindowLong(GetParent(hwnd), GWL_USERDATA);
-	return CallWindowProc(gcLogInfo->oldEditWndProc, hwnd, msg, wParam, lParam);
+	return CallWindowProc(chat->oldEditWndProc, hwnd, msg, wParam, lParam);
 }
 
 static BOOL CALLBACK LogHSplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -1025,8 +1038,11 @@ static BOOL CALLBACK LogVSplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 		ReleaseCapture();
 		return 0;
 	}
-	return CallWindowProc(chat->oldHSplitterWndProc, hwnd, msg, wParam, lParam);
+	return CallWindowProc(chat->oldVSplitterWndProc, hwnd, msg, wParam, lParam);
 }
+
+
+
 
 static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -1034,6 +1050,9 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 	MUCCEVENT muce;
 	ChatWindow *chatWindow;
 	chatWindow = (ChatWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	if (msg!=WM_INITDIALOG && chatWindow==NULL) {
+		return FALSE;
+	}
 	switch (msg) {
 		case WM_INITDIALOG:
 			HDC hdc;
@@ -1119,64 +1138,91 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					SendDlgItemMessage(hwndDlg, IDC_FONT, CB_SETCURSEL, n, 0);
 				}
 			}
-			chatWindow->setFont(0, 12, 0, 0, 0, 0);
-			SetWindowPos(hwndDlg, NULL, 0, 0, 540, 370, SWP_NOMOVE | SWP_NOZORDER);
+			chatWindow->setFont(Options::getChatWindowFont(), chatWindow->getFontSize(Options::getChatWindowFontSize()), 
+								0, 0, 0, Options::getChatWindowFontColor());
+			SetWindowPos(hwndDlg, HWND_TOP, 0, 0, 540, 370, SWP_NOMOVE | SWP_SHOWWINDOW);
 			SetFocus(GetDlgItem(hwndDlg, IDC_EDIT));
 			SetEvent(chatWindow->getEvent());
-			return FALSE;
+			return TRUE;
 		break;
-		case WM_SIZING:
-			RECT *rc;
-			rc = (RECT *)lParam;
-			if (rc->right-rc->left<380) {
-				if (wParam == WMSZ_RIGHT || wParam == WMSZ_BOTTOMRIGHT || wParam == WMSZ_TOPRIGHT) {
-					rc->right=rc->left+380;
-				} else {
-					rc->left=rc->right-380;
-				}
-			}
-			if (rc->bottom-rc->top<160) {
-				if (wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT) {
-					rc->bottom=rc->top+160;
-				} else {
-					rc->top=rc->bottom-160;
-				}
+		case DM_CHAT_EVENT:
+			MUCCEVENT *mucEvent;
+			mucEvent = (MUCCEVENT *) lParam;
+			switch (mucEvent->iType) {
+				case MUCC_EVENT_MESSAGE:
+					chatWindow->logEvent(mucEvent);
+					break;
+				case MUCC_EVENT_TOPIC:
+					chatWindow->changeTopic(mucEvent);
+					break;
+				case MUCC_EVENT_STATUS:
+					chatWindow->changePresence(mucEvent);
+					break;
+				case MUCC_EVENT_ERROR:
+					chatWindow->logEvent(mucEvent);
+					break;
+				//case MUCC_EVENT_LEAVE:
+			//		DestroyWindow(hwndDlg);
+			//		break;
+				case MUCC_EVENT_ROOM_INFO:
+					chatWindow->changeRoomInfo(mucEvent);
+					break;
 			}
 			return TRUE;
+		case DM_CHAT_QUERY:
+			return TRUE;
+		case WM_SETFOCUS:
+			SetFocus(GetDlgItem(hwndDlg, IDC_EDIT));
+			return TRUE;
+		case WM_GETMINMAXINFO:
+			MINMAXINFO *mmi;
+			mmi = (MINMAXINFO *) lParam;
+			mmi->ptMinTrackSize.x = 380;
+			mmi->ptMinTrackSize.y = 160;
+			return FALSE;
 		case WM_SIZE:
-			if (wParam==SIZE_RESTORED || wParam==SIZE_MAXIMIZED) {
+			if (wParam!=SIZE_MINIMIZED) {
 				int dlgWidth, dlgHeight;
+				RECT rc;
 				HDWP hdwp;
-				dlgWidth = LOWORD(lParam);
-				dlgHeight = HIWORD(lParam);
+				GetClientRect(hwndDlg, &rc);
+				dlgWidth = rc.right-rc.left;//LOWORD(lParam);
+				dlgHeight = rc.bottom-rc.top;//HIWORD(lParam);
 				if (dlgHeight-chatWindow->hSplitterPos < chatWindow->hSplitterMinTop) {
 					chatWindow->hSplitterPos = dlgHeight-chatWindow->hSplitterMinTop;
+				}
+				if (chatWindow->hSplitterPos < chatWindow->hSplitterMinBottom) {
+					chatWindow->hSplitterPos = chatWindow->hSplitterMinBottom;
 				}
 				if (dlgWidth-chatWindow->vSplitterPos < chatWindow->vSplitterMinLeft) {
 					chatWindow->vSplitterPos = dlgWidth-chatWindow->vSplitterMinLeft;
 				}
+				if (chatWindow->vSplitterPos < chatWindow->vSplitterMinRight) {
+					chatWindow->vSplitterPos = chatWindow->vSplitterMinRight;
+				}
 
 				hdwp = BeginDeferWindowPos(16);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_TOPIC), 0, 70, 7, dlgWidth-140, 18, SWP_NOZORDER);
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_LOG), 0, 3, 30, dlgWidth-(chatWindow->vSplitterPos)-5, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_TREELIST), 0, dlgWidth-(chatWindow->vSplitterPos)+2, 30, (chatWindow->vSplitterPos)-5, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_LOG), 0, 0, 30, dlgWidth-(chatWindow->vSplitterPos)-2, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_TREELIST), 0, dlgWidth-(chatWindow->vSplitterPos)+2, 30, (chatWindow->vSplitterPos)-2, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
 //				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_LIST), 0, dlgWidth-(chatWindow->vSplitterPos)+2, 30, (chatWindow->vSplitterPos)-5, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_EDIT), 0, 3, dlgHeight-(chatWindow->hSplitterPos)+2, dlgWidth-6, (chatWindow->hSplitterPos)-5, SWP_NOZORDER);
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_INVITE), 0, dlgWidth-27, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_EDIT), 0, 0, dlgHeight-(chatWindow->hSplitterPos)+2, dlgWidth, (chatWindow->hSplitterPos)-5, SWP_NOZORDER);
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_INVITE), 0, dlgWidth-31, dlgHeight-(chatWindow->hSplitterPos)-26, 31, 24, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_ROOMADMIN), 0, dlgWidth-55, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_BOLD), 0, 3, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER );
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_ITALIC), 0, 27, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER );
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_UNDERLINE), 0, 51, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER );
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_COLOR), 0, 76, dlgHeight-(chatWindow->hSplitterPos)-25, 22, 22, SWP_NOZORDER );
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_FONT), 0, 100, dlgHeight-(chatWindow->hSplitterPos)-24, 110, 13, SWP_NOZORDER);
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_BOLD), 0, 0, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER );
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_ITALIC), 0, 24, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER );
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_UNDERLINE), 0, 48, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER );
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_COLOR), 0, 73, dlgHeight-(chatWindow->hSplitterPos)-25, 22, 22, SWP_NOZORDER );
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_FONT), 0, 98, dlgHeight-(chatWindow->hSplitterPos)-24, 110, 13, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_FONTSIZE), 0, 213, dlgHeight-(chatWindow->hSplitterPos)-24, 38, 13, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_SMILEYBTN), 0, 254, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_OPTIONS), 0, 285, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_VSPLIT), 0, dlgWidth-(chatWindow->vSplitterPos)-2, 30, 4, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_HSPLIT), 0, 4, dlgHeight-(chatWindow->hSplitterPos)-2, dlgWidth-8, 4, SWP_NOZORDER);
+				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_HSPLIT), 0, 0, dlgHeight-(chatWindow->hSplitterPos)-2, dlgWidth-8, 4, SWP_NOZORDER);
 				EndDeferWindowPos(hdwp);
 			}
 		break;
+		/*
 		case WM_SYSCOMMAND:
 			if (wParam == SC_CLOSE) {
 				SendMessage(hwndDlg, WM_CLOSE, 1, 0);
@@ -1188,14 +1234,22 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				return TRUE;
 			}
 			break;
+			*/
 		case WM_CLOSE:
-			if (wParam != 1) { // esc
-				return FALSE;
-			}
+			//if (wParam != 1) { // esc
+				//return FALSE;
+			//}
+			DestroyWindow(hwndDlg);
+			return TRUE;
+		case WM_DESTROY:
 			muce.iType = MUCC_EVENT_LEAVE;
 			muce.pszModule =  chatWindow->getModule();
 			muce.pszID = chatWindow->getRoomId();
 			NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
+			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) NULL);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) chatWindow->oldHSplitterWndProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) chatWindow->oldVSplitterWndProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) chatWindow->oldEditWndProc);
 			delete chatWindow;
 			break;
 		case WM_TLEN_SMILEY:
@@ -1361,6 +1415,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					HelperDialog::topicDlg(chatWindow);
 					break;
 				case IDCANCEL:
+					DestroyWindow(hwndDlg);
 					return TRUE;
 				case IDOK:
 					{

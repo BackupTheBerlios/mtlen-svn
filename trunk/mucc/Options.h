@@ -35,6 +35,10 @@ private:
 	static HBRUSH   brushListBg;
 	static int		logLimit;
 	static int		chatWindowOptions;
+	static COLORREF	chatWindowFontColor;
+	static int		chatWindowFont;
+	static int		chatWindowFontSize;
+	static int		chatWindowFontStyle;
 public:
 	static void		setListBgColor(COLORREF c);
 	static void		setLogBgColor(COLORREF c);
@@ -49,6 +53,14 @@ public:
 	static int		getLogLimit();
 	static void		setChatWindowOptions(int o);
 	static int		getChatWindowOptions();
+	static void		setChatWindowFontColor(COLORREF o);
+	static COLORREF	getChatWindowFontColor();
+	static void		setChatWindowFont(int o);
+	static int		getChatWindowFont();
+	static void		setChatWindowFontSize(int o);
+	static int		getChatWindowFontSize();
+	static void		setChatWindowFontStyle(int o);
+	static int		getChatWindowFontStyle();
 	static void		setExpandFlags(int l);
 	static int		getExpandFlags();
 	static void		init();

@@ -53,6 +53,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDD_USER_KICK					163
 #define IDD_USER_ROLE					164
 #define IDD_USER_BROWSER				165
+#define IDD_GROUPCHAT_CONTAINER			166
 
 #define IDR_CHATOPTIONS                 200
 

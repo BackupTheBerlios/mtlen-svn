@@ -96,6 +96,10 @@ SOURCE=.\AdminWindow.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ChatContainer.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ChatEvent.cpp
 # End Source File
 # Begin Source File
@@ -149,6 +153,10 @@ SOURCE=.\Utils.cpp
 # Begin Source File
 
 SOURCE=.\AdminWindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ChatContainer.h
 # End Source File
 # Begin Source File
 

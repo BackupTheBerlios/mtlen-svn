@@ -28,6 +28,7 @@ class ManagerWindow{
 
 private:
 	static CRITICAL_SECTION mutex;
+	static bool		released;
 	static ManagerWindow *	list;
 	HWND			hWnd;
 	HWND			hChatRoomsTabWnd;
