@@ -52,7 +52,6 @@ typedef struct _settextex
 #endif
 #include <newpluginapi.h>
 #include <m_system.h>
-#include <m_netlib.h>
 #include <m_protomod.h>
 #include <m_protosvc.h>
 #include <m_clist.h>
