@@ -35,20 +35,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdarg.h>
 #include <time.h>
 #include <limits.h>
-//#include <win2k.h>
 
-#ifdef __MINGW32__
-	#define EM_SETTEXTEX	(WM_USER + 97)
-	#define ST_DEFAULT		0
-	#define ST_KEEPUNDO		1
-	#define ST_SELECTION	2
-	#define ST_NEWCHARS		4
-	typedef struct _settextex
-	{
-		DWORD	flags;
-		UINT	codepage;
-	} SETTEXTEX;
-#endif
+#define EM_SETTEXTEX	(WM_USER + 97)
+#define ST_DEFAULT		0
+#define ST_KEEPUNDO		1
+#define ST_SELECTION	2
+#define ST_NEWCHARS		4
+typedef struct _settextex
+{
+	DWORD	flags;
+	UINT	codepage;
+} SETTEXTEX;
 
 #include <newpluginapi.h>
 #include <m_system.h>
