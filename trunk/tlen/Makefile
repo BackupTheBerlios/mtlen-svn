@@ -11,9 +11,9 @@ RES  = tlen.res
 OBJ = $(SRC:.c=.o) $(RES)
 BIN  = tlen.dll
 INCS =  -I"../../include"
-CFLAGS = $(INCS) -DBUILDING_DLL=1 -DTLEN_PLUGIN -fexpensive-optimizations -O3 -Os -Wno-error -Wall
+CFLAGS = $(INCS) -DBUILDING_DLL=1 -DTLEN_PLUGIN -fno-exceptions -fexpensive-optimizations -O3 -Os -Wno-error -Wall
 LIBS =  -lversion -lwsock32 -lwinmm
-LFLAGS = -s -shared -mwindows
+LFLAGS = -s -mdll -mwindows --no-export-all-symbols --add-stdcall-alias
 RCFLAGS = -I rc -O coff
 # --no-export-all-symbols --add-stdcall-alias
 
