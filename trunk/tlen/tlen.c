@@ -84,6 +84,8 @@ HANDLE hMenuMUC;
 HANDLE hMenuChats;
 HANDLE hMenuContactMUC;
 HANDLE hMenuContactVoice;
+HANDLE hMenuContactGrantAuth;
+HANDLE hMenuContactRequestAuth;
 
 HWND hwndJabberVcard;
 #ifndef TLEN_PLUGIN
@@ -97,6 +99,8 @@ int TlenOptInit(WPARAM wParam, LPARAM lParam);
 int TlenUserInfoInit(WPARAM wParam, LPARAM lParam);
 int JabberMsgUserTyping(WPARAM wParam, LPARAM lParam);
 int JabberSvcInit(void);
+int TlenContactMenuHandleRequestAuth(WPARAM wParam, LPARAM lParam);
+int TlenContactMenuHandleGrantAuth(WPARAM wParam, LPARAM lParam);
 
 BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvReserved)
 {
@@ -197,8 +201,51 @@ static void TlenIconInit()
 
 static int TlenPrebuildContactMenu(WPARAM wParam, LPARAM lParam)
 {
-	TlenMUCPrebuildContactMenu(wParam, lParam);
-	TlenVoicePrebuildContactMenu(wParam, lParam);
+	HANDLE hContact;
+	DBVARIANT dbv;
+	CLISTMENUITEM clmi = {0};
+	JABBER_LIST_ITEM *item;
+	clmi.cbSize = sizeof(CLISTMENUITEM);
+	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
+		if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+			if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
+				if (item->subscription==SUB_NONE || item->subscription==SUB_FROM)
+					clmi.flags = CMIM_FLAGS;
+				else
+					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactRequestAuth, (LPARAM) &clmi);
+
+				if (item->subscription==SUB_NONE || item->subscription==SUB_TO)
+					clmi.flags = CMIM_FLAGS;
+				else
+					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactGrantAuth, (LPARAM) &clmi);
+
+				if (item->status!=ID_STATUS_OFFLINE)
+					clmi.flags = CMIM_FLAGS;
+				else
+					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactMUC, (LPARAM) &clmi);
+
+				if (item->status!=ID_STATUS_OFFLINE && !TlenVoiceIsInUse())
+					clmi.flags = CMIM_FLAGS;
+				else
+					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactVoice, (LPARAM) &clmi);
+
+				DBFreeVariant(&dbv);
+				return 0;
+			}
+			DBFreeVariant(&dbv);
+		}
+	}
+	clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactMUC, (LPARAM) &clmi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactVoice, (LPARAM) &clmi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactRequestAuth, (LPARAM) &clmi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactGrantAuth, (LPARAM) &clmi);
+//	TlenMUCPrebuildContactMenu(wParam, lParam);
+//	TlenVoicePrebuildContactMenu(wParam, lParam);
 	return 0;
 }
 
@@ -253,30 +300,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszPopupName = jabberModuleName;
 	mi.popupPosition = 500090000;
 
-	/*
-	// Add Jabber menu to the main menu
-	// "Agents..."
-	mi.pszPopupName = jabberModuleName;
-	mi.popupPosition = 500090000;
-	wsprintf(text, "%s/Agents", jabberModuleName);
-	CreateServiceFunction(text, JabberMenuHandleAgents);
-	mi.pszName = Translate("Agents...");
-	mi.position = 2000050000;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_AGENTS));
-	mi.pszService = text;
-	hMenuAgent = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuAgent, (LPARAM) &clmi);
-	// "Change Password..."
-	wsprintf(text, "%s/ChangePassword", jabberModuleName);
-	CreateServiceFunction(text, JabberMenuHandleChangePassword);
-	mi.pszName = Translate("Change Password...");
-	mi.position = 2000050001;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_KEYS));
-	mi.pszService = text;
-	hMenuChangePassword = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChangePassword, (LPARAM) &clmi);
-	*/
-	// "Multi-User Conference..."
+	// "Multi-User Conference"
 	wsprintf(text, "%s/MainMenuMUC", jabberModuleName);
 	CreateServiceFunction(text, TlenMUCMenuHandleMUC);
 	mi.pszName = Translate("Multi-User Conference");
@@ -305,6 +329,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactMUC = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
+	// "Invite to voice chat"
 	sprintf(text, "%s/ContactMenuVoice", jabberModuleName);
 	CreateServiceFunction(text, TlenVoiceContactMenuHandleVoice);
 	mi.pszName = Translate("Voice Chat");
@@ -313,6 +338,28 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszService = text;
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactVoice = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+
+
+	// "Request authorization"
+	sprintf(text, "%s/RequestAuth", jabberModuleName);
+	CreateServiceFunction(text, TlenContactMenuHandleRequestAuth);
+	mi.pszName = Translate("Request authorization");
+	mi.position = -2000001001;
+	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_REQUEST));
+	mi.pszService = text;
+	mi.pszContactOwner = jabberProtoName;
+	hMenuContactRequestAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+
+	// "Grant authorization"
+	sprintf(text, "%s/GrantAuth", jabberModuleName);
+	CreateServiceFunction(text, TlenContactMenuHandleGrantAuth);
+	mi.pszName = Translate("Grant authorization");
+	mi.position = -2000001000;
+	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_GRANT));
+	mi.pszService = text;
+	mi.pszContactOwner = jabberProtoName;
+	hMenuContactGrantAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+
 
 	HookEvent(ME_CLIST_PREBUILDCONTACTMENU, TlenPrebuildContactMenu);
 
@@ -351,5 +398,33 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	JabberListInit();
 	JabberSvcInit();
 
+	return 0;
+}
+
+int TlenContactMenuHandleRequestAuth(WPARAM wParam, LPARAM lParam)
+{
+	HANDLE hContact;
+	DBVARIANT dbv;
+
+	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
+		if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+			JabberSend(jabberThreadInfo->s, "<presence to='%s' type='subscribe'/>", dbv.pszVal);
+			DBFreeVariant(&dbv);
+		}
+	}
+	return 0;
+}
+
+int TlenContactMenuHandleGrantAuth(WPARAM wParam, LPARAM lParam)
+{
+	HANDLE hContact;
+	DBVARIANT dbv;
+
+	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
+		if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+			JabberSend(jabberThreadInfo->s, "<presence to='%s' type='subscribed'/>", dbv.pszVal);
+			DBFreeVariant(&dbv);
+		}
+	}
 	return 0;
 }

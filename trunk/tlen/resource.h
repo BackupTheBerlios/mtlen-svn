@@ -8,6 +8,8 @@
 #define IDI_MUC							102
 #define IDI_MICROPHONE					103
 #define IDI_SPEAKER						104
+#define IDI_GRANT						105
+#define IDI_REQUEST						106
 
 #define IDD_OPTIONS                  	150
 #define IDD_OPTIONS_EXPERT            	151
@@ -32,8 +34,6 @@
 #define IDC_OFFLINE_MESSAGE_OPTION		1014
 #define IDC_VISIBILITY_SUPPORT			1015
 
-#define IDC_FRAME                       1037
-#define IDC_FRAME_TEXT                  1038
 #define IDC_SUBSCRIPTION                1039
 #define IDC_REGISTERACCOUNT             1040
 #define IDC_SIMPLE                      1041
@@ -49,18 +49,14 @@
 #define IDC_JID                         1051
 #define IDC_ROSTER_SYNC                 1052
 #define IDC_CITY                        1058
-#define IDC_COUNTRY                     1060
 #define IDC_FULLNAME                    1061
-#define IDC_ZIP                         1061
 #define IDC_NICKNAME                    1062
-#define IDC_COMPANY                     1062
 #define IDC_FIRSTNAME                   1063
 #define IDC_LASTNAME                    1064
 #define IDC_BIRTH                       1065
 #define IDC_AGE                         1065
 #define IDC_OCCUPATION                  1066
 #define IDC_EMAIL                       1073
-#define IDC_MSG                         1084
 #define IDC_GENDER                      1096
 #define IDC_VOICECONVERSATIONS			1097
 #define IDC_VCQUALITY					1100
@@ -106,7 +102,6 @@
 #define IDC_DELAY_CUSTOM                1186
 #define IDC_DELAY_POPUP                 1187
 #define IDC_TLEN                        1190
-#define IDC_AUTO_ADD                    1194
 #define IDC_GENDER_TEXT                 1195
 #define IDC_OCCUPATION_TEXT             1199
 #define IDC_LOOKFOR_TEXT                1200

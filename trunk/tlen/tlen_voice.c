@@ -101,6 +101,12 @@ static void CALLBACK TlenVoicePlaybackCallback(HWAVEOUT hwo, UINT uMsg, DWORD* d
 		if (availPlayback > 0) {
 			availPlayback--;
 		}
+//		playbackControl->waveHeaders[playbackControl->waveHeadersPos].dwFlags =  WHDR_DONE;
+//		playbackControl->waveHeaders[playbackControl->waveHeadersPos].lpData = (char *) (playbackControl->waveData + playbackControl->waveHeadersPos * playbackControl->waveFrameSize);
+//		playbackControl->waveHeaders[playbackControl->waveHeadersPos].dwBufferLength = playbackControl->waveFrameSize * 2;
+//		waveOutPrepareHeader(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
+//		waveOutWrite(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
+
 	}
 }
 
@@ -1326,31 +1332,6 @@ int TlenVoiceContactMenuHandleVoice(WPARAM wParam, LPARAM lParam)
 int TlenVoiceIsInUse() {
 	if (JabberListFindNext(LIST_VOICE, 0) >= 0 || voiceDlgHWND!=NULL) {
 		return 1;
-	}
-	return 0;
-}
-
-int TlenVoicePrebuildContactMenu(WPARAM wParam, LPARAM lParam)
-{
-	HANDLE hContact;
-	DBVARIANT dbv;
-	CLISTMENUITEM clmi = {0};
-	JABBER_LIST_ITEM *item;
-	clmi.cbSize = sizeof(CLISTMENUITEM);
-	clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactVoice, (LPARAM) &clmi);
-	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
-		if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
-			if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
-				if (item->status!=ID_STATUS_OFFLINE && !TlenVoiceIsInUse()) {
-					clmi.flags = CMIM_FLAGS;
-					CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactVoice, (LPARAM) &clmi);
-					DBFreeVariant(&dbv);
-					return 0;
-				}
-			}
-			DBFreeVariant(&dbv);
-		}
 	}
 	return 0;
 }

@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern void __cdecl TlenVoiceSendingThread(JABBER_FILE_TRANSFER *ft);
 extern void __cdecl TlenVoiceReceiveThread(JABBER_FILE_TRANSFER *ft);
-extern int TlenVoicePrebuildContactMenu(WPARAM wParam, LPARAM lParam);
+extern int TlenVoiceIsInUse();
 extern int TlenVoiceContactMenuHandleVoice(WPARAM wParam, LPARAM lParam);
 extern int TlenVoiceCancelAll();
 extern int TlenVoiceStart(JABBER_FILE_TRANSFER *ft, int mode) ;

@@ -35,8 +35,6 @@ extern BOOL TlenMUCInit(void);
 extern int TlenMUCMenuHandleMUC(WPARAM wParam, LPARAM lParam);
 extern int TlenMUCMenuHandleChats(WPARAM wParam, LPARAM lParam);
 extern int TlenMUCContactMenuHandleMUC(WPARAM wParam, LPARAM lParam);
-extern int TlenMUCPrebuildContactMenu(WPARAM wParam, LPARAM lParam);
-
 extern int TlenMUCCreateWindow(const char *roomID, const char *roomName, int roomFlags, const char *nick, const char *iqId);
 extern int TlenMUCRecvInvitation(const char *roomJid, const char *roomName, const char *from, const char *reason);
 extern int TlenMUCRecvPresence(const char *from, int status, int flags,  const char *kick);

@@ -126,13 +126,6 @@ BEGIN
                     WS_DISABLED
     EDITTEXT        IDC_FILE_PROXY_PASSWORD,204,85,81,12,ES_PASSWORD |
                     ES_AUTOHSCROLL | WS_DISABLED
-    GROUPBOX        "Miscellaneous",IDC_STATIC,7,141,286,55,NOT WS_VISIBLE
-    CONTROL         "Automatically add contact when accept authorization",
-                    IDC_AUTO_ADD,"Button",BS_AUTOCHECKBOX | BS_TOP | NOT
-                    WS_VISIBLE | WS_TABSTOP,14,165,203,12
-    CONTROL         "Send messages slower, but with full acknowledgement",
-                    IDC_MSG_ACK,"Button",BS_AUTOCHECKBOX | BS_TOP | NOT
-                    WS_VISIBLE | WS_TABSTOP,14,176,203,12
     GROUPBOX        "Voice Chats",IDC_STATIC,7,110,286,97
     LTEXT           "Recording device:",IDC_STATIC,14,134,105,8
     COMBOBOX        IDC_VOICE_DEVICE_IN,120,132,110,100,CBS_DROPDOWNLIST |
@@ -391,6 +384,8 @@ IDI_MAIL                ICON    DISCARDABLE     "icos\\sendmail.ico"
 IDI_MUC                 ICON    DISCARDABLE     "icos\\muc.ico"
 IDI_MICROPHONE          ICON    DISCARDABLE     "icos\\microphone.ico"
 IDI_SPEAKER             ICON    DISCARDABLE     "icos\\speaker.ico"
+IDI_GRANT				ICON    DISCARDABLE     "icos\\grant.ico"
+IDI_REQUEST				ICON    DISCARDABLE     "icos\\request.ico"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

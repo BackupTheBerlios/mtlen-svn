@@ -999,29 +999,3 @@ int TlenMUCContactMenuHandleMUC(WPARAM wParam, LPARAM lParam)
 	}
 	return 0;
 }
-
-int TlenMUCPrebuildContactMenu(WPARAM wParam, LPARAM lParam)
-{
-	HANDLE hContact;
-	DBVARIANT dbv;
-	CLISTMENUITEM clmi = {0};
-	JABBER_LIST_ITEM *item;
-	clmi.cbSize = sizeof(CLISTMENUITEM);
-	clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactMUC, (LPARAM) &clmi);
-	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
-		if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
-			if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
-				if (item->status!=ID_STATUS_OFFLINE) {
-					clmi.flags = CMIM_FLAGS;
-					CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactMUC, (LPARAM) &clmi);
-					DBFreeVariant(&dbv);
-					return 0;
-				}
-			}
-			DBFreeVariant(&dbv);
-		}
-	}
-	return 0;
-}
-
