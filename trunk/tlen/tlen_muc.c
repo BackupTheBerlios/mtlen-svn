@@ -891,10 +891,12 @@ void TlenIqResultRoomInfo(XmlNode *iqNode, void *userdata) {
 	}
 }
 
-static int TlenMUCQueryContacts(const char *roomId) {
+static void __cdecl TlenMUCCSendQueryResultThread(void *vRoomId)
+{
 	HANDLE hContact;
 	MUCCQUERYRESULT queryResult;
 	DBVARIANT dbv;
+	char *roomId = (char *)vRoomId;
 	queryResult.cbSize = sizeof (MUCCQUERYRESULT);
 	queryResult.iType = MUCC_EVENT_QUERY_CONTACTS;
 	queryResult.pszModule = jabberProtoName;
@@ -937,6 +939,12 @@ static int TlenMUCQueryContacts(const char *roomId) {
 	}
 	CallService(MS_MUCC_QUERY_RESULT, 0, (LPARAM) &queryResult);
 	TlenMUCFreeQueryResult(&queryResult);
+	free(roomId);
+}
+
+
+static int TlenMUCQueryContacts(const char *roomId) {
+	JabberForkThread(TlenMUCCSendQueryResultThread, 0, (void *)_strdup(roomId));
 	return 1;
 }
 

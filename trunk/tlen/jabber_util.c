@@ -1119,7 +1119,7 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 	case ID_STATUS_OFFLINE:
 		ptr = NULL;
 		if (DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE)) {
-			int offlineMessageOption = DBGetContactSettingByte(NULL, jabberProtoName, "OfflineMessageOption", 0);
+			int offlineMessageOption = DBGetContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", 0);
 			if (offlineMessageOption == 0) {
 				switch (jabberStatus) {
 					case ID_STATUS_ONLINE:
