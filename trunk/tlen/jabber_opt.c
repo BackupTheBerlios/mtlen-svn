@@ -292,7 +292,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				DBWriteContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VISIBILITY_SUPPORT));
 
 				if (reconnectRequired && jabberConnected)
-					MessageBox(hwndDlg, Translate("These changes will take effect the next time you connect to the Jabber network."), Translate("Jabber Protocol Option"), MB_OK|MB_SETFOREGROUND);
+					MessageBox(hwndDlg, Translate("These changes will take effect the next time you connect to the Tlen network."), Translate("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
 
 				return TRUE;
 			}

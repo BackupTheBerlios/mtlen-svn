@@ -1418,11 +1418,11 @@ static void TlenProcessW(XmlNode *node, void *userdata)
 
 	if ((f=JabberXmlGetAttrValue(node, "f")) != NULL) {
 
-		localMessage = JabberTextDecode(f);
-		if ((hContact=JabberHContactFromJID(localMessage)) == NULL) {
-			hContact = JabberDBCreateContact(localMessage, localMessage, TRUE, FALSE);
+		char webContactName[128];
+		sprintf(webContactName, Translate("%s Web Messages"), jabberModuleName);
+		if ((hContact=JabberHContactFromJID(webContactName)) == NULL) {
+			hContact = JabberDBCreateContact(webContactName, webContactName, TRUE, FALSE);
 		}
-		free(localMessage);
 
 		s = JabberXmlGetAttrValue(node, "s");
 		e = JabberXmlGetAttrValue(node, "e");
