@@ -342,14 +342,14 @@ int ChatWindow::setRights(int flags) {
 
 int ChatWindow::getUserGroup(ChatUser *user) {
 	int group = 4;
-	if (user->getFlags()&MUCC_EF_USER_OWNER) {
+	if (user->getFlags()&MUCC_EF_USER_GLOBALOWNER) {
+		group = 0;
+	} else if (user->getFlags()&MUCC_EF_USER_OWNER) {
 		group = 1;
 	} else if (user->getFlags()&MUCC_EF_USER_ADMIN) {
 		group = 2;
 	} else if (user->getFlags()&MUCC_EF_USER_MODERATOR) {
 		group = 3;
-	} else if (user->getFlags()&MUCC_EF_USER_GLOBALOWNER) {
-		group = 0;
 	}
 	return group;
 }
@@ -1120,15 +1120,15 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 											pCustomDraw->clrTextBk = Options::getListBgColor();
 										}
 										if (user!=NULL) {
-											if (user->getFlags()&MUCC_EF_USER_OWNER) {
+											if (user->getFlags()&MUCC_EF_USER_GLOBALOWNER) {
+												hIcon = muccIcon[MUCC_IDI_U_GLOBALOWNER];
+											} else if (user->getFlags()&MUCC_EF_USER_OWNER) {
 												hIcon = muccIcon[MUCC_IDI_U_OWNER];
 											} else if (user->getFlags()&MUCC_EF_USER_ADMIN) {
 												hIcon = muccIcon[MUCC_IDI_U_ADMIN];
 											} else if (user->getFlags()&MUCC_EF_USER_REGISTERED) {
 												hIcon = muccIcon[MUCC_IDI_U_REGISTERED];
-											} else if (user->getFlags()&MUCC_EF_USER_GLOBALOWNER) {
-												hIcon = muccIcon[MUCC_IDI_U_GLOBALOWNER];
-											}
+											} 
 										}
 										SelectObject(pCustomDraw->nmcd.hdc, ChatWindow::getListFont());
 										break;
