@@ -70,6 +70,7 @@ extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 	int i;
 	static int iconList[] = {
 		IDI_CHAT,
+		IDI_GLOBALOWNER,
 		IDI_OWNER,
 		IDI_ADMIN,
 		IDI_REGISTERED,

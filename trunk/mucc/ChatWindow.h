@@ -60,6 +60,7 @@ private:
 	void			addUser(ChatUser *);
 	void			removeUser(ChatUser *);
 	ChatUser *		findUser(const char *);
+	int				getUserGroup(ChatUser *);
 	ChatUser *		getSelectedUser();
 	ChatEventList 	eventList;
 	int				appendMessage(const MUCCEVENT *event);

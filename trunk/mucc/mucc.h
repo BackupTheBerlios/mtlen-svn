@@ -73,6 +73,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 enum {
 	MUCC_IDI_CHAT = 0,
+	MUCC_IDI_U_GLOBALOWNER,
 	MUCC_IDI_U_OWNER,
 	MUCC_IDI_U_ADMIN,
 	MUCC_IDI_U_REGISTERED,

@@ -340,9 +340,23 @@ int ChatWindow::setRights(int flags) {
 	return 0;
 }
 
+int ChatWindow::getUserGroup(ChatUser *user) {
+	int group = 4;
+	if (user->getFlags()&MUCC_EF_USER_OWNER) {
+		group = 1;
+	} else if (user->getFlags()&MUCC_EF_USER_ADMIN) {
+		group = 2;
+	} else if (user->getFlags()&MUCC_EF_USER_MODERATOR) {
+		group = 3;
+	} else if (user->getFlags()&MUCC_EF_USER_GLOBALOWNER) {
+		group = 0;
+	}
+	return group;
+}
+
 int ChatWindow::changePresence(const MUCCEVENT *event) {
-	int i, bLogEvent = FALSE;
-	const char *groupNames[] = {"Owners", "Admins", "Moderators", "Users"};
+	int i, group, bLogEvent = FALSE;
+	const char *groupNames[] = {"Global Owners", "Owners", "Admins", "Moderators", "Users"};
 	
 	ChatUser *user = findUser(event->pszUID);
 	if (event->dwData == ID_STATUS_ONLINE || (user!=NULL && event->dwData!=ID_STATUS_OFFLINE)) {
@@ -359,14 +373,7 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 			}
 			bLogEvent = TRUE;
 		} else {
-			int group = 3;
-			if (user->getFlags()&MUCC_EF_USER_OWNER) {
-				group = 0;
-			} else if (user->getFlags()&MUCC_EF_USER_ADMIN) {
-				group = 1;
-			} else if (user->getFlags()&MUCC_EF_USER_MODERATOR) {
-				group = 2;
-			}
+			group = getUserGroup(user);
 			user->setFlags(event->dwFlags);
 			TreeView_DeleteItem(GetDlgItem(hWnd, IDC_TREELIST), user->getHTreeItem());
 			if (TreeView_GetChild(GetDlgItem(hWnd, IDC_TREELIST), getTreeItem(group))==NULL) {
@@ -381,14 +388,7 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 				EnableWindow(GetDlgItem(hWnd, IDC_TOPIC_BUTTON), FALSE);
 			}
 		}
-		int group = 3;
-		if (user->getFlags()&MUCC_EF_USER_OWNER) {
-			group = 0;
-		} else if (user->getFlags()&MUCC_EF_USER_ADMIN) {
-			group = 1;
-		} else if (user->getFlags()&MUCC_EF_USER_MODERATOR) {
-			group = 2;
-		}
+		group = getUserGroup(user);
 		TVINSERTSTRUCT tvis;
 		if (getTreeItem(group)==NULL) {
 			for (i=group-1;i>=0;i--) {
@@ -418,14 +418,7 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 	}
 	else {
 		if (user != NULL) {
-			int group = 3;
-			if (user->getFlags()&MUCC_EF_USER_OWNER) {
-				group = 0;
-			} else if (user->getFlags()&MUCC_EF_USER_ADMIN) {
-				group = 1;
-			} else if (user->getFlags()&MUCC_EF_USER_MODERATOR) {
-				group = 2;
-			}
+			group = getUserGroup(user);
 			TreeView_DeleteItem(GetDlgItem(hWnd, IDC_TREELIST), user->getHTreeItem());
 			if (TreeView_GetChild(GetDlgItem(hWnd, IDC_TREELIST), getTreeItem(group))==NULL) {
 				TreeView_DeleteItem(GetDlgItem(hWnd, IDC_TREELIST), getTreeItem(group));
@@ -1125,14 +1118,6 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 											pCustomDraw->clrTextBk = 0xDAC8C2;
 										} else {
 											pCustomDraw->clrTextBk = Options::getListBgColor();
-											if (user!=NULL) {
-												if (user->getFlags()&MUCC_EF_USER_OWNER) {
-													hIcon = muccIcon[MUCC_IDI_U_OWNER];
-												} else if (user->getFlags()&MUCC_EF_USER_ADMIN) {
-													hIcon = muccIcon[MUCC_IDI_U_ADMIN];
-												} else if (user->getFlags()&MUCC_EF_USER_REGISTERED) {
-												}
-											}
 										}
 										if (user!=NULL) {
 											if (user->getFlags()&MUCC_EF_USER_OWNER) {
@@ -1141,6 +1126,8 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 												hIcon = muccIcon[MUCC_IDI_U_ADMIN];
 											} else if (user->getFlags()&MUCC_EF_USER_REGISTERED) {
 												hIcon = muccIcon[MUCC_IDI_U_REGISTERED];
+											} else if (user->getFlags()&MUCC_EF_USER_GLOBALOWNER) {
+												hIcon = muccIcon[MUCC_IDI_U_GLOBALOWNER];
 											}
 										}
 										SelectObject(pCustomDraw->nmcd.hdc, ChatWindow::getListFont());

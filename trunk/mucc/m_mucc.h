@@ -162,6 +162,7 @@ typedef struct {
 #define MUCC_EF_USER_MEMBER			0x000008
 #define MUCC_EF_USER_MODERATOR		0x000010
 #define MUCC_EF_USER_BANNED			0x000020
+#define MUCC_EF_USER_GLOBALOWNER	0x000040
 
 typedef struct {
 	int			cbSize;

@@ -232,6 +232,10 @@ SOURCE=.\icos\chat.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\icos\glowner.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\icos\invite.ico
 # End Source File
 # Begin Source File
