@@ -1416,11 +1416,11 @@ static void TlenProcessW(XmlNode *node, void *userdata)
 	if ((info=(struct ThreadData *) userdata) == NULL) return;
 	if ((body=node->text) == NULL) return;
 
-	if ((s=JabberXmlGetAttrValue(node, "s")) != NULL) {
-		if ((hContact=JabberHContactFromJID(s)) == NULL)
-			hContact = JabberDBCreateContact(s, s, TRUE, FALSE);
+	if ((f=JabberXmlGetAttrValue(node, "f")) != NULL) {
+		if ((hContact=JabberHContactFromJID(f)) == NULL)
+			hContact = JabberDBCreateContact(f, f, TRUE, FALSE);
 
-		f = JabberXmlGetAttrValue(node, "f");
+		s = JabberXmlGetAttrValue(node, "s");
 		e = JabberXmlGetAttrValue(node, "e");
 
 		str = NULL;
