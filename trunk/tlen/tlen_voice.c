@@ -82,6 +82,7 @@ static HWND voiceAcceptDlgHWND = NULL;
 static TLEN_VOICE_CONTROL *playbackControl = NULL;
 static TLEN_VOICE_CONTROL *recordingControl = NULL;
 static int availPlayback = 0;
+static int availOverrun = 0;
 static int availLimit = 0;
 static int availLimitMin = 2;
 static int availLimitMax = 4;
@@ -150,7 +151,7 @@ static DWORD WINAPI TlenVoiceRecordingThreadProc(TLEN_VOICE_CONTROL *control)
 	}
 }*/
 
-static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
+static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control) 
 {
 	WAVEFORMATEX wfm;
 	MMRESULT mmres;
@@ -161,7 +162,7 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
     memset(&wfm, 0, sizeof(wfm));
     wfm.cbSize          = sizeof(WAVEFORMATEX);
     wfm.nChannels       = 1;
-    wfm.wBitsPerSample  = 16;
+    wfm.wBitsPerSample  = 16;   
     wfm.nSamplesPerSec  = modeFrequency[control->codec];
     wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nChannels * wfm.wBitsPerSample/8;
     wfm.nBlockAlign     = 2 * wfm.nChannels;
@@ -169,8 +170,8 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
 
 	control->waveMode	= 0;
 	control->waveFrameSize = modeFrameSize[control->codec] * 160 * wfm.nChannels;// * wfm.wBitsPerSample / 8;
-	control->waveHeadersPos=0;
-	control->waveHeadersNum=4;
+	control->waveHeadersPos = 0;
+	control->waveHeadersNum = availLimitMin + 2;
 
 	j = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", 0);
 	iSelDev = WAVE_MAPPER;
@@ -187,7 +188,7 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
 				}
 			}
 		}
-	}
+	} 
 	if (!waveOutGetDevCaps(iSelDev, &wic, sizeof(WAVEOUTCAPS))) {
 		JabberLog("Playback device ID #%u: %s\r\n", iSelDev, wic.szPname);
 	}
@@ -205,7 +206,7 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
 }
 
 
-static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
+static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control) 
 {
 	WAVEFORMATEX wfm;
 	MMRESULT mmres;
@@ -216,7 +217,7 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
     memset(&wfm, 0, sizeof(wfm));
     wfm.cbSize          = sizeof(WAVEFORMATEX);
     wfm.nChannels       = 1;
-    wfm.wBitsPerSample  = 16;
+    wfm.wBitsPerSample  = 16;   
     wfm.nSamplesPerSec  = modeFrequency[control->codec];
     wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nChannels * wfm.wBitsPerSample/8;
     wfm.nBlockAlign     = 2 * wfm.nChannels;
@@ -254,7 +255,7 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
 				}
 			}
 		}
-	}
+	} 
 	if (!waveInGetDevCaps(iSelDev, &wic, sizeof(WAVEINCAPS))) {
 		JabberLog("Recording device ID #%u: %s\r\n", iSelDev, wic.szPname);
 	}
@@ -419,49 +420,41 @@ static TLEN_VOICE_CONTROL *TlenVoiceCreateVC(int codec)
 	vc->codec = codec;
 	return vc;
 }
-static void TlenVoiceFreeVc(TLEN_VOICE_CONTROL *vc)
+static void TlenVoiceFreeVc(TLEN_VOICE_CONTROL *vc) 
 {
 	int i;
-	JabberLog("......... free vc .............");
+	JabberLog("-> TlenVoiceFreeVc");
 	vc->stopThread = 1;
+	PostThreadMessage(vc->threadID, MM_WIM_CLOSE, 0, 0);
+	while(vc->isRunning) {
+		Sleep(50);
+	}
+	if (vc->hThread!=NULL) CloseHandle(vc->hThread);
 	if (vc->hWaveIn) {
 		for (i=0;i<vc->waveHeadersNum;i++) {
 			while(waveInUnprepareHeader(vc->hWaveIn, &vc->waveHeaders[i], sizeof(WAVEHDR)) == WAVERR_STILLPLAYING) {
-				JabberLog("vc waiting %d #1",i );
 				Sleep(50);
 			}
 		}
 		while(waveInClose(vc->hWaveIn) == WAVERR_STILLPLAYING) {
-			JabberLog("vc waiting #2");
 			Sleep(50);
 		}
 	}
-	JabberLog("......... free po in .............");
 	if (vc->hWaveOut) {
 		for (i=0;i<vc->waveHeadersNum;i++) {
 			while(waveOutUnprepareHeader(vc->hWaveOut, &vc->waveHeaders[i], sizeof(WAVEHDR)) == WAVERR_STILLPLAYING) {
-				JabberLog("vc waiting #3");
 				Sleep(50);
 			}
 		}
 		while(waveOutClose(vc->hWaveOut) == WAVERR_STILLPLAYING) {
-			JabberLog("vc waiting #4");
 			Sleep(50);
 		}
 	}
-	JabberLog("......... free po out .............");
 	if (vc->waveData) free(vc->waveData);
 	if (vc->waveHeaders) free(vc->waveHeaders);
 	if (vc->gsmstate) gsm_release(vc->gsmstate);
-	while(vc->isRunning) {
-		PostThreadMessage(vc->threadID, MM_WIM_CLOSE, 0, 0);
-		Sleep(50);
-	}
-	if (vc->hThread!=NULL) CloseHandle(vc->hThread);
-	JabberLog("......... free po watku .............");
 	free(vc);
-	JabberLog("......... free vc done .............");
-//	Sleep(1500);
+	JabberLog("<- TlenVoiceFreeVc");
 }
 
 typedef struct {
@@ -484,14 +477,7 @@ static void TlenVoiceCrypt(char *buffer, int len)
 		j = j << 6;
 		j += k;
 		j = k + (j << 1);
-		//j = j * 131;
-		j += 0xBB;/*
-		j &= 0x800000FF;
-		if (j<0) {
-			j--;
-			j |= 0xFFFFFF00;
-			j++;
-		}*/
+		j += 0xBB;
 		buffer[i]^=j;
 	}
 }
@@ -1022,16 +1008,14 @@ static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft)
 	char *p;
 	float val;
 	TLEN_FILE_PACKET  *packet;
-//	while (availPlayback > 2) {
-//		SleepEx(5, FALSE);
-//	}
 	packet = TlenVoicePacketReceive(ft->s);
 	if (packet != NULL) {
-		statusTxt = " OK ";
+		statusTxt = " Unknown packet ";
 		p = packet->packet;
 		if (packet->type == 0x96) {
 			short *out;
 			int codec, chunkNum;
+			statusTxt = " OK ";
 			TlenVoiceCrypt(packet->packet+4, packet->len-4);
 			codec = *((int *)packet->packet);
 			if (codec<2 || codec>5) {
@@ -1041,18 +1025,21 @@ static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft)
 					playbackControl = TlenVoiceCreateVC(codec);
 					TlenVoicePlaybackStart(playbackControl);
 					availPlayback = 0;
+					availOverrun = 0;
 					availLimit = availLimitMax;
 				} else if (playbackControl->codec != codec) {
 					TlenVoiceFreeVc(playbackControl);
 					playbackControl = TlenVoiceCreateVC(codec);
 					TlenVoicePlaybackStart(playbackControl);
 					availPlayback = 0;
+					availOverrun = 0;
 					availLimit = availLimitMax;
 				}
 				if (!playbackControl->bDisable) {
 					playbackControl->waveHeaders[playbackControl->waveHeadersPos].dwFlags =  WHDR_DONE;
 					playbackControl->waveHeaders[playbackControl->waveHeadersPos].lpData = (char *) (playbackControl->waveData + playbackControl->waveHeadersPos * playbackControl->waveFrameSize);
 					playbackControl->waveHeaders[playbackControl->waveHeadersPos].dwBufferLength = playbackControl->waveFrameSize * 2;
+						/*
 					if (availPlayback == 0) {
 						statusTxt = "!! Buffer is empty !!";
 						availPlayback++;
@@ -1063,9 +1050,9 @@ static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft)
 						playbackControl->waveHeaders[playbackControl->waveHeadersPos].lpData = (char *) (playbackControl->waveData + playbackControl->waveHeadersPos * playbackControl->waveFrameSize);
 						playbackControl->waveHeaders[playbackControl->waveHeadersPos].dwBufferLength = playbackControl->waveFrameSize * 2;
 					}
+						*/
 					chunkNum = min(modeFrameSize[codec], (int)(packet->len - 4) / 33);
 					out = (short *)playbackControl->waveHeaders[playbackControl->waveHeadersPos].lpData;
-					//JabberLog("Pos: %d Avail: %d ChunkNum: %d Limit: %d  out:%08X", playbackControl->waveHeadersPos, availPlayback,chunkNum, availLimit, out); //playbackControl->waveHeadersAvail,
 					for (i=0; i<chunkNum; i++) {
 						for (j=0;j<33;j++) {
 							playbackControl->gsmstate->gsmFrame[j] = packet->packet[i*33 +j +4];
@@ -1086,6 +1073,24 @@ static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft)
 					}
 					playbackControl->vuMeter = j;
 					playbackControl->bytesSum  += 8 + packet->len;
+
+					j = availOverrun > 0 ? -1 : 0;
+					while (availPlayback > availLimitMin) {
+						j = 1;
+						SleepEx(5, FALSE);
+					}
+					availOverrun += j;
+					
+					if (availOverrun < 40) {
+						availPlayback++;
+						waveOutPrepareHeader(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
+						waveOutWrite(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
+						playbackControl->waveHeadersPos = (playbackControl->waveHeadersPos +1) % playbackControl->waveHeadersNum;
+					} else {
+						availOverrun -= 10;
+						statusTxt = "!! Skipping frame !!";
+					} 
+				/*
 					if (availPlayback < availLimit) {
 						availPlayback++;
 						if (availPlayback == availLimitMax) {
@@ -1095,14 +1100,20 @@ static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft)
 						}
 						waveOutPrepareHeader(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
 						waveOutWrite(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
+//						playbackAlive--;
 						playbackControl->waveHeadersPos = (playbackControl->waveHeadersPos +1) % playbackControl->waveHeadersNum;
 					} else {
 						statusTxt = "!! Buffer is full !!";
 					}
+					*/
 				}
 			}
 		}
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, statusTxt);
+		{
+			char ttt[2048];
+			sprintf(ttt, "%s %d %d ", statusTxt, availPlayback, availOverrun);
+			SetDlgItemText(voiceDlgHWND, IDC_STATUS, ttt);
+		}
 		TlenVoicePacketFree(packet);
 	}
 	else {
@@ -1353,9 +1364,9 @@ static HBITMAP TlenVoiceMakeBitmap(int w, int h, int bpp, void *ptr)
 	bmih.bmiHeader.biWidth = w&0xFFFFFFFC;
 	bmih.bmiHeader.biHeight = h;//&0xFFFFFFFC;
 	bmih.bmiHeader.biPlanes = 1;			   // musi byc 1
-	bmih.bmiHeader.biBitCount = bpp;
-	bmih.bmiHeader.biCompression = BI_RGB;
-	bmih.bmiHeader.biSizeImage = 0;
+	bmih.bmiHeader.biBitCount = bpp;	
+	bmih.bmiHeader.biCompression = BI_RGB;	  
+	bmih.bmiHeader.biSizeImage = 0; 		  
 	bmih.bmiHeader.biXPelsPerMeter = 0;
 	bmih.bmiHeader.biYPelsPerMeter = 0;
 	bmih.bmiHeader.biClrUsed = 0;
@@ -1366,14 +1377,14 @@ static HBITMAP TlenVoiceMakeBitmap(int w, int h, int bpp, void *ptr)
 	return hbm;
 }
 
-static void TlenVoiceInitVUMeters()
-{
+static void TlenVoiceInitVUMeters() 
+{	
 	int i, v, y, x, x0, col, col0;
 	unsigned char *pBits;
 	int ledWidth, ledHeight;
 	ledWidth = 9;
 	ledHeight = 6;
-	vuMeterHeight = ledHeight;
+	vuMeterHeight = ledHeight; 
 	vuMeterWidth = (vuMeterLevels-1) * ledWidth;
 	vuMeterWidth = (vuMeterWidth + 3) & (~3);
 	pBits = (unsigned char *)malloc(3*vuMeterWidth*vuMeterHeight);
@@ -1405,7 +1416,7 @@ static void TlenVoiceInitVUMeters()
 }
 
 static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
+{	
 	HDC hDC, hMemDC;
 	int v;
 	static int counter;
@@ -1529,20 +1540,20 @@ static void __cdecl TlenVoiceDlgThread(void *ptr)
 	TlenVoiceCancelAll();
 }
 
-int TlenVoiceStart(JABBER_FILE_TRANSFER *ft, int mode)
+int TlenVoiceStart(JABBER_FILE_TRANSFER *ft, int mode) 
 {
-
+	
 	if (mode==0) {
-		JabberForkThread((void (__cdecl *)(void*))TlenVoiceReceiveThread, 0, ft);
+		JabberForkThread((void (__cdecl *)(void*))TlenVoiceReceiveThread, 0, ft); 
 	} else if (mode==1) {
-		JabberForkThread((void (__cdecl *)(void*))TlenVoiceSendingThread, 0, ft);
+		JabberForkThread((void (__cdecl *)(void*))TlenVoiceSendingThread, 0, ft); 
 	} else {
-		JabberForkThread((void (__cdecl *)(void*))TlenVoiceDlgThread, 0, ft);
+		JabberForkThread((void (__cdecl *)(void*))TlenVoiceDlgThread, 0, ft); 
 	}
 	return 0;
 }
 
-static char *getDisplayName(const char *id)
+static char *getDisplayName(const char *id) 
 {
 	char jid[256];
 	HANDLE hContact;
@@ -1558,7 +1569,7 @@ static char *getDisplayName(const char *id)
 }
 
 static BOOL CALLBACK TlenVoiceAcceptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
+{	
 	JABBER_LIST_ITEM * item;
 	char *str;
 	switch (msg) {
@@ -1610,7 +1621,7 @@ static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
 	}
 }
 
-int TlenVoiceAccept(const char *id, const char *from)
+int TlenVoiceAccept(const char *id, const char *from) 
 {
 	JABBER_LIST_ITEM * item;
 	if (!TlenVoiceIsInUse()) {

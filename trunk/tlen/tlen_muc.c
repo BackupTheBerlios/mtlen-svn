@@ -302,6 +302,7 @@ int TlenMUCRecvPresence(const char *from, int status, int flags, const char *kic
 		mucce->bIsMe = isSelf(roomId, userId);
 		mucce->dwData = status;
 		mucce->dwFlags = 0;
+		if (flags & USER_FLAGS_GLOBALOWNER) mucce->dwFlags |= MUCC_EF_USER_GLOBALOWNER;
 		if (flags & USER_FLAGS_OWNER) mucce->dwFlags |= MUCC_EF_USER_OWNER;
 		if (flags & USER_FLAGS_ADMIN) mucce->dwFlags |= MUCC_EF_USER_ADMIN;
 		if (flags & USER_FLAGS_REGISTERED) mucce->dwFlags |= MUCC_EF_USER_REGISTERED;

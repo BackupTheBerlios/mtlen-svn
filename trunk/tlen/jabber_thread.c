@@ -1686,6 +1686,9 @@ static void TlenProcessP(XmlNode *node, void *userdata)
 		if (atoi(a) == 3) {
 			//flags |= USER_FLAGS_MEMBER;
 		} 
+		if (atoi(a) == 5) {
+			flags |= USER_FLAGS_GLOBALOWNER;
+		} 
 	}
 	sNode = JabberXmlGetChild(node, "s");
 	if (sNode != NULL) {

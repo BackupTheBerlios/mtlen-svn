@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define USER_FLAGS_OWNER			0x01
 #define USER_FLAGS_ADMIN			0x02
 #define USER_FLAGS_REGISTERED		0x04
+#define USER_FLAGS_GLOBALOWNER		0x08
 #define USER_FLAGS_KICKED			0x80
 
 extern BOOL TlenMUCInit(void);
