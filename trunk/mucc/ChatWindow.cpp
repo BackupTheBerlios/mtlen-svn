@@ -1345,7 +1345,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 									ofn.Flags = OFN_HIDEREADONLY;
 									ofn.lpstrDefExt = "rtf";
 									if (GetSaveFileNameA(&ofn)) {
-										remove(szFilename);
+										//remove(szFilename);
 										EDITSTREAM stream = { 0 };
 										stream.dwCookie = (DWORD_PTR)szFilename;
 										stream.dwError = 0;
