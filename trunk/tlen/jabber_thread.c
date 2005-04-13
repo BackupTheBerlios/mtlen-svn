@@ -1279,8 +1279,10 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 					numFiles = atoi(p);
 					if (numFiles == 1) {
 						if ((p=JabberXmlGetAttrValue(node, "n")) != NULL)
+							p = JabberTextDecode(p);
 							strncpy(szFilename, p, sizeof(szFilename));
-							JabberHttpUrlDecode(szFilename);
+							free(p);
+							
 					}
 					else if (numFiles > 1) {
 						_snprintf(szFilename, sizeof(szFilename), "%d Files", numFiles);

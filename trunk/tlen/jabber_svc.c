@@ -806,8 +806,7 @@ int JabberSendFile(WPARAM wParam, LPARAM lParam)
 				p++;
 			else
 				p = files[0];
-			p = JabberHttpUrlEncode(p);
-			MessageBox(NULL, p, "FT", MB_OK);
+			p = JabberTextEncode(p);
 			JabberSend(jabberThreadInfo->s, "<f t='%s' n='%s' e='1' i='%s' c='1' s='%d' v='1'/>", nick, p, idStr, ft->allFileTotalSize);
 			free(p);
 		}
