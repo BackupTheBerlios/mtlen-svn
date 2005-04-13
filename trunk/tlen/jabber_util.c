@@ -607,7 +607,7 @@ char *JabberHttpUrlEncode(const char *str)
 	if (str == NULL) return NULL;
 	res = (char *) malloc(3*strlen(str) + 1);
 	for (p=(char *)str,q=res; *p!='\0'; p++,q++) {
-		if ((*p>='A' && *p<='Z') || (*p>='a' && *p<='z') || (*p>='0' && *p<='9') || strchr("$-_.+!*'(),", *p)!=NULL) {
+		if ((*p>='A' && *p<='Z') || (*p>='a' && *p<='z') || (*p>='0' && *p<='9') || strchr("$-_.+!*(),", *p)!=NULL) {
 			*q = *p;
 		}
 		else {
