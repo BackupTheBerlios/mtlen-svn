@@ -241,7 +241,6 @@ extern int jabberDesiredStatus;
 //extern char *jabberModeMsg;
 extern CRITICAL_SECTION modeMsgMutex;
 extern JABBER_MODEMSGS modeMsgs;
-extern BOOL modeMsgStatusChangePending;
 extern BOOL jabberChangeStatusMessageOnly;
 extern BOOL jabberSendKeepAlive;
 

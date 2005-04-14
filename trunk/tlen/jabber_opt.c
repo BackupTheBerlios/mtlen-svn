@@ -117,13 +117,6 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				if (!dbv.pszVal[0]) enableRegister = FALSE;
 				DBFreeVariant(&dbv);
 			}
-			if (!DBGetContactSetting(NULL, jabberProtoName, "Resource", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_EDIT_RESOURCE, dbv.pszVal);
-				DBFreeVariant(&dbv);
-			}
-			else {
-				SetDlgItemText(hwndDlg, IDC_EDIT_RESOURCE, "t");
-			}
 			CheckDlgButton(hwndDlg, IDC_SAVEPASSWORD, DBGetContactSettingByte(NULL, jabberProtoName, "SavePassword", TRUE));
 			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, dbv.pszVal);
@@ -180,7 +173,6 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		switch (LOWORD(wParam)) {
 		case IDC_EDIT_USERNAME:
 		case IDC_EDIT_PASSWORD:
-		case IDC_EDIT_RESOURCE:
 		case IDC_EDIT_LOGIN_SERVER:
 		case IDC_PORT:
 		case IDC_MANUAL:
@@ -246,12 +238,6 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				}
 				else
 					DBDeleteContactSetting(NULL, jabberProtoName, "Password");
-
-				GetDlgItemText(hwndDlg, IDC_EDIT_RESOURCE, text, sizeof(text));
-				if (DBGetContactSetting(NULL, jabberProtoName, "Resource", &dbv) || strcmp(text, dbv.pszVal))
-					reconnectRequired = TRUE;
-				if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
-				DBWriteContactSettingString(NULL, jabberProtoName, "Resource", text);
 
 				DBWriteContactSettingByte(NULL, jabberProtoName, "SavePassword", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD));
 

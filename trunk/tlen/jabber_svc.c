@@ -577,15 +577,15 @@ static void __cdecl JabberSendMessageAckThread(HANDLE hContact)
 	ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_MESSAGE, ACKRESULT_SUCCESS, (HANDLE) 1, 0);
 	JabberLog("Returning from thread");
 }
-/*
+
 static void __cdecl JabberSendMessageFailedThread(HANDLE hContact)
 {
 	SleepEx(10, TRUE);
 	JabberLog("Broadcast ACK");
-	ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_MESSAGE, ACKRESULT_FAILED, (HANDLE) 1, 0);
+	ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_MESSAGE, ACKRESULT_FAILED, (HANDLE) 2, 0);
 	JabberLog("Returning from thread");
 }
-*/
+
 
 int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 {
@@ -597,9 +597,9 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 	char msgType[16];
 
 	if (!jabberOnline || DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) {
-//		JabberForkThread(JabberSendMessageFailedThread, 0, (void *) ccs->hContact);
-		ProtoBroadcastAck(jabberProtoName, ccs->hContact, ACKTYPE_MESSAGE, ACKRESULT_FAILED, (HANDLE) 1, 0);
-		return 0;
+		JabberForkThread(JabberSendMessageFailedThread, 0, (void *) ccs->hContact);
+//		ProtoBroadcastAck(jabberProtoName, ccs->hContact, ACKTYPE_MESSAGE, ACKRESULT_FAILED, (HANDLE) 2, 0);
+		return 2;
 	}
 
 	if ((msg=JabberTextEncode((char *) ccs->lParam)) != NULL) {

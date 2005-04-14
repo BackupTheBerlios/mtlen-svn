@@ -1,15 +1,10 @@
 #include "resource.h"
-#ifdef __MINGW32__
-	#define WINVER 0x500
-	#include <windows.h>
-	#ifndef IDC_STATIC
-	#define IDC_STATIC (-1)
-#endif
-#else
-	#define APSTUDIO_READONLY_SYMBOLS
-	#include "winres.h"
-	#undef APSTUDIO_READONLY_SYMBOLS
-#endif
+#define APSTUDIO_READONLY_SYMBOLS
+#define _WIN32_WINNT 0x0501
+#define _WIN32_IE 0x0500
+#include <windows.h>
+#include <winres.h>
+#undef APSTUDIO_READONLY_SYMBOLS
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU) || defined(__MINGW32__)
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -47,7 +42,7 @@ STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    GROUPBOX        "Tlen",IDC_TLEN,7,7,266,99
+    GROUPBOX        "Tlen",IDC_TLEN,7,7,266,88
     LTEXT           "Username:",IDC_STATIC,14,21,45,8
     EDITTEXT        IDC_EDIT_USERNAME,70,19,86,12,ES_AUTOHSCROLL
     CONTROL         "Create a new account",IDC_REGISTERACCOUNT,"Hyperlink",
@@ -55,28 +50,26 @@ BEGIN
     LTEXT           "Password:",IDC_STATIC,14,35,45,8
     EDITTEXT        IDC_EDIT_PASSWORD,70,33,86,12,ES_PASSWORD |
                     ES_AUTOHSCROLL
-    LTEXT           "Resource:",IDC_RESOURCE_T,14,49,45,8
-    EDITTEXT        IDC_EDIT_RESOURCE,70,47,86,12,ES_AUTOHSCROLL
     CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,70,61,172,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,70,48,172,10
     LTEXT           "Login server:",IDC_STATIC,14,75,45,8
     EDITTEXT        IDC_EDIT_LOGIN_SERVER,70,73,86,12,ES_AUTOHSCROLL
     LTEXT           "Port:",IDC_STATIC,174,76,45,8
     EDITTEXT        IDC_PORT,225,73,26,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Use SSL",IDC_USE_SSL,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,14,91,69,10
-    GROUPBOX        "Options",IDC_SIMPLE,7,108,266,52
+    GROUPBOX        "Options",IDC_SIMPLE,7,102,266,58
     CONTROL         "Show offline users with status messages as invisible in contact list",
                     IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,121,221,10
+                    14,116,221,10
     CONTROL         "Leave status message after disconnection",
                     IDC_OFFLINE_MESSAGE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,14,134,160,10
+                    WS_TABSTOP,14,129,160,10
+    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,128,75,140,CBS_DROPDOWNLIST |
+                    WS_TABSTOP
     CONTROL         "Enable Always Visible and Never Visible",
                     IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,147,221,10
-    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,132,75,140,CBS_DROPDOWNLIST |
-                    WS_TABSTOP
+                    14,142,221,10
     GROUPBOX        "Expert",IDC_STATIC,7,163,266,84
     CONTROL         "Manually specify connection host",IDC_MANUAL,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,14,177,223,10

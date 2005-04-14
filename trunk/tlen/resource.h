@@ -26,7 +26,6 @@
 #define IDC_EDIT_PASSWORD               1001
 #define IDC_EDIT_LOGIN_SERVER           1003
 #define IDC_PORT                        1004
-#define IDC_EDIT_RESOURCE               1005
 #define IDC_INFO_JID                    1007
 #define IDC_INFO_RESOURCE               1008
 #define IDC_SHOW_OFFLINE                1012

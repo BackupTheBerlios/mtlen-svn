@@ -182,7 +182,6 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 
 			jabberOnline = TRUE;
 			JabberLog("Status changed via THREADSTART");
-			modeMsgStatusChangePending = FALSE;
 			oldStatus = jabberStatus;
 			switch (jabberDesiredStatus) {
 			case ID_STATUS_ONLINE:

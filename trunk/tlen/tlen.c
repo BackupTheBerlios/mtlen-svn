@@ -59,7 +59,6 @@ BOOL jabberConnected;
 BOOL jabberOnline;
 int jabberStatus;
 int jabberDesiredStatus;
-BOOL modeMsgStatusChangePending;
 BOOL jabberChangeStatusMessageOnly;
 char *jabberJID = NULL;
 char *streamId;
@@ -379,7 +378,6 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	jabberThreadInfo = NULL;
 	jabberConnected = FALSE;
 	jabberOnline = FALSE;
-	modeMsgStatusChangePending = FALSE;
 	jabberStatus = ID_STATUS_OFFLINE;
 	jabberChangeStatusMessageOnly = FALSE;
 	jabberVcardPhotoFileName = NULL;
