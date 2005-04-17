@@ -36,8 +36,8 @@ PLUGINLINK *pluginLink;
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
 	"Tlen Protocol",
-	PLUGIN_MAKE_VERSION(1,0,6,0),
-	"Tlen protocol plugin for Miranda IM (1.0.6.0 "__DATE__")",
+	PLUGIN_MAKE_VERSION(1,0,6,1),
+	"Tlen protocol plugin for Miranda IM (1.0.6.1 "__DATE__")",
 	"Santithorn Bunchua, Adam Strzelecki, Piotr Piastucki",
 	"the_leech@users.berlios.de",
 	"(c) 2002-2005 Santithorn Bunchua, Piotr Piastucki",
@@ -59,7 +59,6 @@ BOOL jabberConnected;
 BOOL jabberOnline;
 int jabberStatus;
 int jabberDesiredStatus;
-BOOL jabberChangeStatusMessageOnly;
 char *jabberJID = NULL;
 char *streamId;
 DWORD jabberLocalIP;
@@ -379,7 +378,6 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	jabberConnected = FALSE;
 	jabberOnline = FALSE;
 	jabberStatus = ID_STATUS_OFFLINE;
-	jabberChangeStatusMessageOnly = FALSE;
 	jabberVcardPhotoFileName = NULL;
 	jabberVcardPhotoType = NULL;
 	memset((char *) &modeMsgs, 0, sizeof(JABBER_MODEMSGS));

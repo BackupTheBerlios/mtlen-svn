@@ -66,20 +66,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define JABBER_DEFAULT_PORT 5222
+#define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "keh_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"
 // User-defined message
 #define WM_JABBER_REGDLG_UPDATE				WM_USER + 100
-#define WM_JABBER_AGENT_REFRESH				WM_USER + 101
-#define WM_JABBER_TRANSPORT_REFRESH			WM_USER + 102
-#define WM_JABBER_REGINPUT_ACTIVATE			WM_USER + 103
 #define WM_JABBER_REFRESH					WM_USER + 104
 #define WM_JABBER_CHECK_ONLINE				WM_USER + 105
 #define WM_JABBER_CHANGED					WM_USER + 106
 #define WM_JABBER_ACTIVATE					WM_USER + 107
-#define WM_JABBER_SET_FONT					WM_USER + 108
-#define WM_JABBER_FLASHWND					WM_USER + 109
 #define WM_JABBER_SHUTDOWN					WM_USER + 112
 // Error code
 #define JABBER_ERROR_REDIRECT				302
@@ -241,7 +236,6 @@ extern int jabberDesiredStatus;
 //extern char *jabberModeMsg;
 extern CRITICAL_SECTION modeMsgMutex;
 extern JABBER_MODEMSGS modeMsgs;
-extern BOOL jabberChangeStatusMessageOnly;
 extern BOOL jabberSendKeepAlive;
 
 extern HANDLE hEventSettingChanged;
@@ -297,10 +291,8 @@ char *JabberBase64Decode(const char *buffer, int *resultLen);
 char *JabberGetVersionText();
 time_t JabberIsoToUnixTime(char *stamp);
 time_t TlenTimeToUTC(time_t time);
-int JabberCountryNameToId(char *ctry);
 void JabberSendPresenceTo(int status, char *to, char *extra);
 void JabberSendPresence();
-char *JabberRtfEscape(char *str);
 void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 char *JabberGetClientJID(char *jid);
 // jabber_misc.c

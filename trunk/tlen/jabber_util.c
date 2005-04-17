@@ -1001,32 +1001,6 @@ time_t JabberIsoToUnixTime(char *stamp)
 		return (time_t) 0;
 }
 
-int JabberCountryNameToId(char *ctry)
-{
-	int ctryCount, i;
-	struct CountryListEntry *ctryList;
-	static struct CountryListEntry extraCtry[] = {
-		{ 1,		"United States" },
-		{ 1,		"United States of America" },
-		{ 1,		"US" },
-		{ 44,		"England" }
-	};
-
-	// Check for some common strings not present in the country list
-	ctryCount = sizeof(extraCtry)/sizeof(extraCtry[0]);
-	for (i=0; i<ctryCount && stricmp(extraCtry[i].szName, ctry); i++);
-	if (i < ctryCount)
-		return extraCtry[i].id;
-
-	// Check Miranda country list
-	CallService(MS_UTILS_GETCOUNTRYLIST, (WPARAM) &ctryCount, (LPARAM) &ctryList);
-	for (i=0; i<ctryCount && stricmp(ctryList[i].szName, ctry); i++);
-	if (i < ctryCount)
-		return ctryList[i].id;
-	else
-		return 0xffff; // Unknown
-}
-
 void JabberSendVisibleInvisiblePresence(BOOL invisible)
 {
 	JABBER_LIST_ITEM *item;
@@ -1215,48 +1189,6 @@ void JabberSendPresence(int status)
 		}
 	}
 */
-}
-
-char *JabberRtfEscape(char *str)
-{
-	char *escapedStr;
-	int size;
-	char *p, *q;
-
-	if (str == NULL)
-		return NULL;
-
-	for (p=str,size=0; *p!='\0'; p++) {
-		if (*p == '\\')
-			size += 2;
-		else if (*p == '\n')
-			size += 5;
-		else
-			size++;
-	}
-
-	if ((escapedStr=(char *)malloc(size+1)) == NULL)
-		return NULL;
-
-	for (p=str,q=escapedStr; *p!='\0'; p++) {
-		if (*p == '\\') {
-			*q++ = '\\';
-			*q++ = '\\';
-		}
-		else if (*p == '\n') {
-			*q++ = '\\';
-			*q++ = 'p';
-			*q++ = 'a';
-			*q++ = 'r';
-			*q++ = ' ';
-		}
-		else {
-			*q++ = *p;
-		}
-	}
-	*q = '\0';
-
-	return escapedStr;
 }
 
 void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...)

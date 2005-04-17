@@ -212,10 +212,10 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 				info->manualHost[sizeof(info->manualHost)-1] = '\0';
 				DBFreeVariant(&dbv);
 			}
-			info->port = DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", JABBER_DEFAULT_PORT);
+			info->port = DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT);
 		}
 		else {
-			info->port = DBGetContactSettingWord(NULL, jabberProtoName, "Port", JABBER_DEFAULT_PORT);
+			info->port = DBGetContactSettingWord(NULL, jabberProtoName, "Port", TLEN_DEFAULT_PORT);
 		}
 
 		info->useSSL = DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE);

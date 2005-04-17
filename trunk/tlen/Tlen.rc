@@ -37,12 +37,12 @@ END
 // Dialog
 //
 
-IDD_OPTIONS DIALOGEX 0, 0, 280, 254
+IDD_OPTIONS DIALOGEX 0, 0, 280, 250
 STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    GROUPBOX        "Tlen",IDC_TLEN,7,7,266,88
+    GROUPBOX        "Tlen",IDC_TLEN,5,7,268,60
     LTEXT           "Username:",IDC_STATIC,14,21,45,8
     EDITTEXT        IDC_EDIT_USERNAME,70,19,86,12,ES_AUTOHSCROLL
     CONTROL         "Create a new account",IDC_REGISTERACCOUNT,"Hyperlink",
@@ -52,40 +52,40 @@ BEGIN
                     ES_AUTOHSCROLL
     CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,70,48,172,10
-    LTEXT           "Login server:",IDC_STATIC,14,75,45,8
-    EDITTEXT        IDC_EDIT_LOGIN_SERVER,70,73,86,12,ES_AUTOHSCROLL
-    LTEXT           "Port:",IDC_STATIC,174,76,45,8
-    EDITTEXT        IDC_PORT,225,73,26,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Use SSL",IDC_USE_SSL,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,14,91,69,10
-    GROUPBOX        "Options",IDC_SIMPLE,7,102,266,58
+    GROUPBOX        "Options",IDC_SIMPLE,5,72,268,58
     CONTROL         "Show offline users with status messages as invisible in contact list",
                     IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,116,221,10
+                    14,86,221,10
     CONTROL         "Leave status message after disconnection",
                     IDC_OFFLINE_MESSAGE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,14,129,160,10
-    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,128,75,140,CBS_DROPDOWNLIST |
+                    WS_TABSTOP,14,99,160,10
+    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,98,75,140,CBS_DROPDOWNLIST |
                     WS_TABSTOP
-    CONTROL         "Enable Always Visible and Never Visible",
-                    IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,142,221,10
-    GROUPBOX        "Expert",IDC_STATIC,7,163,266,84
+    CONTROL         "Automatically reconnect after unintentional disconnection",
+                    IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
+                    112,221,10
+    GROUPBOX        "Expert",IDC_STATIC,5,135,268,112
+    LTEXT           "Login server:",IDC_STATIC,14,149,45,8
+    EDITTEXT        IDC_EDIT_LOGIN_SERVER,70,147,86,12,ES_AUTOHSCROLL
+    LTEXT           "Port:",IDC_STATIC,174,149,35,8
+    EDITTEXT        IDC_PORT,215,147,26,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Manually specify connection host",IDC_MANUAL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,14,177,223,10
-    LTEXT           "Host:",IDC_STATIC,28,190,30,8
-    EDITTEXT        IDC_HOST,62,188,90,12,ES_AUTOHSCROLL | WS_DISABLED
-    LTEXT           "Port:",IDC_STATIC,158,190,25,8
-    EDITTEXT        IDC_HOSTPORT,186,188,31,12,ES_AUTOHSCROLL | ES_NUMBER |
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,168,223,10
+    LTEXT           "Host:",IDC_STATIC,28,181,30,8
+    EDITTEXT        IDC_HOST,62,179,90,12,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Port:",IDC_STATIC,174,181,35,8
+    EDITTEXT        IDC_HOSTPORT,215,179,26,12,ES_AUTOHSCROLL | ES_NUMBER |
                     WS_DISABLED
     CONTROL         "Keep connection alive",IDC_KEEPALIVE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,14,202,221,10
-    CONTROL         "Automatically reconnect after unintentional disconnection",
-                    IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    213,221,10
+    CONTROL         "Enable Always Visible and Never Visible",
+                    IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,215,221,10
     CONTROL         "Automatically delete contacts not in my roster",
                     IDC_ROSTER_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    224,221,10
+                    228,221,10
 END
 
 IDD_OPTIONS_EXPERT DIALOGEX 0, 0, 302, 210
@@ -345,14 +345,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Tlen Protocol Plugin for Miranda IM\0"
-            VALUE "FileVersion", "1.0.6.0\0"
+            VALUE "FileVersion", "1.0.6.1\0"
             VALUE "InternalName", "tlen\0"
             VALUE "LegalCopyright", "Copyright (c) 2002-2005 Santithorn Bunchua, Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "tlen.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Tlen Protocol Plugin\0"
-            VALUE "ProductVersion", "1.0.6.0\0"
+            VALUE "ProductVersion", "1.0.6.1\0"
             VALUE "SpecialBuild", "\0"
         END
     END

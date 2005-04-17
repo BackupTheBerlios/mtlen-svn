@@ -126,7 +126,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			else {
 				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, "tlen.pl");
 			}
-			port = (WORD) DBGetContactSettingWord(NULL, jabberProtoName, "Port", 443);
+			port = (WORD) DBGetContactSettingWord(NULL, jabberProtoName, "Port", TLEN_DEFAULT_PORT);
 			SetDlgItemInt(hwndDlg, IDC_PORT, port, FALSE);
 			if (port <= 0) enableRegister = FALSE;
 
@@ -144,7 +144,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			}
 			else
 				SetDlgItemText(hwndDlg, IDC_HOST, "s1.tlen.pl");
-			SetDlgItemInt(hwndDlg, IDC_HOSTPORT, DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", 443), FALSE);
+			SetDlgItemInt(hwndDlg, IDC_HOSTPORT, DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT), FALSE);
 
 			CheckDlgButton(hwndDlg, IDC_KEEPALIVE, DBGetContactSettingByte(NULL, jabberProtoName, "KeepAlive", TRUE));
 			CheckDlgButton(hwndDlg, IDC_RECONNECT, DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE));
@@ -248,7 +248,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", text);
 
 				port = (WORD) GetDlgItemInt(hwndDlg, IDC_PORT, NULL, FALSE);
-				if (DBGetContactSettingWord(NULL, jabberProtoName, "Port", JABBER_DEFAULT_PORT) != port)
+				if (DBGetContactSettingWord(NULL, jabberProtoName, "Port", TLEN_DEFAULT_PORT) != port)
 					reconnectRequired = TRUE;
 				DBWriteContactSettingWord(NULL, jabberProtoName, "Port", port);
 
@@ -263,7 +263,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				DBWriteContactSettingString(NULL, jabberProtoName, "ManualHost", text);
 
 				port = (WORD) GetDlgItemInt(hwndDlg, IDC_HOSTPORT, NULL, FALSE);
-				if (DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", JABBER_DEFAULT_PORT) != port)
+				if (DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT) != port)
 					reconnectRequired = TRUE;
 				DBWriteContactSettingWord(NULL, jabberProtoName, "ManualPort", port);
 
@@ -316,15 +316,15 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				CheckDlgButton(hwndDlg, IDC_FILE_PROXY_USE_AUTH, TRUE);
 			} else {
 			    bChecked = FALSE;
-			}    
+			}
 			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USER_LABEL), bChecked);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USER), bChecked);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD_LABEL), bChecked);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD), bChecked);
-			
+
 			SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)Translate("Forwarding"));
-            SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)Translate("SOCKS4"));    
-            SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)Translate("SOCKS5"));    
+            SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)Translate("SOCKS4"));
+            SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)Translate("SOCKS5"));
 			SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "FileProxyType", 0), 0);
 			if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyHost", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, dbv.pszVal);
@@ -420,7 +420,7 @@ static void MailPopupPreview(DWORD colorBack, DWORD colorText, char *title, char
 	char * lpzContactName;
 	char * lpzText;
 
-	lpzContactName = title; 
+	lpzContactName = title;
 	lpzText = emailInfo;
 	ZeroMemory(&ppd, sizeof(ppd));
 	ppd.lchContact = NULL;
@@ -482,10 +482,10 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					} else {
 						delay=GetDlgItemInt(hwndDlg, IDC_DELAY, NULL, FALSE);
 					}
-					MailPopupPreview((DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0), 
-									 (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0), 
-									 "New mail", 
-									 "From: test@test.test\nSubject: test", 
+					MailPopupPreview((DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0),
+									 (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0),
+									 "New mail",
+									 "From: test@test.test\nSubject: test",
 									 delay);
 				}
 
@@ -495,7 +495,7 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 
 		case WM_NOTIFY:
 			switch (((LPNMHDR) lParam)->code) {
-				case PSN_APPLY: 
+				case PSN_APPLY:
 				{
 					BYTE delayMode;
 					DBWriteContactSettingByte(NULL, jabberProtoName, "MailPopupEnabled", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ENABLEPOPUP));
