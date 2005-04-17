@@ -1224,17 +1224,14 @@ static char clientJID[3072];
 
 char *JabberGetClientJID(char *jid)
 {
-	char *resource, *p;
+	char *p;
 
 	if (jid == NULL) return NULL;
 	strncpy(clientJID, jid, sizeof(clientJID));
 	clientJID[sizeof(clientJID)-1] = '\0';
 	if ((p=strchr(clientJID, '/')) == NULL) {
 		p = clientJID + strlen(clientJID);
-		if ((resource=JabberListGetBestClientResourceNamePtr(jid)) != NULL)
-			_snprintf(p, sizeof(clientJID)-strlen(clientJID)-1, "/%s", resource);
 	}
-
 	return clientJID;
 }
 

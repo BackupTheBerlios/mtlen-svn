@@ -39,42 +39,6 @@ typedef enum {
 	SUB_BOTH
 } JABBER_SUBSCRIPTION;
 
-typedef enum {
-	AFFILIATION_NONE,
-	AFFILIATION_OUTCAST,
-	AFFILIATION_MEMBER,
-	AFFILIATION_ADMIN,
-	AFFILIATION_OWNER
-} JABBER_GC_AFFILIATION;
-
-typedef enum {
-	ROLE_NONE,
-	ROLE_VISITOR,
-	ROLE_PARTICIPANT,
-	ROLE_MODERATOR
-} JABBER_GC_ROLE;
-
-typedef enum {			// initial default to RSMODE_LASTSEEN
-	RSMODE_SERVER,		// always let server decide (always send correspondence without resouce name)
-	RSMODE_LASTSEEN,	// use the last seen resource (or let server decide if haven't seen anything yet)
-	RSMODE_MANUAL		// specify resource manually (see the defaultResource field - must not be NULL)
-} JABBER_RESOURCE_MODE;
-
-typedef struct {
-	int status;
-	char *resourceName;	// in UTF-8
-	char *statusMessage;
-	char *software;
-	char *version;
-	char *system;
-	JABBER_GC_AFFILIATION affiliation;
-	JABBER_GC_ROLE role;
-} JABBER_RESOURCE_STATUS;
-
-#define AGENT_CAP_REGISTER		1
-#define AGENT_CAP_SEARCH		2
-#define AGENT_CAP_GROUPCHAT		4
-
 typedef struct {
 	JABBER_LIST list;
 	char *jid;
@@ -82,12 +46,8 @@ typedef struct {
 	// LIST_ROSTER
 	// jid = jid of the contact
 	char *nick;
-	int resourceCount;
 	int status;	// Main status, currently useful for transport where no resource information is kept.
 				// On normal contact, this is the same status as shown on contact list.
-	JABBER_RESOURCE_STATUS *resource;
-	int defaultResource;	// index to resource[x] which is the default, negative (-1) means no resource is chosen yet
-	JABBER_RESOURCE_MODE resourceMode;
 	JABBER_SUBSCRIPTION subscription;
 	char *statusMessage;	// Status message when the update is to JID with no resource specified (e.g. transport user)
 	char *group;
@@ -128,8 +88,6 @@ JABBER_LIST_ITEM *JabberListGetItemPtrFromIndex(int index);
 
 void JabberListAddResource(JABBER_LIST list, const char *jid, int status, const char *statusMessage);
 void JabberListRemoveResource(JABBER_LIST list, const char *jid);
-char *JabberListGetBestResourceNamePtr(const char *jid);
-char *JabberListGetBestClientResourceNamePtr(const char *jid);
 
 #endif
 

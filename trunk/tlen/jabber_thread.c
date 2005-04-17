@@ -608,7 +608,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 	CCSDATA ccs;
 	PROTORECVEVENT recv;
 	XmlNode *bodyNode, *subjectNode, *xNode, *inviteNode, *idNode, *n;
-	char *from, *type, *nick, *p, *localMessage, *idStr, *fromResource;
+	char *from, *type, *nick, *p, *localMessage, *idStr;
 	time_t msgTime;
 	BOOL delivered, composing;
 	int i, id;
@@ -709,18 +709,6 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 								item->wantComposingEvent = composing;
 								if ((hContact=JabberHContactFromJID(from)) != NULL)
 									CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
-
-								if (item->resourceMode==RSMODE_LASTSEEN && (fromResource=strchr(from, '/'))!=NULL) {
-									fromResource++;
-									if (*fromResource != '\0') {
-										for (i=0; i<item->resourceCount; i++) {
-											if (!strcmp(item->resource[i].resourceName, fromResource)) {
-												item->defaultResource = i;
-												break;
-											}
-										}
-									}
-								}
 							}
 
 							if ((hContact=JabberHContactFromJID(from)) == NULL) {
@@ -796,9 +784,8 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 	HANDLE hContact;
 	XmlNode *showNode, *statusNode;
 	JABBER_LIST_ITEM *item;
-	JABBER_RESOURCE_STATUS *r;
 	char *from, *type, *nick, *show;
-	int status, count, i;
+	int status;
 	char *p;
 
 	if (!node || !node->name || strcmp(node->name, "presence")) return;
@@ -836,32 +823,22 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 					if (status == ID_STATUS_OFFLINE)
 						JabberListRemoveResource(LIST_ROSTER, from);
 					else {
-						// Send version query if this is the new resource
-						if ((p=strchr(from, '@')) != NULL) {
-							if ((p=strchr(p, '/'))!=NULL && p[1]!='\0') {
-								p++;
-								item = JabberListGetItemPtr(LIST_ROSTER, from);
-								r = item->resource;
-								for (i=0; i<item->resourceCount && strcmp(r[i].resourceName, p); i++);
-								if (i >= item->resourceCount) {
-									JabberSend(info->s, "<iq type='get' to='%s'><query xmlns='jabber:iq:version'/></iq>", from);
-								}
-							}
-						}
-
 						statusNode = JabberXmlGetChild(node, "status");
 						if (statusNode)
 							p = JabberTextDecode(statusNode->text);
 						else
 							p = NULL;
 						JabberListAddResource(LIST_ROSTER, from, status, statusNode?p:NULL);
+						if (p) {
+							DBWriteContactSettingString(hContact, "CList", "StatusMsg", p);
+						} else {
+							DBDeleteContactSetting(hContact, "CList", "StatusMsg");
+						}
 						if (p) free(p);
 					}
 					// Determine status to show for the contact
 					if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
-						count = item->resourceCount;
-						for (i=0; i<count; i++)
-							status = JabberCombineStatus(status, item->resource[i].status);
+//						status = JabberCombineStatus(status, item->resource[i].status);
 						item->status = status;
 					}
 
@@ -889,13 +866,18 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 					}
 					p = JabberTextDecode(statusNode->text);
 					JabberListAddResource(LIST_ROSTER, from, status, p);
+					if ((hContact=JabberHContactFromJID(from)) != NULL) {
+						if (p) {
+							DBWriteContactSettingString(hContact, "CList", "StatusMsg", p);
+						} else {
+							DBDeleteContactSetting(hContact, "CList", "StatusMsg");
+						}
+					}
 					if (p) free(p);
 				} 
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
 					// Determine status to show for the contact based on the remaining resources
-					count = item->resourceCount;
-					for (i=0; i<count; i++)
-						status = JabberCombineStatus(status, item->resource[i].status);
+//					status = JabberCombineStatus(status, item->resource[i].status);
 					item->status = status;
 				}
 				if ((hContact=JabberHContactFromJID(from)) != NULL) {
@@ -934,10 +916,10 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 {
 	struct ThreadData *info;
 	HANDLE hContact;
-	XmlNode *queryNode, *n;
+	XmlNode *queryNode;
 	char *type, *jid, *nick;
 	char *xmlns;
-	char *idStr, *str, *p;
+	char *idStr, *str;
 	int id;
 	int i;
 	JABBER_IQ_PFUNC pfunc;
@@ -1109,11 +1091,10 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 
 		// RECVED: software version result
 		// ACTION: update version information for the specified jid/resource
+						/*
 		if (!strcmp(xmlns, "jabber:iq:version")) {
 			char *from;
 			JABBER_LIST_ITEM *item;
-			JABBER_RESOURCE_STATUS *r;
-
 			if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, from))!=NULL && (r=item->resource)!=NULL) {
 					if ((p=strchr(from, '/'))!=NULL && p[1]!='\0') {
@@ -1140,6 +1121,7 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 				}
 			}
 		}
+		*/
 	}
 	// RECVED: <iq type='error'> ...
 	else if (!strcmp(type, "error")) {

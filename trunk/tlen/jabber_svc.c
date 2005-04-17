@@ -641,42 +641,10 @@ static void __cdecl JabberGetAwayMsgThread(HANDLE hContact)
 {
 	DBVARIANT dbv;
 	JABBER_LIST_ITEM *item;
-	JABBER_RESOURCE_STATUS *r;
-	char *str;
-	int i, len, msgCount;
-
 	if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 		if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
 			DBFreeVariant(&dbv);
-			if (item->resourceCount > 0) {
-				JabberLog("resourceCount > 0");
-				r = item->resource;
-				len = msgCount = 0;
-				for (i=0; i<item->resourceCount; i++) {
-					if (r[i].statusMessage) {
-						msgCount++;
-						len += (strlen(r[i].resourceName) + strlen(r[i].statusMessage) + 6);
-					}
-				}
-				if ((str=(char *) malloc(len + 1)) != NULL) {
-					str[0] = str[len] = '\0';
-					for (i=0; i<item->resourceCount; i++) {
-						if (r[i].statusMessage) {
-							if (str[0] != '\0') strcat(str, "\r\n");
-							if (msgCount > 1) {
-								strcat(str, "(");
-								strcat(str, r[i].resourceName);
-								strcat(str, "): ");
-							}
-							strcat(str, r[i].statusMessage);
-						}
-					}
-					ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AWAYMSG, ACKRESULT_SUCCESS, (HANDLE) 1, (LPARAM) str);
-					free(str);
-					return;
-				}
-			}
-			else if (item->statusMessage != NULL) {
+			 if (item->statusMessage != NULL) {
 				ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AWAYMSG, ACKRESULT_SUCCESS, (HANDLE) 1, (LPARAM) item->statusMessage);
 				return;
 			}

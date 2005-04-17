@@ -1,11 +1,12 @@
 #include "resource.h"
 #define APSTUDIO_READONLY_SYMBOLS
+#define WINVER 0x500
 #define _WIN32_WINNT 0x0501
 #define _WIN32_IE 0x0500
 #include <windows.h>
 #include <winres.h>
 #undef APSTUDIO_READONLY_SYMBOLS
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU) || defined(__MINGW32__)
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
