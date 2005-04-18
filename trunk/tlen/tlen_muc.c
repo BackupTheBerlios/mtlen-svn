@@ -518,8 +518,11 @@ static int TlenMUCSendPresence(const char *roomID, const char *nick, int desired
 				}
 				break;
 			default:
-				JabberSend(jabberThreadInfo->s, "<p to='%s'><s>unavailable</s></p>", jid);
-				JabberListRemove(LIST_CHATROOM, roomID);
+				item = JabberListGetItemPtr(LIST_CHATROOM, roomID);
+				if (item!=NULL) {
+					JabberSend(jabberThreadInfo->s, "<p to='%s'><s>unavailable</s></p>", jid);
+					JabberListRemove(LIST_CHATROOM, roomID);
+				}
 				break;
 		}
 		free(jid);
