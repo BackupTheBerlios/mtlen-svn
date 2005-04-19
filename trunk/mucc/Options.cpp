@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 #include "resource.h"
 #include <commctrl.h>
+#include "m_ieview.h"
 
 static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK MUCCLogOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -156,6 +157,9 @@ void Options::loadSettings() {
 	setLogLimit(DBGetContactSettingDword(NULL, muccModuleName, "LogSizeLimit", 100));
 	setChatContainerOptions(DBGetContactSettingDword(NULL, muccModuleName, "ChatContainerOptions", ChatContainer::getDefaultOptions()));
 	setChatWindowOptions(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowOptions", ChatWindow::getDefaultOptions()));
+	if (ServiceExists(MS_IEVIEW_WINDOW)) {
+		setChatWindowOptions(getChatWindowOptions() | ChatWindow::FLAG_USEIEVIEW);
+	}
 	setChatWindowFont(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFont", 0));
 	setChatWindowFontSize(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontSize", 5));
 	setChatWindowFontStyle(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontStyle", 0));
@@ -325,7 +329,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			hItem = TreeView_InsertItem(hTreeControl, &tvis);
 			bCheckParent = 1;
 			bCheckParent &= addOption(hTreeControl, hItem, "Show nicknames", ChatWindow::FLAG_SHOW_NICKNAMES);
-			bCheckParent &= addOption(hTreeControl, hItem, "Show messages in new line", ChatWindow::FLAG_MSGINNEWLINE);
+			bCheckParent &= addOption(hTreeControl, hItem, "Show message on a new line", ChatWindow::FLAG_MSGINNEWLINE);
 			tvi.state = (bCheckParent ? INDEXTOSTATEIMAGEMASK(2) : INDEXTOSTATEIMAGEMASK(1));
 			tvi.hItem = hItem;
 			TreeView_SetItem(hTreeControl, &tvi);

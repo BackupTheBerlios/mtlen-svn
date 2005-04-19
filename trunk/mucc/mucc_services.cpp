@@ -125,7 +125,6 @@ int MUCCEvent(WPARAM wParam, LPARAM lParam)
 			chatWindow = ChatWindow::getWindow(mucEvent->pszModule, mucEvent->pszID);
 			if (chatWindow!=NULL) {
 				SendMessage(chatWindow->getHWND(), DM_CHAT_EVENT, (WPARAM) 0, (LPARAM) mucEvent);
-				chatWindow->logEvent(mucEvent);
 			} else {
 				HelperDialog::errorDlg(mucEvent);
 			}

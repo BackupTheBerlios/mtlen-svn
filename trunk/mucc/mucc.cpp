@@ -36,8 +36,8 @@ static int PreShutdown(WPARAM wParam, LPARAM lParam);
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
 	"MUCC Plugin",
-	PLUGIN_MAKE_VERSION(1,0,6,0),
-	"Group chats GUI plugin for Miranda IM (1.0.6.0 "__DATE__")",
+	PLUGIN_MAKE_VERSION(1,0,6,2),
+	"Group chats GUI plugin for Miranda IM (1.0.6.2 "__DATE__")",
 	"Piotr Piastucki",
 	"the_leech@users.berlios.de",
 	"(c) 2004-2005 Piotr Piastucki",
@@ -91,7 +91,7 @@ static void LoadIcons() {
 	}
 	if (hImageList != NULL) {
 		ImageList_Destroy(hImageList);
-	}
+	} 
 	hImageList = ImageList_Create(GetSystemMetrics(SM_CXSMICON),GetSystemMetrics(SM_CYSMICON),ILC_COLOR32|ILC_MASK,0,3);
 //	ImageList_AddIcon(hImageList, LoadIcon(hInst, MAKEINTRESOURCE(IDI_BLANK)));
 //	ImageList_AddIcon(hImageList, LoadIcon(hInst, MAKEINTRESOURCE(IDI_BLANK)));

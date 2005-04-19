@@ -231,7 +231,6 @@ static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, L
 						iSelection = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, (short)LOWORD(GetMessagePos()), (short)HIWORD(GetMessagePos()), 0, hwndDlg, NULL);
 						DestroyMenu(hMenu);
 						if (iSelection == ID_USERMENU_UNBAN) {
-							Utils::log("Unban: %s", nick);
 							adminWindow->getParent()->unban(nick);
 						} 
 					}
@@ -392,12 +391,10 @@ ChatWindow * AdminWindow::getParent() {
 }
 
 void AdminWindow::queryResultUsers(MUCCQUERYRESULT *queryResult) {
-	Utils::log("queryResultUsers()");
 	ListView_DeleteAllItems(GetDlgItem(getBrowserTabHWND(), IDC_LIST));
 	for (int i=0;i<queryResult->iItemsNum;i++) {
 		char timestampStr[100];
 		DBTIMETOSTRING dbtts;
-		Utils::log("adding...%s", queryResult->pItems[i].pszID);
 		LVITEM lvItem;
 		lvItem.mask = LVIF_TEXT;// | LVIF_PARAM;
 		lvItem.iSubItem = 0;

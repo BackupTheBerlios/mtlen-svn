@@ -24,12 +24,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 #include "Options.h"
 #include "m_smileyadd.h"
+#include "m_ieview.h"
 
 static int logPixelSY;
 static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static void __cdecl StartThread(void *vChat);
 static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 static char *JabberRtfEscape(char *str);
+static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb);
 
 COLORREF ChatWindow::colorListBg, ChatWindow::colorListText, ChatWindow::colorListGroupText;
 HFONT ChatWindow::hListGroupFont=NULL;
@@ -62,10 +64,12 @@ ChatWindow::ChatWindow(MUCCWINDOW *mucw)  {
 	prev = next = NULL;
 	adminWindow = NULL;
 	hWnd = NULL;
+	hWndLog = NULL;
 	module = roomId = roomName = topic = NULL;
 	hSplitterPos = 0;
 	vSplitterPos = 0;
 	wasFirstMessage = 0;
+	isEmpty = true;
 	isStarted = 0;
 	options = Options::getChatWindowOptions();
 	bBold = bItalic = bUnderline = 0;
@@ -154,6 +158,14 @@ void ChatWindow::setHWND(HWND hWnd) {
 
 HWND ChatWindow::getHWND() {
 	return hWnd;
+}
+
+void ChatWindow::setHWNDLog(HWND hWnd) {
+	this->hWndLog = hWnd;
+}
+
+HWND ChatWindow::getHWNDLog() {
+	return hWndLog;
 }
 
 HANDLE ChatWindow::getEvent() {
@@ -571,19 +583,30 @@ int ChatWindow::getDefaultOptions() {
 void ChatWindow::rebuildLog() {
 	int	nMin, nMax;
 	HWND hwndLog;
-	SetDlgItemText(getHWND(), IDC_LOG, "");
-	for (ChatEvent* event=eventList.getEvents();event!=NULL;event=event->getNext()) {
-		if (event->getEvent()->iType == MUCC_EVENT_MESSAGE) {
-			appendMessage(event->getEvent());
-		} else {
-			appendEvent(event->getEvent());
-		}
+	if (getHWNDLog()!=NULL) {
+		IEVIEWEVENT iee;
+		iee.cbSize = sizeof(IEVIEWEVENT);
+		iee.dwFlags = IEEF_NO_UNICODE;
+		iee.hwnd = hWndLog;
+		iee.hContact = NULL;
+		iee.iType = IEE_CLEAR_LOG;
+		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
+	} else {
+		SetDlgItemText(getHWND(), IDC_LOG, "");
 	}
-	if (ServiceExists(MS_SMILEYADD_REPLACESMILEYS)) PostMessage(getHWND(), WM_TLEN_SMILEY, 0, 0);
-	hwndLog = GetDlgItem(getHWND(), IDC_LOG);
-	GetScrollRange(hwndLog, SB_VERT, &nMin, &nMax);
-	SetScrollPos(hwndLog, SB_VERT, nMax, TRUE);
-	PostMessage(hwndLog, WM_VSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nMax), (LPARAM) NULL);
+	isEmpty = true;
+	for (ChatEvent* event=eventList.getEvents();event!=NULL;event=event->getNext()) {
+		appendMessage(event->getEvent());
+	}
+	if (getHWNDLog()==NULL) {
+		if (ServiceExists(MS_SMILEYADD_REPLACESMILEYS)) PostMessage(getHWND(), WM_TLEN_SMILEY, 0, 0);
+		hwndLog = GetDlgItem(getHWND(), IDC_LOG);
+		int len = GetWindowTextLengthA(hwndLog);
+		SendMessage(hwndLog, EM_SETSEL, len - 1, len - 1);
+		GetScrollRange(hwndLog, SB_VERT, &nMin, &nMax);
+		SetScrollPos(hwndLog, SB_VERT, nMax, TRUE);
+		PostMessage(hwndLog, WM_VSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nMax), (LPARAM) NULL);
+	}
 }
 
 int ChatWindow::logEvent(const MUCCEVENT *event) {
@@ -599,94 +622,177 @@ int ChatWindow::logEvent(const MUCCEVENT *event) {
 		wasFirstMessage = 1;
 		appendMessage(event);
 		container->remoteSetUnread(this, 1);
-		if (getOptions() & ChatWindow::FLAG_FLASH_MESSAGES) {
-			container->remoteFlashWindow();
-		}
 	} else {
-		appendEvent(event);
-		if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_ONLINE && getOptions() & FLAG_FLASH_JOINED) {
-			container->remoteFlashWindow();
-		} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_OFFLINE && getOptions() & FLAG_FLASH_LEFT) {
-			container->remoteFlashWindow();
-		} else if (event->iType==MUCC_EVENT_TOPIC && getOptions() & FLAG_FLASH_TOPIC) {
-			container->remoteFlashWindow();
-		}
+		appendMessage(event);
 	}
-	if (ServiceExists(MS_SMILEYADD_REPLACESMILEYS)) PostMessage(getHWND(), WM_TLEN_SMILEY, 0, 0);
-	hwndLog = GetDlgItem(getHWND(), IDC_LOG);
-	GetScrollRange(hwndLog, SB_VERT, &nMin, &nMax);
-	SetScrollPos(hwndLog, SB_VERT, nMax, TRUE);
-	PostMessage(hwndLog, WM_VSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nMax), (LPARAM) NULL);
+	if (event->iType==MUCC_EVENT_MESSAGE && getOptions() & FLAG_FLASH_MESSAGES) {
+		container->remoteFlashWindow();
+	} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_ONLINE && getOptions() & FLAG_FLASH_JOINED) {
+		container->remoteFlashWindow();
+	} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_OFFLINE && getOptions() & FLAG_FLASH_LEFT) {
+		container->remoteFlashWindow();
+	} else if (event->iType==MUCC_EVENT_TOPIC && getOptions() & FLAG_FLASH_TOPIC) {
+		container->remoteFlashWindow();
+	}
+	if (getHWNDLog()==NULL) {
+		if (ServiceExists(MS_SMILEYADD_REPLACESMILEYS)) PostMessage(getHWND(), WM_TLEN_SMILEY, 0, 0);
+		hwndLog = GetDlgItem(getHWND(), IDC_LOG);
+		int len = GetWindowTextLengthA(hwndLog);
+		SendMessage(hwndLog, EM_SETSEL, len - 1, len - 1);
+		GetScrollRange(hwndLog, SB_VERT, &nMin, &nMax);
+		SetScrollPos(hwndLog, SB_VERT, nMax, TRUE);
+		PostMessage(hwndLog, WM_VSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nMax), (LPARAM) NULL);
+	}
 	return 1;
 }
 
-int ChatWindow::appendEvent(const MUCCEVENT *event) {
-	char *rtf, *escapedStr;
+void ChatWindow::createRTFHeader() {
+	char *rtf;
+	int i, msgSize;
+	//, , iFontSize, bItalic, bBold, bUnderline;
+	rtf = NULL;
+	JabberStringAppend(&rtf, &msgSize, "{\\rtf1\\ansi\\deff0{\\fonttbl");
+
+	for (i=0;i<FontList::getFontNum();i++) {
+		Font *font = FontList::getFont(i);
+		JabberStringAppend(&rtf, &msgSize, "{\\f%u\\fnil\\fcharset%u %s;}", font->getCharSet(), font->getFace());
+	}
+	JabberStringAppend(&rtf, &msgSize, "}{\\colortbl ");
+	for (i=0;i<FontList::getFontNum();i++) {
+		Font *font = FontList::getFont(i);
+		DWORD color = font->getColor();
+		JabberStringAppend(&rtf, &msgSize, "\\red%d\\green%d\\blue%d;", color&0xFF, (color>>8)&0xFF, (color>>16)&0xFF);
+	}
+	JabberStringAppend(&rtf, &msgSize, "}");
+}
+
+
+int ChatWindow::appendMessage(const MUCCEVENT *event) {
 	char timestampStr[100], str[512];
-	Font *fontTimestamp, *fontPrefix, *fontMessage;
-	int msgSize, iFontSize, bItalic, bBold, bUnderline;
+	char *rtf, *escapedStr = NULL, *escapedNick = NULL;
+	Font *fontTimestamp, *fontName, *fontMessage; //*fontColon,
+	int msgSize;
+	DWORD color;
+	int iFontSize, bItalic, bBold, bUnderline;
 	HWND hwndLog;
+	DBTIMETOSTRING dbtts;
 	CHARRANGE sel;
 	SETTEXTEX stt;
-	DBTIMETOSTRING dbtts;
-	DWORD color;
+	tm *ltime;
 
-	if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_ONLINE && !(getOptions() & FLAG_LOG_JOINED)) {
+	if (event->iType!=MUCC_EVENT_STATUS && event->iType!=MUCC_EVENT_STATUS && event->iType!=MUCC_EVENT_ERROR
+		&& event->iType!=MUCC_EVENT_TOPIC && event->iType != MUCC_EVENT_MESSAGE) {
+		return 0;
+	}
+	if (event->iType==MUCC_EVENT_MESSAGE && !(getOptions() & FLAG_LOG_MESSAGES)) {
+		return 0;
+	} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_ONLINE && !(getOptions() & FLAG_LOG_JOINED)) {
 		return 0;
 	} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_OFFLINE && !(getOptions() & FLAG_LOG_LEFT)) {
 		return 0;
 	} else if (event->iType==MUCC_EVENT_TOPIC && !(getOptions() & FLAG_LOG_TOPIC)) {
 		return 0;
-	}/* else if (event->iType==MUCC_EVENT_TOPIC && !(getFlags() & FLAG_LOG_TOPIC) {
-		return 0;
-	} */
-	fontTimestamp = FontList::getFont(FontList::FONT_TIMESTAMP);
-	fontPrefix = FontList::getFont(FontList::FONT_ERROR);
-	rtf = NULL;
-	JabberStringAppend(&rtf, &msgSize, "{\\rtf1\\ansi\\deff0{\\fonttbl");
-	if (event->iType == MUCC_EVENT_ERROR) {
-		fontMessage = FontList::getFont(FontList::FONT_ERROR);
-		escapedStr = JabberRtfEscape((char *)event->pszText);
-	} else if (event->iType == MUCC_EVENT_STATUS) {
-		if (event->dwData == ID_STATUS_ONLINE) {
-			fontMessage = FontList::getFont(FontList::FONT_JOINED);
-			_snprintf(str, sizeof(str), "%s has joined.", event->pszNick);
-		} else {
-			fontMessage = FontList::getFont(FontList::FONT_LEFT);
-			_snprintf(str, sizeof(str), "%s has left.", event->pszNick);
-		}
-		escapedStr = JabberRtfEscape(str);
-	} else if (event->iType == MUCC_EVENT_TOPIC) {
-		fontMessage = FontList::getFont(FontList::FONT_TOPIC);
-		_snprintf(str, sizeof(str), "The topic is %s.", event->pszText);
-		escapedStr = JabberRtfEscape(str);
-	} else {
-		return 0;
 	}
+
+	if (getHWNDLog()!=NULL) {
+		IEVIEWEVENTDATA ied;
+		IEVIEWEVENT iee;
+		iee.cbSize = sizeof(IEVIEWEVENT);
+		iee.dwFlags = IEEF_NO_UNICODE;
+		iee.hwnd = hWndLog;
+		iee.hContact = NULL;
+		iee.iType = IEE_LOG_EVENTS;
+		iee.codepage = CP_ACP;
+		iee.hDbEventFirst = &ied;
+		iee.count = 1;
+
+		ied.cbSize = sizeof(IEVIEWEVENTDATA);
+		if (event->iType==MUCC_EVENT_MESSAGE) {
+			ied.iType = IEED_EVENT_MESSAGE;
+		} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_ONLINE) {
+			ied.iType = IEED_EVENT_JOINED;
+		} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_OFFLINE) {
+			ied.iType = IEED_EVENT_LEFT;
+		} else if (event->iType==MUCC_EVENT_TOPIC) {
+			ied.iType = IEED_EVENT_TOPIC;
+		} else if (event->iType==MUCC_EVENT_ERROR) {
+			ied.iType = IEED_EVENT_ERROR;
+		}
+		ied.dwFlags = getOptions() & FLAG_FORMAT_ALL;
+		ied.next = NULL;
+		ied.fontStyle = event->dwFlags;
+		ied.color = event->color;
+		ied.fontSize = event->iFontSize;
+		ied.fontStyle = event->dwFlags;
+		ied.fontName = getFontName(event->iFont);
+		ied.pszProto = getModule();
+		ied.pszNick = event->pszNick;
+		ied.pszText = event->pszText;
+		ied.time = event->time;
+		ied.dwData = getOptions(); // event->dwData;
+		ied.bIsMe = event->bIsMe;
+		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
+		return 1;
+	}
+	rtf = NULL;
+	fontTimestamp = FontList::getFont(FontList::FONT_TIMESTAMP);
+//	fontColon = FontList::getFont(FontList::FONT_COLON);
+	if (event->iType == MUCC_EVENT_MESSAGE) {
+		escapedStr=JabberRtfEscape((char *)event->pszText);
+		escapedNick=JabberRtfEscape((char *)event->pszNick);
+		if (event->bIsMe) {
+			fontName = FontList::getFont(FontList::FONT_MYNAME);
+			fontMessage = FontList::getFont(FontList::FONT_OUTMESSAGE);
+		} else {
+			fontName = FontList::getFont(FontList::FONT_OTHERSNAMES);
+			fontMessage = FontList::getFont(FontList::FONT_INMESSAGE);
+		}
+	} else {
+		fontName = FontList::getFont(FontList::FONT_ERROR);
+		if (event->iType == MUCC_EVENT_ERROR) {
+			escapedStr = JabberRtfEscape((char *)event->pszText);
+			fontMessage = FontList::getFont(FontList::FONT_ERROR);
+		} else if (event->iType == MUCC_EVENT_STATUS) {
+			if (event->dwData == ID_STATUS_ONLINE) {
+				fontMessage = FontList::getFont(FontList::FONT_JOINED);
+				_snprintf(str, sizeof(str), Translate("%s has joined."), event->pszNick);
+			} else {
+				fontMessage = FontList::getFont(FontList::FONT_LEFT);
+				_snprintf(str, sizeof(str), Translate("%s has left."), event->pszNick);
+			}
+			escapedStr = JabberRtfEscape(str);
+		} else if (event->iType == MUCC_EVENT_TOPIC) {
+			fontMessage = FontList::getFont(FontList::FONT_TOPIC);
+			_snprintf(str, sizeof(str), Translate("The topic is %s."), event->pszText);
+			escapedStr = JabberRtfEscape(str);
+		}
+	}
+	ltime = localtime(&event->time);
+	JabberStringAppend(&rtf, &msgSize, "{\\rtf1\\ansi\\deff0{\\fonttbl");
 	JabberStringAppend(&rtf, &msgSize, "{\\f0\\fnil\\fcharset%u %s;}", fontTimestamp->getCharSet(), fontTimestamp->getFace());
-	JabberStringAppend(&rtf, &msgSize, "{\\f1\\fnil\\fcharset%u %s;}", fontPrefix->getCharSet(), fontPrefix->getFace());
-	JabberStringAppend(&rtf, &msgSize, "{\\f2\\fnil\\fcharset%u %s;}", fontMessage->getCharSet(), fontMessage->getFace());
+	JabberStringAppend(&rtf, &msgSize, "{\\f1\\fnil\\fcharset%u %s;}", fontName->getCharSet(), fontName->getFace());
+	if (event->iType == MUCC_EVENT_MESSAGE && getOptions()&FLAG_FORMAT_FONT) {
+		JabberStringAppend(&rtf, &msgSize, "{\\f2\\fnil\\fcharset%u %s;}", fontMessage->getCharSet(), getFontName(event->iFont));
+	} else {
+		JabberStringAppend(&rtf, &msgSize, "{\\f2\\fnil\\fcharset%u %s;}", fontMessage->getCharSet(), fontMessage->getFace());
+	}
 	JabberStringAppend(&rtf, &msgSize, "}{\\colortbl ");
 	color = fontTimestamp->getColor();
 	JabberStringAppend(&rtf, &msgSize, "\\red%d\\green%d\\blue%d;", color&0xFF, (color>>8)&0xFF, (color>>16)&0xFF);
-	color = fontPrefix->getColor();
+	color = fontName->getColor();
 	JabberStringAppend(&rtf, &msgSize, "\\red%d\\green%d\\blue%d;", color&0xFF, (color>>8)&0xFF, (color>>16)&0xFF);
-	color = fontMessage->getColor();
-	JabberStringAppend(&rtf, &msgSize, "\\red%d\\green%d\\blue%d;", color&0xFF, (color>>8)&0xFF, (color>>16)&0xFF);
-	JabberStringAppend(&rtf, &msgSize, "}");
-	if (event->iType == MUCC_EVENT_ERROR) {
-		bBold = fontPrefix->getStyle() & Font::BOLD ? 1 : 0;
-		bItalic = fontPrefix->getStyle() & Font::ITALIC ? 1 : 0;
-		bUnderline = fontPrefix->getStyle() & Font::UNDERLINE ? 1 : 0;
-		iFontSize = fontPrefix->getSize();
-		iFontSize = 2 * abs((signed char)iFontSize) * 74 / logPixelSY;
-		JabberStringAppend(&rtf, &msgSize, "\\f1\\cf1\\fs%d\\b%d\\i%d%s %s: ",
-								iFontSize,
-								bBold,
-								bItalic,
-								bUnderline?"\\ul":"",
-								Translate("Error"));
+	if (event->iType == MUCC_EVENT_MESSAGE && getOptions()&FLAG_FORMAT_COLOR && event->color!=0xFFFFFFFF) {
+		color = event->color;
 	} else {
+		color = fontMessage->getColor();
+	}
+	JabberStringAppend(&rtf, &msgSize, "\\red%d\\green%d\\blue%d;", color&0xFF, (color>>8)&0xFF, (color>>16)&0xFF);
+	JabberStringAppend(&rtf, &msgSize, "}\\pard");
+	if (!isEmpty) {
+		JabberStringAppend(&rtf, &msgSize, "\\par");
+	}
+	isEmpty = false;
+	if (event->iType == MUCC_EVENT_MESSAGE) {
 		if (getOptions()&FLAG_SHOW_DATE || getOptions()&FLAG_SHOW_TIMESTAMP) {
 			bBold = fontTimestamp->getStyle() & Font::BOLD ? 1 : 0;
 			bItalic = fontTimestamp->getStyle() & Font::ITALIC ? 1 : 0;
@@ -718,159 +824,110 @@ int ChatWindow::appendEvent(const MUCCEVENT *event) {
 									bUnderline?"\\ul":"",
 									timestampStr);
 		}
-	}
-	bBold = fontMessage->getStyle() & Font::BOLD ? 1 : 0;
-	bItalic = fontMessage->getStyle() & Font::ITALIC ? 1 : 0;
-	bUnderline = fontMessage->getStyle() & Font::UNDERLINE ? 1 : 0;
-	iFontSize = fontMessage->getSize();
-	iFontSize = 2 * abs((signed char)iFontSize) * 74 / logPixelSY;
-	JabberStringAppend(&rtf, &msgSize, "\\f2\\cf2\\fs%d\\b%d\\i%d%s %s",
-							iFontSize,
-							bBold,
-							bItalic,
-							bUnderline?"\\ul":"",
-							escapedStr);
-	JabberStringAppend(&rtf, &msgSize, "\\par}");
-	hwndLog = GetDlgItem(getHWND(), IDC_LOG);
-	sel.cpMin = sel.cpMax = GetWindowTextLength(hwndLog);
-	SendMessage(hwndLog, EM_EXSETSEL, 0, (LPARAM) &sel);
-	stt.flags = ST_SELECTION;
-	stt.codepage = CP_ACP;
-	SendMessage(hwndLog, EM_SETTEXTEX, (WPARAM) &stt, (LPARAM) rtf);
-	//Utils::log("%s", rtf);
-	free(rtf);
-	free(escapedStr);
-	return 1;
-}
-
-int ChatWindow::appendMessage(const MUCCEVENT *event) {
-	char timestampStr[100];
-	char *rtf, *escapedStr, *escapedNick;
-	Font *fontTimestamp, *fontName, *fontMessage; //*fontColon,
-	int msgSize;
-	DWORD color;
-	int iFontSize, bItalic, bBold, bUnderline;
-	HWND hwndLog;
-	DBTIMETOSTRING dbtts;
-	CHARRANGE sel;
-	SETTEXTEX stt;
-	tm *ltime;
-
-	if (!(getOptions() & FLAG_LOG_MESSAGES)) return 0;
-
-	escapedStr=JabberRtfEscape((char *)event->pszText);
-	escapedNick=JabberRtfEscape((char *)event->pszNick);
-	ltime = localtime(&event->time);
-	rtf = NULL;
-	JabberStringAppend(&rtf, &msgSize, "{\\rtf1\\ansi\\deff0{\\fonttbl");
-	fontTimestamp = FontList::getFont(FontList::FONT_TIMESTAMP);
-//	fontColon = FontList::getFont(FontList::FONT_COLON);
-	if (event->bIsMe) {
-		fontName = FontList::getFont(FontList::FONT_MYNAME);
-		fontMessage = FontList::getFont(FontList::FONT_OUTMESSAGE);
-	} else {
-		fontName = FontList::getFont(FontList::FONT_OTHERSNAMES);
-		fontMessage = FontList::getFont(FontList::FONT_INMESSAGE);
-	}
-	JabberStringAppend(&rtf, &msgSize, "{\\f0\\fnil\\fcharset%u %s;}", fontTimestamp->getCharSet(), fontTimestamp->getFace());
-	JabberStringAppend(&rtf, &msgSize, "{\\f1\\fnil\\fcharset%u %s;}", fontName->getCharSet(), fontName->getFace());
-	if (getOptions()&FLAG_FORMAT_FONT) {
-		JabberStringAppend(&rtf, &msgSize, "{\\f2\\fnil\\fcharset%u %s;}", fontMessage->getCharSet(), getFontName(event->iFont));
-	} else {
-		JabberStringAppend(&rtf, &msgSize, "{\\f2\\fnil\\fcharset%u %s;}", fontMessage->getCharSet(), fontMessage->getFace());
-	}
-	JabberStringAppend(&rtf, &msgSize, "}{\\colortbl ");
-	color = fontTimestamp->getColor();
-	JabberStringAppend(&rtf, &msgSize, "\\red%d\\green%d\\blue%d;", color&0xFF, (color>>8)&0xFF, (color>>16)&0xFF);
-	color = fontName->getColor();
-	JabberStringAppend(&rtf, &msgSize, "\\red%d\\green%d\\blue%d;", color&0xFF, (color>>8)&0xFF, (color>>16)&0xFF);
-	if (getOptions()&FLAG_FORMAT_COLOR && event->color!=0xFFFFFFFF) {
-		color = event->color;
-	} else {
-		color = fontMessage->getColor();
-	}
-	JabberStringAppend(&rtf, &msgSize, "\\red%d\\green%d\\blue%d;", color&0xFF, (color>>8)&0xFF, (color>>16)&0xFF);
-	JabberStringAppend(&rtf, &msgSize, "}");
-	if (getOptions()&FLAG_SHOW_DATE || getOptions()&FLAG_SHOW_TIMESTAMP) {
-		bBold = fontTimestamp->getStyle() & Font::BOLD ? 1 : 0;
-		bItalic = fontTimestamp->getStyle() & Font::ITALIC ? 1 : 0;
-		bUnderline = fontTimestamp->getStyle() & Font::UNDERLINE ? 1 : 0;
-		iFontSize = fontTimestamp->getSize();
+		bBold = fontName->getStyle() & Font::BOLD ? 1 : 0;
+		bItalic = fontName->getStyle() & Font::ITALIC ? 1 : 0;
+		bUnderline = fontName->getStyle() & Font::UNDERLINE ? 1 : 0;
+		iFontSize = fontName->getSize();
 		iFontSize = 2 * abs((signed char)iFontSize) * 74 / logPixelSY;
-		dbtts.cbDest = 90;
-		dbtts.szDest = timestampStr;
-		timestampStr[0]='\0';
-		//time_t time = time
-		if (getOptions()&FLAG_SHOW_DATE && getOptions()&FLAG_SHOW_TIMESTAMP) {
-			if (getOptions()&FLAG_LONG_DATE) {
-				dbtts.szFormat = getOptions()&FLAG_SHOW_SECONDS ? (char *)"D s" : (char *)"D t";
-			} else {
-				dbtts.szFormat = getOptions()&FLAG_SHOW_SECONDS ? (char *)"d s" : (char *)"d t";
-			}
-		} else if (getOptions()&FLAG_SHOW_DATE) {
-			dbtts.szFormat = getOptions()&FLAG_LONG_DATE ? (char *)"D" : (char *)"d";
-		} else if (getOptions()&FLAG_SHOW_TIMESTAMP) {
-			dbtts.szFormat = getOptions()&FLAG_SHOW_SECONDS ? (char *)"s" : (char *)"t";
-		} else {
-			dbtts.szFormat = (char *)"";
-		}
-		CallService(MS_DB_TIME_TIMESTAMPTOSTRING, (WPARAM)event->time, (LPARAM) & dbtts);
-		JabberStringAppend(&rtf, &msgSize, "\\f0\\cf0\\fs%d\\b%d\\i%d%s %s ",
+		if (getOptions()&FLAG_SHOW_NICKNAMES) {
+			JabberStringAppend(&rtf, &msgSize, "\\f1\\cf1\\fs%d\\b%d\\i%d%s %s: ",
 								iFontSize,
 								bBold,
 								bItalic,
 								bUnderline?"\\ul":"",
-								timestampStr);
-	}
-	bBold = fontName->getStyle() & Font::BOLD ? 1 : 0;
-	bItalic = fontName->getStyle() & Font::ITALIC ? 1 : 0;
-	bUnderline = fontName->getStyle() & Font::UNDERLINE ? 1 : 0;
-	iFontSize = fontName->getSize();
-	iFontSize = 2 * abs((signed char)iFontSize) * 74 / logPixelSY;
-	if (getOptions()&FLAG_SHOW_NICKNAMES) {
-		JabberStringAppend(&rtf, &msgSize, "\\f1\\cf1\\fs%d\\b%d\\i%d%s %s: ",
-							iFontSize,
-							bBold,
-							bItalic,
-							bUnderline?"\\ul":"",
-							escapedNick);
-	}
-	bBold = fontMessage->getStyle() & Font::BOLD ? 1 : 0;
-	bItalic = fontMessage->getStyle() & Font::ITALIC ? 1 : 0;
-	bUnderline = fontMessage->getStyle() & Font::UNDERLINE ? 1 : 0;
-	iFontSize = fontMessage->getSize();
-	iFontSize = 2 * abs((signed char)iFontSize) * 74 / logPixelSY;
-	if (getOptions()&FLAG_FORMAT_STYLE) {
-		bBold = bItalic = bUnderline = 0;
-		if (event->dwFlags & MUCC_EF_FONT_BOLD) bBold = 1;
-		if (event->dwFlags & MUCC_EF_FONT_ITALIC) bItalic = 1;
-		if (event->dwFlags & MUCC_EF_FONT_UNDERLINE) bUnderline = 1;
-	}
-	if (getOptions()&FLAG_FORMAT_SIZE) {
-		if (event->iFontSize != 0) iFontSize = 2 * event->iFontSize;
-	}
-	if (getOptions()&FLAG_MSGINNEWLINE) {
-		JabberStringAppend(&rtf, &msgSize, "\\line");
-	}
-	JabberStringAppend(&rtf, &msgSize, "\\f2\\cf2\\fs%d\\b%d\\i%d%s %s",
-							iFontSize,
-							bBold,
-							bItalic,
-							bUnderline?"\\ul":"",
-							escapedStr);
-
-	JabberStringAppend(&rtf, &msgSize, "\\par}");
-	//MUCCLog("%s", rtf);
+								escapedNick);
+		}
+		bBold = fontMessage->getStyle() & Font::BOLD ? 1 : 0;
+		bItalic = fontMessage->getStyle() & Font::ITALIC ? 1 : 0;
+		bUnderline = fontMessage->getStyle() & Font::UNDERLINE ? 1 : 0;
+		iFontSize = fontMessage->getSize();
+		iFontSize = 2 * abs((signed char)iFontSize) * 74 / logPixelSY;
+		if (getOptions()&FLAG_FORMAT_STYLE) {
+			bBold = bItalic = bUnderline = 0;
+			if (event->dwFlags & MUCC_EF_FONT_BOLD) bBold = 1;
+			if (event->dwFlags & MUCC_EF_FONT_ITALIC) bItalic = 1;
+			if (event->dwFlags & MUCC_EF_FONT_UNDERLINE) bUnderline = 1;
+		}
+		if (getOptions()&FLAG_FORMAT_SIZE) {
+			if (event->iFontSize != 0) iFontSize = 2 * event->iFontSize;
+		}
+		if (getOptions()&FLAG_MSGINNEWLINE) {
+			JabberStringAppend(&rtf, &msgSize, "\\line");
+		}
+		JabberStringAppend(&rtf, &msgSize, "\\f2\\cf2\\fs%d\\b%d\\i%d%s %s",
+								iFontSize,
+								bBold,
+								bItalic,
+								bUnderline?"\\ul":"",
+								escapedStr);
+	} else {
+		if (event->iType == MUCC_EVENT_ERROR) {
+			bBold = fontName->getStyle() & Font::BOLD ? 1 : 0;
+			bItalic = fontName->getStyle() & Font::ITALIC ? 1 : 0;
+			bUnderline = fontName->getStyle() & Font::UNDERLINE ? 1 : 0;
+			iFontSize = fontName->getSize();
+			iFontSize = 2 * abs((signed char)iFontSize) * 74 / logPixelSY;
+			JabberStringAppend(&rtf, &msgSize, "\\f1\\cf1\\fs%d\\b%d\\i%d%s %s: ",
+									iFontSize,
+									bBold,
+									bItalic,
+									bUnderline?"\\ul":"",
+									Translate("Error"));
+		} else {
+			if (getOptions()&FLAG_SHOW_DATE || getOptions()&FLAG_SHOW_TIMESTAMP) {
+				bBold = fontTimestamp->getStyle() & Font::BOLD ? 1 : 0;
+				bItalic = fontTimestamp->getStyle() & Font::ITALIC ? 1 : 0;
+				bUnderline = fontTimestamp->getStyle() & Font::UNDERLINE ? 1 : 0;
+				iFontSize = fontTimestamp->getSize();
+				iFontSize = 2 * abs((signed char)iFontSize) * 74 / logPixelSY;
+				dbtts.cbDest = 90;
+				dbtts.szDest = timestampStr;
+				timestampStr[0]='\0';
+				//time_t time = time
+				if (getOptions()&FLAG_SHOW_DATE && getOptions()&FLAG_SHOW_TIMESTAMP) {
+					if (getOptions()&FLAG_LONG_DATE) {
+						dbtts.szFormat = getOptions()&FLAG_SHOW_SECONDS ? (char *)"D s" : (char *)"D t";
+					} else {
+						dbtts.szFormat = getOptions()&FLAG_SHOW_SECONDS ? (char *)"d s" : (char *)"d t";
+					}
+				} else if (getOptions()&FLAG_SHOW_DATE) {
+					dbtts.szFormat = getOptions()&FLAG_LONG_DATE ? (char *)"D" : (char *)"d";
+				} else if (getOptions()&FLAG_SHOW_TIMESTAMP) {
+					dbtts.szFormat = getOptions()&FLAG_SHOW_SECONDS ? (char *)"s" : (char *)"t";
+				} else {
+					dbtts.szFormat = (char *)"";
+				}
+				CallService(MS_DB_TIME_TIMESTAMPTOSTRING, (WPARAM)event->time, (LPARAM) & dbtts);
+				JabberStringAppend(&rtf, &msgSize, "\\f0\\cf0\\fs%d\\b%d\\i%d%s %s ",
+										iFontSize,
+										bBold,
+										bItalic,
+										bUnderline?"\\ul":"",
+										timestampStr);
+			}
+		}
+		bBold = fontMessage->getStyle() & Font::BOLD ? 1 : 0;
+		bItalic = fontMessage->getStyle() & Font::ITALIC ? 1 : 0;
+		bUnderline = fontMessage->getStyle() & Font::UNDERLINE ? 1 : 0;
+		iFontSize = fontMessage->getSize();
+		iFontSize = 2 * abs((signed char)iFontSize) * 74 / logPixelSY;
+		JabberStringAppend(&rtf, &msgSize, "\\f2\\cf2\\fs%d\\b%d\\i%d%s %s",
+								iFontSize,
+								bBold,
+								bItalic,
+								bUnderline?"\\ul":"",
+								escapedStr);
+	} 
+	JabberStringAppend(&rtf, &msgSize, "}");
 	hwndLog = GetDlgItem(getHWND(), IDC_LOG);
 	sel.cpMin = sel.cpMax = GetWindowTextLength(hwndLog);
 	SendMessage(hwndLog, EM_EXSETSEL, 0, (LPARAM) &sel);
 	stt.flags = ST_SELECTION;
 	stt.codepage = CP_ACP;
 	SendMessage(hwndLog, EM_SETTEXTEX, (WPARAM) &stt, (LPARAM) rtf);
-
 	free(rtf);
-	free(escapedStr);
-	free(escapedNick);
+	if (escapedStr!=NULL) free(escapedStr);
+	if (escapedNick!=NULL) free(escapedNick);
 	return 1;
 }
 
@@ -1123,6 +1180,21 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 								Options::getChatWindowFontStyle()&Font::ITALIC ? 1 : 0,
 								Options::getChatWindowFontStyle()&Font::UNDERLINE ? 1 : 0,
 								Options::getChatWindowFontColor());
+			if (Options::getChatWindowOptions() & ChatWindow::FLAG_USEIEVIEW) {
+				IEVIEWWINDOW ieWindow;
+				ieWindow.cbSize = sizeof(IEVIEWWINDOW);
+				ieWindow.iType = IEW_CREATE;
+				ieWindow.dwFlags = 0;
+				ieWindow.dwMode = IEWM_MUCC;
+				ieWindow.parent = hwndDlg;
+				ieWindow.x = 0;
+				ieWindow.y = 0;
+				ieWindow.cx = 200;
+				ieWindow.cy = 300;
+				CallService(MS_IEVIEW_WINDOW, 0, (LPARAM)&ieWindow);
+				chatWindow->setHWNDLog(ieWindow.hwnd);
+				ShowWindow(GetDlgItem(hwndDlg, IDC_LOG), SW_HIDE);
+			}
 			SetWindowPos(hwndDlg, HWND_TOP, 0, 0, 540, 370, SWP_NOMOVE | SWP_SHOWWINDOW);
 			SetFocus(GetDlgItem(hwndDlg, IDC_EDIT));
 			SetEvent(chatWindow->getEvent());
@@ -1213,6 +1285,18 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_VSPLIT), 0, dlgWidth-(chatWindow->vSplitterPos)-2, 30, 4, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_HSPLIT), 0, 0, dlgHeight-(chatWindow->hSplitterPos)-2, dlgWidth-8, 4, SWP_NOZORDER);
 				EndDeferWindowPos(hdwp);
+				if (chatWindow->getHWNDLog()!=NULL) {
+					IEVIEWWINDOW ieWindow;
+					ieWindow.cbSize = sizeof(IEVIEWWINDOW);
+					ieWindow.iType = IEW_SETPOS;
+					ieWindow.parent = hwndDlg;
+					ieWindow.hwnd = chatWindow->getHWNDLog();
+					ieWindow.x = 0;
+					ieWindow.y = 30;
+					ieWindow.cx = dlgWidth-(chatWindow->vSplitterPos)-2;
+					ieWindow.cy = dlgHeight-(chatWindow->hSplitterPos)-30-26-2;
+					CallService(MS_IEVIEW_WINDOW, 0, (LPARAM)&ieWindow);
+				}
 			}
 		break;
 		/*
@@ -1239,6 +1323,13 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			muce.pszModule =  chatWindow->getModule();
 			muce.pszID = chatWindow->getRoomId();
 			NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
+			if (chatWindow->getHWNDLog()!=NULL) {
+				IEVIEWWINDOW ieWindow;
+				ieWindow.cbSize = sizeof(IEVIEWWINDOW);
+				ieWindow.iType = IEW_DESTROY;
+				ieWindow.hwnd = chatWindow->getHWNDLog();
+				CallService(MS_IEVIEW_WINDOW, 0, (LPARAM)&ieWindow);
+			}
 			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) NULL);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
@@ -1370,7 +1461,11 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					smaddInfo.Direction = 0;
 					smaddInfo.xPosition = rc.left;
 					smaddInfo.yPosition = rc.top + 24;
-					CallService(MS_SMILEYADD_SHOWSELECTION, 0, (LPARAM) &smaddInfo);
+					if (chatWindow->getHWNDLog() != NULL) {
+						CallService(MS_IEVIEW_SHOWSMILEYSELECTION, 0, (LPARAM) &smaddInfo);
+					} else {
+						CallService(MS_SMILEYADD_SHOWSELECTION, 0, (LPARAM) &smaddInfo);
+					}
 					break;
 				case IDC_INVITE:
 					{
@@ -1408,7 +1503,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 							muce.pszModule = chatWindow->getModule();
 							muce.pszID = chatWindow->getRoomId();
 							NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
-							delete chatWindow;
+							DestroyWindow(hwndDlg);
 							break;
 						case ID_ADMINMENU_ADMIN:
 							chatWindow->startAdminDialog(ChatWindow::ADMIN_MODE_KICK);
@@ -1724,3 +1819,26 @@ static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ..
 	va_end(vararg);
 }
 
+
+static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb)
+{
+    StreamData *stream = (StreamData *) dwCookie;
+/* 
+	if (lstrdat->buffer == NULL) 
+	{
+		lstrdat->iColCount = 4;
+        lstrdat->bufferOffset = 0;
+		lstrdat->buffer = Log_CreateBody(lstrdat);
+        lstrdat->bufferLen = lstrlen(lstrdat->buffer);
+    }
+    *pcb = min(cb, lstrdat->bufferLen - lstrdat->bufferOffset);
+    CopyMemory(pbBuff, lstrdat->buffer + lstrdat->bufferOffset, *pcb);
+    lstrdat->bufferOffset += *pcb;
+    if (lstrdat->bufferOffset == lstrdat->bufferLen) 
+	{
+	    free(lstrdat->buffer);
+        lstrdat->buffer = NULL;
+    }
+*/	
+    return 0;
+}

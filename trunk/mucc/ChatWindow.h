@@ -33,6 +33,13 @@ class ChatWindow;
 #define DM_CHAT_QUERY   (WM_USER+2)
 #define WM_TLEN_SMILEY  (WM_USER+200)
 
+
+class StreamData {
+public:
+	ChatWindow *chat;
+	MUCCEVENT  *event;
+};
+
 class ChatWindow{
 private:
 	static ChatWindow *	list;
@@ -44,6 +51,7 @@ private:
 	ChatContainer *	container;
 	HANDLE			hEvent;
 	HWND			hWnd;
+	HWND			hWndLog;
 	HFONT			hEditFont;
 	HTREEITEM		hUserGroups[5];		
 	char *			module;
@@ -55,6 +63,7 @@ private:
 	int				font, fontSize;
 	int				bBold, bItalic, bUnderline;
 	int				wasFirstMessage;
+	bool			isEmpty;
 	COLORREF		fontColor;
 	int				isStarted;
 	ChatWindow *	prev;
@@ -69,9 +78,8 @@ private:
 	int				getUserGroup(ChatUser *);
 	ChatUser *		getSelectedUser();
 	ChatEventList 	eventList;
+	void			createRTFHeader();
 	int				appendMessage(const MUCCEVENT *event);
-	int				appendEvent(const MUCCEVENT *event);
-	void			rebuildLog();
 	int				logMessage(const MUCCEVENT *event);
 public:
 	enum LOGFLAGS {
@@ -102,6 +110,8 @@ public:
 		FLAG_FLASH_TOPIC	= 0x00080000,
 		FLAG_FLASH_ALL		= 0x000F0000,
 
+		FLAG_USEIEVIEW		= 0x00100000,
+
 	};
 
 	enum ADMINMODES {
@@ -124,6 +134,8 @@ public:
 	void			setPrev(ChatWindow *);
 	void			setHWND(HWND);
 	HWND			getHWND();
+	void			setHWNDLog(HWND);
+	HWND			getHWNDLog();
 	HANDLE			getEvent();
 	const char *	getModule();
 	void			setModule(const char *);
@@ -161,6 +173,7 @@ public:
 	void			refreshSettings();
 	void			setAdminWindow(AdminWindow *);
 	AdminWindow *	getAdminWindow();
+	void			rebuildLog();
 	int				logEvent(const MUCCEVENT *event);
 	int				changePresence(const MUCCEVENT *event);
 	int				changeTopic(const MUCCEVENT *event);
