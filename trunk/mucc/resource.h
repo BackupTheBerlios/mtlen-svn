@@ -58,6 +58,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDD_GROUPCHAT_CONTAINER			166
 
 #define IDR_CHATOPTIONS                 200
+#define IDR_CONTEXT						201
 
 #define IDC_FONTLIST                    1000
 #define IDC_COLORINPUT                  1001
@@ -71,6 +72,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDC_LOGLIMIT                    1009
 #define IDC_SENDONENTER                 1010
 #define IDC_USETABS						1011
+#define IDC_ENABLEIEVIEW				1012
 #define IDC_REGISTER                    1020
 #define IDC_NAME                        1021
 #define IDC_FRAME                       1037
@@ -191,6 +193,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ID_ADMINMENU_ADMIN				40081
 #define ID_ADMINMENU_BROWSE				40082
 #define ID_ADMINMENU_SAVELOG			40083
+
+#define IDM_CUT                         40000
+#define IDM_COPY                        40001
+#define IDM_PASTE                       40002
+#define IDM_UNDO                        40003
+#define IDM_DELETE                      40004
+#define IDM_REDO                        40005
+#define IDM_COPYALL                     40011
+#define IDM_SELECTALL                   40012
+#define IDM_CLEAR                       40013
+#define IDM_OPENNEW                     40014
+#define IDM_OPENEXISTING                40015
+#define IDM_COPYLINK                    40016
 
 // Next default values for new objects
 //

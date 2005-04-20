@@ -42,7 +42,7 @@ bool ChatWindow::released = false;
 CRITICAL_SECTION ChatWindow::mutex;
 
 static	WNDPROC	oldSplitterWndProc, oldEditWndProc;
-static  HCURSOR hCurSplitNS, hCurSplitWE;
+static  HCURSOR hCurSplitNS, hCurSplitWE, hCurHyperlinkHand;
 
 void ChatWindow::release() {
 	released = true;
@@ -51,11 +51,18 @@ void ChatWindow::release() {
 		//SendMessage(ptr->getHWND(), WM_CLOSE, 0, 0);
 	}
 	DeleteCriticalSection(&mutex);
+	DestroyCursor(hCurSplitNS);
+	DestroyCursor(hCurSplitWE);
+	DestroyCursor(hCurHyperlinkHand);
 }
 
 void ChatWindow::init() {
 	hCurSplitNS = LoadCursor(NULL, IDC_SIZENS);
 	hCurSplitWE = LoadCursor(NULL, IDC_SIZEWE);
+	hCurHyperlinkHand = LoadCursor(NULL, IDC_HAND);
+	if (hCurHyperlinkHand == NULL) {
+		hCurHyperlinkHand = LoadCursor(NULL, IDC_ARROW);
+	}
 	released = false;
 	InitializeCriticalSection(&mutex);
 }
@@ -391,7 +398,7 @@ int ChatWindow::getUserGroup(ChatUser *user) {
 int ChatWindow::changePresence(const MUCCEVENT *event) {
 	int i, group, bLogEvent = FALSE;
 	const char *groupNames[] = {"Global Owners", "Owners", "Admins", "Moderators", "Users"};
-	
+
 	ChatUser *user = findUser(event->pszUID);
 	if (event->dwData == ID_STATUS_ONLINE || (user!=NULL && event->dwData!=ID_STATUS_OFFLINE)) {
 		Utils::log("new status: %d, %d", event->dwData, user);
@@ -434,7 +441,7 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 			} else {
 				tvis.hInsertAfter = TVI_FIRST;
 			}
-			tvis.item.mask = TVIF_TEXT | TVIF_PARAM | TVIF_CHILDREN; 
+			tvis.item.mask = TVIF_TEXT | TVIF_PARAM | TVIF_CHILDREN;
 			tvis.item.lParam = (LPARAM) NULL;
 			tvis.item.cChildren = 1;
 			tvis.item.pszText = (char *)Translate(groupNames[group]);
@@ -578,6 +585,22 @@ void ChatWindow::setTreeItem(int index, HTREEITEM hTreeItem) {
 
 int ChatWindow::getDefaultOptions() {
 	return FLAG_SHOW_NICKNAMES | FLAG_SHOW_TIMESTAMP | FLAG_FORMAT_ALL | FLAG_LOG_MESSAGES | FLAG_OPT_SENDONENTER;
+}
+
+void ChatWindow::clearLog() {
+	if (getHWNDLog()!=NULL) {
+		IEVIEWEVENT iee;
+		iee.cbSize = sizeof(IEVIEWEVENT);
+		iee.dwFlags = IEEF_NO_UNICODE;
+		iee.hwnd = hWndLog;
+		iee.hContact = NULL;
+		iee.iType = IEE_CLEAR_LOG;
+		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
+	} else {
+		SetDlgItemText(getHWND(), IDC_LOG, "");
+	}
+	isEmpty = true;
+	eventList.clear();
 }
 
 void ChatWindow::rebuildLog() {
@@ -917,7 +940,7 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 								bItalic,
 								bUnderline?"\\ul":"",
 								escapedStr);
-	} 
+	}
 	JabberStringAppend(&rtf, &msgSize, "}");
 	hwndLog = GetDlgItem(getHWND(), IDC_LOG);
 	sel.cpMin = sel.cpMax = GetWindowTextLength(hwndLog);
@@ -1150,7 +1173,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg, IDC_ITALIC, BUTTONSETASPUSHBTN, 0, 0);
 			SendDlgItemMessage(hwndDlg, IDC_UNDERLINE, BUTTONSETASFLATBTN, 0, 0);
 			SendDlgItemMessage(hwndDlg, IDC_UNDERLINE, BUTTONSETASPUSHBTN, 0, 0);
-			SendDlgItemMessage(hwndDlg, IDC_OPTIONS, BUTTONSETASFLATBTN, 0, 0); 
+			SendDlgItemMessage(hwndDlg, IDC_OPTIONS, BUTTONSETASFLATBTN, 0, 0);
 			SendDlgItemMessage(hwndDlg, IDC_SMILEYBTN, BUTTONSETASFLATBTN, 0, 0);
 
 			SetWindowLong(GetDlgItem(hwndDlg,IDC_TREELIST),GWL_STYLE,GetWindowLong(GetDlgItem(hwndDlg,IDC_TREELIST),GWL_STYLE)|TVS_NOHSCROLL);
@@ -1174,13 +1197,13 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			CheckDlgButton(hwndDlg, IDC_ITALIC, Options::getChatWindowFontStyle()&Font::ITALIC ? TRUE : FALSE);
 			CheckDlgButton(hwndDlg, IDC_UNDERLINE, Options::getChatWindowFontStyle()&Font::UNDERLINE ? TRUE : FALSE);
 			SendDlgItemMessage(hwndDlg, IDC_COLOR, CPM_SETCOLOUR, 0, (LPARAM)Options::getChatWindowFontColor());
-			chatWindow->setFont(Options::getChatWindowFont(), 
-								chatWindow->getFontSize(Options::getChatWindowFontSize()), 
+			chatWindow->setFont(Options::getChatWindowFont(),
+								chatWindow->getFontSize(Options::getChatWindowFontSize()),
 								Options::getChatWindowFontStyle()&Font::BOLD ? 1 : 0,
 								Options::getChatWindowFontStyle()&Font::ITALIC ? 1 : 0,
 								Options::getChatWindowFontStyle()&Font::UNDERLINE ? 1 : 0,
 								Options::getChatWindowFontColor());
-			if (Options::getChatWindowOptions() & ChatWindow::FLAG_USEIEVIEW) {
+			if (ServiceExists(MS_IEVIEW_WINDOW) && Options::getChatWindowOptions() & ChatWindow::FLAG_OPT_ENABLEIEVIEW) {
 				IEVIEWWINDOW ieWindow;
 				ieWindow.cbSize = sizeof(IEVIEWWINDOW);
 				ieWindow.iType = IEW_CREATE;
@@ -1607,7 +1630,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 		case WM_NOTIFY:
 			LPNMHDR pNmhdr;
 			pNmhdr = (LPNMHDR)lParam;
-			if (pNmhdr->idFrom = IDC_TREELIST) {
+			if (pNmhdr->idFrom == IDC_TREELIST) {
 				switch (pNmhdr->code) {
 				case TVN_ITEMEXPANDING:
 					{
@@ -1716,7 +1739,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 												hIcon = muccIcon[MUCC_IDI_U_ADMIN];
 											} else if (user->getFlags()&MUCC_EF_USER_REGISTERED) {
 												hIcon = muccIcon[MUCC_IDI_U_REGISTERED];
-											} 
+											}
 										}
 										SelectObject(pCustomDraw->nmcd.hdc, ChatWindow::getListFont());
 										break;
@@ -1741,13 +1764,140 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						}
 					break;
 				}
+			} else if (pNmhdr->idFrom == IDC_LOG) {
+				switch (((NMHDR *) lParam)->code) {
+				case EN_MSGFILTER:
+					switch (((MSGFILTER *) lParam)->msg) {
+						/*
+					case WM_LBUTTONDOWN:
+						{
+							HCURSOR hCur = GetCursor();
+							if (hCur == LoadCursor(NULL, IDC_SIZENS) || hCur == LoadCursor(NULL, IDC_SIZEWE)
+								|| hCur == LoadCursor(NULL, IDC_SIZENESW) || hCur == LoadCursor(NULL, IDC_SIZENWSE)) {
+									SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+									return TRUE;
+								}
+								break;
+						}
+					case WM_MOUSEMOVE:
+						{
+							HCURSOR hCur = GetCursor();
+							if (hCur == LoadCursor(NULL, IDC_SIZENS) || hCur == LoadCursor(NULL, IDC_SIZEWE)
+								|| hCur == LoadCursor(NULL, IDC_SIZENESW) || hCur == LoadCursor(NULL, IDC_SIZENWSE))
+								SetCursor(LoadCursor(NULL, IDC_ARROW));
+							break;
+						}
+						*/
+					case WM_RBUTTONUP:
+						{
+							HMENU hMenu, hSubMenu;
+							POINT pt;
+							CHARRANGE sel, all = { 0, -1 };
+
+							hMenu = LoadMenu(hInst, MAKEINTRESOURCE(IDR_CONTEXT));
+							hSubMenu = GetSubMenu(hMenu, 0);
+							CallService(MS_LANGPACK_TRANSLATEMENU, (WPARAM) hSubMenu, 0);
+							SendMessage(((NMHDR *) lParam)->hwndFrom, EM_EXGETSEL, 0, (LPARAM) & sel);
+							if (sel.cpMin == sel.cpMax)
+								EnableMenuItem(hSubMenu, IDM_COPY, MF_BYCOMMAND | MF_GRAYED);
+							pt.x = (short) LOWORD(((ENLINK *) lParam)->lParam);
+							pt.y = (short) HIWORD(((ENLINK *) lParam)->lParam);
+							ClientToScreen(((NMHDR *) lParam)->hwndFrom, &pt);
+							switch (TrackPopupMenu(hSubMenu, TPM_RETURNCMD, pt.x, pt.y, 0, hwndDlg, NULL)) {
+							case IDM_COPY:
+								SendMessage(((NMHDR *) lParam)->hwndFrom, WM_COPY, 0, 0);
+								break;
+							case IDM_COPYALL:
+								SendMessage(((NMHDR *) lParam)->hwndFrom, EM_EXSETSEL, 0, (LPARAM) & all);
+								SendMessage(((NMHDR *) lParam)->hwndFrom, WM_COPY, 0, 0);
+								SendMessage(((NMHDR *) lParam)->hwndFrom, EM_EXSETSEL, 0, (LPARAM) & sel);
+								break;
+							case IDM_SELECTALL:
+								SendMessage(((NMHDR *) lParam)->hwndFrom, EM_EXSETSEL, 0, (LPARAM) & all);
+								break;
+							case IDM_CLEAR:
+								chatWindow->clearLog();
+								break;
+							}
+							DestroyMenu(hMenu);
+							SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+							return TRUE;
+						}
+					}
+					break;
+				case EN_LINK:
+					switch (((ENLINK *) lParam)->msg) {
+					case WM_SETCURSOR:
+						SetCursor(hCurHyperlinkHand);
+						SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+						return TRUE;
+					case WM_RBUTTONDOWN:
+					case WM_LBUTTONUP:
+						{
+							TEXTRANGEA tr;
+							CHARRANGE sel;
+
+							SendDlgItemMessage(hwndDlg, IDC_LOG, EM_EXGETSEL, 0, (LPARAM) & sel);
+							if (sel.cpMin != sel.cpMax)
+								break;
+							tr.chrg = ((ENLINK *) lParam)->chrg;
+							tr.lpstrText = (char *)malloc(tr.chrg.cpMax - tr.chrg.cpMin + 8);
+							SendDlgItemMessageA(hwndDlg, IDC_LOG, EM_GETTEXTRANGE, 0, (LPARAM) & tr);
+							if (strchr(tr.lpstrText, '@') != NULL && strchr(tr.lpstrText, ':') == NULL && strchr(tr.lpstrText, '/') == NULL) {
+								MoveMemory(tr.lpstrText + 7, tr.lpstrText, tr.chrg.cpMax - tr.chrg.cpMin + 1);
+								CopyMemory(tr.lpstrText, "mailto:", 7);
+							}
+							if (((ENLINK *) lParam)->msg == WM_RBUTTONDOWN) {
+								HMENU hMenu, hSubMenu;
+								POINT pt;
+
+								hMenu = LoadMenu(hInst, MAKEINTRESOURCE(IDR_CONTEXT));
+								hSubMenu = GetSubMenu(hMenu, 1);
+								CallService(MS_LANGPACK_TRANSLATEMENU, (WPARAM) hSubMenu, 0);
+								pt.x = (short) LOWORD(((ENLINK *) lParam)->lParam);
+								pt.y = (short) HIWORD(((ENLINK *) lParam)->lParam);
+								ClientToScreen(((NMHDR *) lParam)->hwndFrom, &pt);
+								switch (TrackPopupMenu(hSubMenu, TPM_RETURNCMD, pt.x, pt.y, 0, hwndDlg, NULL)) {
+								case IDM_OPENNEW:
+									CallService(MS_UTILS_OPENURL, 1, (LPARAM) tr.lpstrText);
+									break;
+								case IDM_OPENEXISTING:
+									CallService(MS_UTILS_OPENURL, 0, (LPARAM) tr.lpstrText);
+									break;
+								case IDM_COPYLINK:
+									{
+										HGLOBAL hData;
+										if (!OpenClipboard(hwndDlg))
+											break;
+										EmptyClipboard();
+										hData = GlobalAlloc(GMEM_MOVEABLE, lstrlenA(tr.lpstrText) + 1);
+										lstrcpyA((char *)GlobalLock(hData), tr.lpstrText);
+										GlobalUnlock(hData);
+										SetClipboardData(CF_TEXT, hData);
+										CloseClipboard();
+										break;
+									}
+								}
+								free(tr.lpstrText);
+								DestroyMenu(hMenu);
+								SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+								return TRUE;
+							}
+							else {
+								CallService(MS_UTILS_OPENURL, 1, (LPARAM) tr.lpstrText);
+								SetFocus(GetDlgItem(hwndDlg, IDC_EDIT));
+							}
+							free(tr.lpstrText);
+							break;
+						}
+					}
+					break;
+				}
 			}
-			break;
+		break;
 	}
 	return FALSE;
 }
-
-
 
 static char *JabberRtfEscape(char *str) {
 	char *escapedStr;
@@ -1823,8 +1973,8 @@ static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ..
 static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb)
 {
     StreamData *stream = (StreamData *) dwCookie;
-/* 
-	if (lstrdat->buffer == NULL) 
+/*
+	if (lstrdat->buffer == NULL)
 	{
 		lstrdat->iColCount = 4;
         lstrdat->bufferOffset = 0;
@@ -1834,11 +1984,11 @@ static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb,
     *pcb = min(cb, lstrdat->bufferLen - lstrdat->bufferOffset);
     CopyMemory(pbBuff, lstrdat->buffer + lstrdat->bufferOffset, *pcb);
     lstrdat->bufferOffset += *pcb;
-    if (lstrdat->bufferOffset == lstrdat->bufferLen) 
+    if (lstrdat->bufferOffset == lstrdat->bufferLen)
 	{
 	    free(lstrdat->buffer);
         lstrdat->buffer = NULL;
     }
-*/	
+*/
     return 0;
 }

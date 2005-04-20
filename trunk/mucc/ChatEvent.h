@@ -53,6 +53,7 @@ public:
 	~ChatEventList();
 	ChatEvent * getEvents();
 	int			addEvent(const MUCCEVENT *);
+	void		clear();
 	void		setMaxSize(int s);
 };
 

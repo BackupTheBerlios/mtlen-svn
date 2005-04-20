@@ -117,6 +117,36 @@ BEGIN
     END
 END
 
+IDR_CONTEXT MENU DISCARDABLE
+BEGIN
+    POPUP "Log"
+    BEGIN
+        MENUITEM "&Copy",                       IDM_COPY
+        MENUITEM "Co&py All",                   IDM_COPYALL
+        MENUITEM SEPARATOR
+        MENUITEM "Select &All",                 IDM_SELECTALL
+        MENUITEM SEPARATOR
+        MENUITEM "C&lear Log",                  IDM_CLEAR
+    END
+    POPUP "LogLink"
+    BEGIN
+        MENUITEM "Open in &new window",         IDM_OPENNEW
+        MENUITEM "&Open in existing window",    IDM_OPENEXISTING
+        MENUITEM "&Copy link",                  IDM_COPYLINK
+    END
+    POPUP "Message"
+    BEGIN
+        MENUITEM "Undo",                        IDM_UNDO
+        MENUITEM "Redo",                        IDM_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cut",                         IDM_CUT
+        MENUITEM "Copy",                        IDM_COPY
+        MENUITEM "Paste",                       IDM_PASTE
+        MENUITEM "Delete",                      IDM_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Select &All",                 IDM_SELECTALL
+    END
+END
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -147,8 +177,8 @@ BEGIN
     GROUPBOX        "Other",IDC_SIMPLE,5,193,310,57
     CONTROL         "Use tabbed mode",IDC_USETABS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,13,206,200,10
-/*    CONTROL         "Enable IEView",IDC_SENDONENTER,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,220,200,10*/
+    CONTROL         "Enable IEView",IDC_ENABLEIEVIEW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,219,200,10
     CONTROL         "Send message on 'Enter'",IDC_SENDONENTER,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,13,232,200,10
     LTEXT           "Limit log history to (events):",IDC_STATIC,153,234,110,8
@@ -199,7 +229,7 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_VSPLIT,"Static",SS_ENHMETAFILE,237,20,3,117
     CONTROL         "",IDC_HSPLIT,"Static",SS_ENHMETAFILE,156,285,2,0
-    CONTROL         "",IDC_LOG,"RichEdit20A",WS_VSCROLL | WS_TABSTOP | 0x844,
+    CONTROL         "",IDC_LOG,"RichEdit20A",WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | 0x844,
                     3,21,233,117,WS_EX_STATICEDGE
     CONTROL         "",IDC_TREELIST,"SysTreeView32",TVS_DISABLEDRAGDROP |
                     TVS_SHOWSELALWAYS | TVS_NOTOOLTIPS | TVS_NONEVENHEIGHT,5,

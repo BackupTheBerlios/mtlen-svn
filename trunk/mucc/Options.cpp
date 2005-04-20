@@ -157,9 +157,6 @@ void Options::loadSettings() {
 	setLogLimit(DBGetContactSettingDword(NULL, muccModuleName, "LogSizeLimit", 100));
 	setChatContainerOptions(DBGetContactSettingDword(NULL, muccModuleName, "ChatContainerOptions", ChatContainer::getDefaultOptions()));
 	setChatWindowOptions(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowOptions", ChatWindow::getDefaultOptions()));
-	if (ServiceExists(MS_IEVIEW_WINDOW)) {
-		setChatWindowOptions(getChatWindowOptions() | ChatWindow::FLAG_USEIEVIEW);
-	}
 	setChatWindowFont(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFont", 0));
 	setChatWindowFontSize(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontSize", 5));
 	setChatWindowFontStyle(DBGetContactSettingDword(NULL, muccModuleName, "ChatWindowFontStyle", 0));
@@ -394,6 +391,10 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			}
 
 			CheckDlgButton(hwndDlg, IDC_SENDONENTER, Options::getChatWindowOptions() & ChatWindow::FLAG_OPT_SENDONENTER);
+			CheckDlgButton(hwndDlg, IDC_ENABLEIEVIEW, Options::getChatWindowOptions() & ChatWindow::FLAG_OPT_ENABLEIEVIEW);
+			if (!ServiceExists(MS_IEVIEW_WINDOW)) {
+				EnableWindow(GetDlgItem(hwndDlg, IDC_ENABLEIEVIEW), FALSE);
+			}
 			CheckDlgButton(hwndDlg, IDC_USETABS, Options::getChatContainerOptions() & ChatContainer::FLAG_USE_TABS);
 
 		}
@@ -413,7 +414,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 								   OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, font->getFace());
 				hDC = GetDC(GetDlgItem(hwndDlg, lpMis->CtlID));
 				hoFont = (HFONT) SelectObject(hDC, hFont);
-				pszText = Translate(Options::getFontSettings(iItem)->getName());//fontOptionsList[iItem].szDescr);
+				pszText = Translate(Options::getFontSettings(iItem)->getName());
 				GetTextExtentPoint32(hDC, pszText, lstrlen(pszText), &fontSize);
 				SelectObject(hDC, hoFont);
 				ReleaseDC(GetDlgItem(hwndDlg, lpMis->CtlID), hDC);
@@ -500,6 +501,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				InvalidateRect(GetDlgItem(hwndDlg, IDC_FONTLIST), NULL, FALSE);
 			case IDC_SENDONENTER:
 			case IDC_USETABS:
+			case IDC_ENABLEIEVIEW:
 				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 				break;
 			case IDC_FONTLIST:
@@ -591,6 +593,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				Options::setLogLimit(SendDlgItemMessage(hwndDlg, IDC_LOGLIMITSPIN, UDM_GETPOS, 0, 0));
 				Options::setChatWindowOptions(getOptions(GetDlgItem(hwndDlg, IDC_TREELIST), TreeView_GetRoot(GetDlgItem(hwndDlg, IDC_TREELIST)), 0));
 				Options::setChatWindowOptions(Options::getChatWindowOptions() | (IsDlgButtonChecked(hwndDlg, IDC_SENDONENTER) ? ChatWindow::FLAG_OPT_SENDONENTER : 0));
+				Options::setChatWindowOptions(Options::getChatWindowOptions() | (IsDlgButtonChecked(hwndDlg, IDC_ENABLEIEVIEW) ? ChatWindow::FLAG_OPT_ENABLEIEVIEW : 0));
 				Options::setChatContainerOptions(IsDlgButtonChecked(hwndDlg, IDC_USETABS) ? ChatContainer::FLAG_USE_TABS : 0);
 				Options::saveSettings();
 				ChatWindow::refreshSettings(1);

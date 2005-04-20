@@ -252,6 +252,10 @@ SOURCE=.\icos\italic.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\icos\message.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\icos\moderator.ico
 # End Source File
 # Begin Source File
@@ -293,6 +297,10 @@ SOURCE=.\icos\registered.ico
 # Begin Source File
 
 SOURCE=.\icos\search.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\icos\smile.ico
 # End Source File
 # Begin Source File
 

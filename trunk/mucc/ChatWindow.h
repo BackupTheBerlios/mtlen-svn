@@ -53,7 +53,7 @@ private:
 	HWND			hWnd;
 	HWND			hWndLog;
 	HFONT			hEditFont;
-	HTREEITEM		hUserGroups[5];		
+	HTREEITEM		hUserGroups[5];
 	char *			module;
 	char *			roomId;
 	char *			roomName;
@@ -86,6 +86,7 @@ public:
 		FLAG_SHOW_NICKNAMES	= 0x00000001,
 		FLAG_MSGINNEWLINE	= 0x00000002,
 		FLAG_OPT_SENDONENTER= 0x00000004,
+		FLAG_OPT_ENABLEIEVIEW=0x00000008,
 
 		FLAG_SHOW_DATE		= 0x00000010,
 		FLAG_SHOW_TIMESTAMP	= 0x00000020,
@@ -110,7 +111,6 @@ public:
 		FLAG_FLASH_TOPIC	= 0x00080000,
 		FLAG_FLASH_ALL		= 0x000F0000,
 
-		FLAG_USEIEVIEW		= 0x00100000,
 
 	};
 
@@ -174,6 +174,7 @@ public:
 	void			setAdminWindow(AdminWindow *);
 	AdminWindow *	getAdminWindow();
 	void			rebuildLog();
+	void			clearLog();
 	int				logEvent(const MUCCEVENT *event);
 	int				changePresence(const MUCCEVENT *event);
 	int				changeTopic(const MUCCEVENT *event);

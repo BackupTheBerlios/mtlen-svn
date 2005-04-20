@@ -23,9 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#define ENABLE_LOGGING
 
-#ifndef _WIN32_IE
-#define _WIN32_IE 0x500
-#endif
+#define _WIN32_WINNT 0x0501
+#define _WIN32_IE 0x0500
 
 #include <windows.h>
 #include <commctrl.h>

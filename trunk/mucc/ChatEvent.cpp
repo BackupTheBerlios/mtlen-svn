@@ -141,7 +141,6 @@ int ChatEventList::addEvent(const MUCCEVENT *muccevent) {
 			trimmed = 1;
 		}
 	}
-//	Utils::log("#### eventList size = %d", currentSize);
 	return trimmed;
 }
 
@@ -157,4 +156,19 @@ void ChatEventList::setMaxSize(int s) {
 		hiMaxSize = s + 20;
 	}
 }
+
+void ChatEventList::clear() {
+	ChatEvent *event = eventListRoot.getNext();
+	eventListRoot.setNext(NULL);
+	eventListEnd = &eventListRoot;
+	currentSize = 0;
+	if (event!=NULL) {
+		event->setPrev(NULL);
+		while (event->getNext()!=NULL) {
+			delete event->getNext();
+		}
+		delete event;
+	}
+}
+
 
