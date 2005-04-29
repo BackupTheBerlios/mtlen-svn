@@ -294,64 +294,6 @@ char *JabberLocalNickFromJID(const char *jid)
 	return localNick;
 }
 
-void JabberUrlDecode(char *str)
-{
-	char *p, *q;
-
-	if (str == NULL)
-		return;
-
-	for (p=q=str; *p!='\0'; p++,q++) {
-		if (*p == '&') {
-			if (!strncmp(p, "&amp;", 5)) {	*q = '&'; p += 4; }
-			else if (!strncmp(p, "&apos;", 6)) { *q = '\''; p += 5; }
-			else if (!strncmp(p, "&gt;", 4)) { *q = '>'; p += 3; }
-			else if (!strncmp(p, "&lt;", 4)) { *q = '<'; p += 3; }
-			else if (!strncmp(p, "&quot;", 6)) { *q = '"'; p += 5; }
-			else { *q = *p;	}
-		}
-		else {
-			*q = *p;
-		}
-	}
-	*q = '\0';
-}
-
-char *JabberUrlEncode(const char *str)
-{
-	char *s, *p, *q;
-	int c;
-
-	if (str == NULL)
-		return NULL;
-
-	for (c=0,p=(char *)str; *p!='\0'; p++) {
-		switch (*p) {
-		case '&': c += 5; break;
-		case '\'': c += 6; break;
-		case '>': c += 4; break;
-		case '<': c += 4; break;
-		case '"': c += 6; break;
-		default: c++; break;
-		}
-	}
-	if ((s=(char *) malloc(c+1)) != NULL) {
-		for (p=(char *) str,q=s; *p!='\0'; p++) {
-			switch (*p) {
-			case '&': strcpy(q, "&amp;"); q += 5; break;
-			case '\'': strcpy(q, "&apos;"); q += 6; break;
-			case '>': strcpy(q, "&gt;"); q += 4; break;
-			case '<': strcpy(q, "&lt;"); q += 4; break;
-			case '"': strcpy(q, "&quot;"); q += 6; break;
-			default: *q = *p; q++; break;
-			}
-		}
-		*q = '\0';
-	}
-
-	return s;
-}
-
 // Tlen should not do Utf8Decode
 #ifndef TLEN_PLUGIN
 char *JabberUtf8Decode(const char *str)
@@ -394,35 +336,6 @@ char *JabberUtf8Decode(const char *str)
 	free(wszTemp);
 
 	return szOut;
-
-/*
-	for(p=q=str; *p!='\0'; p++,q++) {
-		if(p[1]!='\0' && (p[0]&0xE0)==0xC0 && (p[1]&0xC0)==0x80) {
-			// 110xxxxx 10xxxxxx
-			*q = (char) (BYTE) (((p[0]&0x1F)<<6)|(p[1]&0x3F));
-			p++;
-		}
-		else if (p[1]!='\0' && p[2]!='\0' && (p[0]&0xF0)==0xE0 && (p[1]&0xC0)==0x80 && (p[2]&0xC0)==0x80) {
-			// 1110xxxx 10xxxxxx 10xxxxxx
-			unicode=(((WORD)(p[0]&0x0F))<<12) |
-				    (((WORD)(p[1]&0x3F))<<6) |
-					((WORD)(p[2]&0x3F));
-			// Thai (convert to TIS-620)
-			if (unicode>=0x0E00 && unicode<=0x0E7F) {
-				*q = (char) ((unicode&0x7F)+0xA0);
-			}
-			// Default (useless anyway)
-			else {
-				*q = (char) (unicode&0x7F);
-			}
-			p += 2;
-		}
-		else {
-			*q = *p;
-		}
-	}
-	*q = '\0';
-*/
 }
 #endif
 
@@ -471,47 +384,6 @@ char *JabberUtf8Encode(const char *str)
 
 	return (char *) szOut;
 
-/*
-	// Number of bytes for each unicode character depending on language
-	switch (jabberLang) {
-	case JABBER_LANG_THAI: x = 3; break;
-	default: x = 2; break;
-	}
-
-	for (c=0,p=(char *)str; *p!='\0'; p++) {
-		if (*p < 0)
-			c += x;
-		else
-			c++;
-	}
-
-	if ((s=(char *) malloc(c+1)) != NULL) {
-		for (p=(char *)str,q=s; *p!='\0'; p++) {
-			if (*p < 0) {
-				switch (jabberLang) {
-				case JABBER_LANG_THAI:
-					temp = (BYTE) (p[0]-0xA0);
-					q[0] = (char) 0xE0;
-					q[1] = ((temp>>6)&0x01) | 0xB8;
-					q[2] = (temp&0x3F) | 0x80;
-					break;
-				default:
-					q[0] = ((p[0]&0xC0)>>6) | 0xc0;
-					q[1] = (p[0]&0x3f) | 0x80;
-					break;
-				}
-				q += x;
-			}
-			else {
-				*q = *p;
-				q++;
-			}
-		}
-		*q = '\0';
-	}
-
-	return s;
-*/
 }
 
 char *JabberSha1(char *str)
@@ -800,6 +672,28 @@ void TlenUrlDecode(char *str)
 		}
 	}
 	*q = '\0';
+}
+
+void TlenGroupDecode(char *str)
+{
+	char *p;
+	if (str == NULL) return;
+	for (p=str; *p!='\0'; p++) {
+		if (*p == '/') {
+			*p = '\\';
+		}
+	}
+}
+
+void TlenGroupEncode(char *str)
+{
+	char *p;
+	if (str == NULL) return;
+	for (p=str; *p!='\0'; p++) {
+		if (*p == '\\') {
+			*p = '/';
+		}
+	}
 }
 
 char *JabberTextEncode(const char *str)
@@ -1167,28 +1061,6 @@ void JabberSendPresence(int status)
 		else
 			JabberSendInvisiblePresence();
 	}
-/*
-	if (status == ID_STATUS_INVISIBLE) {
-		i = 0;
-		while ((i=JabberListFindNext(LIST_CHATROOM, i)) >= 0) {
-			if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
-				// Quit all chatrooms when change to invisible
-				PostMessage(item->hwndGcDlg, WM_JABBER_GC_FORCE_QUIT, 0, 0);
-			}
-			i++;
-		}
-	}
-	else {
-		i = 0;
-		while ((i=JabberListFindNext(LIST_CHATROOM, i)) >= 0) {
-			if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
-				// Also update status in all chatrooms
-				JabberSendPresenceTo(status, item->jid, NULL);
-			}
-			i++;
-		}
-	}
-*/
 }
 
 void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...)

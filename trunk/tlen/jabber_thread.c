@@ -993,6 +993,7 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 										if (item->group) free(item->group);
 										if ((groupNode=JabberXmlGetChild(itemNode, "group"))!=NULL && groupNode->text!=NULL) {
 											item->group = JabberTextDecode(groupNode->text);
+											TlenGroupDecode(item->group);
 											JabberContactListCreateGroup(item->group);
 											DBWriteContactSettingString(hContact, "CList", "Group", item->group);
 										}
@@ -1034,6 +1035,7 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 		}
 
 	}
+	/*
 	// RECVED: <iq type='get'><query ...
 	else if (!strcmp(type, "get") && queryNode!=NULL && (xmlns=JabberXmlGetAttrValue(queryNode, "xmlns"))!=NULL) {
 
@@ -1091,7 +1093,6 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 
 		// RECVED: software version result
 		// ACTION: update version information for the specified jid/resource
-						/*
 		if (!strcmp(xmlns, "jabber:iq:version")) {
 			char *from;
 			JABBER_LIST_ITEM *item;
@@ -1121,8 +1122,8 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 				}
 			}
 		}
-		*/
 	}
+		*/
 	// RECVED: <iq type='error'> ...
 	else if (!strcmp(type, "error")) {
 		JABBER_LIST_ITEM *item;

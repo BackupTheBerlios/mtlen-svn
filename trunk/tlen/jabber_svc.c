@@ -868,6 +868,7 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 						else if (cws->value.type==DBVT_ASCIIZ && cws->value.pszVal!=NULL && (item->group==NULL || strcmp(cws->value.pszVal, item->group))) {
 							JabberLog("Group set to %s", cws->value.pszVal);
 							if ((group=JabberTextEncode(cws->value.pszVal)) != NULL) {
+								TlenGroupEncode(group);
 								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, item->jid, group);
 								free(group);
 							} 
@@ -902,6 +903,7 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 						if ((nick=JabberTextEncode(newNick)) != NULL) {
 							JabberLog("Nick set to %s", newNick);
 							if (item->group!=NULL && (group=JabberTextEncode(item->group))!=NULL) {
+								TlenGroupEncode(group);
 								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, jid, group);
 								free(group);
 							}

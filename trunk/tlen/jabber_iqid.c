@@ -117,6 +117,7 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 							if (item->group) free(item->group);
 							if ((groupNode=JabberXmlGetChild(itemNode, "group"))!=NULL && groupNode->text!=NULL) {
 								item->group = JabberTextDecode(groupNode->text);
+								TlenGroupDecode(item->group);
 								JabberContactListCreateGroup(item->group);
 								// Don't set group again if already correct, or Miranda may show wrong group count in some case
 								if (!DBGetContactSetting(hContact, "CList", "Group", &dbv)) {

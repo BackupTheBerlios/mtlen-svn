@@ -253,7 +253,19 @@ SOURCE=.\icos\inbox.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\icos\microphone.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\icos\muc.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\icos\sendmail.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\icos\speaker.ico
 # End Source File
 # Begin Source File
 
@@ -263,18 +275,6 @@ SOURCE=.\icos\tlensmall.ico
 # Begin Source File
 
 SOURCE=.\docs\changelog_tlen.txt
-# End Source File
-# Begin Source File
-
-SOURCE=.\icos\microphone.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\icos\muc.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\icos\speaker.ico
 # End Source File
 # End Target
 # End Project
