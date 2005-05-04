@@ -126,18 +126,12 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			else {
 				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, "tlen.pl");
 			}
-			port = (WORD) DBGetContactSettingWord(NULL, jabberProtoName, "Port", TLEN_DEFAULT_PORT);
-			SetDlgItemInt(hwndDlg, IDC_PORT, port, FALSE);
-			if (port <= 0) enableRegister = FALSE;
 
 			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE));
 
-			if (DBGetContactSettingByte(NULL, jabberProtoName, "ManualConnect", TRUE) == TRUE) {
-				CheckDlgButton(hwndDlg, IDC_MANUAL, TRUE);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), TRUE);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), TRUE);
-				EnableWindow(GetDlgItem(hwndDlg, IDC_PORT), FALSE);
-			}
+			EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), TRUE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), TRUE);
+
 			if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_HOST, dbv.pszVal);
 				DBFreeVariant(&dbv);
@@ -174,27 +168,10 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		case IDC_EDIT_USERNAME:
 		case IDC_EDIT_PASSWORD:
 		case IDC_EDIT_LOGIN_SERVER:
-		case IDC_PORT:
-		case IDC_MANUAL:
 		case IDC_HOST:
 		case IDC_HOSTPORT:
-			if (LOWORD(wParam) == IDC_MANUAL) {
-				if (IsDlgButtonChecked(hwndDlg, IDC_MANUAL)) {
-					EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), TRUE);
-					EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), TRUE);
-					EnableWindow(GetDlgItem(hwndDlg, IDC_PORT), FALSE);
-				}
-				else {
-					EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), FALSE);
-					EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), FALSE);
-					EnableWindow(GetDlgItem(hwndDlg, IDC_PORT), TRUE);
-				}
+			if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
 				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
-			}
-			else {
-				if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
-					SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
-			}
 			break;
 		case IDC_USE_SSL:
 			// Fall through
@@ -247,14 +224,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
 				DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", text);
 
-				port = (WORD) GetDlgItemInt(hwndDlg, IDC_PORT, NULL, FALSE);
-				if (DBGetContactSettingWord(NULL, jabberProtoName, "Port", TLEN_DEFAULT_PORT) != port)
-					reconnectRequired = TRUE;
-				DBWriteContactSettingWord(NULL, jabberProtoName, "Port", port);
-
 				DBWriteContactSettingByte(NULL, jabberProtoName, "UseSSL", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_USE_SSL));
-
-				DBWriteContactSettingByte(NULL, jabberProtoName, "ManualConnect", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_MANUAL));
 
 				GetDlgItemText(hwndDlg, IDC_HOST, text, sizeof(text));
 				if (DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv) || strcmp(text, dbv.pszVal))

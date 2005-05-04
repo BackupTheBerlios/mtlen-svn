@@ -25,7 +25,6 @@
 #define IDC_SAVE                        1000
 #define IDC_EDIT_PASSWORD               1001
 #define IDC_EDIT_LOGIN_SERVER           1003
-#define IDC_PORT                        1004
 #define IDC_INFO_JID                    1007
 #define IDC_INFO_RESOURCE               1008
 #define IDC_SHOW_OFFLINE                1012
@@ -40,8 +39,6 @@
 #define IDC_HOST                        1043
 #define IDC_HOSTPORT                    1044
 #define IDC_USE_SSL                     1045
-#define IDC_MANUAL                      1046
-#define IDC_RESOURCE_T                  1047
 #define IDC_SAVEPASSWORD                1048
 #define IDC_PASSWORD                    1050
 #define IDC_RECONNECT                   1050

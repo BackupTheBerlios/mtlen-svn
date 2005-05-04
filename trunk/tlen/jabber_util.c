@@ -674,26 +674,32 @@ void TlenUrlDecode(char *str)
 	*q = '\0';
 }
 
-void TlenGroupDecode(char *str)
+char * TlenGroupDecode(const char *str)
 {
-	char *p;
-	if (str == NULL) return;
-	for (p=str; *p!='\0'; p++) {
+	char *p, *q;
+	if (str == NULL) return NULL;
+	p = q = JabberTextDecode(str);
+	for (; *p!='\0'; p++) {
 		if (*p == '/') {
 			*p = '\\';
 		}
 	}
+	return q;
 }
 
-void TlenGroupEncode(char *str)
+char * TlenGroupEncode(const char *str)
 {
-	char *p;
-	if (str == NULL) return;
-	for (p=str; *p!='\0'; p++) {
+	char *p, *q;
+	if (str == NULL) return NULL;
+	p = q = strdup(str);
+	for (; *p!='\0'; p++) {
 		if (*p == '\\') {
 			*p = '/';
 		}
 	}
+	p = JabberTextEncode(q);
+	free (q);
+	return p;
 }
 
 char *JabberTextEncode(const char *str)

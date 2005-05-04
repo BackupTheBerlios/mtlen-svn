@@ -206,17 +206,12 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 			DBFreeVariant(&dbv);
 		}
 
-		if (DBGetContactSettingByte(NULL, jabberProtoName, "ManualConnect", FALSE) == TRUE) {
-			if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
-				strncpy(info->manualHost, dbv.pszVal, sizeof(info->manualHost));
-				info->manualHost[sizeof(info->manualHost)-1] = '\0';
-				DBFreeVariant(&dbv);
-			}
-			info->port = DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT);
+		if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
+			strncpy(info->manualHost, dbv.pszVal, sizeof(info->manualHost));
+			info->manualHost[sizeof(info->manualHost)-1] = '\0';
+			DBFreeVariant(&dbv);
 		}
-		else {
-			info->port = DBGetContactSettingWord(NULL, jabberProtoName, "Port", TLEN_DEFAULT_PORT);
-		}
+		info->port = DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT);
 
 		info->useSSL = DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE);
 	}
@@ -992,8 +987,7 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 										DBWriteContactSettingString(hContact, "CList", "MyHandle", nick);
 										if (item->group) free(item->group);
 										if ((groupNode=JabberXmlGetChild(itemNode, "group"))!=NULL && groupNode->text!=NULL) {
-											item->group = JabberTextDecode(groupNode->text);
-											TlenGroupDecode(item->group);
+											item->group = TlenGroupDecode(groupNode->text);
 											JabberContactListCreateGroup(item->group);
 											DBWriteContactSettingString(hContact, "CList", "Group", item->group);
 										}
