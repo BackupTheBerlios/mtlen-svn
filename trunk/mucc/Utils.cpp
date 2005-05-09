@@ -108,7 +108,7 @@ void Utils::log(const char *fmt, ...)
 	}
 	*q = '\n';
 	*(q+1) = '\0';
-	CallService(MS_NETLIB_LOG, (WPARAM) NULL, (LPARAM) text);
+//	CallService(MS_NETLIB_LOG, (WPARAM) NULL, (LPARAM) text);
 	//OutputDebugString(text);
 	free(text);
 	free(str);

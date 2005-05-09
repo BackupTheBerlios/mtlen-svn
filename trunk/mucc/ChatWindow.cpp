@@ -25,10 +25,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Options.h"
 #include "m_smileyadd.h"
 #include "m_ieview.h"
+//#include "m_chat.h"
 
 static int logPixelSY;
 static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static void __cdecl StartThread(void *vChat);
 static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 static char *JabberRtfEscape(char *str);
 static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb);
@@ -67,6 +67,59 @@ void ChatWindow::init() {
 	InitializeCriticalSection(&mutex);
 }
 
+/* chat.dll mod*/
+/*
+static bool gcRegistered = false;
+
+static void __stdcall StartThread(void *vChat) { //__cdecl 
+	ChatWindow *chat = (ChatWindow *)vChat;
+	if (!gcRegistered) {
+		gcRegistered = true;
+		GCREGISTER gcr = {0};
+		gcr.cbSize = sizeof(GCREGISTER);
+		gcr.dwFlags = 0;
+		gcr.iMaxText = 0;
+		gcr.nColors = 0;
+		gcr.pColors = 0;
+		gcr.pszModuleDispName = chat->getModule();
+		gcr.pszModule = chat->getModule();
+		if (CallService(MS_GC_REGISTER, 0, (LPARAM)&gcr)) {
+			MessageBox(NULL, "cannot register", "CHAT", MB_OK);
+		}
+	}
+	GCWINDOW gcw = {0};
+	gcw.cbSize = sizeof(GCWINDOW);
+	gcw.iType = GCW_CHATROOM;
+	gcw.pszModule = chat->getModule();
+	gcw.pszName = chat->getRoomName();
+	gcw.pszID = chat->getRoomId();
+	gcw.pszStatusbarText =  "status";
+	gcw.bDisableNickList = FALSE;
+	gcw.dwItemData = (DWORD) chat;
+	if(CallService(MS_GC_NEWCHAT, 0, (LPARAM) &gcw)) {
+		MessageBox(NULL, "cannot create", "CHAT", MB_OK);
+	}
+
+	GCDEST gcdest;
+	GCEVENT gcevent = {sizeof(GCEVENT), &gcdest};
+	const char *groupNames[] = {"Global Owners", "Owners", "Admins", "Moderators", "Users"};
+	gcdest.pszModule = (char *)chat->getModule();
+	gcdest.pszID = (char *)chat->getRoomId();
+	gcevent.bAddToLog = FALSE;
+    gcevent.time = 0;
+	gcdest.iType = GC_EVENT_ADDGROUP;
+	for (int i=0;i<5;i++) {
+		gcevent.pszStatus = Translate(groupNames[i]);
+		CallService(MS_GC_EVENT, 0, (LPARAM)&gcevent);
+	}
+
+
+	gcdest.iType = GC_EVENT_CONTROL;
+	CallService(MS_GC_EVENT, WINDOW_INITDONE, (LPARAM)&gcevent);
+	CallService(MS_GC_EVENT, WINDOW_ONLINE, (LPARAM)&gcevent);
+}
+*/
+
 ChatWindow::ChatWindow(MUCCWINDOW *mucw)  {
 	prev = next = NULL;
 	adminWindow = NULL;
@@ -100,7 +153,8 @@ ChatWindow::ChatWindow(MUCCWINDOW *mucw)  {
 	container = ChatContainer::getWindow();
 	hWnd = container->remoteCreateChild(LogDlgProc, this);
 	container->remoteAddChild(this);
-
+	/* chat.dll mod*/
+/*	CallFunctionAsync(StartThread, (void *)this);*/
 }
 
 ChatWindow::~ChatWindow () {
@@ -239,13 +293,6 @@ void ChatWindow::setOptions(int options) {
 
 int ChatWindow::getOptions() {
 	return options;
-}
-
-static void __cdecl StartThread(void *vChat) {
-
-	OleInitialize(NULL);
-	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_GROUPCHAT_LOG), NULL, LogDlgProc, (LPARAM) vChat);
-	OleUninitialize();
 }
 
 static void __cdecl StartAdminThread(void *vChat) {
@@ -398,10 +445,8 @@ int ChatWindow::getUserGroup(ChatUser *user) {
 int ChatWindow::changePresence(const MUCCEVENT *event) {
 	int i, group, bLogEvent = FALSE;
 	const char *groupNames[] = {"Global Owners", "Owners", "Admins", "Moderators", "Users"};
-
 	ChatUser *user = findUser(event->pszUID);
 	if (event->dwData == ID_STATUS_ONLINE || (user!=NULL && event->dwData!=ID_STATUS_OFFLINE)) {
-		Utils::log("new status: %d, %d", event->dwData, user);
 		if (user == NULL) {
 			user = new ChatUser();
 			user->setId(event->pszUID);
@@ -633,6 +678,56 @@ void ChatWindow::rebuildLog() {
 }
 
 int ChatWindow::logEvent(const MUCCEVENT *event) {
+	/* chat.dll mod*/
+	/*
+	if (event->iType == MUCC_EVENT_MESSAGE) {
+		GCDEST gcdest;
+		GCEVENT gcevent = {sizeof(GCEVENT), &gcdest};
+		gcdest.pszModule = (char *)this->getModule();
+		gcdest.pszID = (char *)this->getRoomId();
+		gcdest.iType = GC_EVENT_MESSAGE;
+		gcevent.pszText = event->pszText;
+		gcevent.pszNick = event->pszNick;
+		gcevent.pszUID = event->pszUID;
+		gcevent.bIsMe = event->bIsMe;
+		gcevent.bAddToLog = TRUE;
+		gcevent.time = event->time;
+		CallService(MS_GC_EVENT, 0, (LPARAM)&gcevent);
+
+	}
+	if (event->iType == MUCC_EVENT_STATUS) {
+		const char *groupNames[] = {"Global Owners", "Owners", "Admins", "Moderators", "Users"};
+		GCDEST gcdest;
+		GCEVENT gcevent = {sizeof(GCEVENT), &gcdest};
+		gcdest.pszModule = (char *)this->getModule();
+		gcdest.pszID = (char *)this->getRoomId();
+		gcevent.pszText = event->pszText;
+		gcevent.pszNick = event->pszNick;
+		int group = 4;
+		if (event->dwFlags&MUCC_EF_USER_GLOBALOWNER) {
+			group = 0;
+		} else if (event->dwFlags&MUCC_EF_USER_OWNER) {
+			group = 1;
+		} else if (event->dwFlags&MUCC_EF_USER_ADMIN) {
+			group = 2;
+		} else if (event->dwFlags&MUCC_EF_USER_MODERATOR) {
+			group = 3;
+		}
+		gcevent.pszStatus = Translate(groupNames[group]);
+		gcevent.pszUID = event->pszUID;
+		gcevent.bIsMe = event->bIsMe;
+		gcevent.bAddToLog = TRUE;
+		gcevent.time = event->time;
+		if (event->dwData == ID_STATUS_ONLINE) {
+			gcdest.iType = GC_EVENT_JOIN;
+		} else {
+			gcdest.iType = GC_EVENT_PART;
+		}
+		CallService(MS_GC_EVENT, 0, (LPARAM)&gcevent);
+	}
+	*/
+	/* chat.dll mod*/
+
 	int	nMin, nMax;
 	HWND hwndLog;
 	if (event->iType != MUCC_EVENT_ERROR) {
@@ -1535,27 +1630,35 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 							chatWindow->startAdminDialog(ChatWindow::ADMIN_MODE_ROLE);
 							break;
 						case ID_ADMINMENU_SAVELOG:
-								{
-									char szFilename[MAX_PATH];
-									strcpy(szFilename, "");
-									OPENFILENAMEA ofn={0};
-									ofn.lStructSize=sizeof(OPENFILENAME);
-									ofn.hwndOwner=hwndDlg;
-									ofn.lpstrFile = szFilename;
-									ofn.lpstrFilter = "Rich Text File\0*.rtf\0\0";
-									ofn.nMaxFile = MAX_PATH;
-									ofn.nMaxFileTitle = MAX_PATH;
-									ofn.Flags = OFN_HIDEREADONLY;
-									ofn.lpstrDefExt = "rtf";
-									if (GetSaveFileNameA(&ofn)) {
-										//remove(szFilename);
-										EDITSTREAM stream = { 0 };
-										stream.dwCookie = (DWORD_PTR)szFilename;
-										stream.dwError = 0;
-										stream.pfnCallback = EditStreamCallback;
-										SendDlgItemMessage(hwndDlg, IDC_LOG, EM_STREAMOUT, SF_RTF | SF_USECODEPAGE, (LPARAM) & stream);
-									}
+							if (chatWindow->getHWNDLog()!=NULL) {
+								IEVIEWEVENT iee;
+								iee.cbSize = sizeof(IEVIEWEVENT);
+								iee.dwFlags = 0;
+								iee.hwnd = chatWindow->getHWNDLog();
+								iee.hContact = NULL;
+								iee.iType = IEE_SAVE_DOCUMENT;
+								CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
+							} else {
+								char szFilename[MAX_PATH];
+								strcpy(szFilename, "");
+								OPENFILENAMEA ofn={0};
+								ofn.lStructSize=sizeof(OPENFILENAME);
+								ofn.hwndOwner=hwndDlg;
+								ofn.lpstrFile = szFilename;
+								ofn.lpstrFilter = "Rich Text File\0*.rtf\0\0";
+								ofn.nMaxFile = MAX_PATH;
+								ofn.nMaxFileTitle = MAX_PATH;
+								ofn.Flags = OFN_HIDEREADONLY;
+								ofn.lpstrDefExt = "rtf";
+								if (GetSaveFileNameA(&ofn)) {
+									//remove(szFilename);
+									EDITSTREAM stream = { 0 };
+									stream.dwCookie = (DWORD_PTR)szFilename;
+									stream.dwError = 0;
+									stream.pfnCallback = EditStreamCallback;
+									SendDlgItemMessage(hwndDlg, IDC_LOG, EM_STREAMOUT, SF_RTF | SF_USECODEPAGE, (LPARAM) & stream);
 								}
+							}
 							break;
 						}
 					}
