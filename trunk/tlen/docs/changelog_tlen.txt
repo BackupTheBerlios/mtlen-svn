@@ -1,3 +1,17 @@
+1.0.6.3 Stable
+---------
++ group names encoding
++ log saving in IEView mode
+* simplified option page
+1.0.6.2 Stable
+---------
++ support for IEView group chats (IEView 1.0.3.0 or later)
++ improvements of group chats in RichEdit mode (context menu, better scrolling)
+1.0.6.1 Stable
+---------
+* bugfix: proper filename encoding
+* options page rearranged
+* code cleanup, other fixes and improvements
 1.0.6.0 Stable
 ---------
 + group chat window flashing
