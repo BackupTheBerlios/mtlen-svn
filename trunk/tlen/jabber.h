@@ -288,7 +288,7 @@ char *JabberTextEncode(const char *str);
 char *JabberTextDecode(const char *str);
 char *JabberBase64Encode(const char *buffer, int bufferLen);
 char *JabberBase64Decode(const char *buffer, int *resultLen);
-char *JabberGetVersionText();
+//char *JabberGetVersionText();
 time_t JabberIsoToUnixTime(char *stamp);
 time_t TlenTimeToUTC(time_t time);
 void JabberSendPresenceTo(int status, char *to, char *extra);

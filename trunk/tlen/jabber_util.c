@@ -804,7 +804,7 @@ char *JabberBase64Decode(const char *str, int *resultLen)
 
 	return res;
 }
-
+/*
 char *JabberGetVersionText()
 {
 	char filename[MAX_PATH], *fileVersion, *res;
@@ -829,7 +829,7 @@ char *JabberGetVersionText()
 	}
 	return NULL;
 }
-
+*/
 /*
  *	Apply Polish Daylight Saving Time rules to get "DST-unbiased" timestamp
  */
