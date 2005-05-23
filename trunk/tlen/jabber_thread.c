@@ -604,7 +604,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 	PROTORECVEVENT recv;
 	XmlNode *bodyNode, *subjectNode, *xNode, *inviteNode, *idNode, *n;
 	char *from, *type, *nick, *p, *localMessage, *idStr;
-	time_t msgTime;
+	DWORD msgTime;
 	BOOL delivered, composing;
 	int i, id;
 	JABBER_LIST_ITEM *item;
@@ -723,7 +723,19 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 								free(nick);
 							}
 
-							if (msgTime == 0) msgTime = time(NULL);
+							if (msgTime == 0) {
+								msgTime = time(NULL);
+							} else {
+								HANDLE hDbEvent = (HANDLE) CallService(MS_DB_EVENT_FINDLAST, (WPARAM) hContact, 0);
+								if (hDbEvent != NULL) {
+									DBEVENTINFO dbei = { 0 };
+									dbei.cbSize = sizeof(dbei);
+									CallService(MS_DB_EVENT_GET, (WPARAM) hDbEvent, (LPARAM) &dbei);
+									if (msgTime < dbei.timestamp) {
+										msgTime = dbei.timestamp + 1;
+									}
+								}
+							}
 							recv.flags = 0;
 							recv.timestamp = (DWORD) msgTime;
 							recv.szMessage = localMessage;

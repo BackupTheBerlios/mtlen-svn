@@ -75,8 +75,7 @@ typedef struct {
 
 static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft);
 static void TlenVoiceSendParse(JABBER_FILE_TRANSFER *ft);
-static void TlenVoiceReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP);
-
+static void TlenVoiceReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 static HWND voiceDlgHWND = NULL;
 static HWND voiceAcceptDlgHWND = NULL;
 static TLEN_VOICE_CONTROL *playbackControl = NULL;
@@ -884,9 +883,10 @@ static JABBER_SOCKET TlenVoiceListen(JABBER_FILE_TRANSFER *ft)
 		}
 	}
 	if (useProxy<2) {
-		nlb.cbSize = NETLIBBIND_SIZEOF_V1;//sizeof(NETLIBBIND);
-		nlb.pfnNewConnection = TlenVoiceReceivingConnection;
+		nlb.cbSize = sizeof(NETLIBBIND);
+		nlb.pfnNewConnectionV2 = TlenVoiceReceivingConnection;
 		nlb.wPort = 0;	// User user-specified incoming port ranges, if available
+		nlb.pExtra = NULL;
 		JabberLog("Calling MS_NETLIB_BINDPORT");
 		s = (HANDLE) CallService(MS_NETLIB_BINDPORT, (WPARAM) hNetlibUser, (LPARAM) &nlb);
 		JabberLog("listening on %d",s);
@@ -970,7 +970,7 @@ void __cdecl TlenVoiceReceiveThread(JABBER_FILE_TRANSFER *ft)
 	TlenVoiceFreeFt(ft);
 }
 
-static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP)
+static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
 {
 	JABBER_SOCKET slisten;
 	JABBER_FILE_TRANSFER *ft;

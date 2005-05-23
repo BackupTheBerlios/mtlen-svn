@@ -33,8 +33,8 @@ extern DWORD jabberLocalIP;
 
 static void TlenFileReceiveParse(JABBER_FILE_TRANSFER *ft);
 static void TlenFileSendParse(JABBER_FILE_TRANSFER *ft);
-static void TlenFileSendingConnection(HANDLE hNewConnection, DWORD dwRemoteIP);
-static void TlenFileReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP);
+static void TlenFileSendingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
+static void TlenFileReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 
 typedef struct {
 	unsigned int maxDataLen;
@@ -559,13 +559,14 @@ static JABBER_SOCKET TlenFileListen(JABBER_FILE_TRANSFER *ft)
 		}
 	} 
 	if (useProxy<2) {
-		nlb.cbSize = NETLIBBIND_SIZEOF_V1;//sizeof(NETLIBBIND);
+		nlb.cbSize = sizeof(NETLIBBIND);
 		if (ft->mode == FT_SEND) {
-			nlb.pfnNewConnection = TlenFileSendingConnection;
+			nlb.pfnNewConnectionV2 = TlenFileSendingConnection;
 		} else {
-			nlb.pfnNewConnection = TlenFileReceivingConnection;
+			nlb.pfnNewConnectionV2 = TlenFileReceivingConnection;
 		}
 		nlb.wPort = 0;	// User user-specified incoming port ranges, if available
+		nlb.pExtra = NULL;
 		JabberLog("Calling MS_NETLIB_BINDPORT");
 		s = (HANDLE) CallService(MS_NETLIB_BINDPORT, (WPARAM) hNetlibUser, (LPARAM) &nlb);
 		JabberLog("listening on %d",s);
@@ -637,7 +638,7 @@ void __cdecl TlenFileReceiveThread(JABBER_FILE_TRANSFER *ft)
 	TlenFileFreeFt(ft);
 }
 
-static void TlenFileReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP)
+static void TlenFileReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
 {
 	JABBER_SOCKET slisten;
 	JABBER_FILE_TRANSFER *ft;
@@ -876,7 +877,7 @@ void __cdecl TlenFileSendingThread(JABBER_FILE_TRANSFER *ft)
 	TlenFileFreeFt(ft);
 }
 
-static void TlenFileSendingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP)
+static void TlenFileSendingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
 {
 	JABBER_SOCKET slisten;
 	JABBER_FILE_TRANSFER *ft;

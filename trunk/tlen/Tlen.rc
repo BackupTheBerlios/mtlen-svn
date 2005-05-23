@@ -90,7 +90,7 @@ STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    GROUPBOX        "File Transfer && Voice Chats",IDC_STATIC,7,8,286,97
+    GROUPBOX        "File Transfer and Voice Chats",IDC_STATIC,7,8,286,97
     CONTROL         "Use proxy for incoming connections",IDC_FILE_USE_PROXY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,21,221,10
     LTEXT           "Proxy type:",IDC_FILE_PROXY_TYPE_LABEL,16,35,48,8,
