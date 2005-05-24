@@ -735,6 +735,9 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 										msgTime = dbei.timestamp + 1;
 									}
 								}
+								if (msgTime > time(NULL)) {
+									msgTime = time(NULL);
+								}
 							}
 							recv.flags = 0;
 							recv.timestamp = (DWORD) msgTime;
