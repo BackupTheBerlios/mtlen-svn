@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _TLEN_MUC_H_
 
 #include <windows.h>
-#include "../mucc/m_mucc.h"
+#include "m_mucc.h"
 
 #define USER_FLAGS_OWNER			0x01
 #define USER_FLAGS_ADMIN			0x02
