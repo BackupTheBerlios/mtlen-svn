@@ -441,13 +441,13 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 			if (info->type == JABBER_SESSION_NORMAL) {
 				jabberOnline = FALSE;
 				jabberConnected = FALSE;
-				
+
 				memset(&clmi, 0, sizeof(CLISTMENUITEM));
 				clmi.cbSize = sizeof(CLISTMENUITEM);
 				clmi.flags = CMIM_FLAGS | CMIF_GRAYED;
 				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuMUC, (LPARAM) &clmi);
 				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChats, (LPARAM) &clmi);
-				
+
 				// Set status to offline
 				oldStatus = jabberStatus;
 				jabberStatus = ID_STATUS_OFFLINE;
@@ -672,23 +672,6 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 										item->messageEventIdStr = (idStr==NULL)?NULL:_strdup(idStr);
 									}
 								}
-								else if (!strcmp(p, "http://jabber.org/protocol/muc#user")) {
-									if ((inviteNode=JabberXmlGetChild(xNode, "invite")) != NULL) {
-										inviteFromJid = JabberXmlGetAttrValue(inviteNode, "from");
-										if ((n=JabberXmlGetChild(inviteNode, "reason")) != NULL) {
-											inviteReason = n->text;
-										}
-									}
-									if ((n=JabberXmlGetChild(xNode, "password")) != NULL) {
-										invitePassword = n->text;
-									}
-								}
-								else if (!strcmp(p, "jabber:x:conference")) {
-									inviteRoomJid = JabberXmlGetAttrValue(xNode, "jid");
-									if (inviteReason == NULL)
-										inviteReason = xNode->text;
-									isChatRoomInvitation = TRUE;
-								}
 							}
 							i++;
 						}
@@ -719,7 +702,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 								else {
 									nick = JabberLocalNickFromJID(from);
 									hContact = JabberDBCreateContact(from, nick, TRUE, TRUE);
-								}	
+								}
 								free(nick);
 							}
 
@@ -884,7 +867,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 						}
 					}
 					if (p) free(p);
-				} 
+				}
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
 					// Determine status to show for the contact based on the remaining resources
 //					status = JabberCombineStatus(status, item->resource[i].status);
@@ -959,12 +942,6 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 	/////////////////////////////////////////////////////////////////////////
 	// MORE GENERAL ROUTINES, WHEN ID DOES NOT MATCH
 	/////////////////////////////////////////////////////////////////////////
-/*
-	else if ((pfunc=JabberIqFetchXmlnsFunc(xmlns)) != NULL) {
-		JabberLog("Handling iq request for xmlns=%s", xmlns);
-		pfunc(node, userdata);
-	}
-*/
 	// RECVED: <iq type='set'><query ...
 	else if (!strcmp(type, "set") && queryNode!=NULL && (xmlns=JabberXmlGetAttrValue(queryNode, "xmlns"))!=NULL) {
 
@@ -1044,95 +1021,6 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 		}
 
 	}
-	/*
-	// RECVED: <iq type='get'><query ...
-	else if (!strcmp(type, "get") && queryNode!=NULL && (xmlns=JabberXmlGetAttrValue(queryNode, "xmlns"))!=NULL) {
-
-		// RECVED: software version query
-		// ACTION: return my software version
-		if (!strcmp(xmlns, "jabber:iq:version")) {
-			char *from, *resultId, *version, *os;
-			OSVERSIONINFO osvi;
-			char mversion[64];
-
-			if ((from=JabberXmlGetAttrValue(node, "from"))!=NULL) {
-				str = JabberGetVersionText();
-				version = JabberTextEncode(str);
-				os = NULL;
-				memset(&osvi, 0, sizeof(OSVERSIONINFO));
-				osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-				if (GetVersionEx(&osvi)) {
-					switch (osvi.dwPlatformId) {
-					case VER_PLATFORM_WIN32_NT:
-						if (osvi.dwMajorVersion == 5) {
-							if (osvi.dwMinorVersion == 2) os = JabberTextEncode(Translate("Windows Server 2003"));
-							else if (osvi.dwMinorVersion == 1) os = JabberTextEncode(Translate("Windows XP"));
-							else if (osvi.dwMinorVersion == 0) os = JabberTextEncode(Translate("Windows 2000"));
-						}
-						else if (osvi.dwMajorVersion <= 4) {
-							os = JabberTextEncode(Translate("Windows NT"));
-						}
-						break;
-					case VER_PLATFORM_WIN32_WINDOWS:
-						if (osvi.dwMajorVersion == 4) {
-							if (osvi.dwMinorVersion == 0) os = JabberTextEncode(Translate("Windows 95"));
-							if (osvi.dwMinorVersion == 10) os = JabberTextEncode(Translate("Windows 98"));
-							if (osvi.dwMinorVersion == 90) os = JabberTextEncode(Translate("Windows ME"));
-						}
-						break;
-					}
-				}
-				if (os == NULL) os = JabberTextEncode(Translate("Windows"));
-				CallService(MS_SYSTEM_GETVERSIONTEXT, sizeof(mversion), (LPARAM) mversion);
-				if ((resultId=JabberTextEncode(idStr)) != NULL) {
-					JabberSend(jabberThreadInfo->s, "<iq type='result' id='%s' to='%s'><query xmlns='jabber:iq:version'><name>Tlen+Protocol+Plugin+(Miranda+IM+%s)</name><version>%s</version><os>%s</os></query></iq>", resultId, from, mversion, version?version:"", os?os:"");
-					free(resultId);
-				}
-				else {
-					JabberSend(jabberThreadInfo->s, "<iq type='result' to='%s'><query xmlns='jabber:iq:version'><name>Tlen+Protocol+Plugin+(Miranda+IM+%s)</name><version>%s</version><os>%s</os></query></iq>", from, mversion, version?version:"", os?os:"");
-				}
-				if (str) free(str);
-				if (version) free(version);
-				if (os) free(os);
-			}
-		}
-	}
-	// RECVED: <iq type='result'><query ...
-	else if (!strcmp(type, "result") && queryNode!=NULL && (xmlns=JabberXmlGetAttrValue(queryNode, "xmlns"))!=NULL) {
-
-		// RECVED: software version result
-		// ACTION: update version information for the specified jid/resource
-		if (!strcmp(xmlns, "jabber:iq:version")) {
-			char *from;
-			JABBER_LIST_ITEM *item;
-			if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
-				if ((item=JabberListGetItemPtr(LIST_ROSTER, from))!=NULL && (r=item->resource)!=NULL) {
-					if ((p=strchr(from, '/'))!=NULL && p[1]!='\0') {
-						p++;
-						for (i=0; i<item->resourceCount && strcmp(r[i].resourceName, p); i++);
-						if (i < item->resourceCount) {
-							if (r[i].software) free(r[i].software);
-							if ((n=JabberXmlGetChild(queryNode, "name"))!=NULL && n->text)
-								r[i].software = JabberTextDecode(n->text);
-							else
-								r[i].software = NULL;
-							if (r[i].version) free(r[i].version);
-							if ((n=JabberXmlGetChild(queryNode, "version"))!=NULL && n->text)
-								r[i].version = JabberTextDecode(n->text);
-							else
-								r[i].version = NULL;
-							if (r[i].system) free(r[i].system);
-							if ((n=JabberXmlGetChild(queryNode, "os"))!=NULL && n->text)
-								r[i].system = JabberTextDecode(n->text);
-							else
-								r[i].system = NULL;
-						}
-					}
-				}
-			}
-		}
-	}
-		*/
 	// RECVED: <iq type='error'> ...
 	else if (!strcmp(type, "error")) {
 		JABBER_LIST_ITEM *item;
@@ -1274,7 +1162,7 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 							p = JabberTextDecode(p);
 							strncpy(szFilename, p, sizeof(szFilename));
 							free(p);
-							
+
 					}
 					else if (numFiles > 1) {
 						_snprintf(szFilename, sizeof(szFilename), "%d Files", numFiles);
@@ -1366,7 +1254,7 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 				}
 			}
 			else if (!strcmp(e, "7")) {
-				// FILE_RECV : e='7' : IP and port information to connect to send file 
+				// FILE_RECV : e='7' : IP and port information to connect to send file
 				// in case the conection to the given server was not successful
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
@@ -1510,7 +1398,7 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 						CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
 						free(localMessage);
 					} else {
-						/* MUC message */ 
+						/* MUC message */
 						TlenMUCRecvMessage(f, timestamp, bNode);
 					}
 				}
@@ -1556,7 +1444,7 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 }
 
 static void TlenMailPopup(char *title, char *emailInfo)
-{	
+{
 	POPUPDATAEX ppd;
 	char * lpzContactName;
 	char * lpzText;
@@ -1564,7 +1452,7 @@ static void TlenMailPopup(char *title, char *emailInfo)
 	if (!DBGetContactSettingByte(NULL, jabberProtoName, "MailPopupEnabled", TRUE)) {
 		return;
 	}
-	lpzContactName = title; 
+	lpzContactName = title;
 	lpzText = emailInfo;
 	ZeroMemory(&ppd, sizeof(ppd));
 	ppd.lchContact = NULL;
@@ -1581,7 +1469,7 @@ static void TlenMailPopup(char *title, char *emailInfo)
 		delayMode = DBGetContactSettingByte(NULL, jabberProtoName, "MailPopupDelayMode", 0);
 		delay = 0;
 		if (delayMode==1) {
-			delay = DBGetContactSettingDword(NULL, jabberProtoName, "MailPopupDelay", 4); 
+			delay = DBGetContactSettingDword(NULL, jabberProtoName, "MailPopupDelay", 4);
 		} else if (delayMode==2) {
 			delay = -1;
 		}
@@ -1681,13 +1569,13 @@ static void TlenProcessP(XmlNode *node, void *userdata)
 		}
 		if (atoi(a) == 1) {
 			flags |= USER_FLAGS_OWNER;
-		} 
+		}
 		if (atoi(a) == 3) {
 			//flags |= USER_FLAGS_MEMBER;
-		} 
+		}
 		if (atoi(a) == 5) {
 			flags |= USER_FLAGS_GLOBALOWNER;
-		} 
+		}
 	}
 	sNode = JabberXmlGetChild(node, "s");
 	if (sNode != NULL) {
@@ -1797,14 +1685,14 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
 								item->ft->httpPort = atoi(p);
 								TlenVoiceStart(item->ft, 0);
-								//JabberForkThread((void (__cdecl *)(void*))TlenVoiceReceiveThread, 0, item->ft); 
+								//JabberForkThread((void (__cdecl *)(void*))TlenVoiceReceiveThread, 0, item->ft);
 							}
 						}
 					}
 				}
 			}
 			else if (!strcmp(e, "7")) {
-				// FILE_RECV : e='7' : IP and port information to connect to send file 
+				// FILE_RECV : e='7' : IP and port information to connect to send file
 				// in case the conection to the given server was not successful
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(LIST_VOICE, p)) != NULL) {
@@ -1821,7 +1709,7 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 				}
 			}
 			else if (!strcmp(e, "8")) {
-				// FILE_RECV : e='8' : transfer error 
+				// FILE_RECV : e='8' : transfer error
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(LIST_VOICE, p)) != NULL) {
 						item->ft->state = FT_ERROR;
