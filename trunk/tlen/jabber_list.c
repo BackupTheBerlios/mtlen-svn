@@ -29,42 +29,6 @@ static CRITICAL_SECTION csLists;
 
 static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item);
 
-#ifdef _DEBUG
-static void PrintResource(int index)
-{
-	char *p;
-	int i, resourceCount;
-	JABBER_RESOURCE_STATUS *resource;
-	char *str;
-
-	if (index<0 || index>=count) {
-		JabberLog("PrintResource(): index out-of-bound");
-	}
-	else {
-		resourceCount = lists[index].resourceCount;
-		if (resourceCount <= 0)
-			JabberLog("Resource count is zero");
-		else {
-			if ((str=malloc(resourceCount * 48)) != NULL) {
-				p = str;
-				for (i=0; i<resourceCount; i++) {
-					resource = &(lists[index].resource[i]);
-					sprintf(p, "(%d)", resource->status);
-					for (; *p!='\0'; p++);
-					if (resource->resourceName)
-						sprintf(p, "%s-", resource->resourceName);
-					else
-						strcpy(p, "(NULL)");
-					for (; *p!='\0'; p++);
-				}
-				JabberLog("Resource is now '%s'", str);
-				free(str);
-			}
-		}
-	}
-}
-#endif
-
 void JabberListInit(void)
 {
 	lists = NULL;
