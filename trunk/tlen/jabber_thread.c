@@ -602,15 +602,13 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 	HANDLE hContact;
 	CCSDATA ccs;
 	PROTORECVEVENT recv;
-	XmlNode *bodyNode, *subjectNode, *xNode, *inviteNode, *idNode, *n;
+	XmlNode *bodyNode, *subjectNode, *xNode, *idNode, *n;
 	char *from, *type, *nick, *p, *localMessage, *idStr;
 	DWORD msgTime;
 	BOOL delivered, composing;
 	int i, id;
 	JABBER_LIST_ITEM *item;
 	BOOL isChatRoomJid;
-	BOOL isChatRoomInvitation;
-	char *inviteRoomJid, *inviteFromJid, *inviteReason, *invitePassword;
 
 	if (!node->name || strcmp(node->name, "message")) return;
 	if ((info=(struct ThreadData *) userdata) == NULL) return;
@@ -642,11 +640,6 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 							localMessage = JabberTextDecode(bodyNode->text);
 						}
 
-						isChatRoomInvitation = FALSE;
-						inviteRoomJid = NULL;
-						inviteFromJid = NULL;
-						inviteReason = NULL;
-						invitePassword = NULL;
 						msgTime = 0;
 						delivered = composing = FALSE;
 						i = 1;
@@ -676,62 +669,54 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 							i++;
 						}
 
-						if (isChatRoomInvitation) {
-							if (inviteRoomJid != NULL) {
-								; //JabberGroupchatProcessInvite(inviteRoomJid, inviteFromJid, inviteReason, invitePassword);
-							}
+						if (item != NULL) {
+							item->wantComposingEvent = composing;
+							if ((hContact=JabberHContactFromJID(from)) != NULL)
+								CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
 						}
-						else {
 
-							if (item != NULL) {
-								item->wantComposingEvent = composing;
-								if ((hContact=JabberHContactFromJID(from)) != NULL)
-									CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
+						if ((hContact=JabberHContactFromJID(from)) == NULL) {
+							// Create a temporary contact
+							if (isChatRoomJid) {
+								if ((p=strchr(from, '/'))!=NULL && p[1]!='\0')
+									p++;
+								else
+									p = from;
+								nick = JabberTextEncode(p);
+								hContact = JabberDBCreateContact(from, nick, TRUE, FALSE);
 							}
-
-							if ((hContact=JabberHContactFromJID(from)) == NULL) {
-								// Create a temporary contact
-								if (isChatRoomJid) {
-									if ((p=strchr(from, '/'))!=NULL && p[1]!='\0')
-										p++;
-									else
-										p = from;
-									nick = JabberTextEncode(p);
-									hContact = JabberDBCreateContact(from, nick, TRUE, FALSE);
-								}
-								else {
-									nick = JabberLocalNickFromJID(from);
-									hContact = JabberDBCreateContact(from, nick, TRUE, TRUE);
-								}
-								free(nick);
+							else {
+								nick = JabberLocalNickFromJID(from);
+								hContact = JabberDBCreateContact(from, nick, TRUE, TRUE);
 							}
+							free(nick);
+						}
 
-							if (msgTime == 0) {
+						if (msgTime == 0) {
+							msgTime = time(NULL);
+						} else {
+							HANDLE hDbEvent = (HANDLE) CallService(MS_DB_EVENT_FINDLAST, (WPARAM) hContact, 0);
+							if (hDbEvent != NULL) {
+								DBEVENTINFO dbei = { 0 };
+								dbei.cbSize = sizeof(dbei);
+								CallService(MS_DB_EVENT_GET, (WPARAM) hDbEvent, (LPARAM) &dbei);
+								if (msgTime < dbei.timestamp) {
+									msgTime = dbei.timestamp + 1;
+								}
+							}
+							if (msgTime > (DWORD)time(NULL)) {
 								msgTime = time(NULL);
-							} else {
-								HANDLE hDbEvent = (HANDLE) CallService(MS_DB_EVENT_FINDLAST, (WPARAM) hContact, 0);
-								if (hDbEvent != NULL) {
-									DBEVENTINFO dbei = { 0 };
-									dbei.cbSize = sizeof(dbei);
-									CallService(MS_DB_EVENT_GET, (WPARAM) hDbEvent, (LPARAM) &dbei);
-									if (msgTime < dbei.timestamp) {
-										msgTime = dbei.timestamp + 1;
-									}
-								}
-								if (msgTime > time(NULL)) {
-									msgTime = time(NULL);
-								}
 							}
-							recv.flags = 0;
-							recv.timestamp = (DWORD) msgTime;
-							recv.szMessage = localMessage;
-							recv.lParam = 0;
-							ccs.hContact = hContact;
-							ccs.wParam = 0;
-							ccs.szProtoService = PSR_MESSAGE;
-							ccs.lParam = (LPARAM) &recv;
-							CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
 						}
+						recv.flags = 0;
+						recv.timestamp = (DWORD) msgTime;
+						recv.szMessage = localMessage;
+						recv.lParam = 0;
+						ccs.hContact = hContact;
+						ccs.wParam = 0;
+						ccs.szProtoService = PSR_MESSAGE;
+						ccs.lParam = (LPARAM) &recv;
+						CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
 
 						free(localMessage);
 					}
