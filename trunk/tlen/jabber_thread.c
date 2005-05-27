@@ -816,7 +816,6 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 					}
 					// Determine status to show for the contact
 					if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
-//						status = JabberCombineStatus(status, item->resource[i].status);
 						item->status = status;
 					}
 
@@ -855,7 +854,6 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 				}
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
 					// Determine status to show for the contact based on the remaining resources
-//					status = JabberCombineStatus(status, item->resource[i].status);
 					item->status = status;
 				}
 				if ((hContact=JabberHContactFromJID(from)) != NULL) {

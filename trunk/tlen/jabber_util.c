@@ -195,33 +195,6 @@ HANDLE JabberHContactFromJID(const char *jid)
 		free(s);
 		return hContactMatched;
 	}
-
-	// The following is for the transition to storing JID and resource in UTF8 format.
-	// If we can't find the particular JID, we ut8decode the JID and try again below.
-	// If found, we update the JID using the utf8 format.
-	s2 = JabberTextDecode(s);
-	len = strlen(s2);
-	hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDFIRST, 0, 0);
-	while (hContact != NULL) {
-		szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
-		if (szProto!=NULL && !strcmp(jabberProtoName, szProto)) {
-			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
-				p = dbv.pszVal;
-				if (p && (int)strlen(p)>=len && (p[len]=='\0'||p[len]=='/') && !strncmp(p, s2, len)) {
-					DBFreeVariant(&dbv);
-					// Update with the utf8 format
-					DBWriteContactSettingString(hContact, jabberProtoName, "jid", s);
-					free(s);
-					free(s2);
-					return hContact;
-				}
-				DBFreeVariant(&dbv);
-			}
-		}
-		hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDNEXT, (WPARAM) hContact, 0);
-	}
-	free(s2);
-	free(s);
 	return NULL;
 }
 
@@ -508,34 +481,6 @@ void JabberHttpUrlDecode(char *str)
 		}
 	}
 	*q = '\0';
-}
-
-int JabberCombineStatus(int status1, int status2)
-{
-	// Combine according to the following priority (high to low)
-	// ID_STATUS_FREECHAT
-	// ID_STATUS_ONLINE
-	// ID_STATUS_DND
-	// ID_STATUS_AWAY
-	// ID_STATUS_NA
-	// ID_STATUS_INVISIBLE 
-	// ID_STATUS_OFFLINE
-	// other ID_STATUS in random order (actually return status1)
-	if (status1==ID_STATUS_FREECHAT || status2==ID_STATUS_FREECHAT)
-		return ID_STATUS_FREECHAT;
-	if (status1==ID_STATUS_ONLINE || status2==ID_STATUS_ONLINE)
-		return ID_STATUS_ONLINE;
-	if (status1==ID_STATUS_DND || status2==ID_STATUS_DND)
-		return ID_STATUS_DND;
-	if (status1==ID_STATUS_AWAY || status2==ID_STATUS_AWAY)
-		return ID_STATUS_AWAY;
-	if (status1==ID_STATUS_NA || status2==ID_STATUS_NA)
-		return ID_STATUS_NA;
-	if (status1==ID_STATUS_INVISIBLE || status2==ID_STATUS_INVISIBLE)
-		return ID_STATUS_INVISIBLE;
-	if (status1==ID_STATUS_OFFLINE || status2==ID_STATUS_OFFLINE)
-		return ID_STATUS_OFFLINE;
-	return status1;
 }
 
 struct tagErrorCodeToStr {

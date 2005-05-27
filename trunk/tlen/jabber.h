@@ -275,7 +275,6 @@ char *JabberUnixToDos(const char *str);
 void JabberDosToUnix(char *str);
 void JabberHttpUrlDecode(char *str);
 char *JabberHttpUrlEncode(const char *str);
-int JabberCombineStatus(int status1, int status2);
 char *JabberErrorStr(int errorCode);
 char *JabberErrorMsg(XmlNode *errorNode);
 void JabberSendVisibleInvisiblePresence(BOOL invisible);
