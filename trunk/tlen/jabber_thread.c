@@ -620,8 +620,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 
 			isChatRoomJid = JabberListExist(LIST_CHATROOM, from);
 
-			if (isChatRoomJid && type!=NULL && !strcmp(type, "groupchat"))
-				; //JabberGroupchatProcessMessage(node, userdata);
+			if (isChatRoomJid && type!=NULL && !strcmp(type, "groupchat")); //JabberGroupchatProcessMessage(node, userdata);
 
 			else {
 
@@ -771,8 +770,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 
 	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
 
-		if (JabberListExist(LIST_CHATROOM, from))
-			; //JabberGroupchatProcessPresence(node, userdata);
+		if (JabberListExist(LIST_CHATROOM, from)); //JabberGroupchatProcessPresence(node, userdata);
 
 		else {
 			type = JabberXmlGetAttrValue(node, "type");
@@ -1346,8 +1344,28 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_INFINITE);
 				else if(!strcmp(tp, "u"))//contact stopped writing
 					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_OFF);
-				else if(!strcmp(tp, "a"))//alert was received
-					SkinPlaySound("TlenAlertNotify");
+				else if(!strcmp(tp, "a")) {//alert was received 
+					int bAlert = TRUE;
+					if (DBGetContactSettingByte(NULL, jabberProtoName, "IgnoredAlerts", FALSE)) {
+						if (JabberListGetItemPtr(LIST_ROSTER, f) == NULL) bAlert = FALSE;
+					} 
+					if (bAlert) {
+						CCSDATA ccs;
+						PROTORECVEVENT recv;
+						char *localMessage = strdup(Translate("An alert was received."));
+						recv.flags = 0;
+						recv.timestamp = (DWORD) time(NULL);
+						recv.szMessage = localMessage;
+						recv.lParam = 0;
+						ccs.hContact = hContact;
+						ccs.wParam = 0;
+						ccs.szProtoService = PSR_MESSAGE;
+						ccs.lParam = (LPARAM) &recv;
+						CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
+						free(localMessage);
+						SkinPlaySound("TlenAlertNotify");
+					}
+				}
 			}
 		}
 		if ((p=strchr(f, '@')) != NULL) {

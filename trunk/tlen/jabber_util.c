@@ -156,7 +156,6 @@ HANDLE JabberHContactFromJID(const char *jid)
 	char *szProto;
 	char *s, *p, *q;
 	int len;
-	char *s2;
 
 	if (jid == NULL) return (HANDLE) NULL;
 

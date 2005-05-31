@@ -40,6 +40,7 @@
 #define IDC_HOSTPORT                    1044
 #define IDC_USE_SSL                     1045
 #define IDC_SAVEPASSWORD                1048
+#define IDC_ROSTER_ALERTS				1049
 #define IDC_PASSWORD                    1050
 #define IDC_RECONNECT                   1050
 #define IDC_JID                         1051

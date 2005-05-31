@@ -92,14 +92,12 @@ static LRESULT CALLBACK JabberValidateUsernameWndProc(HWND hwndEdit, UINT msg, W
 static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	char text[256];
-	WORD port;
 	WNDPROC oldProc;
 
 	switch (msg) {
 	case WM_INITDIALOG:
 		{
 			DBVARIANT dbv;
-			BOOL enableRegister = TRUE;
 
 			TranslateDialogDefault(hwndDlg);
 			SetDlgItemText(hwndDlg, IDC_TLEN, jabberModuleName);
@@ -108,44 +106,22 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 #endif
 			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, dbv.pszVal);
-				if (!dbv.pszVal[0]) enableRegister = FALSE;
 				DBFreeVariant(&dbv);
 			}
 			if (!DBGetContactSetting(NULL, jabberProtoName, "Password", &dbv)) {
 				CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
 				SetDlgItemText(hwndDlg, IDC_EDIT_PASSWORD, dbv.pszVal);
-				if (!dbv.pszVal[0]) enableRegister = FALSE;
 				DBFreeVariant(&dbv);
 			}
 			CheckDlgButton(hwndDlg, IDC_SAVEPASSWORD, DBGetContactSettingByte(NULL, jabberProtoName, "SavePassword", TRUE));
-			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, dbv.pszVal);
-				if (!dbv.pszVal[0]) enableRegister = FALSE;
-				DBFreeVariant(&dbv);
-			}
-			else {
-				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, "tlen.pl");
-			}
 
 			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE));
 
-			EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), TRUE);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), TRUE);
-
-			if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_HOST, dbv.pszVal);
-				DBFreeVariant(&dbv);
-			}
-			else
-				SetDlgItemText(hwndDlg, IDC_HOST, "s1.tlen.pl");
-			SetDlgItemInt(hwndDlg, IDC_HOSTPORT, DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT), FALSE);
-
-			CheckDlgButton(hwndDlg, IDC_KEEPALIVE, DBGetContactSettingByte(NULL, jabberProtoName, "KeepAlive", TRUE));
 			CheckDlgButton(hwndDlg, IDC_RECONNECT, DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE));
 			CheckDlgButton(hwndDlg, IDC_ROSTER_SYNC, DBGetContactSettingByte(NULL, jabberProtoName, "RosterSync", FALSE));
 			CheckDlgButton(hwndDlg, IDC_SHOW_OFFLINE, DBGetContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", FALSE));
 			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE));
-			CheckDlgButton(hwndDlg, IDC_VISIBILITY_SUPPORT, DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE));
+			CheckDlgButton(hwndDlg, IDC_ROSTER_ALERTS, DBGetContactSettingByte(NULL, jabberProtoName, "IgnoredAlerts", FALSE));
 
 			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("<Last message>"));
 	        //SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("<Ask me>"));
@@ -160,33 +136,36 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			oldProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_USERDATA, (LONG) oldProc);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC, (LONG) JabberValidateUsernameWndProc);
-
+			TlenVoiceBuildInDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_IN));
+			TlenVoiceBuildOutDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_OUT));
 			return TRUE;
 		}
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDC_EDIT_USERNAME:
 		case IDC_EDIT_PASSWORD:
-		case IDC_EDIT_LOGIN_SERVER:
-		case IDC_HOST:
-		case IDC_HOSTPORT:
 			if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
 				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_USE_SSL:
 			// Fall through
 		case IDC_SAVEPASSWORD:
-		case IDC_KEEPALIVE:
 		case IDC_RECONNECT:
 		case IDC_ROSTER_SYNC:
 		case IDC_SHOW_OFFLINE:
 		case IDC_OFFLINE_MESSAGE:
-		case IDC_VISIBILITY_SUPPORT:
+		case IDC_ROSTER_ALERTS:
 			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_REGISTERACCOUNT:
 		    CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) TLEN_REGISTER);
 		    break;
+		case IDC_OFFLINE_MESSAGE_OPTION:
+		case IDC_VOICE_DEVICE_IN:
+		case IDC_VOICE_DEVICE_OUT:
+			if (HIWORD(wParam) == CBN_SELCHANGE)
+				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			break;
 		default:
 			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
@@ -218,34 +197,17 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 
 				DBWriteContactSettingByte(NULL, jabberProtoName, "SavePassword", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD));
 
-				GetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, text, sizeof(text));
-				if (DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv) || strcmp(text, dbv.pszVal))
-					reconnectRequired = TRUE;
-				if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
-				DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", text);
 
 				DBWriteContactSettingByte(NULL, jabberProtoName, "UseSSL", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_USE_SSL));
-
-				GetDlgItemText(hwndDlg, IDC_HOST, text, sizeof(text));
-				if (DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv) || strcmp(text, dbv.pszVal))
-					reconnectRequired = TRUE;
-				if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
-				DBWriteContactSettingString(NULL, jabberProtoName, "ManualHost", text);
-
-				port = (WORD) GetDlgItemInt(hwndDlg, IDC_HOSTPORT, NULL, FALSE);
-				if (DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT) != port)
-					reconnectRequired = TRUE;
-				DBWriteContactSettingWord(NULL, jabberProtoName, "ManualPort", port);
-
-				DBWriteContactSettingByte(NULL, jabberProtoName, "KeepAlive", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE));
-				jabberSendKeepAlive = IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE);
 
 				DBWriteContactSettingByte(NULL, jabberProtoName, "Reconnect", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_RECONNECT));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "RosterSync", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ROSTER_SYNC));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SHOW_OFFLINE));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_OFFLINE_MESSAGE));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", (WORD) SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VISIBILITY_SUPPORT));
+				DBWriteContactSettingByte(NULL, jabberProtoName, "IgnoredAlerts", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ROSTER_ALERTS));
+				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_IN, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
 
 				if (reconnectRequired && jabberConnected)
 					MessageBox(hwndDlg, Translate("These changes will take effect the next time you connect to the Tlen network."), Translate("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
@@ -269,6 +231,28 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 		{
 			DBVARIANT dbv;
 			TranslateDialogDefault(hwndDlg);
+			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, dbv.pszVal);
+				DBFreeVariant(&dbv);
+			} else {
+				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, "tlen.pl");
+			}
+
+			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE));
+
+			EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), TRUE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), TRUE);
+
+			if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_HOST, dbv.pszVal);
+				DBFreeVariant(&dbv);
+			}
+			else
+				SetDlgItemText(hwndDlg, IDC_HOST, "s1.tlen.pl");
+			SetDlgItemInt(hwndDlg, IDC_HOSTPORT, DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT), FALSE);
+
+			CheckDlgButton(hwndDlg, IDC_KEEPALIVE, DBGetContactSettingByte(NULL, jabberProtoName, "KeepAlive", TRUE));
+			CheckDlgButton(hwndDlg, IDC_VISIBILITY_SUPPORT, DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE));
 			// File transfer options
 			bChecked = FALSE;
 			if (DBGetContactSettingByte(NULL, jabberProtoName, "UseFileProxy", FALSE) == TRUE) {
@@ -310,18 +294,18 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_PASSWORD, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			}
-			TlenVoiceBuildInDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_IN));
-			TlenVoiceBuildOutDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_OUT));
 			return TRUE;
 		}
 	case WM_COMMAND:
 		{
 			switch (LOWORD(wParam)) {
-			case IDC_VOICE_DEVICE_IN:
-			case IDC_VOICE_DEVICE_OUT:
+			case IDC_FILE_PROXY_TYPE:
 				if (HIWORD(wParam) == CBN_SELCHANGE)
 					SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 				break;
+			case IDC_EDIT_LOGIN_SERVER:
+			case IDC_HOST:
+			case IDC_HOSTPORT:
 			case IDC_FILE_PROXY_HOST:
 			case IDC_FILE_PROXY_PORT:
 			case IDC_FILE_PROXY_USER:
@@ -346,6 +330,10 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD), bChecked);
 				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 				break;
+			case IDC_KEEPALIVE:
+			case IDC_VISIBILITY_SUPPORT:
+				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				break;
 			default:
 //				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 				break;
@@ -356,21 +344,47 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 		{
 			switch (((LPNMHDR) lParam)->code) {
 			case PSN_APPLY:
-				// File transfer options
-				DBWriteContactSettingByte(NULL, jabberProtoName, "UseFileProxy", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "FileProxyType", (WORD) SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_GETCURSEL, 0, 0));
-				GetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, text, sizeof(text));
-				DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyHost", text);
-				DBWriteContactSettingWord(NULL, jabberProtoName, "FileProxyPort", (WORD) GetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, NULL, FALSE));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "FileProxyAuth", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_PROXY_USE_AUTH));
-				GetDlgItemText(hwndDlg, IDC_FILE_PROXY_USER, text, sizeof(text));
-				DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyUsername", text);
-				GetDlgItemText(hwndDlg, IDC_FILE_PROXY_PASSWORD, text, sizeof(text));
-				CallService(MS_DB_CRYPT_ENCODESTRING, sizeof(text), (LPARAM) text);
-				DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyPassword", text);
-				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_IN, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
-				return TRUE;
+				{
+					WORD port;
+					BOOL reconnectRequired = FALSE;
+					DBVARIANT dbv;
+					GetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, text, sizeof(text));
+					if (DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv) || strcmp(text, dbv.pszVal))
+						reconnectRequired = TRUE;
+					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
+					DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", text);
+
+					DBWriteContactSettingByte(NULL, jabberProtoName, "UseSSL", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_USE_SSL));
+
+					GetDlgItemText(hwndDlg, IDC_HOST, text, sizeof(text));
+					if (DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv) || strcmp(text, dbv.pszVal))
+						reconnectRequired = TRUE;
+					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
+					DBWriteContactSettingString(NULL, jabberProtoName, "ManualHost", text);
+
+					port = (WORD) GetDlgItemInt(hwndDlg, IDC_HOSTPORT, NULL, FALSE);
+					if (DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT) != port)
+						reconnectRequired = TRUE;
+					DBWriteContactSettingWord(NULL, jabberProtoName, "ManualPort", port);
+					DBWriteContactSettingByte(NULL, jabberProtoName, "KeepAlive", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE));
+					jabberSendKeepAlive = IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE);
+					DBWriteContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VISIBILITY_SUPPORT));
+					// File transfer options
+					DBWriteContactSettingByte(NULL, jabberProtoName, "UseFileProxy", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY));
+					DBWriteContactSettingWord(NULL, jabberProtoName, "FileProxyType", (WORD) SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_GETCURSEL, 0, 0));
+					GetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, text, sizeof(text));
+					DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyHost", text);
+					DBWriteContactSettingWord(NULL, jabberProtoName, "FileProxyPort", (WORD) GetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, NULL, FALSE));
+					DBWriteContactSettingByte(NULL, jabberProtoName, "FileProxyAuth", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_PROXY_USE_AUTH));
+					GetDlgItemText(hwndDlg, IDC_FILE_PROXY_USER, text, sizeof(text));
+					DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyUsername", text);
+					GetDlgItemText(hwndDlg, IDC_FILE_PROXY_PASSWORD, text, sizeof(text));
+					CallService(MS_DB_CRYPT_ENCODESTRING, sizeof(text), (LPARAM) text);
+					DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyPassword", text);
+					if (reconnectRequired && jabberConnected)
+						MessageBox(hwndDlg, Translate("These changes will take effect the next time you connect to the Tlen network."), Translate("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
+					return TRUE;
+				}
 			}
 		}
 		break;
