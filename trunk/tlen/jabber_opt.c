@@ -121,7 +121,25 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			CheckDlgButton(hwndDlg, IDC_ROSTER_SYNC, DBGetContactSettingByte(NULL, jabberProtoName, "RosterSync", FALSE));
 			CheckDlgButton(hwndDlg, IDC_SHOW_OFFLINE, DBGetContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", FALSE));
 			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE));
-			CheckDlgButton(hwndDlg, IDC_ROSTER_ALERTS, DBGetContactSettingByte(NULL, jabberProtoName, "IgnoredAlerts", FALSE));
+			
+			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all alerts"));
+			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore alerts from contacts not in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all alerts"));
+			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0), 0);
+			
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Always ask me"));
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from contacts in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all invitations"));
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from contacts not in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all invitation"));
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", 0), 0);
+
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Always ask me"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from contacts in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all invitations"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from contacts not in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all invitation"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0), 0);
 
 			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("<Last message>"));
 	        //SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("<Ask me>"));
@@ -154,13 +172,15 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		case IDC_ROSTER_SYNC:
 		case IDC_SHOW_OFFLINE:
 		case IDC_OFFLINE_MESSAGE:
-		case IDC_ROSTER_ALERTS:
 			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_REGISTERACCOUNT:
 		    CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) TLEN_REGISTER);
 		    break;
 		case IDC_OFFLINE_MESSAGE_OPTION:
+		case IDC_ALERT_POLICY:
+		case IDC_MUC_POLICY:
+		case IDC_VOICE_POLICY:
 		case IDC_VOICE_DEVICE_IN:
 		case IDC_VOICE_DEVICE_OUT:
 			if (HIWORD(wParam) == CBN_SELCHANGE)
@@ -205,7 +225,9 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				DBWriteContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SHOW_OFFLINE));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_OFFLINE_MESSAGE));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", (WORD) SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "IgnoredAlerts", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ROSTER_ALERTS));
+				DBWriteContactSettingWord(NULL, jabberProtoName, "AlertPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_IN, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
 

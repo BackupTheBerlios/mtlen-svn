@@ -97,6 +97,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define JABBER_OPTION_FT_DIRECT		0	// Direct connection
 #define JABBER_OPTION_FT_PASS		1	// Use PASS server
 #define JABBER_OPTION_FT_PROXY		2	// Use proxy with local port forwarding
+
+#define TLEN_ALERTS_ACCEPT_ALL 0
+#define TLEN_ALERTS_IGNORE_NIR 1
+#define TLEN_ALERTS_IGNORE_ALL 2
+
+#define TLEN_MUC_ASK		0
+#define TLEN_MUC_ACCEPT_IR  1
+#define TLEN_MUC_ACCEPT_ALL 2
+#define TLEN_MUC_IGNORE_NIR 3
+#define TLEN_MUC_IGNORE_ALL 4
+
 #define IDC_STATIC (-1)
 
 enum {

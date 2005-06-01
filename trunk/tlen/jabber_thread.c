@@ -1346,8 +1346,14 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_OFF);
 				else if(!strcmp(tp, "a")) {//alert was received 
 					int bAlert = TRUE;
-					if (DBGetContactSettingByte(NULL, jabberProtoName, "IgnoredAlerts", FALSE)) {
-						if (JabberListGetItemPtr(LIST_ROSTER, f) == NULL) bAlert = FALSE;
+					int alertPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0);
+					if (alertPolicy == TLEN_ALERTS_IGNORE_ALL) {
+						bAlert = FALSE;
+					} else if (alertPolicy == TLEN_ALERTS_IGNORE_NIR) {
+						JABBER_LIST_ITEM *item;
+						item = JabberListGetItemPtr(LIST_ROSTER, f);
+						if (item == NULL) bAlert = FALSE;
+						else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) bAlert = FALSE;
 					} 
 					if (bAlert) {
 						CCSDATA ccs;
@@ -1427,7 +1433,7 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 				f = JabberXmlGetAttrValue(invNode, "f");
 				f = JabberTextDecode(f);
 				n = JabberXmlGetAttrValue(invNode, "n");
-				if (n!=NULL) {
+				if (n!=NULL && strstr(r, n)!=r) {
 					n = JabberTextDecode(n);
 				} else {
 					n = _strdup(Translate("Private conference"));
@@ -1661,7 +1667,8 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 					if ((item=JabberListGetItemPtr(LIST_VOICE, p)) != NULL) {
 						nick = JabberNickFromJID(item->ft->jid);
 						if (!strcmp(nick, from)) {
-							JabberListRemove(LIST_VOICE, p);
+							TlenVoiceCancelAll();
+							//JabberListRemove(LIST_VOICE, p);
 						}
 						free(nick);
 					}

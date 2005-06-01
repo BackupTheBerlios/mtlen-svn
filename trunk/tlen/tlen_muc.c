@@ -265,21 +265,68 @@ static int TlenMUCHandleEvent(WPARAM wParam, LPARAM lParam)
 int TlenMUCRecvInvitation(const char *roomId, const char *roomName, const char *from, const char *reason)
 {
 	char *nick;
-	MUCCEVENT *mucce;
+	int	 ignore, ask, groupChatPolicy;
 	if (roomId == NULL) return 1;
-	mucce = (MUCCEVENT *) malloc (sizeof(MUCCEVENT));
-	mucce->cbSize = sizeof(MUCCEVENT);
-	mucce->iType = MUCC_EVENT_INVITATION;
-	mucce->pszModule = jabberProtoName;
-	mucce->pszID = roomId;
-	mucce->pszName = roomName;
-	mucce->pszUID = from;
-	nick = getDisplayName(from);
-	mucce->pszNick = nick;
-	mucce->pszText = reason;
-	CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
-	free(nick);
-	free(mucce);
+	groupChatPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", 0);
+	if (groupChatPolicy == TLEN_MUC_ASK) {
+		ignore = FALSE;
+		ask = TRUE;
+	} else if (groupChatPolicy == TLEN_MUC_IGNORE_ALL) {
+		ignore = TRUE;
+	} else if (groupChatPolicy == TLEN_MUC_IGNORE_NIR) {
+		char jid[256];
+		JABBER_LIST_ITEM *item;
+		DBVARIANT dbv;
+		if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+			_snprintf(jid, sizeof(jid), "%s@%s", from, dbv.pszVal);
+			DBFreeVariant(&dbv);
+		} else {
+			strcpy(jid, from);
+		}
+		item = JabberListGetItemPtr(LIST_ROSTER, jid);
+		ignore = FALSE;
+		if (item == NULL) ignore = TRUE;
+		else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) ignore = TRUE;
+		ask = TRUE;
+	} else if (groupChatPolicy == TLEN_MUC_ACCEPT_IR) {
+		char jid[256];
+		JABBER_LIST_ITEM *item;
+		DBVARIANT dbv;
+		if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+			_snprintf(jid, sizeof(jid), "%s@%s", from, dbv.pszVal);
+			DBFreeVariant(&dbv);
+		} else {
+			strcpy(jid, from);
+		}
+		item = JabberListGetItemPtr(LIST_ROSTER, jid);
+		ask = FALSE;
+		if (item == NULL) ask = TRUE;
+		else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) ask = TRUE;
+		ignore = FALSE;
+	} else if (groupChatPolicy == TLEN_MUC_ACCEPT_ALL) {
+		ask = FALSE;
+		ignore = FALSE;
+	} 
+	if (!ignore) {
+		if (ask) {
+			MUCCEVENT mucce;
+			mucce.cbSize = sizeof(MUCCEVENT);
+			mucce.pszModule = jabberProtoName;
+			mucce.pszID = roomId;
+			mucce.pszName = roomName;
+			mucce.iType = MUCC_EVENT_INVITATION;
+			mucce.pszUID = from;
+			nick = getDisplayName(from);
+			mucce.pszNick = nick;
+			mucce.pszText = reason;
+			CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
+			free(nick);
+		} else {
+			if (!TlenMUCCreateWindow(roomId, roomName, 0, NULL, NULL)) {
+				TlenMUCSendPresence(roomId, NULL, ID_STATUS_ONLINE);
+			}
+		}
+	}
 	return 0;
 }
 
@@ -288,34 +335,33 @@ int TlenMUCRecvPresence(const char *from, int status, int flags, const char *kic
 	char str[512];
 //	if (JabberListExist(LIST_CHATROOM, from)) {
 		char *nick, *roomId, *userId;
-		MUCCEVENT *mucce = (MUCCEVENT *) malloc (sizeof(MUCCEVENT));
+		MUCCEVENT mucce;
 		roomId = JabberLoginFromJID(from);
 		userId = JabberResourceFromJID(from);
 		nick = getDisplayName(userId);
-		mucce->cbSize = sizeof(MUCCEVENT);
-		mucce->pszModule = jabberProtoName;
-		mucce->pszID = roomId;
-		mucce->iType = MUCC_EVENT_STATUS;
-		mucce->pszUID = userId;//from;
-		mucce->pszNick = nick;
-		mucce->time = time(NULL);
-		mucce->bIsMe = isSelf(roomId, userId);
-		mucce->dwData = status;
-		mucce->dwFlags = 0;
-		if (flags & USER_FLAGS_GLOBALOWNER) mucce->dwFlags |= MUCC_EF_USER_GLOBALOWNER;
-		if (flags & USER_FLAGS_OWNER) mucce->dwFlags |= MUCC_EF_USER_OWNER;
-		if (flags & USER_FLAGS_ADMIN) mucce->dwFlags |= MUCC_EF_USER_ADMIN;
-		if (flags & USER_FLAGS_REGISTERED) mucce->dwFlags |= MUCC_EF_USER_REGISTERED;
-		if (status == ID_STATUS_OFFLINE && mucce->bIsMe && kick!=NULL) {
-			mucce->iType = MUCC_EVENT_ERROR;
+		mucce.cbSize = sizeof(MUCCEVENT);
+		mucce.pszModule = jabberProtoName;
+		mucce.pszID = roomId;
+		mucce.iType = MUCC_EVENT_STATUS;
+		mucce.pszUID = userId;//from;
+		mucce.pszNick = nick;
+		mucce.time = time(NULL);
+		mucce.bIsMe = isSelf(roomId, userId);
+		mucce.dwData = status;
+		mucce.dwFlags = 0;
+		if (flags & USER_FLAGS_GLOBALOWNER) mucce.dwFlags |= MUCC_EF_USER_GLOBALOWNER;
+		if (flags & USER_FLAGS_OWNER) mucce.dwFlags |= MUCC_EF_USER_OWNER;
+		if (flags & USER_FLAGS_ADMIN) mucce.dwFlags |= MUCC_EF_USER_ADMIN;
+		if (flags & USER_FLAGS_REGISTERED) mucce.dwFlags |= MUCC_EF_USER_REGISTERED;
+		if (status == ID_STATUS_OFFLINE && mucce.bIsMe && kick!=NULL) {
+			mucce.iType = MUCC_EVENT_ERROR;
 			sprintf(str, Translate("You have been kicked. Reason: %s "), kick);
-			mucce->pszText = str;
+			mucce.pszText = str;
 		}
-		CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
+		CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
 		free(roomId);
 		free(userId);
 		free(nick);
-		free(mucce);
 //	}
 	return 0;
 }
@@ -326,28 +372,28 @@ int TlenMUCRecvMessage(const char *from, long timestamp, XmlNode *bodyNode)
 		char *localMessage;
 		char *nick, *style, *roomId, *userId;
 		int	 iStyle;
-		MUCCEVENT *mucce = (MUCCEVENT *) malloc (sizeof(MUCCEVENT));
+		MUCCEVENT mucce;
 		roomId = JabberLoginFromJID(from);
 		userId = JabberResourceFromJID(from);
 		nick = getDisplayName(userId);
 		localMessage = JabberTextDecode(bodyNode->text);
-		mucce->cbSize = sizeof(MUCCEVENT);
-		mucce->iType = MUCC_EVENT_MESSAGE;
-		mucce->pszID = roomId;
-		mucce->pszModule = jabberProtoName;
-		mucce->pszText = localMessage;
-		mucce->pszUID = userId;//from;
-		mucce->pszNick = nick;
-		mucce->time = timestamp;
-		mucce->bIsMe = isSelf(roomId, userId);
-		mucce->dwFlags = 0;
-		mucce->iFontSize = 0;
+		mucce.cbSize = sizeof(MUCCEVENT);
+		mucce.iType = MUCC_EVENT_MESSAGE;
+		mucce.pszID = roomId;
+		mucce.pszModule = jabberProtoName;
+		mucce.pszText = localMessage;
+		mucce.pszUID = userId;//from;
+		mucce.pszNick = nick;
+		mucce.time = timestamp;
+		mucce.bIsMe = isSelf(roomId, userId);
+		mucce.dwFlags = 0;
+		mucce.iFontSize = 0;
 		style = JabberXmlGetAttrValue(bodyNode, "f");
 		if (style!=NULL) {
 			iStyle = atoi(style);
-			if (iStyle & 1) mucce->dwFlags |= MUCC_EF_FONT_BOLD;
-			if (iStyle & 2) mucce->dwFlags |= MUCC_EF_FONT_ITALIC;
-			if (iStyle & 4) mucce->dwFlags |= MUCC_EF_FONT_UNDERLINE;
+			if (iStyle & 1) mucce.dwFlags |= MUCC_EF_FONT_BOLD;
+			if (iStyle & 2) mucce.dwFlags |= MUCC_EF_FONT_ITALIC;
+			if (iStyle & 4) mucce.dwFlags |= MUCC_EF_FONT_UNDERLINE;
 		}
 		style = JabberXmlGetAttrValue(bodyNode, "c");
 		if (style!=NULL && strlen(style)>5) {
@@ -355,42 +401,40 @@ int TlenMUCRecvMessage(const char *from, long timestamp, XmlNode *bodyNode)
 		} else {
 			iStyle = 0xFFFFFFFF;
 		}
-		mucce->color = (COLORREF) iStyle;
+		mucce.color = (COLORREF) iStyle;
 		style = JabberXmlGetAttrValue(bodyNode, "s");
 		if (style!=NULL) {
 			iStyle = atoi(style);
 		} else {
 			iStyle = 0;
 		}
-		mucce->iFontSize = iStyle;
+		mucce.iFontSize = iStyle;
 		style = JabberXmlGetAttrValue(bodyNode, "n");
 		if (style!=NULL) {
 			iStyle = atoi(style)-1;
 		} else {
 			iStyle = 0;
 		}
-		mucce->iFont = iStyle;
-		CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
+		mucce.iFont = iStyle;
+		CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
 		free(roomId);
 		free(userId);
 		free(nick);
 		free(localMessage);
-		free(mucce);
 //	}
 	return 0;
 }
 int TlenMUCRecvTopic(const char *from, const char *subject) 
 {
 //	if (JabberListExist(LIST_CHATROOM, from)) {
-		MUCCEVENT *mucce = (MUCCEVENT *) malloc (sizeof(MUCCEVENT));
-		mucce->cbSize = sizeof(MUCCEVENT);
-		mucce->iType = MUCC_EVENT_TOPIC;
-		mucce->pszID = from;
-		mucce->pszModule = jabberProtoName;
-		mucce->pszText = subject;
-		mucce->time = time(NULL);
-		CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
-		free(mucce);
+		MUCCEVENT mucce;
+		mucce.cbSize = sizeof(MUCCEVENT);
+		mucce.iType = MUCC_EVENT_TOPIC;
+		mucce.pszID = from;
+		mucce.pszModule = jabberProtoName;
+		mucce.pszText = subject;
+		mucce.time = time(NULL);
+		CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
 //	}
 	return 0;
 }
@@ -400,11 +444,11 @@ int TlenMUCRecvError(const char *from, XmlNode *errorNode)
 	int errCode;
 	char str[512];
 	JABBER_LIST_ITEM *item;
-	MUCCEVENT *mucce = (MUCCEVENT *) malloc (sizeof(MUCCEVENT));
-	mucce->cbSize = sizeof(MUCCEVENT);
-	mucce->iType = MUCC_EVENT_ERROR;
-	mucce->pszID = from;
-	mucce->pszModule = jabberProtoName;
+	MUCCEVENT mucce;
+	mucce.cbSize = sizeof(MUCCEVENT);
+	mucce.iType = MUCC_EVENT_ERROR;
+	mucce.pszID = from;
+	mucce.pszModule = jabberProtoName;
 	errCode = atoi(JabberXmlGetAttrValue(errorNode, "code"));
 	switch (errCode) {
 		case 403:
@@ -449,37 +493,36 @@ int TlenMUCRecvError(const char *from, XmlNode *errorNode)
 			sprintf(str, Translate("Unknown error code : %d"), errCode);
 			break;
 	}
-	mucce->pszText = str;
-	CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
+	mucce.pszText = str;
+	CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
 	if (jabberOnline) {
 		switch (errCode) {
 			case 412:
 				item = JabberListGetItemPtr(LIST_CHATROOM, from);
 				if (item!=NULL) {
-					mucce->iType = MUCC_EVENT_JOIN;
-					mucce->dwFlags = MUCC_EF_ROOM_NICKNAMES;
-					mucce->pszModule = jabberProtoName;
-					mucce->pszID = from;
-					mucce->pszName = item->roomName;
-					mucce->pszNick = JabberXmlGetAttrValue(errorNode, "free");
-					CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
+					mucce.iType = MUCC_EVENT_JOIN;
+					mucce.dwFlags = MUCC_EF_ROOM_NICKNAMES;
+					mucce.pszModule = jabberProtoName;
+					mucce.pszID = from;
+					mucce.pszName = item->roomName;
+					mucce.pszNick = JabberXmlGetAttrValue(errorNode, "free");
+					CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
 				}
 				break;
 			case 601:
 				item = JabberListGetItemPtr(LIST_CHATROOM, from);
 				if (item!=NULL) {
-					mucce->iType = MUCC_EVENT_JOIN;
-					mucce->dwFlags = 0;
-					mucce->pszModule = jabberProtoName;
-					mucce->pszID = from;
-					mucce->pszName = item->roomName;
-					mucce->pszNick = NULL;
-					CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
+					mucce.iType = MUCC_EVENT_JOIN;
+					mucce.dwFlags = 0;
+					mucce.pszModule = jabberProtoName;
+					mucce.pszID = from;
+					mucce.pszName = item->roomName;
+					mucce.pszNick = NULL;
+					CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
 				}
 				break;
 		}
 	}
-	free(mucce);
 	return 1;
 }
 static int TlenMUCSendInvitation(const char *roomID, const char *user)
@@ -605,7 +648,7 @@ static int TlenMUCSendQuery(int type, const char *parent, int page)
 int TlenMUCCreateWindow(const char *roomID, const char *roomName, int roomFlags, const char *nick, const char *iqId)
 {	
 	JABBER_LIST_ITEM *item;
-	MUCCWINDOW *mucw;
+	MUCCWINDOW mucw;
 	if (!jabberOnline || roomID==NULL) {
 		return 1;
 	}
@@ -619,18 +662,16 @@ int TlenMUCCreateWindow(const char *roomID, const char *roomName, int roomFlags,
 	if (nick!=NULL) {
 		item->nick = _strdup(nick);
 	} 
-	mucw = (MUCCWINDOW *) malloc (sizeof(MUCCWINDOW));
-	mucw->cbSize = sizeof(MUCCWINDOW);
-	mucw->iType = MUCC_WINDOW_CHATROOM;
-	mucw->pszModule = jabberProtoName;
-	mucw->pszModuleName = jabberModuleName;
-	mucw->pszID = roomID;
-	mucw->pszName = roomName;
-	mucw->pszNick = nick;
-	mucw->dwFlags = roomFlags;
-	mucw->pszStatusbarText = "hello";
-	CallService(MS_MUCC_NEW_WINDOW, 0, (LPARAM) mucw);
-	free (mucw);
+	mucw.cbSize = sizeof(MUCCWINDOW);
+	mucw.iType = MUCC_WINDOW_CHATROOM;
+	mucw.pszModule = jabberProtoName;
+	mucw.pszModuleName = jabberModuleName;
+	mucw.pszID = roomID;
+	mucw.pszName = roomName;
+	mucw.pszNick = nick;
+	mucw.dwFlags = roomFlags;
+	mucw.pszStatusbarText = "hello";
+	CallService(MS_MUCC_NEW_WINDOW, 0, (LPARAM) &mucw);
 	if (iqId != NULL) {
 		item = JabberListGetItemPtr(LIST_INVITATIONS, iqId);
 		if (item !=NULL) {
@@ -850,21 +891,19 @@ void TlenIqResultRoomSearch(XmlNode *iqNode, void *userdata) {
 	iqId=JabberXmlGetAttrValue(iqNode, "id");
 	item=JabberListGetItemPtr(LIST_SEARCH, iqId);
 	if ((id=JabberXmlGetAttrValue(iqNode, "i")) != NULL) {
-		MUCCEVENT *mucce;
+		MUCCEVENT mucce;
 		id = JabberTextDecode(id);
-		mucce = (MUCCEVENT *) malloc (sizeof(MUCCEVENT));
-		mucce->cbSize = sizeof(MUCCEVENT);
-		mucce->iType = MUCC_EVENT_JOIN;
-		mucce->pszModule = jabberProtoName;
-		mucce->pszID = id;
-		mucce->pszName = id;
+		mucce.cbSize = sizeof(MUCCEVENT);
+		mucce.iType = MUCC_EVENT_JOIN;
+		mucce.pszModule = jabberProtoName;
+		mucce.pszID = id;
+		mucce.pszName = id;
 		if (item!=NULL) {
-			mucce->pszName = item->roomName;
+			mucce.pszName = item->roomName;
 		} 
-		mucce->pszNick = NULL;
-		mucce->dwFlags = MUCC_EF_ROOM_NICKNAMES;
-		CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
-		free(mucce);
+		mucce.pszNick = NULL;
+		mucce.dwFlags = MUCC_EF_ROOM_NICKNAMES;
+		CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
 		free(id);
 	}
 	JabberListRemove(LIST_SEARCH, iqId);
@@ -874,20 +913,18 @@ void TlenIqResultRoomInfo(XmlNode *iqNode, void *userdata) {
 	char *id, *name, *group, *flags;
 	if ((id=JabberXmlGetAttrValue(iqNode, "from")) != NULL) {
 		if ((name=JabberXmlGetAttrValue(iqNode, "n")) != NULL) {
-			MUCCEVENT *mucce;
+			MUCCEVENT mucce;
 			group = JabberXmlGetAttrValue(iqNode, "cn");
 			flags = JabberXmlGetAttrValue(iqNode, "x");
 			id = JabberTextDecode(id);
 			name = JabberTextDecode(name);
-			mucce = (MUCCEVENT *) malloc (sizeof(MUCCEVENT));
-			mucce->cbSize = sizeof(MUCCEVENT);
-			mucce->iType = MUCC_EVENT_ROOM_INFO;
-			mucce->pszModule = jabberProtoName;
-			mucce->pszID = id;
-			mucce->pszName = name;
-			mucce->dwFlags = atoi(flags);
-			CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
-			free(mucce);
+			mucce.cbSize = sizeof(MUCCEVENT);
+			mucce.iType = MUCC_EVENT_ROOM_INFO;
+			mucce.pszModule = jabberProtoName;
+			mucce.pszID = id;
+			mucce.pszName = name;
+			mucce.dwFlags = atoi(flags);
+			CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
 			free(id);
 			free(name);
 		}
@@ -976,17 +1013,15 @@ int TlenMUCMenuHandleMUC(WPARAM wParam, LPARAM lParam)
 
 int TlenMUCMenuHandleChats(WPARAM wParam, LPARAM lParam)
 {
-	MUCCWINDOW * mucw;
+	MUCCWINDOW mucw;
 	if (!jabberOnline) {
 		return 1;
 	}
-	mucw = (MUCCWINDOW *) malloc (sizeof(MUCCWINDOW));
-	mucw->cbSize = sizeof(MUCCWINDOW);
-	mucw->iType = MUCC_WINDOW_CHATLIST;
-	mucw->pszModule = jabberProtoName;
-	mucw->pszModuleName = jabberModuleName;
-	CallService(MS_MUCC_NEW_WINDOW, 0, (LPARAM) mucw);
-	free (mucw);
+	mucw.cbSize = sizeof(MUCCWINDOW);
+	mucw.iType = MUCC_WINDOW_CHATLIST;
+	mucw.pszModule = jabberProtoName;
+	mucw.pszModuleName = jabberModuleName;
+	CallService(MS_MUCC_NEW_WINDOW, 0, (LPARAM) &mucw);
 	return 0;
 }
 

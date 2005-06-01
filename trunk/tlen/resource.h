@@ -44,7 +44,10 @@
 #define IDC_PASSWORD                    1050
 #define IDC_RECONNECT                   1050
 #define IDC_JID                         1051
-#define IDC_ROSTER_SYNC                 1052
+#define IDC_ROSTER_SYNC					1052
+#define IDC_ALERT_POLICY				1053
+#define IDC_MUC_POLICY					1054
+#define IDC_VOICE_POLICY				1055
 #define IDC_CITY                        1058
 #define IDC_FULLNAME                    1061
 #define IDC_NICKNAME                    1062

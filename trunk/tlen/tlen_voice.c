@@ -1585,15 +1585,13 @@ static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
 	JABBER_LIST_ITEM * item;
 	int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ACCEPT_VOICE), NULL, TlenVoiceAcceptDlgProc, (LPARAM) ptr);
 	item = (JABBER_LIST_ITEM *)ptr;
-	if (result) {
+	if (result && jabberOnline) {
 		item->ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
 		memset(item->ft, 0, sizeof(JABBER_FILE_TRANSFER));
 		item->ft->iqId = _strdup(item->jid);
 		item->ft->jid = _strdup(item->nick);
 		TlenVoiceStart(NULL, 2);
-		if (jabberOnline) {
-			JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='5' v='1'/>", item->nick, item->jid);
-		}
+		JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='5' v='1'/>", item->nick, item->jid);
 	} else {
 		if (jabberOnline) {
 			JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='4' />", item->nick, item->jid);
@@ -1607,8 +1605,65 @@ int TlenVoiceAccept(const char *id, const char *from)
 	JABBER_LIST_ITEM * item;
 	if (!TlenVoiceIsInUse()) {
 		if ((item = JabberListAdd(LIST_VOICE, id)) != NULL) {
-			item->nick = _strdup(from);
-			JabberForkThread((void (__cdecl *)(void*))TlenVoiceAcceptDlgThread, 0, item);
+			int ask, ignore, voiceChatPolicy;
+			voiceChatPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0);
+			if (voiceChatPolicy == TLEN_MUC_ASK) {
+				ignore = FALSE;
+				ask = TRUE;
+			} else if (voiceChatPolicy == TLEN_MUC_IGNORE_ALL) {
+				ignore = TRUE;
+			} else if (voiceChatPolicy == TLEN_MUC_IGNORE_NIR) {
+				char jid[256];
+				JABBER_LIST_ITEM *item;
+				DBVARIANT dbv;
+				if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+					_snprintf(jid, sizeof(jid), "%s@%s", from, dbv.pszVal);
+					DBFreeVariant(&dbv);
+				} else {
+					strcpy(jid, from);
+				}
+				item = JabberListGetItemPtr(LIST_ROSTER, jid);
+				ignore = FALSE;
+				if (item == NULL) ignore = TRUE;
+				else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) ignore = TRUE;
+				ask = TRUE;
+			} else if (voiceChatPolicy == TLEN_MUC_ACCEPT_IR) {
+				char jid[256];
+				JABBER_LIST_ITEM *item;
+				DBVARIANT dbv;
+				if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+					_snprintf(jid, sizeof(jid), "%s@%s", from, dbv.pszVal);
+					DBFreeVariant(&dbv);
+				} else {
+					strcpy(jid, from);
+				}
+				item = JabberListGetItemPtr(LIST_ROSTER, jid);
+				ask = FALSE;
+				if (item == NULL) ask = TRUE;
+				else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) ask = TRUE;
+				ignore = FALSE;
+			} else if (voiceChatPolicy == TLEN_MUC_ACCEPT_ALL) {
+				ask = FALSE;
+				ignore = FALSE;
+			} 
+			if (ignore) {
+				if (jabberOnline) {
+					JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='4' />", from, id);
+				}
+				JabberListRemove(LIST_VOICE, id);
+			} else {
+				item->nick = _strdup(from);
+				if (ask) {
+					JabberForkThread((void (__cdecl *)(void*))TlenVoiceAcceptDlgThread, 0, item);
+				} else if (jabberOnline) {
+					item->ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
+					memset(item->ft, 0, sizeof(JABBER_FILE_TRANSFER));
+					item->ft->iqId = _strdup(id);
+					item->ft->jid = _strdup(from);
+					TlenVoiceStart(NULL, 2);
+					JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='5' v='1'/>", item->nick, item->jid);
+				}
+			}
 			return 1;
 		}
 	}
