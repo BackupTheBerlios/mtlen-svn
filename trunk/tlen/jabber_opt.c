@@ -123,21 +123,21 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE));
 			
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all alerts"));
-			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore alerts from contacts not in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore alerts from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all alerts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0), 0);
 			
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Always ask me"));
-			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from contacts in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from authorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all invitations"));
-			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from contacts not in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all invitation"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", 0), 0);
 
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Always ask me"));
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from contacts in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from authorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all invitations"));
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from contacts not in my roster"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all invitation"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0), 0);
 
