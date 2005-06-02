@@ -67,14 +67,20 @@ BEGIN
     CONTROL         "Show offline users with status messages as invisible in contact list",
                     IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     14,108,250,10
-    CONTROL         "Ignore alerts from contacts not in my roster",IDC_ROSTER_ALERTS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,14,121,250,10
     CONTROL         "Automatically delete contacts not in my roster",
                     IDC_ROSTER_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    134,250,10
-    //LTEXT           "Group chats policy",IDC_STATIC,14,137,250,8
+                    121,250,10
+    LTEXT           "Alert policy",IDC_STATIC,14,135,70,8
+    COMBOBOX        IDC_ALERT_POLICY,95,133,190,100,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "Group chat policy",IDC_STATIC,14,148,70,8
+    COMBOBOX        IDC_MUC_POLICY,95,147,190,100,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
     GROUPBOX        "Voice Chats",IDC_STATIC,5,180,286,63
-    LTEXT           "Recording device:",IDC_STATIC,14,210,105,8
+    LTEXT           "Voice chat policy",IDC_STATIC,14,194,70,8
+    COMBOBOX        IDC_VOICE_POLICY,95,193,190,100,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
+	LTEXT           "Recording device:",IDC_STATIC,14,210,105,8
     COMBOBOX        IDC_VOICE_DEVICE_IN,120,208,110,100,CBS_DROPDOWNLIST |
                     WS_TABSTOP
     LTEXT           "Playback device:",IDC_STATIC,14,224,105,8
@@ -328,8 +334,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,6,3
- PRODUCTVERSION 1,0,6,3
+ FILEVERSION 1,0,6,4
+ PRODUCTVERSION 1,0,6,4
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -347,14 +353,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Tlen Protocol Plugin for Miranda IM\0"
-            VALUE "FileVersion", "1.0.6.3\0"
+            VALUE "FileVersion", "1.0.6.4\0"
             VALUE "InternalName", "tlen\0"
             VALUE "LegalCopyright", "Copyright (c) 2002-2005 Santithorn Bunchua, Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "tlen.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Tlen Protocol Plugin\0"
-            VALUE "ProductVersion", "1.0.6.3\0"
+            VALUE "ProductVersion", "1.0.6.4\0"
             VALUE "SpecialBuild", "\0"
         END
     END

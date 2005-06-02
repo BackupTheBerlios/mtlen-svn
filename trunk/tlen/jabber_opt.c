@@ -47,7 +47,7 @@ int TlenOptInit(WPARAM wParam, LPARAM lParam)
 	odp.pszTitle = jabberModuleName;
 	odp.flags = ODPF_BOLDGROUPS;
 	odp.pfnDlgProc = TlenOptDlgProc;
-	odp.nIDBottomSimpleControl = IDC_SIMPLE;
+	odp.nIDBottomSimpleControl = 0;//IDC_SIMPLE;
 	CallService(MS_OPT_ADDPAGE, wParam, (LPARAM) &odp);
 
 	odp.pszTemplate = MAKEINTRESOURCE(IDD_OPTIONS_EXPERT);
