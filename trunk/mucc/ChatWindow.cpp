@@ -71,7 +71,7 @@ void ChatWindow::init() {
 /*
 static bool gcRegistered = false;
 
-static void __stdcall StartThread(void *vChat) { //__cdecl 
+static void __stdcall StartThread(void *vChat) { //__cdecl
 	ChatWindow *chat = (ChatWindow *)vChat;
 	if (!gcRegistered) {
 		gcRegistered = true;
@@ -363,6 +363,7 @@ int ChatWindow::startPriv() {
 	ChatUser *user = getSelectedUser();
 	if (user!=NULL) {
 		MUCCEVENT mucce;
+		mucce.cbSize = sizeof(MUCCEVENT);
 		mucce.iType = MUCC_EVENT_START_PRIV;
 		mucce.pszModule =  getModule();
 		mucce.pszID = getRoomId();
@@ -375,6 +376,7 @@ int ChatWindow::startPriv() {
 int ChatWindow::unban(const char *id) {
 	if (id!=NULL) {
 		MUCCEVENT mucce;
+		mucce.cbSize = sizeof(MUCCEVENT);
 		mucce.iType = MUCC_EVENT_UNBAN;
 		mucce.pszModule =  getModule();
 		mucce.pszID = getRoomId();
@@ -388,6 +390,7 @@ int ChatWindow::unban(const char *id) {
 int ChatWindow::kickAndBan(const char *id, int time, const char *reason) {
 	if (id!=NULL) {
 		MUCCEVENT mucce;
+		mucce.cbSize = sizeof(MUCCEVENT);
 		mucce.iType = MUCC_EVENT_KICK_BAN;
 		mucce.pszModule =  getModule();
 		mucce.pszID = getRoomId();
@@ -410,6 +413,7 @@ int ChatWindow::kickAndBan(int time) {
 int ChatWindow::setRights(const char *id, int flags) {
 	if (id!=NULL) {
 		MUCCEVENT mucce;
+		mucce.cbSize = sizeof(MUCCEVENT);
 		mucce.iType = MUCC_EVENT_SET_USER_ROLE;
 		mucce.pszModule =  getModule();
 		mucce.pszID = getRoomId();
@@ -1212,7 +1216,6 @@ static BOOL CALLBACK SplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
-	MUCCEVENT muce;
 	ChatWindow *chatWindow;
 	chatWindow = (ChatWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
 	if (msg!=WM_INITDIALOG && chatWindow==NULL) {
@@ -1437,23 +1440,27 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			DestroyWindow(hwndDlg);
 			return TRUE;
 		case WM_DESTROY:
-			muce.iType = MUCC_EVENT_LEAVE;
-			muce.pszModule =  chatWindow->getModule();
-			muce.pszID = chatWindow->getRoomId();
-			NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
-			if (chatWindow->getHWNDLog()!=NULL) {
-				IEVIEWWINDOW ieWindow;
-				ieWindow.cbSize = sizeof(IEVIEWWINDOW);
-				ieWindow.iType = IEW_DESTROY;
-				ieWindow.hwnd = chatWindow->getHWNDLog();
-				CallService(MS_IEVIEW_WINDOW, 0, (LPARAM)&ieWindow);
+			{
+				MUCCEVENT muce;
+				muce.cbSize = sizeof(MUCCEVENT);
+				muce.iType = MUCC_EVENT_LEAVE;
+				muce.pszModule =  chatWindow->getModule();
+				muce.pszID = chatWindow->getRoomId();
+				NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
+				if (chatWindow->getHWNDLog()!=NULL) {
+					IEVIEWWINDOW ieWindow;
+					ieWindow.cbSize = sizeof(IEVIEWWINDOW);
+					ieWindow.iType = IEW_DESTROY;
+					ieWindow.hwnd = chatWindow->getHWNDLog();
+					CallService(MS_IEVIEW_WINDOW, 0, (LPARAM)&ieWindow);
+				}
+				SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) NULL);
+				SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
+				SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
+				SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) oldEditWndProc);
+				delete chatWindow;
+				break;
 			}
-			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) NULL);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) oldEditWndProc);
-			delete chatWindow;
-			break;
 		case WM_TLEN_SMILEY:
 			if (ServiceExists(MS_SMILEYADD_REPLACESMILEYS)) {
 				SMADD_RICHEDIT2 smre;
@@ -1671,9 +1678,11 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					return TRUE;
 				case IDOK:
 					{
+						MUCCEVENT muce;
 						char text[2048];
 						GetDlgItemText(hwndDlg, IDC_EDIT, text, sizeof(text));
 						SetDlgItemText(hwndDlg, IDC_EDIT, "");
+						muce.cbSize = sizeof(MUCCEVENT);
 						muce.iType = MUCC_EVENT_MESSAGE;
 						muce.pszModule =  chatWindow->getModule();
 						muce.pszID = chatWindow->getRoomId();

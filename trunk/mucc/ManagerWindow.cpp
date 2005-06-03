@@ -365,7 +365,6 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 {
 	HWND lv;
 	LVCOLUMN lvCol;
-	MUCCEVENT event;
 	ManagerWindow *manager;
 	manager = (ManagerWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
 	switch (msg) {
@@ -423,8 +422,10 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 							item.iSubItem = 0;
 							item.mask = LVIF_PARAM;
 							if (ListView_GetItem(GetDlgItem(hwndDlg, IDC_ROOM), &item)) {
+								MUCCEVENT event;
 								ChatRoom *room = (ChatRoom *)item.lParam;
 								Utils::log("entering room %s ", room->getId());
+								event.cbSize = sizeof(MUCCEVENT);
 								event.iType = MUCC_EVENT_JOIN;
 								event.pszModule = manager->getModule();
 								event.pszID = room->getId();
@@ -458,13 +459,18 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 				SendMessage(GetParent(hwndDlg), WM_MUCC_REFRESH_ROOMS, 0, 0);
 				break;
 			case IDC_SEARCH:
-				event.iType = MUCC_EVENT_JOIN;
-				event.dwFlags = MUCC_EF_ROOM_NAME;
-				event.pszModule = manager->getModule();
-				event.pszID = NULL;
-				event.pszName = NULL;
-				event.pszNick = NULL;
-				HelperDialog::joinDlg(&event);
+				{
+					MUCCEVENT event;
+					event.cbSize = sizeof(MUCCEVENT);
+					event.iType = MUCC_EVENT_JOIN;
+					event.dwFlags = MUCC_EF_ROOM_NAME;
+					event.pszModule = manager->getModule();
+					event.pszID = NULL;
+					event.pszName = NULL;
+					event.pszNick = NULL;
+					HelperDialog::joinDlg(&event);
+					break;
+				}
 		}
 		break;
 	case WM_MEASUREITEM:
@@ -574,6 +580,7 @@ static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 							ChatRoom *room = (ChatRoom *)item.lParam;
 							Utils::log("entering room %s (%s)", room->getId(), room->getId());
 							MUCCEVENT muce;
+							muce.cbSize = sizeof(MUCCEVENT);
 							muce.iType = MUCC_EVENT_JOIN;
 							muce.pszModule = manager->getModule();
 							muce.pszID = room->getId();
@@ -614,7 +621,7 @@ static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 							if (IsDlgButtonChecked(hwndDlg, IDC_CHECK_NICKNAMES)) {
 								flags |= MUCC_EF_ROOM_NICKNAMES;
 							}
-
+							muce.cbSize = sizeof(MUCCEVENT);
 							muce.iType = MUCC_EVENT_REGISTER_ROOM;
 							muce.pszModule = manager->getModule();
 							muce.pszID = manager->getCurrentGroup()->getId();
@@ -704,9 +711,10 @@ static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			case IDC_REGISTER:
 				{
 					char nick[256];
-					MUCCEVENT muce;
 					GetDlgItemText(hwndDlg, IDC_NICK, nick, 255);
 					if (strlen(nick)!=0) {
+						MUCCEVENT muce;
+						muce.cbSize = sizeof(MUCCEVENT);
 						muce.iType = MUCC_EVENT_REGISTER_NICK;
 						muce.pszModule = manager->getModule();
 						muce.pszNick = nick;
@@ -726,6 +734,7 @@ static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 						item.cchTextMax = sizeof(text);
 						if (ListView_GetItem(GetDlgItem(hwndDlg, IDC_LIST), &item)) {
 							MUCCEVENT muce;
+							muce.cbSize = sizeof(MUCCEVENT);
 							muce.iType = MUCC_EVENT_REMOVE_NICK;
 							muce.pszModule = manager->getModule();
 							muce.pszNick = text;
