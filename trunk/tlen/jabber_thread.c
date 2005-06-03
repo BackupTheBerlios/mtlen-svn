@@ -164,8 +164,9 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 			return;
 		}
 
+		_snprintf(jidStr, sizeof(jidStr), "%s@%s", info->username, info->server);
+		DBWriteContactSettingString(NULL, jabberProtoName, "jid", jidStr);
 		if (DBGetContactSettingByte(NULL, jabberProtoName, "SavePassword", TRUE) == FALSE) {
-			_snprintf(jidStr, sizeof(jidStr), "%s@%s", info->username, info->server);
 			// Ugly hack: continue logging on only the return value is &(onlinePassword[0])
 			// because if WM_QUIT while dialog box is still visible, p is returned with some
 			// exit code which may not be NULL.

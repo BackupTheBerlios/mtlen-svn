@@ -1,3 +1,10 @@
+1.0.6.4 Stable
+---------
++ alert, voice chat and group chat policies
++ received alerts are logged as messages
+* offline message timestamp improvements (thanks to Atay for the idea)
+* removed obsolete, Jabber-specific code
+* a lot of more or less important bugfixes
 1.0.6.3 Stable
 ---------
 + group names encoding
