@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_file.h"
 
 char *searchJID = NULL;
+static int msgCounter = 0;
 
 int JabberGetCaps(WPARAM wParam, LPARAM lParam)
 {
@@ -570,24 +571,7 @@ int JabberSetApparentMode(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-static void __cdecl JabberSendMessageAckThread(HANDLE hContact)
-{
-	SleepEx(10, TRUE);
-	JabberLog("Broadcast ACK");
-	ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_MESSAGE, ACKRESULT_SUCCESS, (HANDLE) 1, 0);
-	JabberLog("Returning from thread");
-}
-
-static void __cdecl JabberSendMessageFailedThread(HANDLE hContact)
-{
-	SleepEx(10, TRUE);
-	JabberLog("Broadcast ACK");
-	ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_MESSAGE, ACKRESULT_FAILED, (HANDLE) 2, 0);
-	JabberLog("Returning from thread");
-}
-
-
-int JabberSendMessage(WPARAM wParam, LPARAM lParam)
+static void __cdecl JabberSendMessageThread(void *lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
 	DBVARIANT dbv;
@@ -597,11 +581,9 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 	char msgType[16];
 
 	if (!jabberOnline || DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) {
-		JabberForkThread(JabberSendMessageFailedThread, 0, (void *) ccs->hContact);
-//		ProtoBroadcastAck(jabberProtoName, ccs->hContact, ACKTYPE_MESSAGE, ACKRESULT_FAILED, (HANDLE) 2, 0);
-		return 2;
+		ProtoBroadcastAck(jabberProtoName, ccs->hContact, ACKTYPE_MESSAGE, ACKRESULT_FAILED, (HANDLE) ccs->wParam, 0);
+		return;
 	}
-
 	if ((msg=JabberTextEncode((char *) ccs->lParam)) != NULL) {
 		if (JabberListExist(LIST_CHATROOM, dbv.pszVal) && strchr(dbv.pszVal, '/')==NULL) {
 			strcpy(msgType, "groupchat");
@@ -623,9 +605,7 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 					JabberSend(jabberThreadInfo->s, "<m tp='a' to='%s'/>", JabberGetClientJID(dbv.pszVal));
 				}
 			}
-			JabberForkThread(JabberSendMessageAckThread, 0, (void *) ccs->hContact);
-		}
-		else {
+		} else {
 			id = JabberSerialNext();
 			if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL)
 				item->idMsgAckPending = id;
@@ -634,7 +614,16 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 		free(msg);
 	}
 	DBFreeVariant(&dbv);
-	return 1;
+	JabberLog("Broadcast ACK %d", ccs->wParam);
+	ProtoBroadcastAck(jabberProtoName, ccs->hContact, ACKTYPE_MESSAGE, ACKRESULT_SUCCESS, (HANDLE) ccs->wParam, 0);
+}
+
+int JabberSendMessage(WPARAM wParam, LPARAM lParam) 
+{
+	CCSDATA *ccs = (CCSDATA *) lParam;
+	ccs->wParam = ++msgCounter;
+	JabberForkThread(JabberSendMessageThread, 0, (void *) lParam);
+	return msgCounter;
 }
 
 static void __cdecl JabberGetAwayMsgThread(HANDLE hContact)
@@ -660,8 +649,6 @@ static void __cdecl JabberGetAwayMsgThread(HANDLE hContact)
 int JabberGetAwayMsg(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
-
-	JabberLog("GetAwayMsg called, wParam=%d lParam=%d", wParam, lParam);
 	JabberForkThread((void (__cdecl *)(void*))JabberGetAwayMsgThread, 0, (void *) ccs->hContact);
 	return 1;
 }
