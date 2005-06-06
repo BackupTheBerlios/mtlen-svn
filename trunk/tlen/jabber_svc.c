@@ -582,6 +582,8 @@ static void __cdecl JabberSendMessageThread(void *lParam)
 
 	if (!jabberOnline || DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) {
 		ProtoBroadcastAck(jabberProtoName, ccs->hContact, ACKTYPE_MESSAGE, ACKRESULT_FAILED, (HANDLE) ccs->wParam, 0);
+		if ((char *)ccs->lParam != NULL) free((char *)ccs->lParam);
+		free(ccs);
 		return;
 	}
 	if ((msg=JabberTextEncode((char *) ccs->lParam)) != NULL) {
@@ -614,15 +616,19 @@ static void __cdecl JabberSendMessageThread(void *lParam)
 		free(msg);
 	}
 	DBFreeVariant(&dbv);
-	JabberLog("Broadcast ACK %d", ccs->wParam);
 	ProtoBroadcastAck(jabberProtoName, ccs->hContact, ACKTYPE_MESSAGE, ACKRESULT_SUCCESS, (HANDLE) ccs->wParam, 0);
+	if ((char *)ccs->lParam != NULL) free((char *)ccs->lParam);
+	free(ccs);
 }
 
 int JabberSendMessage(WPARAM wParam, LPARAM lParam) 
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
-	ccs->wParam = ++msgCounter;
-	JabberForkThread(JabberSendMessageThread, 0, (void *) lParam);
+	CCSDATA *ccs2 = (CCSDATA *) malloc(sizeof(CCSDATA));
+	ccs2->hContact = ccs->hContact;
+	ccs2->lParam = (LPARAM) strdup((char *)ccs->lParam);
+	ccs2->wParam = ++msgCounter; 
+	JabberForkThread(JabberSendMessageThread, 0, (void *) ccs2);
 	return msgCounter;
 }
 
