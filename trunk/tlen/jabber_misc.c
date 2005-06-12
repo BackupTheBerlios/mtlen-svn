@@ -78,60 +78,53 @@ void JabberDBAddAuthRequest(char *jid, char *nick)
 	JabberLog("Setup DBAUTHREQUEST with nick='%s' jid='%s'", nick, jid);
 }
 
-HANDLE JabberDBCreateContact(char *jid, char *nick, BOOL temporary, BOOL stripResource)
+HANDLE JabberHContactFromJID(const char *jid)
 {
-	HANDLE hContact;
-	char *s, *p, *q;
+	HANDLE hContact, hContactMatched;
 	DBVARIANT dbv;
-	int len;
 	char *szProto;
-
-	if (jid==NULL || jid[0]=='\0')
-		return NULL;
-
-	s = _strdup(jid);
-	q = NULL;
-	// strip resource if present
-	if ((p=strchr(s, '@')) != NULL) {
-		if ((q=strchr(p, '/')) != NULL)
-			*q = '\0';
-	}
-	_strlwr(s);
-	if (!stripResource && q!=NULL)	// so that resource is not converted to lowercase
-		*q = '/';
-	len = strlen(s);
-
-	// We can't use JabberHContactFromJID() here because of the stripResource option
+	char *p;
+	if (jid == NULL) return (HANDLE) NULL;
+	hContactMatched = NULL;
 	hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDFIRST, 0, 0);
 	while (hContact != NULL) {
 		szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
 		if (szProto!=NULL && !strcmp(jabberProtoName, szProto)) {
 			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
-				p = dbv.pszVal;
-				if (p && (int)strlen(p)>=len && (p[len]=='\0'||p[len]=='/') && !strncmp(p, s, len)) {
-					DBFreeVariant(&dbv);
-					break;
+				if ((p=dbv.pszVal) != NULL) {
+					if (!stricmp(p, jid)) {	// exact match (node@domain/resource)
+						hContactMatched = hContact;
+						DBFreeVariant(&dbv);
+						break;
+					}
 				}
 				DBFreeVariant(&dbv);
 			}
 		}
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDNEXT, (WPARAM) hContact, 0);
 	}
+	if (hContactMatched != NULL) {
+		return hContactMatched;
+	}
+	return NULL;
+}
 
-	//if ((hContact=JabberHContactFromJID(s)) == NULL) {
-	if (hContact == NULL) {
+HANDLE JabberDBCreateContact(char *jid, char *nick, BOOL temporary)
+{
+	HANDLE hContact;
+	if (jid==NULL || jid[0]=='\0')
+		return NULL;
+
+	if ((hContact=JabberHContactFromJID(jid)) == NULL) {
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_ADD, 0, 0);
 		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) jabberProtoName);
-		DBWriteContactSettingString(hContact, jabberProtoName, "jid", s);
+		DBWriteContactSettingString(hContact, jabberProtoName, "jid", jid);
 		if (nick!=NULL && nick[0]!='\0')
 			DBWriteContactSettingString(hContact, jabberProtoName, "Nick", nick);
 		if (temporary)
 			DBWriteContactSettingByte(hContact, "CList", "NotOnList", 1);
-		JabberLog("Create Jabber contact jid=%s, nick=%s", s, nick);
+		JabberLog("Create Jabber contact jid=%s, nick=%s", jid, nick);
 	}
-
-	free(s);
-
 	return hContact;
 }
 

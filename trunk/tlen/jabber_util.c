@@ -149,53 +149,6 @@ int JabberSend(HANDLE hConn, const char *fmt, ...)
 	return result;
 }
 
-HANDLE JabberHContactFromJID(const char *jid)
-{
-	HANDLE hContact, hContactMatched;
-	DBVARIANT dbv;
-	char *szProto;
-	char *s, *p, *q;
-	int len;
-
-	if (jid == NULL) return (HANDLE) NULL;
-
-	s = _strdup(jid); _strlwr(s);
-	// Strip resource name if any
-	if ((p=strchr(s, '@')) != NULL) {
-		if ((q=strchr(p, '/')) != NULL)
-			*q = '\0';
-	}
-	len = strlen(s);
-
-	hContactMatched = NULL;
-	hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDFIRST, 0, 0);
-	while (hContact != NULL) {
-		szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
-		if (szProto!=NULL && !strcmp(jabberProtoName, szProto)) {
-			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
-				if ((p=dbv.pszVal) != NULL) {
-					if (!stricmp(p, jid)) {	// exact match (node@domain/resource)
-						hContactMatched = hContact;
-						DBFreeVariant(&dbv);
-						break;
-					}
-					// match only node@domain part
-					if ((int)strlen(p)>=len && (p[len]=='\0'||p[len]=='/') && !strncmp(p, s, len)) {
-						hContactMatched = hContact;
-					}
-				}
-				DBFreeVariant(&dbv);
-			}
-		}
-		hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDNEXT, (WPARAM) hContact, 0);
-	}
-
-	if (hContactMatched != NULL) {
-		free(s);
-		return hContactMatched;
-	}
-	return NULL;
-}
 
 char *JabberResourceFromJID(const char *jid)
 {

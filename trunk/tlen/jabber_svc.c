@@ -609,7 +609,7 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 			if (!strcmp(msgType, "groupchat")) {
 				JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s'><body>%s</body></message>", dbv.pszVal, msgType, msg);
 			} else if (!strcmp(msgType, "privchat")) {
-				JabberSend(jabberThreadInfo->s, "<m to='%s' n='6' s='10' f='0' c='000000'><b>%s</b></m>", dbv.pszVal, msg);
+				JabberSend(jabberThreadInfo->s, "<m to='%s'><b n='6' s='10' f='0' c='000000'>%s</b></m>", dbv.pszVal, msg);
 			} else {
 				if (strcmp((const char *) ccs->lParam, "<alert>")) {
 					id = JabberSerialNext();
@@ -655,8 +655,6 @@ static void __cdecl JabberGetAwayMsgThread(HANDLE hContact)
 int JabberGetAwayMsg(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
-
-	JabberLog("GetAwayMsg called, wParam=%d lParam=%d", wParam, lParam);
 	JabberForkThread((void (__cdecl *)(void*))JabberGetAwayMsgThread, 0, (void *) ccs->hContact);
 	return 1;
 }
@@ -865,7 +863,7 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 							if ((group=TlenGroupEncode(cws->value.pszVal)) != NULL) {
 								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, item->jid, group);
 								free(group);
-							}
+							} 
 						}
 						free(nick);
 					}

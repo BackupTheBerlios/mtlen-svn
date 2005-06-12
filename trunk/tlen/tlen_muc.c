@@ -239,7 +239,7 @@ static int TlenMUCHandleEvent(WPARAM wParam, LPARAM lParam)
 							if (nick[0]=='~' || item->nick!=NULL) {
 								char str[256];
 								sprintf(str, "%s/%s", mucce->pszID, nick);
-								hContact = JabberDBCreateContact(str, nick, TRUE, FALSE); //(char *)mucce->pszUID
+								hContact = JabberDBCreateContact(str, nick, TRUE); //(char *)mucce->pszUID
 								DBWriteContactSettingByte(hContact, jabberProtoName, "bChat", TRUE);
 								CallService(MS_MSG_SENDMESSAGE, (WPARAM) hContact, (LPARAM) NULL);
 							} else {
@@ -248,7 +248,7 @@ static int TlenMUCHandleEvent(WPARAM wParam, LPARAM lParam)
 									char str[512];
 									_snprintf(str, sizeof(str), "%s@%s", nick, dbv.pszVal);
 									DBFreeVariant(&dbv);									
-									hContact = JabberDBCreateContact(str, nick, TRUE, FALSE);
+									hContact = JabberDBCreateContact(str, nick, TRUE);
 									CallService(MS_MSG_SENDMESSAGE, (WPARAM) hContact, (LPARAM) NULL);
 								}
 							}

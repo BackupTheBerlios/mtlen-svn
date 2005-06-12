@@ -111,7 +111,7 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 							if ((hContact=JabberHContactFromJID(jid)) == NULL) {
 								// Received roster has a new JID.
 								// Add the jid (with empty resource) to Miranda contact list.
-								hContact = JabberDBCreateContact(jid, nick, FALSE, TRUE);
+								hContact = JabberDBCreateContact(jid, nick, FALSE);
 							}
 							DBWriteContactSettingString(hContact, "CList", "MyHandle", nick);
 							if (item->group) free(item->group);

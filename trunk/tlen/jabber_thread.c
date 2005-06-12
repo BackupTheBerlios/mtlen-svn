@@ -683,11 +683,11 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 								else
 									p = from;
 								nick = JabberTextEncode(p);
-								hContact = JabberDBCreateContact(from, nick, TRUE, FALSE);
+								hContact = JabberDBCreateContact(from, nick, TRUE);
 							}
 							else {
 								nick = JabberLocalNickFromJID(from);
-								hContact = JabberDBCreateContact(from, nick, TRUE, TRUE);
+								hContact = JabberDBCreateContact(from, nick, TRUE);
 							}
 							free(nick);
 						}
@@ -779,7 +779,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 			if (type==NULL || (!strcmp(type, "available"))) {
 				if ((nick=JabberLocalNickFromJID(from)) != NULL) {
 					if ((hContact=JabberHContactFromJID(from)) == NULL)
-						hContact = JabberDBCreateContact(from, nick, FALSE, TRUE);
+						hContact = JabberDBCreateContact(from, nick, FALSE);
 					if (!JabberListExist(LIST_ROSTER, from)) {
 						JabberLog("Receive presence online from %s (who is not in my roster)", from);
 						JabberListAdd(LIST_ROSTER, from);
@@ -954,7 +954,7 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 										if ((hContact=JabberHContactFromJID(jid)) == NULL) {
 											// Received roster has a new JID.
 											// Add the jid (with empty resource) to Miranda contact list.
-											hContact = JabberDBCreateContact(jid, nick, FALSE, TRUE);
+											hContact = JabberDBCreateContact(jid, nick, FALSE);
 										}
 										else
 											DBWriteContactSettingString(hContact, jabberProtoName, "jid", jid);
@@ -1286,7 +1286,7 @@ static void TlenProcessW(XmlNode *node, void *userdata)
 		char webContactName[128];
 		sprintf(webContactName, Translate("%s Web Messages"), jabberModuleName);
 		if ((hContact=JabberHContactFromJID(webContactName)) == NULL) {
-			hContact = JabberDBCreateContact(webContactName, webContactName, TRUE, FALSE);
+			hContact = JabberDBCreateContact(webContactName, webContactName, TRUE);
 		}
 
 		s = JabberXmlGetAttrValue(node, "s");
@@ -1391,7 +1391,7 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 					if (tp != NULL && !strcmp(tp, "p")) {
 						/* MUC private message */
 						str = JabberResourceFromJID(f);
-						hContact = JabberDBCreateContact(f, str, TRUE, FALSE);
+						hContact = JabberDBCreateContact(f, str, TRUE);
 						DBWriteContactSettingByte(hContact, jabberProtoName, "bChat", TRUE);
 						free(str);
 						localMessage = JabberTextDecode(bNode->text);

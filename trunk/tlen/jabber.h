@@ -307,7 +307,7 @@ void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 char *JabberGetClientJID(char *jid);
 // jabber_misc.c
 void JabberDBAddAuthRequest(char *jid, char *nick);
-HANDLE JabberDBCreateContact(char *jid, char *nick, BOOL temporary, BOOL stripResource);
+HANDLE JabberDBCreateContact(char *jid, char *nick, BOOL temporary);
 void JabberContactListCreateGroup(char *groupName);
 unsigned long JabberForkThread(void (__cdecl *threadcode)(void*), unsigned long stacksize, void *arg);
 // jabber_svc.c
