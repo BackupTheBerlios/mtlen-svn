@@ -36,8 +36,8 @@ PLUGINLINK *pluginLink;
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
 	"Tlen Protocol",
-	PLUGIN_MAKE_VERSION(1,0,6,5),
-	"Tlen protocol plugin for Miranda IM (1.0.6.5 "__DATE__")",
+	PLUGIN_MAKE_VERSION(1,0,6,6),
+	"Tlen protocol plugin for Miranda IM (1.0.6.6 "__DATE__")",
 	"Santithorn Bunchua, Adam Strzelecki, Piotr Piastucki",
 	"the_leech@users.berlios.de",
 	"(c) 2002-2005 Santithorn Bunchua, Piotr Piastucki",
@@ -172,7 +172,18 @@ static int PreShutdown(WPARAM wParam, LPARAM lParam)
 
 static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 {
+	DBVARIANT dbv;
 	char str[128];
+	if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+		DBFreeVariant(&dbv);
+	} else {
+		DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", "tlen.pl");
+	}
+	if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
+		DBFreeVariant(&dbv);
+	} else {
+		DBWriteContactSettingString(NULL, jabberProtoName, "ManualHost", "s1.tlen.pl");
+	}
 	JabberWsInit();
 	//JabberSslInit();
 	TlenMUCInit();
