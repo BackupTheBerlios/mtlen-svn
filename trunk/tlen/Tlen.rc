@@ -58,23 +58,26 @@ BEGIN
     GROUPBOX        "Options",IDC_SIMPLE,5,66,286,109
     CONTROL         "Automatically reconnect after unintentional disconnection",
                     IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    82,249,10
+                    79,249,10
     CONTROL         "Leave status message after disconnection",
                     IDC_OFFLINE_MESSAGE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,14,95,168,10
-    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,94,75,140,
+                    WS_TABSTOP,14,92,168,10
+    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,91,75,140,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-    CONTROL         "Show offline users with status messages as invisible in contact list",
-                    IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,108,250,10
+    CONTROL         "Block advertisements",
+                    IDC_BLOCK_ADVERTISEMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
+                    105,250,10
     CONTROL         "Automatically delete contacts not in my roster",
                     IDC_ROSTER_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    121,250,10
-    LTEXT           "Alert policy",IDC_STATIC,14,135,70,8
-    COMBOBOX        IDC_ALERT_POLICY,95,133,190,100,
+                    118,250,10
+    CONTROL         "Show offline users with status messages as invisible in contact list",
+                    IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,131,250,10
+    LTEXT           "Alert policy",IDC_STATIC,14,145,70,8
+    COMBOBOX        IDC_ALERT_POLICY,95,143,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Group chat policy",IDC_STATIC,14,148,70,8
-    COMBOBOX        IDC_MUC_POLICY,95,147,190,100,
+    LTEXT           "Group chat policy",IDC_STATIC,14,159,70,8
+    COMBOBOX        IDC_MUC_POLICY,95,157,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
     GROUPBOX        "Voice Chats",IDC_STATIC,5,180,286,63
     LTEXT           "Voice chat policy",IDC_STATIC,14,194,70,8

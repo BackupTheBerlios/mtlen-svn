@@ -131,6 +131,7 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 								item->group = NULL;
 								DBDeleteContactSetting(hContact, "CList", "Group");
 							}
+							JabberLog("Adding contact to roster: %s (%s) %d", item->jid, item->group, item->subscription);
 						}
 					}
 				}

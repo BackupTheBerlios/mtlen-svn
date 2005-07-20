@@ -172,18 +172,7 @@ static int PreShutdown(WPARAM wParam, LPARAM lParam)
 
 static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 {
-	DBVARIANT dbv;
 	char str[128];
-	if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
-		DBFreeVariant(&dbv);
-	} else {
-		DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", "tlen.pl");
-	}
-	if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
-		DBFreeVariant(&dbv);
-	} else {
-		DBWriteContactSettingString(NULL, jabberProtoName, "ManualHost", "s1.tlen.pl");
-	}
 	JabberWsInit();
 	//JabberSslInit();
 	TlenMUCInit();
@@ -267,7 +256,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	char *p, *q;
 	char *szProto;
 	CLISTMENUITEM mi, clmi;
-
+	DBVARIANT dbv;
 	GetModuleFileName(hInst, text, sizeof(text));
 	p = strrchr(text, '\\');
 	p++;
@@ -371,6 +360,17 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 
 
 	HookEvent(ME_CLIST_PREBUILDCONTACTMENU, TlenPrebuildContactMenu);
+
+	if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+		DBFreeVariant(&dbv);
+	} else {
+		DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", "tlen.pl");
+	}
+	if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
+		DBFreeVariant(&dbv);
+	} else {
+		DBWriteContactSettingString(NULL, jabberProtoName, "ManualHost", "s1.tlen.pl");
+	}
 
 	// Set all contacts to offline
 	hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDFIRST, 0, 0);
