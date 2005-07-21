@@ -618,7 +618,9 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 	}
 	else {
 		if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
-
+			if (DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", TRUE) && !strcmp(from, "b73@tlen.pl")) {
+				return;
+			}
 			isChatRoomJid = JabberListExist(LIST_CHATROOM, from);
 
 			if (isChatRoomJid && type!=NULL && !strcmp(type, "groupchat")); //JabberGroupchatProcessMessage(node, userdata);
@@ -1345,7 +1347,7 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_INFINITE);
 				else if(!strcmp(tp, "u"))//contact stopped writing
 					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_OFF);
-				else if(!strcmp(tp, "a")) {//alert was received 
+				else if(!strcmp(tp, "a")) {//alert was received
 					int bAlert = TRUE;
 					int alertPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0);
 					if (alertPolicy == TLEN_ALERTS_IGNORE_ALL) {
@@ -1355,7 +1357,7 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 						item = JabberListGetItemPtr(LIST_ROSTER, f);
 						if (item == NULL) bAlert = FALSE;
 						else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) bAlert = FALSE;
-					} 
+					}
 					if (bAlert) {
 						CCSDATA ccs;
 						PROTORECVEVENT recv;
