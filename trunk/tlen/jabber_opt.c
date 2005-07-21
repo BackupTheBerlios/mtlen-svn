@@ -121,7 +121,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			CheckDlgButton(hwndDlg, IDC_ROSTER_SYNC, DBGetContactSettingByte(NULL, jabberProtoName, "RosterSync", FALSE));
 			CheckDlgButton(hwndDlg, IDC_SHOW_OFFLINE, DBGetContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", FALSE));
 			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE));
-			CheckDlgButton(hwndDlg, IDC_BLOCK_ADVERTISEMENTS, DBGetContactSettingByte(NULL, jabberProtoName, "BlockAdvertisements", FALSE));
+			CheckDlgButton(hwndDlg, IDC_IGNORE_ADVERTISEMENTS, DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", FALSE));
 			
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all alerts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore alerts from unauthorized contacts"));
@@ -171,7 +171,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		case IDC_SAVEPASSWORD:
 		case IDC_RECONNECT:
 		case IDC_ROSTER_SYNC:
-		case IDC_BLOCK_ADVERTISEMENTS:
+		case IDC_IGNORE_ADVERTISEMENTS:
 		case IDC_SHOW_OFFLINE:
 		case IDC_OFFLINE_MESSAGE:
 			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
@@ -224,7 +224,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				DBWriteContactSettingByte(NULL, jabberProtoName, "Reconnect", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_RECONNECT));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "RosterSync", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ROSTER_SYNC));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SHOW_OFFLINE));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "BlockAdvertisements", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_BLOCK_ADVERTISEMENTS));
+				DBWriteContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_IGNORE_ADVERTISEMENTS));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_OFFLINE_MESSAGE));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", (WORD) SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "AlertPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_GETCURSEL, 0, 0));

@@ -48,7 +48,7 @@
 #define IDC_ALERT_POLICY				1053
 #define IDC_MUC_POLICY					1054
 #define IDC_VOICE_POLICY				1055
-#define IDC_BLOCK_ADVERTISEMENTS		1056
+#define IDC_IGNORE_ADVERTISEMENTS		1056
 #define IDC_CITY                        1058
 #define IDC_FULLNAME                    1061
 #define IDC_NICKNAME                    1062
