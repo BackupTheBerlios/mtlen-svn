@@ -392,6 +392,9 @@ void HTTPRequest::setUrl(const char *url) {
 const char *HTTPRequest::getUrl() {
 	return url;
 }
+int HTTPRequest::getPort() {
+	return wPort;
+}
 const char *HTTPRequest::getUri() {
 	return uri;
 }

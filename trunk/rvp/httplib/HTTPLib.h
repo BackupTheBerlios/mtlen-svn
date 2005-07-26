@@ -22,7 +22,7 @@ class HTTPCredentials;
 class HTTPHeader;
 class HTTPRequest;
 
-#include "../jabber.h"
+#include "../rvp.h"
 
 #ifndef HTTPUTILS_INCLUDED
 #define HTTPUTILS_INCLUDED
