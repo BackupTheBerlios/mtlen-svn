@@ -19,36 +19,40 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#ifndef JSTRING_INCLUDED
-#define JSTRING_INCLUDED
+#ifndef LIST_INCLUDED
+#define LIST_INCLUDED
+#include <windows.h>
 
-#include <string.h>
-#include <stdio.h>
-
-class JString
-{
+class ListItem {
 private:
-	int		len;
-	void	increaseDataSize(int);
-	int    	dataSize;
-	char  	*data;
+	char *id;
+	ListItem *prev;
+	ListItem *next;
 public:
-	JString();
-	JString(JString *);
-	JString(const char *);
-	JString(const char *, int);
-	~JString();
-	int		length();
-	void 	add(const char *p);
-	void 	add(const char *p, int);
-	void 	add(char c);
-	void 	add(JString *s);
-	char 	getChar(int pos);
-	void 	print();
-	bool 	equals(JString *s);
-	bool 	equals(const char *s);
-	char*	toString();
-
+	ListItem(const char *id);
+	virtual ~ListItem();
+	virtual void	setNext(ListItem *);
+	virtual void	setPrev(ListItem *);
+	virtual const char *getId();
+	virtual ListItem *getPrev();
+	virtual ListItem *getNext();
 };
 
-#endif // !defined(AFX_JSTRING_H__3B69F435_26CD_4C14_8B28_4E5663393410__INCLUDED_)
+class List {
+private:
+	ListItem *items;
+	CRITICAL_SECTION mutex;
+	void enterCritical();
+	void leaveCritical();
+public:
+	List();
+	~List();
+	ListItem *find(const char *);
+	ListItem *get(int);
+	void	add(ListItem *);
+	void	remove(ListItem *);
+	void	release(ListItem *);
+	void	removeAll();
+	void	releaseAll();
+};
+#endif

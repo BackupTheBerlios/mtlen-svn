@@ -1,0 +1,199 @@
+#include "resource.h"
+#ifdef __MINGW32__
+	#define WINVER 0x500
+	#include <windows.h>
+	#ifndef IDC_STATIC
+	#define IDC_STATIC (-1)
+#endif
+#else
+	#define APSTUDIO_READONLY_SYMBOLS
+	#include "winres.h"
+	#undef APSTUDIO_READONLY_SYMBOLS
+#endif
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU) || defined(__MINGW32__)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif
+#ifdef APSTUDIO_INVOKED
+
+1 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_OPTIONS DIALOGEX 0, 0, 280, 254
+STYLE DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "RVP",IDC_TLEN,7,7,266,89
+    LTEXT           "Sign-in name:",IDC_STATIC,14,21,55,8
+    EDITTEXT        IDC_EDIT_USERNAME,70,19,150,12,ES_AUTOHSCROLL
+    CONTROL         "Manually specify Exchange server",IDC_MANUAL_SERVER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,35,223,10
+	LTEXT           "Server address:",IDC_STATIC,14,50,65,8
+    EDITTEXT        IDC_EDIT_SERVER,80,50,140,12,ES_AUTOHSCROLL
+    LTEXT           "Exchange server:",IDC_STATIC,14,75,45,8, NOT WS_VISIBLE
+    EDITTEXT        IDC_EDIT_LOGIN_SERVER,70,73,86,12,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    CONTROL         "Use SSL",IDC_USE_SSL,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE |
+                    WS_TABSTOP,14,91,69,10
+    GROUPBOX        "Options",IDC_SIMPLE,7,98,266,30
+    GROUPBOX        "Authorization",IDC_STATIC,7,133,266,90
+    CONTROL         "Manually specify cedentials",IDC_MANUAL,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,147,223,10
+    LTEXT           "Domain:",IDC_STATIC,14,161,55,8
+    EDITTEXT        IDC_EDIT_NTDOMAIN,70,160,120,12,ES_AUTOHSCROLL | WS_DISABLED
+					| ES_AUTOHSCROLL
+    LTEXT           "Username:",IDC_STATIC,14,176,55,8
+    EDITTEXT        IDC_EDIT_NTUSERNAME,70,175,120,12,ES_AUTOHSCROLL | WS_DISABLED
+					| ES_AUTOHSCROLL
+    LTEXT           "Password:",IDC_STATIC,14,191,55,8
+    EDITTEXT        IDC_EDIT_NTPASSWORD,70,190,120,12,ES_PASSWORD | WS_DISABLED
+					| ES_AUTOHSCROLL
+    CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,70,205,172,10
+END
+
+IDD_PASSWORD DIALOG DISCARDABLE  0, 0, 151, 63
+STYLE DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | WS_POPUP |
+    WS_VISIBLE | WS_CAPTION
+CAPTION "RVP Password"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    EDITTEXT        IDC_JID,7,7,137,12,ES_READONLY | NOT WS_BORDER | NOT
+                    WS_TABSTOP
+    EDITTEXT        IDC_PASSWORD,7,22,137,12,ES_PASSWORD | ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,23,42,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,77,42,50,14
+END
+
+IDD_USER_VCARD DIALOGEX 0, 0, 222, 140
+STYLE DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "Nick name:",IDC_STATIC,5,8,51,8
+    EDITTEXT        IDC_NICKNAME,58,6,102,12,ES_AUTOHSCROLL
+    LTEXT           "First name:",IDC_STATIC,5,21,51,8
+    EDITTEXT        IDC_FIRSTNAME,58,19,102,12,ES_AUTOHSCROLL
+    LTEXT           "Last name:",IDC_STATIC,5,34,51,8
+    EDITTEXT        IDC_LASTNAME,58,32,102,12,ES_AUTOHSCROLL
+    LTEXT           "E-mail:",IDC_STATIC,5,47,51,8
+    EDITTEXT        IDC_EMAIL,58,45,102,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Save changes",IDC_SAVE,164,111,53,16
+END
+
+IDD_USER_INFO DIALOG DISCARDABLE  0, 0, 222, 132
+STYLE DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "MS Exchange login:",IDC_STATIC,5,7,48,8
+    EDITTEXT        IDC_INFO_JID,53,7,73,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "Subscription:",IDC_STATIC,128,7,45,8,NOT WS_GROUP
+    EDITTEXT        IDC_SUBSCRIPTION,181,7,36,12,ES_READONLY | NOT WS_BORDER |
+                    NOT WS_TABSTOP
+    LTEXT           "Nick name:",IDC_STATIC,5,20,48,8
+    EDITTEXT        IDC_NICKNAME,53,20,77,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "First name:",IDC_STATIC,5,33,48,8
+    EDITTEXT        IDC_FIRSTNAME,53,33,73,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "Last name:",IDC_STATIC,5,46,48,8
+    EDITTEXT        IDC_LASTNAME,53,46,73,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "E-mail:",IDC_STATIC,5,59,48,8
+    EDITTEXT        IDC_EMAIL,54,59,120,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+END
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,0,1,5
+ PRODUCTVERSION 0,0,1,5
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041504e3"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "http://mtlen.berlios.de\0"
+            VALUE "FileDescription", "MS Exchange (RVP) Protocol Plugin for Miranda IM\0"
+            VALUE "FileVersion", "0.0.1.4\0"
+            VALUE "InternalName", "rvp\0"
+            VALUE "LegalCopyright", "Copyright (c) 2005 Piotr Piastucki\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "rvp.dll\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "MS Exchange (RVP) Protocol Plugin\0"
+            VALUE "ProductVersion", "0.0.1.4\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x415, 1251
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_TLEN                ICON    DISCARDABLE     "icos\\rvpsmall.ico"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
