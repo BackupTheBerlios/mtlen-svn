@@ -1,3 +1,7 @@
+1.0.6.5 Stable
+---------
++ option to ignore advertisements
+* bugfixes
 1.0.6.4 Stable
 ---------
 + alert, voice chat and group chat policies
