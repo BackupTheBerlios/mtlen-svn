@@ -143,6 +143,7 @@ public:
 	const char *	getMethod();
 	void			setUrl(const char *url);
 	const char *	getUrl();
+	int				getPort();
 	const char *	getUri();
 	const char *	getHost();
 	void			setContent(const char *data, int len);
@@ -175,7 +176,7 @@ public:
 	static HTTPRequest *	recvHeaders(HTTPConnection *con);
 	static HTTPRequest *	recvRequest(HTTPConnection *con);
 	static int				sendResponse(HTTPConnection *con, HTTPRequest *response);
-	static HTTPRequest *	performTransaction(char *host, WORD port, HTTPRequest *request);
+	static HTTPRequest *	performTransaction(HTTPRequest *request);
 };
 
 

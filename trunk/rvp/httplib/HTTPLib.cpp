@@ -874,7 +874,7 @@ int HTTPUtils::sendResponse(HTTPConnection *con, HTTPRequest *response)  {
 
 
 
-HTTPRequest *HTTPUtils::performTransaction(char *host, WORD port, HTTPRequest *request)  {
+HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
 	char *str;
 	HTTPRequest *response = NULL;
 	int authRejects = 0;
@@ -887,7 +887,7 @@ HTTPRequest *HTTPUtils::performTransaction(char *host, WORD port, HTTPRequest *r
 	free(str);
 	while (1) {
 		if (con == NULL) {
-			con = new HTTPConnection(host, port);
+			con = new HTTPConnection(request->getHost(), request->getPort());
 		}
 		response = HTTPUtils::performRequest(con, request);
 		if (response != NULL) {
