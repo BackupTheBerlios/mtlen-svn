@@ -1,0 +1,151 @@
+1.0.6.5 Stable
+---------
++ option to ignore advertisements
+* bugfixes
+1.0.6.4 Stable
+---------
++ alert, voice chat and group chat policies
++ received alerts are logged as messages
+* offline message timestamp improvements (thanks to Atay for the idea)
+* removed obsolete, Jabber-specific code
+* a lot of more or less important bugfixes
+1.0.6.3 Stable
+---------
++ group names encoding
++ log saving in IEView mode
+* simplified option page
+1.0.6.2 Stable
+---------
++ support for IEView group chats (IEView 1.0.3.0 or later)
++ improvements of group chats in RichEdit mode (context menu, better scrolling)
+1.0.6.1 Stable
+---------
+* bugfix: proper filename encoding
+* options page rearranged
+* code cleanup, other fixes and improvements
+1.0.6.0 Stable
+---------
++ group chat window flashing
++ message icons in tabbed mode
++ web messages grouped as a single contact
+* offline message timestamp handling fixed (again)
+1.0.5.10 RC2
+---------
++ tabbed mode available in group chat window
++ saving chat log to file
++ smiley selection button in group chat window
++ new shortcuts: ctrl+w (close), ctrl+a (select all)
++ saving chat fonts setting
++ new menu items: request and grant authorization
+* several bugfixes in MUCC plugin, better MUCC architecture
+1.0.5.9 RC
+---------
++ voice chat improvements (better sound quality and smarter delay reduction, bugfixes)
++ separate group for Global Owners in chat user list
+* bugfix: web messages receiving (fix by MoMaT)
+1.0.5.8
+---------
++ playback and recording device selection
++ sending and receiving alerts (use <alert> to send)
++ enabling/disabling Always Visible support
+* bugfixes
+1.0.5.7
+---------
++ chat room administration window (user administration and browser)
++ unban option
++ dynamic user groups
++ voice chat p2p connection negotiation
++ voice chat status display
++ incoming voice chat invitation dialog
++ removing contacts from roster on authorization denial
++ offline status message selection
+* a lot of fixes in group chats interface
+1.0.5.6
+---------
++ voice chats ! (experimental)
++ chat room administration: destroying room, changing users' roles, kick & ban
++ MUCC option: send on Enter
++ status messages of offline contacts (use mToolTip to read them)
+* bugfix: contact name encoding when adding new contact
+* bugfix: offline messages time ('more inteligent' Daylight Saving Time handling)
+* bugfix: closing all file transfers at shutdown
+* other minor fixes
+1.0.5.5
+---------
++ improved file transfer (p2p connection negotiation, error notification)
++ MUCC options page (fonts, colors, default filters)
++ chat room events logging (user has joined etc.)
++ registering and uregistering nick names
++ creating chat rooms
++ chat room topic displaying and setting
++ improved errors handling
+* look & feel improvements
+* bugfix: correct chat room name returned by search
+* bugfix: removing users from contact list groups
+* source code refactoring
+1.0.5.4
+---------
++ group chats error handling
++ message log formatting options
++ chat room searching
++ list of contacts in 'invite to group chat' dialog
++ Multi-User Conference item in contact menu
++ some look & feel improvements (better resizing, new icons)
++ internal history of messages
+* a lot of bugfixes and code improvements
+* code clean-up
+1.0.5.3
+---------
++ full text formatting (font name, font size)
++ private messaging sessions
++ displaying user details (administrator/moderator/registered nickname)
++ displaying chat room details icons (moderated/members only/anonymous nicknames not allowed)
++ browsing own chat rooms/registered nicknames
+* code clean-up
+* bugfixes
+1.0.5.2
+---------
++ text formatting (bold, italic, underline, text color for now)
++ chat rooms browsing page by page
+* bugfixes and code clean-up
+1.0.5.1
+---------
++ initial multi-user conferences and chats support
++ MUCC plugin responsible for chats GUI (manager window (groups/rooms), messanging window, helper dialogs)
+
+2004-09-23 Version 1.0.4.0
+	Jabber and Tlen now have separate source trees (Tlen plugin is compliant with GCC now)
+	File transfer with forwarding and SOCKS4/5 proxy support
+	vCard viewing and editing
+	Web messages receiving
+	Incoming email notification through the popup plugin and sounds
+	User typing notification (patch by Adam Libura)
+	Searching users by login
+	New user details page
+	Invisible status message
+	Option to leave offline status message
+	Option to show offline users with status message as invisible
+	Link to create new account
+	Fixed bug: adjust offline message time
+	A lot of other fixes and improvements
+
+2003-08-19 Version 0.1.0.2
+	Fixed bug: crash when receiving some invisible presence
+	Fixed bug: incorrect newline encoding/decoding (tlen uses \r\n while jabber uses \n)
+	Fixed bug: User detail text is not decoded
+	Use new invisible presence (now conform to Jabber invisible presence)
+	Advanced search
+	Based on Jabber plugin 0.1.1.2
+
+2003-05-12 Version 0.1.0.1
+	Fixed bug: slightly incorrect online presence
+	Based on Jabber plugin 0.1.1.0
+
+2003-01-19 Version 0.1.0.0
+	Based on Jabber plugin 0.1.0.7
+	Tlen basic user info
+	Tlen invisible status
+	Tlen visible/invisible list
+	Option to show invisible users as invisible
+	Find/add users using tlen user database
+	Rebase DLL to 0x32600000
