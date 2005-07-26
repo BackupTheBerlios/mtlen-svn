@@ -904,6 +904,7 @@ HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
 				HTTPHeader *header;
 				for (header=response->getHeaders(); header!=NULL; header=header->next) {
 					if (!strcmpi(header->name, "Location")) {
+						request->removeHeader("Host");
 						request->setUrl(header->value);
 						request->keepAlive = false;
 						break;
