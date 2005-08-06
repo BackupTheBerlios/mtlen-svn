@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <m_clist.h>
 #include <m_database.h>
 
-extern char *jabberProtoName;
+extern char *rvpProtoName;
 static char b64table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static unsigned char b64rtable[256];
 
@@ -575,10 +575,10 @@ HANDLE Utils::createContact(const char *id,const char *nick, BOOL temporary) {
 	hContact = contactFromID(id);
 	if (hContact == NULL) {
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_ADD, 0, 0);
-		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) jabberProtoName);
-		DBWriteContactSettingString(hContact, jabberProtoName, "mseid", id);
+		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) rvpProtoName);
+		DBWriteContactSettingString(hContact, rvpProtoName, "mseid", id);
 		if (nick!=NULL && nick[0]!='\0')
-			DBWriteContactSettingString(hContact, jabberProtoName, "Nick", nick);
+			DBWriteContactSettingString(hContact, rvpProtoName, "Nick", nick);
 		if (temporary)
 			DBWriteContactSettingByte(hContact, "CList", "NotOnList", 1);
 	}
@@ -617,8 +617,8 @@ HANDLE Utils::contactFromID(const char *id) {
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDFIRST, 0, 0);
 		while (hContact != NULL) {
 			szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
-			if (szProto!=NULL && !strcmp(jabberProtoName, szProto)) {
-				if (!DBGetContactSetting(hContact, jabberProtoName, "mseid", &dbv)) {
+			if (szProto!=NULL && !strcmp(rvpProtoName, szProto)) {
+				if (!DBGetContactSetting(hContact, rvpProtoName, "mseid", &dbv)) {
 					if ((p=dbv.pszVal) != NULL) {
 						if (!stricmp(p, id)) {
 							//delete server;

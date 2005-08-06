@@ -47,7 +47,7 @@ STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    GROUPBOX        "RVP",IDC_TLEN,7,7,266,89
+    GROUPBOX        "RVP",IDC_RVP,7,7,266,89
     LTEXT           "Sign-in name:",IDC_STATIC,14,21,55,8
     EDITTEXT        IDC_EDIT_USERNAME,70,19,150,12,ES_AUTOHSCROLL
     CONTROL         "Manually specify Exchange server",IDC_MANUAL_SERVER,"Button",
@@ -111,9 +111,6 @@ BEGIN
     LTEXT           "MS Exchange login:",IDC_STATIC,5,7,48,8
     EDITTEXT        IDC_INFO_JID,53,7,73,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_BORDER
-    LTEXT           "Subscription:",IDC_STATIC,128,7,45,8,NOT WS_GROUP
-    EDITTEXT        IDC_SUBSCRIPTION,181,7,36,12,ES_READONLY | NOT WS_BORDER |
-                    NOT WS_TABSTOP
     LTEXT           "Nick name:",IDC_STATIC,5,20,48,8
     EDITTEXT        IDC_NICKNAME,53,20,77,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_BORDER
@@ -181,7 +178,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_TLEN                ICON    DISCARDABLE     "icos\\rvpsmall.ico"
+IDI_RVP                ICON    DISCARDABLE     "icos\\rvpsmall.ico"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

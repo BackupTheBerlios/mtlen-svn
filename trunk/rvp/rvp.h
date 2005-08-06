@@ -19,19 +19,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#ifndef _JABBER_H_
-#define _JABBER_H_
+#ifndef RVP_H_INCLUDED
+#define RVP_H_INCLUDED
 
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 #endif
-//#define ENABLE_LOGGING
-/*******************************************************************
- * Global compilation flags
- *******************************************************************/
-//#define TLEN_PLUGIN defined/undefined in Project Setting
 
 /*******************************************************************
  * Global header files
@@ -85,16 +80,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define IDC_STATIC (-1)
 
 enum {
-	TLEN_IDI_TLEN = 0,
-	TLEN_ICON_TOTAL
+	RVP_IDI_RVP = 0,
+	RVP_ICON_TOTAL
 };
 
-extern HICON tlenIcons[TLEN_ICON_TOTAL];
+extern HICON tlenIcons[RVP_ICON_TOTAL];
 
 typedef struct {
 	PROTOSEARCHRESULT hdr;
 	char jid[256];
-} JABBER_SEARCH_RESULT;
+} RVP_SEARCH_RESULT;
 
 
 /*******************************************************************
@@ -104,8 +99,7 @@ extern HINSTANCE hInst;
 extern RVPImpl rvplogin;
 
 extern HANDLE hMainThread;
-extern DWORD jabberMainThreadId;
-extern char *jabberProtoName;
+extern char *rvpProtoName;
 extern char *rvpModuleName;
 
 extern BOOL jabberConnected;
@@ -113,11 +107,6 @@ extern int jabberStatus;
 extern int jabberDesiredStatus;
 
 extern HANDLE hEventSettingChanged, hEventContactDeleted;
-
-/*******************************************************************
- * Function declarations
- *******************************************************************/
-int JabberGetInfo(WPARAM wParam, LPARAM lParam);
 
 #endif
 
