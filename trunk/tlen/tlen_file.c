@@ -36,6 +36,17 @@ static void TlenFileSendParse(JABBER_FILE_TRANSFER *ft);
 static void TlenFileSendingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 static void TlenFileReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 
+
+enum {
+	TLEN_FILE_PACKET_CONNECTION_REQUEST = 0x01,
+	TLEN_FILE_PACKET_CONNECTION_REQUEST_ACK = 0x02,
+	TLEN_FILE_PACKET_FILE_LIST = 0x32,
+	TLEN_FILE_PACKET_FILE_LIST_ACK = 0x33,
+	TLEN_FILE_PACKET_FILE_REQUEST = 0x34,
+	TLEN_FILE_PACKET_FILE_DATA = 0x35,
+	TLEN_FILE_PACKET_END_OF_FILE = 0x37,
+};
+
 typedef struct {
 	unsigned int maxDataLen;
 	char *packet;
@@ -189,7 +200,7 @@ static JABBER_FILE_TRANSFER* TlenFileEstablishIncomingConnection(JABBER_SOCKET *
 	// (DWORD) id
 	// (BYTE) hash[20]
 	packet = TlenFilePacketReceive(s);
-	if (packet == NULL || packet->type!=1 || packet->len<28) {
+	if (packet == NULL || packet->type != TLEN_FILE_PACKET_CONNECTION_REQUEST || packet->len<28) {
 		if (packet!=NULL) {
 			TlenFilePacketFree(packet);
 		}
@@ -221,7 +232,7 @@ static JABBER_FILE_TRANSFER* TlenFileEstablishIncomingConnection(JABBER_SOCKET *
 	if (i >=0) {
 		if ((packet=TlenFilePacketCreate(sizeof(DWORD))) != NULL) {
 			// Send connection establishment acknowledgement
-			TlenFilePacketSetType(packet, 0x2);
+			TlenFilePacketSetType(packet, TLEN_FILE_PACKET_CONNECTION_REQUEST_ACK);
 			TlenFilePacketPackDword(packet, (DWORD) atoi(item->ft->iqId));
 			TlenFilePacketSend(s, packet);
 			TlenFilePacketFree(packet);
@@ -243,7 +254,7 @@ static void TlenFileEstablishOutgoingConnection(JABBER_FILE_TRANSFER *ft)
 	JabberLog("Establishing outgoing connection.");
 	ft->state = FT_ERROR;
 	if ((packet = TlenFilePacketCreate(2*sizeof(DWORD) + 20))!=NULL) {
-		TlenFilePacketSetType(packet, 1);
+		TlenFilePacketSetType(packet, TLEN_FILE_PACKET_CONNECTION_REQUEST);
 		TlenFilePacketPackDword(packet, 1);
 		TlenFilePacketPackDword(packet, (DWORD) atoi(ft->iqId));
 		username[0] = '\0';
@@ -260,7 +271,7 @@ static void TlenFileEstablishOutgoingConnection(JABBER_FILE_TRANSFER *ft)
 		TlenFilePacketFree(packet);
 		packet = TlenFilePacketReceive(ft->s);
 		if (packet != NULL) {
-			if (packet->type == 2) { // acknowledge
+			if (packet->type == TLEN_FILE_PACKET_CONNECTION_REQUEST_ACK) { // acknowledge
 				if ((int)(*((DWORD*)packet->packet)) == atoi(ft->iqId)) {
 					ft->state = FT_CONNECTING;
 					ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, ft, 0);
@@ -676,7 +687,7 @@ static void TlenFileReceiveParse(JABBER_FILE_TRANSFER *ft)
 		rpacket = TlenFilePacketReceive(ft->s);
 		if (rpacket != NULL) {
 			p = rpacket->packet;
-			if (rpacket->type == 0x32) { // list of files (length & name)
+			if (rpacket->type == TLEN_FILE_PACKET_FILE_LIST) { // list of files (length & name)
 				ft->fileCount = (int)(*((DWORD*)p));
 				ft->files = (char **) malloc(sizeof(char *) * ft->fileCount);
 				ft->filesSize = (long *) malloc(sizeof(long) * ft->fileCount);
@@ -696,7 +707,7 @@ static void TlenFileReceiveParse(JABBER_FILE_TRANSFER *ft)
 					ft->state = FT_ERROR;
 				} 
 				else {
-					TlenFilePacketSetType(packet, 0x33); 
+					TlenFilePacketSetType(packet, TLEN_FILE_PACKET_FILE_LIST_ACK); 
 					TlenFilePacketSend(ft->s, packet);
 					TlenFilePacketFree(packet);
 					ft->state = FT_INITIALIZING;
@@ -712,7 +723,7 @@ static void TlenFileReceiveParse(JABBER_FILE_TRANSFER *ft)
 	else if (ft->state == FT_INITIALIZING) {
 		char *fullFileName;
 		if ((packet=TlenFilePacketCreate(3*sizeof(DWORD))) != NULL) {
-			TlenFilePacketSetType(packet, 0x34); // file request
+			TlenFilePacketSetType(packet, TLEN_FILE_PACKET_FILE_REQUEST); // file request
 			TlenFilePacketPackDword(packet, ft->currentFile);
 			TlenFilePacketPackDword(packet, 0);
 			TlenFilePacketPackDword(packet, 0);
@@ -755,7 +766,7 @@ static void TlenFileReceiveParse(JABBER_FILE_TRANSFER *ft)
 			rpacket = TlenFilePacketReceive(ft->s);
 			if (rpacket != NULL) {
 				p = rpacket->packet;
-				if (rpacket->type == 0x35) { // file data
+				if (rpacket->type == TLEN_FILE_PACKET_FILE_DATA) { // file data
 					int writeSize;
 					writeSize = rpacket->len - 2 * sizeof(DWORD) ; // skip file offset
 					if (_write(ft->fileId, p + 2 * sizeof(DWORD), writeSize) != writeSize) {
@@ -769,7 +780,7 @@ static void TlenFileReceiveParse(JABBER_FILE_TRANSFER *ft)
 						ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_DATA, ft, (LPARAM) &pfts);
 					}
 				}
-				else if (rpacket->type == 0x37) { // end of file
+				else if (rpacket->type == TLEN_FILE_PACKET_END_OF_FILE) { // end of file
 					_close(ft->fileId);
 					JabberLog("Finishing this file...");
 					if (ft->currentFile >= ft->fileCount-1) {
@@ -921,7 +932,7 @@ static void TlenFileSendParse(JABBER_FILE_TRANSFER *ft)
 			// will break the session because the receiver cannot take it :)
 			SleepEx(1000, TRUE);
 			TlenFilePacketSetLen(packet, 0); // Reuse packet
-			TlenFilePacketSetType(packet, 0x32);
+			TlenFilePacketSetType(packet, TLEN_FILE_PACKET_FILE_LIST);
 			TlenFilePacketPackDword(packet, (DWORD) ft->fileCount);
 			for (i=0; i<ft->fileCount; i++) {
 //					struct _stat statbuf;
@@ -954,18 +965,18 @@ static void TlenFileSendParse(JABBER_FILE_TRANSFER *ft)
 			return;
 		}
 		p = rpacket->packet;
-		// TYPE: 0x33	will be ignored
+		// TYPE: TLEN_FILE_PACKET_FILE_LIST_ACK	will be ignored
 		// LEN: 0
-		if (rpacket->type == 0x33) {
+		if (rpacket->type == TLEN_FILE_PACKET_FILE_LIST_ACK) {
 
 		}
 		// Then the receiver will request each file
-		// TYPE: 0x34
+		// TYPE: TLEN_FILE_PACKET_REQUEST
 		// LEN:
 		// (DWORD) file number
 		// (DWORD) 0
 		// (DWORD) 0
-		else if (rpacket->type == 0x34) {
+		else if (rpacket->type == TLEN_FILE_PACKET_FILE_REQUEST) {
 			PROTOFILETRANSFERSTATUS pfts;
 			//struct _stat statbuf;
 
@@ -999,7 +1010,7 @@ static void TlenFileSendParse(JABBER_FILE_TRANSFER *ft)
 						ft->state = FT_ERROR;
 					}
 					else {
-						TlenFilePacketSetType(packet, 0x35);
+						TlenFilePacketSetType(packet, TLEN_FILE_PACKET_FILE_DATA);
 						fileBuffer = (char *) malloc(2048);
 						JabberLog("Sending file data...");
 						while ((numRead=_read(ft->fileId, fileBuffer, 2048)) > 0) {
@@ -1033,7 +1044,7 @@ static void TlenFileSendParse(JABBER_FILE_TRANSFER *ft)
 						}
 						JabberLog("Finishing this file...");
 						TlenFilePacketSetLen(packet, 0); // Reuse packet
-						TlenFilePacketSetType(packet, 0x37);
+						TlenFilePacketSetType(packet, TLEN_FILE_PACKET_END_OF_FILE);
 						TlenFilePacketPackDword(packet, currentFile);
 						TlenFilePacketSend(ft->s, packet);
 						TlenFilePacketFree(packet);
