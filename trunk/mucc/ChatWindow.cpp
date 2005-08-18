@@ -819,6 +819,7 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 	if (getHWNDLog()!=NULL) {
 		IEVIEWEVENTDATA ied;
 		IEVIEWEVENT iee;
+		IEVIEWWINDOW iew;
 		iee.cbSize = sizeof(IEVIEWEVENT);
 		iee.dwFlags = IEEF_NO_UNICODE;
 		iee.hwnd = hWndLog;
@@ -854,6 +855,11 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 		ied.dwData = getOptions(); // event->dwData;
 		ied.bIsMe = event->bIsMe;
 		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
+
+		iew.cbSize = sizeof(IEVIEWWINDOW);
+		iew.iType = IEW_SCROLLBOTTOM;
+		iew.hwnd = hWndLog;
+		CallService(MS_IEVIEW_WINDOW, 0, (LPARAM)&iew);
 		return 1;
 	}
 	rtf = NULL;
