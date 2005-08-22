@@ -1,3 +1,7 @@
+1.0.6.6 Stable
+---------
+* fixed IEView support (text scrolling issue)
+* code cleanup
 1.0.6.5 Stable
 ---------
 + option to ignore advertisements
