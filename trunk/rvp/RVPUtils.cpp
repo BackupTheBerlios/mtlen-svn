@@ -629,17 +629,18 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 	request->addHeader("RVP-From-Principal", principalUrl);
 	request->setCredentials(credentials);
 	response = HTTPUtils::performTransaction(request);
-	result = response->resultCode;
 	delete request;
-	delete response;
-	if (result/100 != 2) {
-		Netlib_CloseHandle(lSocket);
-		LeaveCriticalSection(&mutex);
-		return result;
+	if (response != NULL) {
+		result = response->resultCode;
+		delete response;
+		if (result/100 != 2) {
+			Netlib_CloseHandle(lSocket);
+		} else {
+			bOnline = true;
+		}
 	}
-	bOnline = true;
 	LeaveCriticalSection(&mutex);
-	return 0;
+	return (result/100 == 2) ? 0 : result;
 }
 
 int RVPClient::stopListening() {
@@ -682,10 +683,12 @@ int RVPClient::sendPresence(int status) {
 		request->setContent(utf8Message, strlen(utf8Message));
 		delete utf8Message;
 		response = HTTPUtils::performTransaction(request);
-		result = response->resultCode;
 		delete request;
-		delete response;
-		lastStatus = status;
+		if (response != NULL) {
+			result = response->resultCode;
+			delete response;
+			lastStatus = status;
+		}
 	}
 	return (result/100 == 2) ? 0 : result;
 }
@@ -747,11 +750,13 @@ int RVPClient::sendMessage(const char *message, const char *contactID, const cha
 			request->setContent(utf8Message, strlen(utf8Message));
 			delete utf8Message;
 			response = HTTPUtils::performTransaction(request);
-			result = response->resultCode;
-			delete cdata;
 			delete request;
-			delete response;
+			delete cdata;
 			delete node;
+			if (response != NULL) {
+				result = response->resultCode;
+				delete response;
+			}
 		}
 	}
 	return (result/100 == 2) ? 0 : result;
@@ -800,11 +805,13 @@ int RVPClient::sendMessage(const wchar_t *message, const char *contactID, const 
 			request->setContent(utf8Message, strlen(utf8Message));
 			delete utf8Message;
 			response = HTTPUtils::performTransaction(request);
-			result = response->resultCode;
-			delete cdata;
 			delete request;
-			delete response;
+			delete cdata;
 			delete node;
+			if (response != NULL) {
+				result = response->resultCode;
+				delete response;
+			}
 		}
 	}
 	return (result/100 == 2) ? 0 : result;
@@ -848,10 +855,12 @@ int RVPClient::sendTyping(const char *contactID, const char *contactDisplayname,
 			request->setContent(utf8Message, strlen(utf8Message));
 			delete utf8Message;
 			response = HTTPUtils::performTransaction(request);
-			result = response->resultCode;
 			delete request;
-			delete response;
 			delete node;
+			if (response != NULL) {
+				result = response->resultCode;
+				delete response;
+			}
 		}
 	}
 	return (result/100 == 2) ? 0 : result;
@@ -878,7 +887,78 @@ RVPSubscription *RVPClient::subscribe(const char *login) {
 			request->setCredentials(credentials);
 			response = HTTPUtils::performTransaction(request);
 			delete request;
-			if (response->resultCode/100 == 2) {
+			delete node;
+			if (response != NULL) {
+				if (response->resultCode/100 == 2) {
+					time_t expiry = time(NULL);
+					HTTPHeader *header = response->getHeader("Subscription-Id");
+					HTTPHeader *lifetime = response->getHeader("Subscription-Lifetime");
+					if (lifetime != NULL) {
+						expiry += atol(lifetime->getValue());
+					} else {
+						expiry += 14400;
+					}
+					if (header!=NULL) {
+						subscription = RVPSubscription::add(this, login, header->getValue());
+						subscription->setExpiry(expiry);
+						JString *js = new JString(response->getContent(), response->dataLength);
+						XMLObject *xml = new XMLObject();
+						xml->parseXML(js);
+						delete js;
+						XMLObject *d_multistatusXml, *d_responseXml, *d_propstatXml, *d_propXml, *xml2;
+						if ((d_multistatusXml = xml->getChild("d:multistatus")) != NULL) {
+							if ((d_responseXml = d_multistatusXml->getChild("d:response")) != NULL) {
+								if ((d_propstatXml = d_responseXml->getChild("d:propstat")) != NULL) {
+									if ((d_propXml = d_propstatXml->getChild("d:prop")) != NULL) {
+										for (xml2=d_propXml->getChild(); xml2!=NULL; xml2=xml2->getNext()) {
+											if (xml2->getName()->equals("r:state")) {
+												char *statusString = xml2->getChild()->getName()->toString();
+												subscription->setStatus(RVPClient::getStatusFromString(statusString));
+												delete statusString;
+											} else if (xml2->getName()->equals("d:displayname")) {
+												char *nick = xml2->getData()->toString();
+												subscription->setDisplayName(nick);
+												delete nick;
+											} else if (xml2->getName()->equals("r:email")) {
+												char *email = xml2->getData()->toString();
+												subscription->setEmail(email);
+												delete email;
+											}
+										}
+									}
+								}
+							}
+						}
+						delete xml;
+					}
+				}
+				delete response;
+			}
+		}
+	}
+	return subscription;
+}
+
+RVPSubscription *RVPClient::subscribeMain(const char *callbackHost) {
+	int result = 1;
+	RVPSubscription *subscription = NULL;
+	if (bOnline && login != NULL) {
+		/* Sign In */
+		request = new HTTPRequest();
+		request->setMethod("SUBSCRIBE");
+		request->setUrl(principalUrl);
+		request->addHeader("Subscription-Lifetime", "14400");
+		request->addHeader("Notification-Type", "pragma/notify");
+		request->addHeader("User-Agent", "msmsgs/5.1.0.639");
+		request->addHeader("Call-Back", callbackHost);
+		request->addHeader("RVP-Notifications-Version", "0.2");
+		request->addHeader("RVP-From-Principal", principalUrl);
+		request->setCredentials(credentials);
+		response = HTTPUtils::performTransaction(request);
+		delete request;
+		if (response != NULL) {
+			result = response->resultCode;
+			if (resultCode / 100 == 2) {
 				time_t expiry = time(NULL);
 				HTTPHeader *header = response->getHeader("Subscription-Id");
 				HTTPHeader *lifetime = response->getHeader("Subscription-Lifetime");
@@ -888,44 +968,14 @@ RVPSubscription *RVPClient::subscribe(const char *login) {
 					expiry += 14400;
 				}
 				if (header!=NULL) {
-					subscription = RVPSubscription::add(this, login, header->getValue());
+					subscription = RVPSubscription::add(this, signInName, header->getValue());
 					subscription->setExpiry(expiry);
-					JString *js = new JString(response->getContent(), response->dataLength);
-					XMLObject *xml = new XMLObject();
-					xml->parseXML(js);
-					delete js;
-					XMLObject *d_multistatusXml, *d_responseXml, *d_propstatXml, *d_propXml, *xml2;
-					if ((d_multistatusXml = xml->getChild("d:multistatus")) != NULL) {
-						if ((d_responseXml = d_multistatusXml->getChild("d:response")) != NULL) {
-							if ((d_propstatXml = d_responseXml->getChild("d:propstat")) != NULL) {
-								if ((d_propXml = d_propstatXml->getChild("d:prop")) != NULL) {
-									for (xml2=d_propXml->getChild(); xml2!=NULL; xml2=xml2->getNext()) {
-										if (xml2->getName()->equals("r:state")) {
-											char *statusString = xml2->getChild()->getName()->toString();
-											subscription->setStatus(RVPClient::getStatusFromString(statusString));
-											delete statusString;
-										} else if (xml2->getName()->equals("d:displayname")) {
-											char *nick = xml2->getData()->toString();
-											subscription->setDisplayName(nick);
-											delete nick;
-										} else if (xml2->getName()->equals("r:email")) {
-											char *email = xml2->getData()->toString();
-											subscription->setEmail(email);
-											delete email;
-										}
-									}
-								}
-							}
-						}
-					}
-					delete xml;
 				}
 			}
 			delete response;
-			delete node;
 		}
 	}
-	return subscription;
+	return (result/100 == 2) ? 0 : result;
 }
 
 int RVPClient::renew(RVPSubscription *subscription) {
@@ -943,53 +993,55 @@ int RVPClient::renew(RVPSubscription *subscription) {
 			request->addHeader("RVP-From-Principal", principalUrl);
 			request->setCredentials(credentials);
 			response = HTTPUtils::performTransaction(request);
-			result = response->resultCode;
 			delete request;
-			if (result/100 == 2) {
-				time_t expiry = time(NULL);
-				HTTPHeader *header = response->getHeader("Subscription-Id");
-				HTTPHeader *lifetime = response->getHeader("Subscription-Lifetime");
-				if (lifetime != NULL) {
-					expiry += atol(lifetime->getValue());
-				} else {
-					expiry += 14400;
-				}
-				if (header!=NULL) {
-					subscription->setExpiry(expiry);
-					/*
-					JString *js = new JString(response->getContent(), response->dataLength);
-					XMLObject *xml = new XMLObject();
-					xml->parseXML(js);
-					delete js;
-					XMLObject *d_multistatusXml, *d_responseXml, *d_propstatXml, *d_propXml, *xml2;
-					if ((d_multistatusXml = xml->getChild("d:multistatus")) != NULL) {
-						if ((d_responseXml = d_multistatusXml->getChild("d:response")) != NULL) {
-							if ((d_propstatXml = d_responseXml->getChild("d:propstat")) != NULL) {
-								if ((d_propXml = d_propstatXml->getChild("d:prop")) != NULL) {
-									for (xml2=d_propXml->getChild(); xml2!=NULL; xml2=xml2->getNext()) {
-										if (xml2->getName()->equals("r:state")) {
-											char *statusString = xml2->getChild()->getName()->toString();
-											subscription->setStatus(RVPClient::getStatusFromString(statusString));
-											delete statusString;
-										} else if (xml2->getName()->equals("d:displayname")) {
-											char *nick = xml2->getData()->toString();
-											subscription->setDisplayName(nick);
-											delete nick;
-										} else if (xml2->getName()->equals("r:email")) {
-											char *email = xml2->getData()->toString();
-											subscription->setEmail(email);
-											delete email;
+			if (response != NULL) {
+				result = response->resultCode;
+				if (result/100 == 2) {
+					time_t expiry = time(NULL);
+					HTTPHeader *header = response->getHeader("Subscription-Id");
+					HTTPHeader *lifetime = response->getHeader("Subscription-Lifetime");
+					if (lifetime != NULL) {
+						expiry += atol(lifetime->getValue());
+					} else {
+						expiry += 14400;
+					}
+					if (header!=NULL) {
+						subscription->setExpiry(expiry);
+						/*
+						JString *js = new JString(response->getContent(), response->dataLength);
+						XMLObject *xml = new XMLObject();
+						xml->parseXML(js);
+						delete js;
+						XMLObject *d_multistatusXml, *d_responseXml, *d_propstatXml, *d_propXml, *xml2;
+						if ((d_multistatusXml = xml->getChild("d:multistatus")) != NULL) {
+							if ((d_responseXml = d_multistatusXml->getChild("d:response")) != NULL) {
+								if ((d_propstatXml = d_responseXml->getChild("d:propstat")) != NULL) {
+									if ((d_propXml = d_propstatXml->getChild("d:prop")) != NULL) {
+										for (xml2=d_propXml->getChild(); xml2!=NULL; xml2=xml2->getNext()) {
+											if (xml2->getName()->equals("r:state")) {
+												char *statusString = xml2->getChild()->getName()->toString();
+												subscription->setStatus(RVPClient::getStatusFromString(statusString));
+												delete statusString;
+											} else if (xml2->getName()->equals("d:displayname")) {
+												char *nick = xml2->getData()->toString();
+												subscription->setDisplayName(nick);
+												delete nick;
+											} else if (xml2->getName()->equals("r:email")) {
+												char *email = xml2->getData()->toString();
+												subscription->setEmail(email);
+												delete email;
+											}
 										}
 									}
 								}
 							}
 						}
+						delete xml;
+						*/
 					}
-					delete xml;
-					*/
 				}
+				delete response;
 			}
-			delete response;
 			delete node;
 		}
 	}
@@ -1011,16 +1063,19 @@ int RVPClient::unsubscribe(RVPSubscription *subscription) {
 				request->addHeader("RVP-From-Principal", principalUrl);
 				request->setCredentials(credentials);
 				response = HTTPUtils::performTransaction(request);
-				result = response->resultCode;
 				delete request;
-				delete response;
 				delete node;
-				if (result/100 != 2) return result;
+				if (response != NULL) {
+					result = response->resultCode;
+					delete response;
+				}
+			}
+			if (result/100 == 2) {
 				delete subscription;
 			}
 		}
 	}
-	return 0;
+	return (result/100 == 2) ? 0 : result;
 }
 
 
@@ -1040,16 +1095,19 @@ int RVPClient::unsubscribe(const char *login) {
 				request->addHeader("RVP-From-Principal", principalUrl);
 				request->setCredentials(credentials);
 				response = HTTPUtils::performTransaction(request);
-				result = response->resultCode;
 				delete request;
-				delete response;
 				delete node;
-				if (result/100 != 2) return result;
+				if (response != NULL) {
+					result = response->resultCode;
+					delete response;
+				}
+			}
+			if (result/100 == 2) {
 				delete subscription;
 			}
 		}
 	}
-	return 0;
+	return (result/100 == 2) ? 0 : result;
 }
 
 RVPSubscription * RVPClient::getProperty(const char *login, const char *property) {
@@ -1076,12 +1134,14 @@ RVPSubscription * RVPClient::getProperty(const char *login, const char *property
 			request->setContent(utf8Message, strlen(utf8Message));
 			delete utf8Message;
 			response = HTTPUtils::performTransaction(request);
-			if (response->resultCode/100 == 2) {
+			delete request;
+			if (response != NULL) {
+				if (response->resultCode/100 == 2) {
 				//subscription = new RVPSubscription();
 				//subscription->setDisplayName();
+				}
+				delete response;
 			}
-			delete request;
-			delete response;
 		}
 	}
 	return subscription;
@@ -1102,39 +1162,41 @@ int RVPClient::getSubscribers() {
 		request->setCredentials(credentials);
 		response = HTTPUtils::performTransaction(request);
 		delete request;
-		result = response->resultCode;
-		if (result/100 == 2) {
-			JString *js = new JString(response->getContent(), response->dataLength);
-			XMLObject *xml = new XMLObject();
-			xml->parseXML(js);
-			delete js;
-			XMLObject *subscriptionsXml = xml->getChild("r:subscriptions");
-			if (subscriptionsXml!=NULL) {
-				for (XMLObject *subscriptionXml = subscriptionsXml->getChild("r:subscription");subscriptionXml!=NULL;subscriptionXml=subscriptionXml->getNext("r:subscription")) {
-					XMLObject *subscriptionIdXml = subscriptionXml->getChild("r:subscription-id");
-					XMLObject *timeoutXml = subscriptionXml->getChild("d:timeout");
-					XMLObject *principalXml = subscriptionXml->getChild("a:principal");
-					if (principalXml!=NULL) {
-						XMLObject *rvpPrincipalXml = principalXml->getChild("a:rvp-principal");
-						if (rvpPrincipalXml!=NULL) {
-			//				char *jid = rvpPrincipalXml->getData()->toString();
-			//							char *nick = strrchr(jid, '/')+1;
-							//if ((hContact=JabberHContactFromJID(jid)) == NULL) {
-								// Received roster has a new JID.
-								// Add the jid (with empty resource) to Miranda contact list.
-							//	hContact = JabberDBCreateContact(jid, nick, FALSE, TRUE);
-							//}
-			//				delete jid;
+		if (response != NULL) {
+			result = response->resultCode;
+			if (result/100 == 2) {
+				JString *js = new JString(response->getContent(), response->dataLength);
+				XMLObject *xml = new XMLObject();
+				xml->parseXML(js);
+				delete js;
+				XMLObject *subscriptionsXml = xml->getChild("r:subscriptions");
+				if (subscriptionsXml!=NULL) {
+					for (XMLObject *subscriptionXml = subscriptionsXml->getChild("r:subscription");subscriptionXml!=NULL;subscriptionXml=subscriptionXml->getNext("r:subscription")) {
+						XMLObject *subscriptionIdXml = subscriptionXml->getChild("r:subscription-id");
+						XMLObject *timeoutXml = subscriptionXml->getChild("d:timeout");
+						XMLObject *principalXml = subscriptionXml->getChild("a:principal");
+						if (principalXml!=NULL) {
+							XMLObject *rvpPrincipalXml = principalXml->getChild("a:rvp-principal");
+							if (rvpPrincipalXml!=NULL) {
+				//				char *jid = rvpPrincipalXml->getData()->toString();
+				//							char *nick = strrchr(jid, '/')+1;
+								//if ((hContact=JabberHContactFromJID(jid)) == NULL) {
+									// Received roster has a new JID.
+									// Add the jid (with empty resource) to Miranda contact list.
+								//	hContact = JabberDBCreateContact(jid, nick, FALSE, TRUE);
+								//}
+				//				delete jid;
+							}
 						}
 					}
 				}
+				delete xml;
+			} else {
+				delete response;
+				return result;
 			}
-			delete xml;
-		} else {
 			delete response;
-			return result;
 		}
-		delete response;
 	}
 	return 0;
 }
@@ -1152,39 +1214,42 @@ int RVPClient::getACL() {
 		request->setCredentials(credentials);
 		response = HTTPUtils::performTransaction(request);
 		delete request;
-		result = response->resultCode;
-		if (result/100 == 2) {
-			JString *js = new JString(response->getContent(), response->dataLength);
-			delete response;
-			XMLObject *xml = new XMLObject();
-			xml->parseXML(js);
-			delete js;
-			XMLObject *rvpaclXml, *aclXml, *aceXml, *principalXml, *rvpprincipalXml;
-			rvpaclXml = xml->getChild();
-			rvpaclXml = xml->getChild("a:rvpacl");
-			if (rvpaclXml!=NULL) {
-				aclXml = rvpaclXml->getChild();
-				aclXml = rvpaclXml->getChild("a:acl");
-				if (aclXml!=NULL) {
-					for (aceXml=aclXml->getChild("a:ace");aceXml!=NULL;aceXml=aceXml->getNext("a:ace")) {
-						principalXml = aceXml->getChild("a:principal");
-						if (principalXml!=NULL) {
-							rvpprincipalXml = principalXml->getChild("a:rvp-principal");
-							if (rvpprincipalXml!=NULL) {
-	//							char *jid = rvpprincipalXml->getData()->toString();
-	//							char *nick = strrchr(jid, '/')+1;
-	//							if ((hContact=Utils::contactFromID(jid)) == NULL) {
-									// Received roster has a new JID.
-									// Add the jid (with empty resource) to Miranda contact list.
-							//		hContact = JabberDBCreateContact(jid, nick, FALSE, TRUE);
-	//							}
-	//							delete jid;
+		if (response != NULL) {
+			result = response->resultCode;
+			if (result/100 == 2) {
+				JString *js = new JString(response->getContent(), response->dataLength);
+				delete response;
+				XMLObject *xml = new XMLObject();
+				xml->parseXML(js);
+				delete js;
+				XMLObject *rvpaclXml, *aclXml, *aceXml, *principalXml, *rvpprincipalXml;
+				rvpaclXml = xml->getChild();
+				rvpaclXml = xml->getChild("a:rvpacl");
+				if (rvpaclXml!=NULL) {
+					aclXml = rvpaclXml->getChild();
+					aclXml = rvpaclXml->getChild("a:acl");
+					if (aclXml!=NULL) {
+						for (aceXml=aclXml->getChild("a:ace");aceXml!=NULL;aceXml=aceXml->getNext("a:ace")) {
+							principalXml = aceXml->getChild("a:principal");
+							if (principalXml!=NULL) {
+								rvpprincipalXml = principalXml->getChild("a:rvp-principal");
+								if (rvpprincipalXml!=NULL) {
+		//							char *jid = rvpprincipalXml->getData()->toString();
+		//							char *nick = strrchr(jid, '/')+1;
+		//							if ((hContact=Utils::contactFromID(jid)) == NULL) {
+										// Received roster has a new JID.
+										// Add the jid (with empty resource) to Miranda contact list.
+								//		hContact = JabberDBCreateContact(jid, nick, FALSE, TRUE);
+		//							}
+		//							delete jid;
+								}
 							}
 						}
 					}
 				}
+				delete xml;
 			}
-			delete xml;
+			delete response;
 		}
 	}
 	return 0;
