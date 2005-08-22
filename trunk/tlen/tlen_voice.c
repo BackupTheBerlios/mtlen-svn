@@ -156,7 +156,7 @@ static DWORD WINAPI TlenVoiceRecordingThreadProc(TLEN_VOICE_CONTROL *control)
 	}
 }*/
 
-static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control) 
+static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
 {
 	WAVEFORMATEX wfm;
 	MMRESULT mmres;
@@ -167,7 +167,7 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
     memset(&wfm, 0, sizeof(wfm));
     wfm.cbSize          = sizeof(WAVEFORMATEX);
     wfm.nChannels       = 1;
-    wfm.wBitsPerSample  = 16;   
+    wfm.wBitsPerSample  = 16;
     wfm.nSamplesPerSec  = modeFrequency[control->codec];
     wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nChannels * wfm.wBitsPerSample/8;
     wfm.nBlockAlign     = 2 * wfm.nChannels;
@@ -193,7 +193,7 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
 				}
 			}
 		}
-	} 
+	}
 	if (!waveOutGetDevCaps(iSelDev, &wic, sizeof(WAVEOUTCAPS))) {
 		JabberLog("Playback device ID #%u: %s\r\n", iSelDev, wic.szPname);
 	}
@@ -211,7 +211,7 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
 }
 
 
-static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control) 
+static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
 {
 	WAVEFORMATEX wfm;
 	MMRESULT mmres;
@@ -222,7 +222,7 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
     memset(&wfm, 0, sizeof(wfm));
     wfm.cbSize          = sizeof(WAVEFORMATEX);
     wfm.nChannels       = 1;
-    wfm.wBitsPerSample  = 16;   
+    wfm.wBitsPerSample  = 16;
     wfm.nSamplesPerSec  = modeFrequency[control->codec];
     wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nChannels * wfm.wBitsPerSample/8;
     wfm.nBlockAlign     = 2 * wfm.nChannels;
@@ -260,7 +260,7 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
 				}
 			}
 		}
-	} 
+	}
 	if (!waveInGetDevCaps(iSelDev, &wic, sizeof(WAVEINCAPS))) {
 		JabberLog("Recording device ID #%u: %s\r\n", iSelDev, wic.szPname);
 	}
@@ -425,7 +425,7 @@ static TLEN_VOICE_CONTROL *TlenVoiceCreateVC(int codec)
 	vc->codec = codec;
 	return vc;
 }
-static void TlenVoiceFreeVc(TLEN_VOICE_CONTROL *vc) 
+static void TlenVoiceFreeVc(TLEN_VOICE_CONTROL *vc)
 {
 	int i;
 	JabberLog("-> TlenVoiceFreeVc");
@@ -1086,7 +1086,7 @@ static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft)
 						SleepEx(5, FALSE);
 					}
 					availOverrun += j;
-					
+
 					if (availOverrun < 40) {
 						availPlayback++;
 						waveOutPrepareHeader(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
@@ -1095,7 +1095,7 @@ static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft)
 					} else {
 						availOverrun -= 10;
 						statusTxt = "!! Skipping frame !!";
-					} 
+					}
 				/*
 					if (availPlayback < availLimit) {
 						availPlayback++;
@@ -1345,9 +1345,9 @@ static HBITMAP TlenVoiceMakeBitmap(int w, int h, int bpp, void *ptr)
 	bmih.bmiHeader.biWidth = w&0xFFFFFFFC;
 	bmih.bmiHeader.biHeight = h;//&0xFFFFFFFC;
 	bmih.bmiHeader.biPlanes = 1;			   // musi byc 1
-	bmih.bmiHeader.biBitCount = bpp;	
-	bmih.bmiHeader.biCompression = BI_RGB;	  
-	bmih.bmiHeader.biSizeImage = 0; 		  
+	bmih.bmiHeader.biBitCount = bpp;
+	bmih.bmiHeader.biCompression = BI_RGB;
+	bmih.bmiHeader.biSizeImage = 0;
 	bmih.bmiHeader.biXPelsPerMeter = 0;
 	bmih.bmiHeader.biYPelsPerMeter = 0;
 	bmih.bmiHeader.biClrUsed = 0;
@@ -1358,14 +1358,14 @@ static HBITMAP TlenVoiceMakeBitmap(int w, int h, int bpp, void *ptr)
 	return hbm;
 }
 
-static void TlenVoiceInitVUMeters() 
-{	
+static void TlenVoiceInitVUMeters()
+{
 	int i, v, y, x, x0, col, col0;
 	unsigned char *pBits;
 	int ledWidth, ledHeight;
 	ledWidth = 9;
 	ledHeight = 6;
-	vuMeterHeight = ledHeight; 
+	vuMeterHeight = ledHeight;
 	vuMeterWidth = (vuMeterLevels-1) * ledWidth;
 	vuMeterWidth = (vuMeterWidth + 3) & (~3);
 	pBits = (unsigned char *)malloc(3*vuMeterWidth*vuMeterHeight);
@@ -1397,7 +1397,7 @@ static void TlenVoiceInitVUMeters()
 }
 
 static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{	
+{
 	HDC hDC, hMemDC;
 	int v;
 	static int counter;
@@ -1521,20 +1521,20 @@ static void __cdecl TlenVoiceDlgThread(void *ptr)
 	TlenVoiceCancelAll();
 }
 
-int TlenVoiceStart(JABBER_FILE_TRANSFER *ft, int mode) 
+int TlenVoiceStart(JABBER_FILE_TRANSFER *ft, int mode)
 {
-	
+
 	if (mode==0) {
-		JabberForkThread((void (__cdecl *)(void*))TlenVoiceReceiveThread, 0, ft); 
+		JabberForkThread((void (__cdecl *)(void*))TlenVoiceReceiveThread, 0, ft);
 	} else if (mode==1) {
-		JabberForkThread((void (__cdecl *)(void*))TlenVoiceSendingThread, 0, ft); 
+		JabberForkThread((void (__cdecl *)(void*))TlenVoiceSendingThread, 0, ft);
 	} else {
-		JabberForkThread((void (__cdecl *)(void*))TlenVoiceDlgThread, 0, ft); 
+		JabberForkThread((void (__cdecl *)(void*))TlenVoiceDlgThread, 0, ft);
 	}
 	return 0;
 }
 
-static char *getDisplayName(const char *id) 
+static char *getDisplayName(const char *id)
 {
 	char jid[256];
 	HANDLE hContact;
@@ -1550,7 +1550,7 @@ static char *getDisplayName(const char *id)
 }
 
 static BOOL CALLBACK TlenVoiceAcceptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{	
+{
 	JABBER_LIST_ITEM * item;
 	char *str;
 	switch (msg) {
@@ -1600,12 +1600,14 @@ static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
 	}
 }
 
-int TlenVoiceAccept(const char *id, const char *from) 
+int TlenVoiceAccept(const char *id, const char *from)
 {
 	JABBER_LIST_ITEM * item;
 	if (!TlenVoiceIsInUse()) {
 		if ((item = JabberListAdd(LIST_VOICE, id)) != NULL) {
 			int ask, ignore, voiceChatPolicy;
+			ask = TRUE;
+			ignore = FALSE;
 			voiceChatPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0);
 			if (voiceChatPolicy == TLEN_MUC_ASK) {
 				ignore = FALSE;
@@ -1645,7 +1647,7 @@ int TlenVoiceAccept(const char *id, const char *from)
 			} else if (voiceChatPolicy == TLEN_MUC_ACCEPT_ALL) {
 				ask = FALSE;
 				ignore = FALSE;
-			} 
+			}
 			if (ignore) {
 				if (jabberOnline) {
 					JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='4' />", from, id);
