@@ -939,11 +939,11 @@ RVPSubscription *RVPClient::subscribe(const char *login) {
 	return subscription;
 }
 
-RVPSubscription *RVPClient::subscribeMain(const char *callbackHost) {
+int RVPClient::subscribeMain(const char *callbackHost) {
 	int result = 1;
 	RVPSubscription *subscription = NULL;
-	if (bOnline && login != NULL) {
-		/* Sign In */
+	if (bOnline && callbackHost != NULL) {
+		HTTPRequest *request, *response;
 		request = new HTTPRequest();
 		request->setMethod("SUBSCRIBE");
 		request->setUrl(principalUrl);
@@ -958,7 +958,7 @@ RVPSubscription *RVPClient::subscribeMain(const char *callbackHost) {
 		delete request;
 		if (response != NULL) {
 			result = response->resultCode;
-			if (resultCode / 100 == 2) {
+			if (result / 100 == 2) {
 				time_t expiry = time(NULL);
 				HTTPHeader *header = response->getHeader("Subscription-Id");
 				HTTPHeader *lifetime = response->getHeader("Subscription-Lifetime");
@@ -968,7 +968,7 @@ RVPSubscription *RVPClient::subscribeMain(const char *callbackHost) {
 					expiry += 14400;
 				}
 				if (header!=NULL) {
-					subscription = RVPSubscription::add(this, signInName, header->getValue());
+					subscription = RVPSubscription::add(this, "__main__", header->getValue());
 					subscription->setExpiry(expiry);
 				}
 			}
@@ -986,7 +986,11 @@ int RVPClient::renew(RVPSubscription *subscription) {
 			HTTPRequest *request, *response;
 			request = new HTTPRequest();
 			request->setMethod("SUBSCRIBE");
-			request->setUrl(node);
+			if (!strcmp(node, "__main__")) {
+				request->setUrl(principalUrl);
+			} else {
+				request->setUrl(node);
+			}
 			request->addHeader("Subscription-Lifetime", "14400");
 			request->addHeader("Subscription-Id", subscription->getSid());
 			request->addHeader("RVP-Notifications-Version", "0.2");

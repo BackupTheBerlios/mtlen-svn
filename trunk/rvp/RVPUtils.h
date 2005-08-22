@@ -122,6 +122,7 @@ public:
 	int		signOut(); //synchronized
 	int		stopListening();
 	RVPSubscription*	subscribe(const char *login);
+	int 	subscribeMain(const char *callbackHost);
 	int		renew(RVPSubscription *subscription);
 	int		unsubscribe(RVPSubscription*);
 	int		unsubscribe(const char *login);
