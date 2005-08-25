@@ -618,6 +618,14 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 	saddr.sin_addr.S_un.S_addr = localIP;
 	sprintf(callbackHost, "http://%s:%d", inet_ntoa(saddr.sin_addr), nlb.wPort);
 	/* Sign In */
+	result = subscribeMain(callbackHost);
+		if (result/100 != 2) {
+			Netlib_CloseHandle(lSocket);
+		} else {
+			bOnline = true;
+		}
+	
+	/*
 	request = new HTTPRequest();
 	request->setMethod("SUBSCRIBE");
 	request->setUrl(principalUrl);
@@ -638,7 +646,8 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 		} else {
 			bOnline = true;
 		}
-	}
+	}*/
+	
 	LeaveCriticalSection(&mutex);
 	return (result/100 == 2) ? 0 : result;
 }
@@ -947,7 +956,8 @@ int RVPClient::subscribeMain(const char *callbackHost) {
 		request = new HTTPRequest();
 		request->setMethod("SUBSCRIBE");
 		request->setUrl(principalUrl);
-		request->addHeader("Subscription-Lifetime", "14400");
+//		request->addHeader("Subscription-Lifetime", "14400");
+		request->addHeader("Subscription-Lifetime", "120");
 		request->addHeader("Notification-Type", "pragma/notify");
 		request->addHeader("User-Agent", "msmsgs/5.1.0.639");
 		request->addHeader("Call-Back", callbackHost);
