@@ -619,12 +619,12 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 	sprintf(callbackHost, "http://%s:%d", inet_ntoa(saddr.sin_addr), nlb.wPort);
 	/* Sign In */
 	result = subscribeMain(callbackHost);
-		if (result/100 != 2) {
-			Netlib_CloseHandle(lSocket);
-		} else {
-			bOnline = true;
-		}
-	
+	if (result) {
+		Netlib_CloseHandle(lSocket);
+	} else {
+		bOnline = true;
+	}
+
 	/*
 	request = new HTTPRequest();
 	request->setMethod("SUBSCRIBE");
@@ -647,9 +647,9 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 			bOnline = true;
 		}
 	}*/
-	
+
 	LeaveCriticalSection(&mutex);
-	return (result/100 == 2) ? 0 : result;
+	return result;
 }
 
 int RVPClient::stopListening() {
@@ -951,13 +951,12 @@ RVPSubscription *RVPClient::subscribe(const char *login) {
 int RVPClient::subscribeMain(const char *callbackHost) {
 	int result = 1;
 	RVPSubscription *subscription = NULL;
-	if (bOnline && callbackHost != NULL) {
+	if (callbackHost != NULL) {
 		HTTPRequest *request, *response;
 		request = new HTTPRequest();
 		request->setMethod("SUBSCRIBE");
 		request->setUrl(principalUrl);
-//		request->addHeader("Subscription-Lifetime", "14400");
-		request->addHeader("Subscription-Lifetime", "120");
+		request->addHeader("Subscription-Lifetime", "14400");
 		request->addHeader("Notification-Type", "pragma/notify");
 		request->addHeader("User-Agent", "msmsgs/5.1.0.639");
 		request->addHeader("Call-Back", callbackHost);
@@ -991,16 +990,17 @@ int RVPClient::subscribeMain(const char *callbackHost) {
 int RVPClient::renew(RVPSubscription *subscription) {
 	int result = 1;
 	if (bOnline) {
-		char *node = getUrlFromLogin(subscription->getId());
+		char *node;
+		if (!strcmp(subscription->getId(), "__main__")) {
+			node = Utils::dupString(principalUrl);
+		} else {
+			node = getUrlFromLogin(subscription->getId());
+		}
 		if (node != NULL) {
 			HTTPRequest *request, *response;
 			request = new HTTPRequest();
 			request->setMethod("SUBSCRIBE");
-			if (!strcmp(node, "__main__")) {
-				request->setUrl(principalUrl);
-			} else {
-				request->setUrl(node);
-			}
+			request->setUrl(node);
 			request->addHeader("Subscription-Lifetime", "14400");
 			request->addHeader("Subscription-Id", subscription->getSid());
 			request->addHeader("RVP-Notifications-Version", "0.2");

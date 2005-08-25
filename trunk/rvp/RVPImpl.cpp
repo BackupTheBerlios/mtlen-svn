@@ -167,7 +167,7 @@ static void __cdecl RVPRenewSubscriptionsThread(void *ptr) {
 		if (counter == 0) {
 			RVPSubscription *subscription = (RVPSubscription *)impl->getClient()->getSubscriptions()->get(0);
 			for (;subscription != NULL; subscription = (RVPSubscription *)subscription->getNext()) {
-				if (subscription->getExpiry() - t < 3600) { // subscription expires in less than 1h
+				if (subscription->getExpiry() - t < 1800) { // subscription expires in less than 1/2 h
 					impl->getClient()->renew(subscription);
 					counter = 29;
 					break;
