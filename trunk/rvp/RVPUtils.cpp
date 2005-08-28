@@ -1232,7 +1232,6 @@ int RVPClient::getACL() {
 			result = response->resultCode;
 			if (result/100 == 2) {
 				JString *js = new JString(response->getContent(), response->dataLength);
-				delete response;
 				XMLObject *xml = new XMLObject();
 				xml->parseXML(js);
 				delete js;

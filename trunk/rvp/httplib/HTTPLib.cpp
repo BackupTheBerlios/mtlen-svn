@@ -946,8 +946,6 @@ HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
 	if (con != NULL) {
 		delete con;
 	}
-	str = response->toStringRsp();
-	free(str);
 	return response;
 
 }
