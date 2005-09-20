@@ -732,7 +732,7 @@ int JabberSendFile(WPARAM wParam, LPARAM lParam)
 	int id;
 
 	if (!jabberOnline) return 0;
-	if (DBGetContactSettingWord(ccs->hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) == ID_STATUS_OFFLINE) return 0;
+//	if (DBGetContactSettingWord(ccs->hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) == ID_STATUS_OFFLINE) return 0;
 	if (DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) return 0;
 	ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
 	memset(ft, 0, sizeof(JABBER_FILE_TRANSFER));

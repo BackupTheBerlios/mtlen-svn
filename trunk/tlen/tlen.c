@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "jabber_iq.h"
 #include "resource.h"
+#include <m_file.h>
 #include <richedit.h>
 #include <ctype.h>
 
@@ -358,6 +359,13 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactGrantAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
+	mi.position=-2000020000;
+	mi.flags=CMIF_NOTONLINE;
+	mi.hIcon=LoadSkinnedIcon(SKINICON_EVENT_FILE);
+	mi.pszName=Translate("&File");
+	mi.pszService=MS_FILE_SENDFILE;
+	mi.pszContactOwner = jabberProtoName;
+	CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
 	HookEvent(ME_CLIST_PREBUILDCONTACTMENU, TlenPrebuildContactMenu);
 
