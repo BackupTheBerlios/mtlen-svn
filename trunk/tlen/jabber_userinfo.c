@@ -237,6 +237,8 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			}
 			i = DBGetContactSettingWord(hContact, jabberProtoName, "VoiceChat", 0);
 			CheckDlgButton(hwndDlg, IDC_VOICECONVERSATIONS, i);
+			i = DBGetContactSettingWord(hContact, jabberProtoName, "PublicStatus", 0);
+			CheckDlgButton(hwndDlg, IDC_PUBLICSTATUS, i);
 			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 				jid = JabberTextDecode(dbv.pszVal);
 				SetDlgItemText(hwndDlg, IDC_INFO_JID, jid);
@@ -298,6 +300,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			FetchField(hwndDlg, IDC_SCHOOL, "e", &str, &strSize);
 			FetchCombo(hwndDlg, IDC_LOOKFOR, "r", &str, &strSize);
 			JabberStringAppend(&str, &strSize, "<g>%d</g>", IsDlgButtonChecked(hwndDlg, IDC_VOICECONVERSATIONS) ? 1 : 0);
+			JabberStringAppend(&str, &strSize, "<v>%d</v>", IsDlgButtonChecked(hwndDlg, IDC_PUBLICSTATUS) ? 1 : 0);
 			JabberStringAppend(&str, &strSize, "</query></iq>");
 			JabberLog(str);
 			JabberSend(jabberThreadInfo->s, "%s", str);

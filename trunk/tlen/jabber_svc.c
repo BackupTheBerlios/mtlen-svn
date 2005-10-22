@@ -596,38 +596,42 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 		JabberForkThread(JabberSendMessageFailedThread, 0, (void *) ccs->hContact);
 		return 2;
 	}
-
-	if ((msg=JabberTextEncode((char *) ccs->lParam)) != NULL) {
-		if (JabberListExist(LIST_CHATROOM, dbv.pszVal) && strchr(dbv.pszVal, '/')==NULL) {
-			strcpy(msgType, "groupchat");
-		} else if (DBGetContactSettingByte(ccs->hContact, jabberProtoName, "bChat", FALSE)) {
-			strcpy(msgType, "privchat");
-		} else {
-			strcpy(msgType, "chat");
-		}
-		if (!strcmp(msgType, "groupchat") || DBGetContactSettingByte(NULL, jabberProtoName, "MsgAck", FALSE) == FALSE) {
-			if (!strcmp(msgType, "groupchat")) {
-				JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s'><body>%s</body></message>", dbv.pszVal, msgType, msg);
-			} else if (!strcmp(msgType, "privchat")) {
-				JabberSend(jabberThreadInfo->s, "<m to='%s'><b n='6' s='10' f='0' c='000000'>%s</b></m>", dbv.pszVal, msg);
+	if (!strcmp((const char *) ccs->lParam, "<alert>")) {
+		JabberSend(jabberThreadInfo->s, "<m tp='a' to='%s'/>", JabberGetClientJID(dbv.pszVal));
+		JabberForkThread(JabberSendMessageAckThread, 0, (void *) ccs->hContact);
+	}  else if (!strcmp((const char *) ccs->lParam, "<image>")) {
+		id = JabberSerialNext();
+		JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' crc='%x' idt='%d'/>", JabberGetClientJID(dbv.pszVal), "pic", 0x757f044, id);
+		JabberForkThread(JabberSendMessageAckThread, 0, (void *) ccs->hContact);
+	} else {
+		if ((msg=JabberTextEncode((char *) ccs->lParam)) != NULL) {
+			if (JabberListExist(LIST_CHATROOM, dbv.pszVal) && strchr(dbv.pszVal, '/')==NULL) {
+				strcpy(msgType, "groupchat");
+			} else if (DBGetContactSettingByte(ccs->hContact, jabberProtoName, "bChat", FALSE)) {
+				strcpy(msgType, "privchat");
 			} else {
-				if (strcmp((const char *) ccs->lParam, "<alert>")) {
+				strcpy(msgType, "chat");
+			}
+			if (!strcmp(msgType, "groupchat") || DBGetContactSettingByte(NULL, jabberProtoName, "MsgAck", FALSE) == FALSE) {
+				if (!strcmp(msgType, "groupchat")) {
+					JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s'><body>%s</body></message>", dbv.pszVal, msgType, msg);
+				} else if (!strcmp(msgType, "privchat")) {
+					JabberSend(jabberThreadInfo->s, "<m to='%s'><b n='6' s='10' f='0' c='000000'>%s</b></m>", dbv.pszVal, msg);
+				} else {
 					id = JabberSerialNext();
 					JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' id='"JABBER_IQID"%d'><body>%s</body><x xmlns='jabber:x:event'><composing/></x></message>", JabberGetClientJID(dbv.pszVal), msgType, id, msg);
-				} else {
-					JabberSend(jabberThreadInfo->s, "<m tp='a' to='%s'/>", JabberGetClientJID(dbv.pszVal));
 				}
+				JabberForkThread(JabberSendMessageAckThread, 0, (void *) ccs->hContact);
 			}
-			JabberForkThread(JabberSendMessageAckThread, 0, (void *) ccs->hContact);
-		}
-		else {
-			id = JabberSerialNext();
-			if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL)
-				item->idMsgAckPending = id;
-			JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' id='"JABBER_IQID"%d'><body>%s</body><x xmlns='jabber:x:event'><offline/><delivered/><composing/></x></message>", JabberGetClientJID(dbv.pszVal), msgType, id, msg);
+			else {
+				id = JabberSerialNext();
+				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL)
+					item->idMsgAckPending = id;
+				JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' id='"JABBER_IQID"%d'><body>%s</body><x xmlns='jabber:x:event'><offline/><delivered/><composing/></x></message>", JabberGetClientJID(dbv.pszVal), msgType, id, msg);
+			}
 		}
 		free(msg);
-	}
+	} 
 	DBFreeVariant(&dbv);
 	return 1;
 }

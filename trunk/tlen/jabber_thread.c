@@ -624,8 +624,10 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 			isChatRoomJid = JabberListExist(LIST_CHATROOM, from);
 
 			if (isChatRoomJid && type!=NULL && !strcmp(type, "groupchat")); //JabberGroupchatProcessMessage(node, userdata);
-
-			else {
+			else if (type!=NULL && !strcmp(type, "pic")) {
+				idStr = JabberXmlGetAttrValue(node, "idt");
+				JabberSend(info->s, "<message type='pic' to='%s' crc_c='n' idt='%s'/>", from, idStr);
+			} else {
 
 				// If message is from a stranger (not in roster), item is NULL
 				item = JabberListGetItemPtr(LIST_ROSTER, from);

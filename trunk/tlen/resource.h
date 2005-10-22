@@ -60,6 +60,7 @@
 #define IDC_EMAIL                       1073
 #define IDC_GENDER                      1096
 #define IDC_VOICECONVERSATIONS			1097
+#define IDC_PUBLICSTATUS				1098
 #define IDC_VCQUALITY					1100
 #define IDC_VUMETERIN					1101
 #define IDC_VUMETEROUT					1102

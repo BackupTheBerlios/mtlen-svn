@@ -324,11 +324,18 @@ void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
 					DBWriteContactSettingWord(hContact, jabberProtoName, "LookingFor", nLookFor);
 				}
 			}
-			else if (!strcmp(n->name, "g")) {
+			else if (!strcmp(n->name, "g")) { // voice chat enabled
 				if (n->text != NULL) {
 					BYTE bVoice;
 					bVoice = atoi(n->text);
 					DBWriteContactSettingWord(hContact, jabberProtoName, "VoiceChat", bVoice);
+				}
+			}
+			else if (!strcmp(n->name, "v")) { // status visibility
+				if (n->text != NULL) {
+					BYTE bPublic;
+					bPublic = atoi(n->text);
+					DBWriteContactSettingWord(hContact, jabberProtoName, "PublicStatus", bPublic);
 				}
 			}
 		}
