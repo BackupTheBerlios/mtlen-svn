@@ -37,8 +37,8 @@ PLUGINLINK *pluginLink;
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
 	"Tlen Protocol",
-	PLUGIN_MAKE_VERSION(1,0,6,6),
-	"Tlen protocol plugin for Miranda IM (1.0.6.6 "__DATE__")",
+	PLUGIN_MAKE_VERSION(1,0,6,7),
+	"Tlen protocol plugin for Miranda IM (1.0.6.7 "__DATE__")",
 	"Santithorn Bunchua, Adam Strzelecki, Piotr Piastucki",
 	"the_leech@users.berlios.de",
 	"(c) 2002-2005 Santithorn Bunchua, Piotr Piastucki",
