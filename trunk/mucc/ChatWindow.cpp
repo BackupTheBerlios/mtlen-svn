@@ -472,7 +472,7 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 			}
 		}
 		if (user->isMe()) {
-			if (user->getFlags() & MUCC_EF_USER_OWNER) {
+			if (user->getFlags() & MUCC_EF_USER_OWNER || user->getFlags() & MUCC_EF_USER_ADMIN) {
 				EnableWindow(GetDlgItem(hWnd, IDC_TOPIC_BUTTON), TRUE);
 			} else {
 				EnableWindow(GetDlgItem(hWnd, IDC_TOPIC_BUTTON), FALSE);
@@ -1484,6 +1484,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			switch (LOWORD(wParam)) {
 				case IDC_OPTIONS:
 					{
+						MUCCEVENT muce;
 						HMENU hMenu;
 						RECT rc;
 						int iSelection;
@@ -1508,6 +1509,15 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						CheckMenuItem(hMenu, ID_OPTIONMENU_FLASHJOINED, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_FLASH_JOINED ? MF_CHECKED : MF_UNCHECKED);
 						CheckMenuItem(hMenu, ID_OPTIONMENU_FLASHLEFT, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_FLASH_LEFT ? MF_CHECKED : MF_UNCHECKED);
 						CheckMenuItem(hMenu, ID_OPTIONMENU_FLASHTOPIC, MF_BYCOMMAND | chatWindow->getOptions()&ChatWindow::FLAG_FLASH_TOPIC ? MF_CHECKED : MF_UNCHECKED);
+						if (chatWindow->getMe()!=NULL) {
+							if (chatWindow->getMe()->getFlags() & (MUCC_EF_USER_OWNER | MUCC_EF_USER_ADMIN)) {
+								EnableMenuItem(hMenu, ID_ADMINMENU_ADMIN, MF_BYCOMMAND | MF_ENABLED);
+								EnableMenuItem(hMenu, ID_ADMINMENU_BROWSE, MF_BYCOMMAND | MF_ENABLED);
+							}
+							if (chatWindow->getMe()->getFlags() & MUCC_EF_USER_OWNER) {
+								EnableMenuItem(hMenu, ID_ADMINMENU_DESTROY, MF_BYCOMMAND | MF_ENABLED);
+							}
+						}
 						iSelection = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, rc.left, rc.bottom, 0, hwndDlg, NULL);
 						DestroyMenu(hMenu);
 						switch (iSelection) {
@@ -1577,6 +1587,51 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 								Options::setChatWindowFontColor((COLORREF) SendDlgItemMessage(hwndDlg, IDC_COLOR, CPM_GETCOLOUR,0,0));
 								Options::saveSettings();
 								break;
+							case ID_ADMINMENU_DESTROY:
+								muce.cbSize = sizeof(MUCCEVENT);
+								muce.iType = MUCC_EVENT_REMOVE_ROOM;
+								muce.pszModule = chatWindow->getModule();
+								muce.pszID = chatWindow->getRoomId();
+								NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
+								DestroyWindow(hwndDlg);
+								break;
+							case ID_ADMINMENU_ADMIN:
+								chatWindow->startAdminDialog(ChatWindow::ADMIN_MODE_KICK);
+								break;
+							case ID_ADMINMENU_BROWSE:
+								chatWindow->startAdminDialog(ChatWindow::ADMIN_MODE_ROLE);
+								break;
+							case ID_ADMINMENU_SAVELOG:
+								if (chatWindow->getHWNDLog()!=NULL) {
+									IEVIEWEVENT iee;
+									iee.cbSize = sizeof(IEVIEWEVENT);
+									iee.dwFlags = 0;
+									iee.hwnd = chatWindow->getHWNDLog();
+									iee.hContact = NULL;
+									iee.iType = IEE_SAVE_DOCUMENT;
+									CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
+								} else {
+									char szFilename[MAX_PATH];
+									strcpy(szFilename, "");
+									OPENFILENAMEA ofn={0};
+									ofn.lStructSize=sizeof(OPENFILENAME);
+									ofn.hwndOwner=hwndDlg;
+									ofn.lpstrFile = szFilename;
+									ofn.lpstrFilter = "Rich Text File\0*.rtf\0\0";
+									ofn.nMaxFile = MAX_PATH;
+									ofn.nMaxFileTitle = MAX_PATH;
+									ofn.Flags = OFN_HIDEREADONLY;
+									ofn.lpstrDefExt = "rtf";
+									if (GetSaveFileNameA(&ofn)) {
+										//remove(szFilename);
+										EDITSTREAM stream = { 0 };
+										stream.dwCookie = (DWORD_PTR)szFilename;
+										stream.dwError = 0;
+										stream.pfnCallback = EditStreamCallback;
+										SendDlgItemMessage(hwndDlg, IDC_LOG, EM_STREAMOUT, SF_RTF | SF_USECODEPAGE, (LPARAM) & stream);
+									}
+								}
+								break;
 						}
 					}
 					break;
@@ -1606,74 +1661,6 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 						muce.pszModule = chatWindow->getModule();
 						muce.pszID = chatWindow->getRoomId();
 						NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
-					}
-					break;
-				case IDC_ROOMADMIN:
-					{
-						MUCCEVENT muce;
-						HMENU hMenu;
-						RECT rc;
-						int iSelection;
-						GetWindowRect(GetDlgItem(hwndDlg, IDC_ROOMADMIN), &rc);
-						hMenu=GetSubMenu(LoadMenu(hInst, MAKEINTRESOURCE(IDR_CHATOPTIONS)), 2);
-						if (chatWindow->getMe()!=NULL) {
-							if (chatWindow->getMe()->getFlags() & (MUCC_EF_USER_OWNER | MUCC_EF_USER_ADMIN)) {
-								EnableMenuItem(hMenu, ID_ADMINMENU_ADMIN, MF_BYCOMMAND | MF_ENABLED);
-								EnableMenuItem(hMenu, ID_ADMINMENU_BROWSE, MF_BYCOMMAND | MF_ENABLED);
-							}
-							if (chatWindow->getMe()->getFlags() & MUCC_EF_USER_OWNER) {
-								EnableMenuItem(hMenu, ID_ADMINMENU_DESTROY, MF_BYCOMMAND | MF_ENABLED);
-							}
-						}
-						iSelection = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, rc.left, rc.bottom, 0, hwndDlg, NULL);
-						DestroyMenu(hMenu);
-						switch (iSelection) {
-						case ID_ADMINMENU_DESTROY:
-							muce.cbSize = sizeof(MUCCEVENT);
-							muce.iType = MUCC_EVENT_REMOVE_ROOM;
-							muce.pszModule = chatWindow->getModule();
-							muce.pszID = chatWindow->getRoomId();
-							NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
-							DestroyWindow(hwndDlg);
-							break;
-						case ID_ADMINMENU_ADMIN:
-							chatWindow->startAdminDialog(ChatWindow::ADMIN_MODE_KICK);
-							break;
-						case ID_ADMINMENU_BROWSE:
-							chatWindow->startAdminDialog(ChatWindow::ADMIN_MODE_ROLE);
-							break;
-						case ID_ADMINMENU_SAVELOG:
-							if (chatWindow->getHWNDLog()!=NULL) {
-								IEVIEWEVENT iee;
-								iee.cbSize = sizeof(IEVIEWEVENT);
-								iee.dwFlags = 0;
-								iee.hwnd = chatWindow->getHWNDLog();
-								iee.hContact = NULL;
-								iee.iType = IEE_SAVE_DOCUMENT;
-								CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
-							} else {
-								char szFilename[MAX_PATH];
-								strcpy(szFilename, "");
-								OPENFILENAMEA ofn={0};
-								ofn.lStructSize=sizeof(OPENFILENAME);
-								ofn.hwndOwner=hwndDlg;
-								ofn.lpstrFile = szFilename;
-								ofn.lpstrFilter = "Rich Text File\0*.rtf\0\0";
-								ofn.nMaxFile = MAX_PATH;
-								ofn.nMaxFileTitle = MAX_PATH;
-								ofn.Flags = OFN_HIDEREADONLY;
-								ofn.lpstrDefExt = "rtf";
-								if (GetSaveFileNameA(&ofn)) {
-									//remove(szFilename);
-									EDITSTREAM stream = { 0 };
-									stream.dwCookie = (DWORD_PTR)szFilename;
-									stream.dwError = 0;
-									stream.pfnCallback = EditStreamCallback;
-									SendDlgItemMessage(hwndDlg, IDC_LOG, EM_STREAMOUT, SF_RTF | SF_USECODEPAGE, (LPARAM) & stream);
-								}
-							}
-							break;
-						}
 					}
 					break;
 				case IDC_TOPIC_BUTTON:

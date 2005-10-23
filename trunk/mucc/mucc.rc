@@ -60,19 +60,24 @@ BEGIN
         POPUP "Event Filter"
         BEGIN
             MENUITEM "Messages",                    ID_OPTIONMENU_LOGMESSAGES
-            MENUITEM "User Has Joined",                ID_OPTIONMENU_LOGJOINED
-            MENUITEM "User Has Left",                ID_OPTIONMENU_LOGLEFT
+            MENUITEM "User Has Joined",             ID_OPTIONMENU_LOGJOINED
+            MENUITEM "User Has Left",               ID_OPTIONMENU_LOGLEFT
             MENUITEM "Topic Changes",               ID_OPTIONMENU_LOGTOPIC
         END
         POPUP "Window Flashing"
         BEGIN
             MENUITEM "Messages",                    ID_OPTIONMENU_FLASHMESSAGES
-            MENUITEM "User Has Joined",                ID_OPTIONMENU_FLASHJOINED
-            MENUITEM "User Has Left",                ID_OPTIONMENU_FLASHLEFT
+            MENUITEM "User Has Joined",             ID_OPTIONMENU_FLASHJOINED
+            MENUITEM "User Has Left",               ID_OPTIONMENU_FLASHLEFT
             MENUITEM "Topic Changes",               ID_OPTIONMENU_FLASHTOPIC
         END
         MENUITEM SEPARATOR
-        MENUITEM "Save As Default",             ID_OPTIONMENU_SAVEDEFAULT
+        MENUITEM "Save Settings As Default",             	ID_OPTIONMENU_SAVEDEFAULT
+        MENUITEM SEPARATOR
+        MENUITEM "User Administration",        		ID_ADMINMENU_ADMIN, GRAYED
+        MENUITEM "Destroy Chat Room",           	ID_ADMINMENU_DESTROY, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "Save Log",           				ID_ADMINMENU_SAVELOG
     END
     POPUP "", MENUBREAK
     BEGIN
@@ -101,15 +106,6 @@ BEGIN
             MENUITEM "Admin",                       ID_USERMENU_RIGHTS_ADMIN
         END
         MENUITEM "User Administration",             ID_USERMENU_ADMINISTRATION, GRAYED
-    END
-    POPUP "", MENUBREAK
-    BEGIN
-        MENUITEM "User Administration",        		ID_ADMINMENU_ADMIN, GRAYED
-//        MENUITEM "Browse Users",                	ID_ADMINMENU_BROWSE, GRAYED
-        MENUITEM SEPARATOR
-        MENUITEM "Destroy Chat Room",           	ID_ADMINMENU_DESTROY, GRAYED
-        MENUITEM SEPARATOR
-        MENUITEM "Save Log",           				ID_ADMINMENU_SAVELOG
     END
     POPUP "", MENUBREAK
     BEGIN
@@ -493,8 +489,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,6,6
- PRODUCTVERSION 1,0,6,6
+ FILEVERSION 1,0,6,7
+ PRODUCTVERSION 1,0,6,7
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -512,14 +508,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Group Chats GUI Plugin for Miranda IM\0"
-            VALUE "FileVersion", "1.0.6.6\0"
+            VALUE "FileVersion", "1.0.6.7\0"
             VALUE "InternalName", "mucc\0"
             VALUE "LegalCopyright", "Copyright (c) 2004-2005 Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "mucc.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "MUCC Plugin\0"
-            VALUE "ProductVersion", "1.0.6.6\0"
+            VALUE "ProductVersion", "1.0.6.7\0"
             VALUE "SpecialBuild", "\0"
         END
     END

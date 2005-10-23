@@ -36,8 +36,8 @@ static int PreShutdown(WPARAM wParam, LPARAM lParam);
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
 	"MUCC Plugin",
-	PLUGIN_MAKE_VERSION(1,0,6,6),
-	"Group chats GUI plugin for Miranda IM (1.0.6.6 "__DATE__")",
+	PLUGIN_MAKE_VERSION(1,0,6,7),
+	"Group chats GUI plugin for Miranda IM (1.0.6.7 "__DATE__")",
 	"Piotr Piastucki",
 	"the_leech@users.berlios.de",
 	"(c) 2004-2005 Piotr Piastucki",
@@ -54,8 +54,8 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvRese
 
 extern "C" __declspec(dllexport) PLUGININFO *MirandaPluginInfo(DWORD mirandaVersion)
 {
-	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,3,1,0)) {
-		MessageBox(NULL, "The MUCC plugin cannot be loaded. It requires Miranda IM 0.3.1 or later.", "Tlen Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
+	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,3,4,0)) {
+		MessageBox(NULL, "The MUCC plugin cannot be loaded. It requires Miranda IM 0.3.4 or later.", "Tlen Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
 		return NULL;
 	}
 	return &pluginInfo;
