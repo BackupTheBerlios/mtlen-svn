@@ -843,17 +843,18 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 		szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
 		if (szProto==NULL || strcmp(szProto, jabberProtoName)) return 0;
 //		if (DBGetContactSettingByte(hContact, jabberProtoName, "ChatRoom", 0) != 0) return 0;
-
 		// A contact's group is changed
 		if (!strcmp(cws->szSetting, "Group")) {
 			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
 					DBFreeVariant(&dbv);
-					if (!DBGetContactSetting(hContact, "CList", "MyHandle", &dbv)) {
+					if (!DBGetContactSettingStringUtf(hContact, "CList", "MyHandle", &dbv)) {
 						nick = JabberTextEncode(dbv.pszVal);
 						DBFreeVariant(&dbv);
-					}
-					else {
+					} else if (!DBGetContactSettingStringUtf(hContact, jabberProtoName, "Nick", &dbv)) {
+						nick = JabberTextEncode(dbv.pszVal);
+						DBFreeVariant(&dbv);
+					} else {
 						nick = JabberNickFromJID(item->jid);
 					}
 					if (nick != NULL) {
@@ -862,7 +863,7 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 							JabberLog("Group set to nothing");
 							JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'></item></query></iq>", nick, item->jid);
 						}
-						else if (cws->value.type==DBVT_ASCIIZ && cws->value.pszVal!=NULL && (item->group==NULL || strcmp(cws->value.pszVal, item->group))) {
+						else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL && (item->group==NULL || strcmp(cws->value.pszVal, item->group))) {
 							JabberLog("Group set to %s", cws->value.pszVal);
 							if ((group=TlenGroupEncode(cws->value.pszVal)) != NULL) {
 								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, item->jid, group);
@@ -885,12 +886,12 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 //			szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
 //			if (szProto==NULL || strcmp(szProto, jabberProtoName)) return 0;
 
-			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+			if (!DBGetContactSettingStringUtf(hContact, jabberProtoName, "jid", &dbv)) {
 				jid = dbv.pszVal;
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
 					if (cws->value.type == DBVT_DELETED)
 						newNick = (char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, GCDNF_NOMYHANDLE);
-					else if (cws->value.type==DBVT_ASCIIZ && cws->value.pszVal!=NULL)
+					else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL)
 						newNick = cws->value.pszVal;
 					else
 						newNick = NULL;
