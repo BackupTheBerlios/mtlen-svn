@@ -87,7 +87,7 @@ static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item)
 		free(item->photoFileName);
 	}
 	if (item->messageEventIdStr) free(item->messageEventIdStr);
-	if (item->type) free(item->type);
+//	if (item->type) free(item->type);
 	//if (item->ft) JabberFileFreeFt(item->ft); // No need to free (it is always free when exit from JabberFileServerThread())
 	if (item->roomName) free(item->roomName);
 }
@@ -149,7 +149,8 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 	item->photoFileName = NULL;
 	item->messageEventIdStr = NULL;
 	item->wantComposingEvent = FALSE;
-	item->type = NULL;
+	item->isTyping = FALSE;
+//	item->type = NULL;
 	item->ft = NULL;
 	item->roomName = NULL;
 	count++;

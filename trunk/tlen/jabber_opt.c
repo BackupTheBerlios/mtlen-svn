@@ -204,7 +204,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				if (DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv) || strcmp(text, dbv.pszVal))
 					reconnectRequired = TRUE;
 				if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
-				DBWriteContactSettingString(NULL, jabberProtoName, "LoginName", text);
+				DBWriteContactSettingString(NULL, jabberProtoName, "LoginName", strlwr(text));
 
 				if (IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD)) {
 					GetDlgItemText(hwndDlg, IDC_EDIT_PASSWORD, text, sizeof(text));
@@ -375,7 +375,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					if (DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv) || strcmp(text, dbv.pszVal))
 						reconnectRequired = TRUE;
 					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
-					DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", text);
+					DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", strlwr(text));
 
 					DBWriteContactSettingByte(NULL, jabberProtoName, "UseSSL", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_USE_SSL));
 

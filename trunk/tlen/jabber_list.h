@@ -55,11 +55,12 @@ typedef struct {
 	int idMsgAckPending;
 	char *messageEventIdStr;
 	BOOL wantComposingEvent;
+	BOOL isTyping;
 
 	// LIST_ROOM
 	// jid = room JID
 	// char *name; // room name
-	char *type;	// room type
+	//char *type;	// room type
 
 	// LIST_CHATROOM
 	// jid = room JID

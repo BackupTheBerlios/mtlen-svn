@@ -135,6 +135,8 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 		if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
 			strncpy(info->username, dbv.pszVal, sizeof(info->username));
 			info->username[sizeof(info->username)-1] = '\0';
+			strlwr(info->username);
+			DBWriteContactSettingString(NULL, jabberProtoName, "LoginName", info->username);
 			DBFreeVariant(&dbv);
 		}
 		else {
@@ -151,6 +153,8 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 		if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
 			strncpy(info->server, dbv.pszVal, sizeof(info->server));
 			info->server[sizeof(info->server)-1] = '\0';
+			strlwr(info->server);
+			DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", info->server);
 			DBFreeVariant(&dbv);
 		}
 		else {
@@ -675,7 +679,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 
 						if (item != NULL) {
 							item->wantComposingEvent = composing;
-							if ((hContact=JabberHContactFromJID(from)) != NULL)
+							if ((hContact=JabberHContactFromJID(from)) != NULL) 
 								CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
 						}
 
@@ -864,7 +868,9 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 						if (DBGetContactSettingWord(hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) != status)
 							DBWriteContactSettingWord(hContact, jabberProtoName, "Status", (WORD) status);
 					}
-					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
+					if (item != NULL && item->isTyping) {
+						CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
+					}
 					JabberLog("%s offline, set contact status to %d", from, status);
 				}
 			}
@@ -1345,18 +1351,21 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 	if ((f=JabberXmlGetAttrValue(node, "f")) != NULL) {
 		if ((hContact=JabberHContactFromJID(f)) != NULL) {
 			if ((tp=JabberXmlGetAttrValue(node, "tp")) != NULL) {
-				if(!strcmp(tp, "t"))//contact is writing
+				JABBER_LIST_ITEM *item = JabberListGetItemPtr(LIST_ROSTER, f);
+				if(!strcmp(tp, "t")) { //contact is writing 
+					if (item !=NULL ) item->isTyping = TRUE;
 					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_INFINITE);
-				else if(!strcmp(tp, "u"))//contact stopped writing
+				}
+				else if(!strcmp(tp, "u")) {//contact stopped writing 
+					if (item !=NULL ) item->isTyping = FALSE;
 					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_OFF);
+				}
 				else if(!strcmp(tp, "a")) {//alert was received
 					int bAlert = TRUE;
 					int alertPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0);
 					if (alertPolicy == TLEN_ALERTS_IGNORE_ALL) {
 						bAlert = FALSE;
 					} else if (alertPolicy == TLEN_ALERTS_IGNORE_NIR) {
-						JABBER_LIST_ITEM *item;
-						item = JabberListGetItemPtr(LIST_ROSTER, f);
 						if (item == NULL) bAlert = FALSE;
 						else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) bAlert = FALSE;
 					}
