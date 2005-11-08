@@ -679,6 +679,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 
 						if (item != NULL) {
 							item->wantComposingEvent = composing;
+							item->isTyping = FALSE;
 							if ((hContact=JabberHContactFromJID(from)) != NULL) 
 								CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
 						}
@@ -869,6 +870,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 							DBWriteContactSettingWord(hContact, jabberProtoName, "Status", (WORD) status);
 					}
 					if (item != NULL && item->isTyping) {
+						item->isTyping = FALSE;
 						CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
 					}
 					JabberLog("%s offline, set contact status to %d", from, status);
