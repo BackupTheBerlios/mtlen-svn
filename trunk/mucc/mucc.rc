@@ -245,8 +245,6 @@ BEGIN
                     WS_TABSTOP
     CONTROL         "",IDC_SMILEYBTN,"MButtonClass", WS_TABSTOP,185,140,16,16,
 					0x18000000L
-    CONTROL         "Admin",IDC_ROOMADMIN,"MButtonClass",WS_TABSTOP,220,141,
-                    16,16,0x18000000L
     CONTROL         "Invite",IDC_INVITE,"MButtonClass",WS_TABSTOP,259,141,16,
                     16,0x18000000L
     EDITTEXT        IDC_TOPIC,70,19,86,12,ES_AUTOHSCROLL | ES_READONLY | NOT
@@ -489,8 +487,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,6,7
- PRODUCTVERSION 1,0,6,7
+ FILEVERSION 1,0,6,8
+ PRODUCTVERSION 1,0,6,8
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -508,14 +506,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Group Chats GUI Plugin for Miranda IM\0"
-            VALUE "FileVersion", "1.0.6.7\0"
+            VALUE "FileVersion", "1.0.6.8\0"
             VALUE "InternalName", "mucc\0"
             VALUE "LegalCopyright", "Copyright (c) 2004-2005 Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "mucc.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "MUCC Plugin\0"
-            VALUE "ProductVersion", "1.0.6.7\0"
+            VALUE "ProductVersion", "1.0.6.8\0"
             VALUE "SpecialBuild", "\0"
         END
     END

@@ -1266,10 +1266,8 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			//	LoadImage(hInst, smadd_iconinfo.SmileyIcon, IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0));
 			SendDlgItemMessage(hwndDlg, IDC_OPTIONS, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_OPTIONS]);
 			SendDlgItemMessage(hwndDlg, IDC_INVITE, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_INVITE]);
-			SendDlgItemMessage(hwndDlg, IDC_ROOMADMIN, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_ADMINISTRATION]);
 
 			SendDlgItemMessage(hwndDlg, IDC_TOPIC_BUTTON, BUTTONSETASFLATBTN, 0, 0);
-			SendDlgItemMessage(hwndDlg, IDC_ROOMADMIN, BUTTONSETASFLATBTN, 0, 0);
 			SendDlgItemMessage(hwndDlg, IDC_INVITE, BUTTONSETASFLATBTN, 0, 0);
 			SendDlgItemMessage(hwndDlg, IDC_BOLD, BUTTONSETASFLATBTN, 0, 0);
 			SendDlgItemMessage(hwndDlg, IDC_BOLD, BUTTONSETASPUSHBTN, 0, 0);
@@ -1370,7 +1368,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 		case WM_GETMINMAXINFO:
 			MINMAXINFO *mmi;
 			mmi = (MINMAXINFO *) lParam;
-			mmi->ptMinTrackSize.x = 380;
+			mmi->ptMinTrackSize.x = 370;
 			mmi->ptMinTrackSize.y = 130;
 			return FALSE;
 		case WM_SIZE:
@@ -1394,13 +1392,12 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					chatWindow->vSplitterPos = chatWindow->vSplitterMinRight;
 				}
 
-				hdwp = BeginDeferWindowPos(16);
+				hdwp = BeginDeferWindowPos(15);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_TOPIC), 0, 70, 7, dlgWidth-140, 18, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_LOG), 0, 0, 30, dlgWidth-(chatWindow->vSplitterPos)-2, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_TREELIST), 0, dlgWidth-(chatWindow->vSplitterPos)+2, 30, (chatWindow->vSplitterPos)-2, dlgHeight-(chatWindow->hSplitterPos)-30-26-2, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_EDIT), 0, 0, dlgHeight-(chatWindow->hSplitterPos)+2, dlgWidth, (chatWindow->hSplitterPos)-5, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_INVITE), 0, dlgWidth-31, dlgHeight-(chatWindow->hSplitterPos)-26, 31, 24, SWP_NOZORDER);
-				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_ROOMADMIN), 0, dlgWidth-55, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER);
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_BOLD), 0, 0, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER );
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_ITALIC), 0, 24, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER );
 				hdwp = DeferWindowPos(hdwp, GetDlgItem(hwndDlg, IDC_UNDERLINE), 0, 48, dlgHeight-(chatWindow->hSplitterPos)-26, 24, 24, SWP_NOZORDER );
