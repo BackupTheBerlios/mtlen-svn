@@ -1625,13 +1625,14 @@ static void TlenProcessP(XmlNode *node, void *userdata)
 			} else {
 				n = _strdup(Translate("Private conference"));// JabberNickFromJID(f);
 			}
-			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
+			sprintf(jid, "%s/%s", f, info->username);
+//			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
 				// always real username
-				sprintf(jid, "%s/%s", f, dbv.pszVal);
-				TlenMUCCreateWindow(f, n, 0, NULL, id);
-				TlenMUCRecvPresence(jid, ID_STATUS_ONLINE, flags, k);
-				DBFreeVariant(&dbv);
-			}
+//				sprintf(jid, "%s/%s", f, dbv.pszVal);
+			TlenMUCCreateWindow(f, n, 0, NULL, id);
+			TlenMUCRecvPresence(jid, ID_STATUS_ONLINE, flags, k);
+//				DBFreeVariant(&dbv);
+//			}
 			free(n);
 		}
 	} else {

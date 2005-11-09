@@ -339,8 +339,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,6,7
- PRODUCTVERSION 1,0,6,7
+ FILEVERSION 1,0,6,8
+ PRODUCTVERSION 1,0,6,8
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -358,14 +358,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Tlen Protocol Plugin for Miranda IM\0"
-            VALUE "FileVersion", "1.0.6.7\0"
+            VALUE "FileVersion", "1.0.6.8\0"
             VALUE "InternalName", "tlen\0"
             VALUE "LegalCopyright", "Copyright (c) 2002-2005 Santithorn Bunchua, Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "tlen.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Tlen Protocol Plugin\0"
-            VALUE "ProductVersion", "1.0.6.7\0"
+            VALUE "ProductVersion", "1.0.6.8\0"
             VALUE "SpecialBuild", "\0"
         END
     END

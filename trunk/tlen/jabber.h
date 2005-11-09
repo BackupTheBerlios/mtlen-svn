@@ -50,6 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <m_netlib.h>
 #include <m_protomod.h>
 #include <m_protosvc.h>
+#include <m_contacts.h>
 #include <m_clist.h>
 #include <m_clui.h>
 #include <m_options.h>

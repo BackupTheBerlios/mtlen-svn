@@ -37,15 +37,11 @@ static int isSelf(const char *roomID, const char *nick)
 {
 	JABBER_LIST_ITEM *item;
 	int result;
-	DBVARIANT dbv;
 	result=0;
 	item = JabberListGetItemPtr(LIST_CHATROOM, roomID);
 	if (item!=NULL) {
 		if (item->nick==NULL) {
-			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
-				if (!strcmp(nick, dbv.pszVal)) result = 1;
-				DBFreeVariant(&dbv);
-			}
+			if (!strcmp(nick, jabberThreadInfo->username)) result = 1;
 		} else if (nick[0]=='~') {
 			if (!strcmp(nick+1, item->nick)) {
 				result = 1;
@@ -72,18 +68,33 @@ static int stringToHex(const char *str)
 }
 static char *getDisplayName(const char *id)
 {
+	CONTACTINFO ci;
 	char jid[256];
 	HANDLE hContact;
 	DBVARIANT dbv;
 	if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
 		_snprintf(jid, sizeof(jid), "%s@%s", id, dbv.pszVal);
 		DBFreeVariant(&dbv);
-		if ((hContact=JabberHContactFromJID(jid)) != NULL) {
-			return _strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, 0));
+		if (((hContact=JabberHContactFromJID(jid)) != NULL) || !strcmp(id, jabberThreadInfo->username)) {
+			ZeroMemory(&ci, sizeof(ci));
+			ci.cbSize = sizeof(ci);
+			ci.hContact = hContact;
+			ci.szProto = (char *)jabberProtoName;
+			ci.dwFlag = CNF_DISPLAY;
+			if (!CallService(MS_CONTACT_GETCONTACTINFO, 0, (LPARAM) & ci)) {
+				if (ci.type == CNFT_ASCIIZ) {
+					if (ci.pszVal) {
+						char * str = _strdup(ci.pszVal);
+						miranda_sys_free(ci.pszVal);
+						return str;
+					}
+				}
+			}
 		}
 	}
 	return _strdup(id);
 }
+
 BOOL TlenMUCInit(void)
 {
 	HookEvent(ME_MUCC_EVENT, TlenMUCHandleEvent);

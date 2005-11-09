@@ -248,22 +248,14 @@ static void TlenFileEstablishOutgoingConnection(JABBER_FILE_TRANSFER *ft)
 {
 	char *hash;
 	char str[300];
-	char username[128];
 	TLEN_FILE_PACKET *packet;
-	DBVARIANT dbv;
 	JabberLog("Establishing outgoing connection.");
 	ft->state = FT_ERROR;
 	if ((packet = TlenFilePacketCreate(2*sizeof(DWORD) + 20))!=NULL) {
 		TlenFilePacketSetType(packet, TLEN_FILE_PACKET_CONNECTION_REQUEST);
 		TlenFilePacketPackDword(packet, 1);
 		TlenFilePacketPackDword(packet, (DWORD) atoi(ft->iqId));
-		username[0] = '\0';
-		if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
-			strncpy(username, dbv.pszVal, sizeof(username));
-			username[sizeof(username)-1] = '\0';
-			DBFreeVariant(&dbv);
-		}
-		_snprintf(str, sizeof(str), "%08X%s%d", atoi(ft->iqId), username, atoi(ft->iqId));
+		_snprintf(str, sizeof(str), "%08X%s%d", atoi(ft->iqId), jabberThreadInfo->username, atoi(ft->iqId));
 		hash = TlenSha1(str, strlen(str));
 		TlenFilePacketPackBuffer(packet, hash, 20);
 		free(hash);
