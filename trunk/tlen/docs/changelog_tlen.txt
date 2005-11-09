@@ -1,38 +1,44 @@
-1.0.6.7 Stable
+1.0.6.8
+---------
+* bugfix: compatibility with Unicode contact lists
+* bugfix: user login is always converted to lower case
+* bugfix: typing notifications
+* other bugfixes
+1.0.6.7
 ---------
 + possibility to send files to offline users
 + public status visibility settings
 * bugfixes
-1.0.6.6 Stable
+1.0.6.6
 ---------
 * fixed IEView support (text scrolling issue)
 * code cleanup
-1.0.6.5 Stable
+1.0.6.5
 ---------
 + option to ignore advertisements
 * bugfixes
-1.0.6.4 Stable
+1.0.6.4
 ---------
 + alert, voice chat and group chat policies
 + received alerts are logged as messages
 * offline message timestamp improvements (thanks to Atay for the idea)
 * removed obsolete, Jabber-specific code
 * a lot of more or less important bugfixes
-1.0.6.3 Stable
+1.0.6.3
 ---------
 + group names encoding
 + log saving in IEView mode
 * simplified option page
-1.0.6.2 Stable
+1.0.6.2
 ---------
 + support for IEView group chats (IEView 1.0.3.0 or later)
 + improvements of group chats in RichEdit mode (context menu, better scrolling)
-1.0.6.1 Stable
+1.0.6.1
 ---------
 * bugfix: proper filename encoding
 * options page rearranged
 * code cleanup, other fixes and improvements
-1.0.6.0 Stable
+1.0.6.0
 ---------
 + group chat window flashing
 + message icons in tabbed mode
