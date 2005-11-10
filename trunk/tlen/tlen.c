@@ -49,8 +49,8 @@ PLUGININFO pluginInfo = {
 
 HANDLE hMainThread;
 DWORD jabberMainThreadId;
-char *jabberProtoName;	// "JABBER"
-char *jabberModuleName;	// "Jabber"
+char *jabberProtoName;	// "TLEN"
+char *jabberModuleName;	// "Tlen"
 CRITICAL_SECTION mutex;
 HANDLE hNetlibUser;
 HANDLE hFileNetlibUser;
