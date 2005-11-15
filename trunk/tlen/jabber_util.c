@@ -738,7 +738,7 @@ time_t  TlenTimeToUTC(time_t time) {
 		 (timestamp->tm_mon == 2 && timestamp->tm_mday - timestamp->tm_wday >= 25) ||
 		 (timestamp->tm_mon == 9 && timestamp->tm_mday - timestamp->tm_wday < 25)) {
 	} else {
-		time += 3600;
+		time -= 3600;
 	}
 	return time;
 }
@@ -789,8 +789,8 @@ time_t JabberIsoToUnixTime(char *stamp)
 	_tzset();
 	t = mktime(&timestamp);
 	t -= _timezone;
-	t = TlenTimeToUTC(t);
-	JabberLog("%s is %s", stamp, ctime(&t));
+//	t = TlenTimeToUTC(t);
+	JabberLog("%s is %s (%d)", stamp, ctime(&t), _timezone);
 
 	if (t >= 0)
 		return t;

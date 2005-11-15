@@ -1396,6 +1396,9 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 				s = JabberXmlGetAttrValue(node, "s");
 				if (s != NULL) {
 					timestamp = TlenTimeToUTC(atol(s));
+					if (timestamp > time(NULL)) {
+						timestamp = time(NULL);
+					}
 				} else {
 					timestamp = time(NULL);
 				}
@@ -1550,7 +1553,6 @@ static void TlenProcessP(XmlNode *node, void *userdata)
 	char *f, *id, *tp, *a, *n, *k;
 	XmlNode *sNode, *xNode, *iNode, *kNode;
 	int status, flags;
-	DBVARIANT dbv;
 
 	if (!node->name || strcmp(node->name, "p")) return;
 	if ((info=(struct ThreadData *) userdata) == NULL) return;
