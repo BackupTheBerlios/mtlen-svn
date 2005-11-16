@@ -41,11 +41,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ST_KEEPUNDO		1
 #define ST_SELECTION	2
 #define ST_NEWCHARS		4
-typedef struct _settextex
-{
-	DWORD	flags;
-	UINT	codepage;
-} SETTEXTEX;
 #else
 #include <win2k.h>
 #endif

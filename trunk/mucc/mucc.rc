@@ -172,11 +172,11 @@ BEGIN
                     23,146,162,WS_EX_STATICEDGE
     GROUPBOX        "Other",IDC_SIMPLE,5,193,310,57
     CONTROL         "Use tabbed mode",IDC_USETABS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,206,200,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,206,140,10
     CONTROL         "Enable IEView",IDC_ENABLEIEVIEW,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,219,200,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,219,140,10
     CONTROL         "Send message on 'Enter'",IDC_SENDONENTER,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,232,200,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,232,140,10
     LTEXT           "Limit log history to (events):",IDC_STATIC,153,234,110,8
     EDITTEXT        IDC_LOGLIMIT,263,232,40,14,ES_RIGHT | ES_NUMBER
     CONTROL         "",IDC_LOGLIMITSPIN,"msctls_updown32",UDS_SETBUDDYINT |
