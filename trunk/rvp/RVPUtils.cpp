@@ -290,9 +290,36 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 									if (invitationCommandHdr != NULL && invitationCookieHdr != NULL) {
 										if (!strcmpi(invitationCommandHdr->getValue(), "INVITE")) { /* INVITE */
 											if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
+											/* most likely it is a file transfer :) */
+											/* TODO invoke listener here */
+												PROTORECVEVENT pre;
+												CCSDATA ccs;
+												HANDLE hContact = Utils::contactFromID(login);
+												if (hContact==NULL) {
+													hContact = Utils::createContact(login, nick, FALSE);
+												}
+												RVPFile *rvpFile = new RVPFile();
 												DWORD fileSize = atol(applicationFileSizeHdr->getValue());
+												rvpFile->hContact = hContact;
+												rvpFile->id = Utils::dupString(invitationCookieHdr->getValue());
+												rvpFile->size = fileSize;
+												// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
+												char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 2);
+												*((PDWORD) szBlob) = (DWORD) rvpFile;
+												strcpy(szBlob + sizeof(DWORD), applicationFileHdr->getValue());
+												szBlob[sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 1] = '\0';												
+												pre.flags = 0;
+												pre.timestamp = time(NULL);
+												pre.szMessage = szBlob;
+												pre.lParam = 0;
+												ccs.szProtoService = PSR_FILE;
+												ccs.hContact = hContact;
+												ccs.wParam = 0;
+												ccs.lParam = (LPARAM) &pre;
+												CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
+												free(szBlob);
+											/* end TODO */
 												
-												/* most likely file transfer :) */
 											}
 										} else if (!strcmpi(invitationCommandHdr->getValue(), "ACCEPT")) { /* ACCEPT */
 											
@@ -355,8 +382,8 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 													if (hContact!=NULL) {
 														CCSDATA ccs;
 														PROTORECVEVENT recv;
-														char *message = Utils::utf8Decode(request->getContent());
 														wchar_t *messageW = Utils::utf8DecodeW(request->getContent());
+														char *message = Utils::convertToString(messageW); // Utils::utf8Decode(request->getContent());
 														int len = strlen(message)+1;
 														int wlen = wcslen(messageW)+1;
 														char *blob = new char[(len + sizeof(wchar_t)) * wlen];

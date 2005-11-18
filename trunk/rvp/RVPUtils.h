@@ -94,6 +94,18 @@ class RVPListener {
 public:
 	virtual void recvTyping(const char *login) = 0;
 	virtual void recvMessage(const char *login, const char *message) = 0;
+	virtual void recvMessage(const char *login, const wchar_t *message) = 0;
+	virtual void recvStatus(const char *login, int status) = 0;
+	virtual void recvFileInvite(const char *login, const char *filename, int filesize) = 0;
+};
+
+class RVPFile {
+private:
+	static List list;
+public:
+	HANDLE hContact;
+	char *id;
+	int	  size;
 };
 
 class RVPClient {
