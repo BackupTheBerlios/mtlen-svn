@@ -77,6 +77,9 @@ public:
 	int sendStatus();
 	int	sendMessage(CCSDATA *ccs);
 	int	sendTyping(HANDLE hContact, bool on);
+	int	sendFileAccept(const char *id, const char *path);
+	int	sendFileDeny(const char *id);
+	int	sendFileInvite(HANDLE hContact, const char * filenames[] , int filenum);
 	int	searchContact(const char *login);
 	bool isTyping(HANDLE hContact);
 	RVPSubscription* getProperty(const char *node, const char *property);

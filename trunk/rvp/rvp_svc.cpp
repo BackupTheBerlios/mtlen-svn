@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 #include "RVPUtils.h"
 
-RVPImpl rvplogin;
+RVPImpl rvpimpl;
 
 static char ntDomain[256];
 static char ntUsername[256];
@@ -132,17 +132,17 @@ int startRVPClient() {
 	}
 	// User may change status to OFFLINE while we are connecting above
 //	if (jabberDesiredStatus!=ID_STATUS_OFFLINE) {
-		rvplogin.setCredentials(new HTTPCredentials(ntDomain, ntUsername, ntPassword, ntFlags));
+		rvpimpl.setCredentials(new HTTPCredentials(ntDomain, ntUsername, ntPassword, ntFlags));
 		/* Subscribe To RVP Services */
 		if (DBGetContactSettingByte(NULL, rvpProtoName, "ManualServer", FALSE) == TRUE) {
 			if (!DBGetContactSetting(NULL, rvpProtoName, "LoginServer", &dbv)) {
-				result = rvplogin.signIn(username, dbv.pszVal, jabberDesiredStatus);
+				result = rvpimpl.signIn(username, dbv.pszVal, jabberDesiredStatus);
 				DBFreeVariant(&dbv);
 			} else {
-				result = rvplogin.signIn(username, NULL, jabberDesiredStatus);
+				result = rvpimpl.signIn(username, NULL, jabberDesiredStatus);
 			}
 		} else {
-			result = rvplogin.signIn(username, NULL, jabberDesiredStatus);
+			result = rvpimpl.signIn(username, NULL, jabberDesiredStatus);
 		}
 		if (result) {
 			if (result == -1) {
@@ -153,7 +153,7 @@ int startRVPClient() {
 		}
 
 		/* Subscribe to all contacts and refresh contacts' information */
-		rvplogin.subscribeAll();
+		rvpimpl.subscribeAll();
 //	}
 	return 0;
 }
@@ -180,7 +180,7 @@ void __cdecl SignInThread(void *vPtr)
 int RVPGetCaps(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == PFLAGNUM_1)
-		return PF1_IM|PF1_BASICSEARCH;
+		return PF1_IM|PF1_BASICSEARCH|PF1_FILE;
 	if (wParam == PFLAGNUM_2)
 		return PF2_ONLINE|PF2_INVISIBLE|PF2_SHORTAWAY|PF2_LONGAWAY|PF2_LIGHTDND|PF2_OUTTOLUNCH|PF2_ONTHEPHONE;
 	if (wParam == PFLAGNUM_3)
@@ -211,7 +211,7 @@ int RVPLoadIcon(WPARAM wParam, LPARAM lParam)
 int RVPBasicSearch(WPARAM wParam, LPARAM lParam)
 {
 	if ((char *) lParam == NULL) return 0;
-	return rvplogin.searchContact((char *) lParam);
+	return rvpimpl.searchContact((char *) lParam);
 }
 
 int RVPSearchByEmail(WPARAM wParam, LPARAM lParam)
@@ -255,7 +255,7 @@ int RVPAddToList(WPARAM wParam, LPARAM lParam) {
 		if (!(wParam&PALF_TEMPORARY))
 			DBWriteContactSettingByte(hContact, "CList", "NotOnList", 1);
 	}
-	rvplogin.subscribe(hContact);
+	rvpimpl.subscribe(hContact);
 	return (int) hContact;
 }
 
@@ -268,7 +268,7 @@ int RVPSetStatus(WPARAM wParam, LPARAM lParam)
  	if (desiredStatus == ID_STATUS_OFFLINE) {
 		if (jabberConnected) {
 			/* TODO move to signout thread*/
-			rvplogin.signOut();
+			rvpimpl.signOut();
 			HANDLE hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDFIRST, 0, 0);
             while (hContact != NULL) {
                char *str = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
@@ -300,7 +300,7 @@ int RVPSetStatus(WPARAM wParam, LPARAM lParam)
 			jabberStatus = desiredStatus;
 			// send presence update
 			/* TODO move to send presence thread*/
-			rvplogin.setStatus(jabberStatus);
+			rvpimpl.setStatus(jabberStatus);
 		}
 	}
 	return 0;
@@ -340,7 +340,7 @@ int RVPGetInfo(WPARAM wParam, LPARAM lParam)
 }
 
 int RVPSendMessage(WPARAM wParam, LPARAM lParam) {
-	return rvplogin.sendMessage((CCSDATA *) lParam);
+	return rvpimpl.sendMessage((CCSDATA *) lParam);
 }
 
 int RVPRecvMessage(WPARAM wParam, LPARAM lParam)
@@ -390,7 +390,7 @@ int RVPContactDeleted(WPARAM wParam, LPARAM lParam)
 {
 	char *szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, wParam, 0);
 	if (szProto==NULL || strcmp(szProto, rvpProtoName)) return 0;
-	rvplogin.unsubscribe((HANDLE) wParam);
+	rvpimpl.unsubscribe((HANDLE) wParam);
 	return 0;
 }
 
@@ -399,14 +399,153 @@ int RVPUserIsTyping(WPARAM wParam, LPARAM lParam)
 	HANDLE hContact = (HANDLE) wParam;
 	switch (lParam) {
 	case PROTOTYPE_SELFTYPING_OFF:
-		rvplogin.sendTyping(hContact, false);
+		rvpimpl.sendTyping(hContact, false);
 		break;
 	case PROTOTYPE_SELFTYPING_ON:
-		rvplogin.sendTyping(hContact, true);
+		rvpimpl.sendTyping(hContact, true);
 		break;
 	}
 	return 0;
 }
+
+int RVPFileAllow(WPARAM wParam, LPARAM lParam)
+{
+	CCSDATA *ccs = (CCSDATA *) lParam;
+//	ft = (JABBER_FILE_TRANSFER *) ccs->wParam;
+	rvpimpl.sendFileAccept("", (const char *) ccs->lParam);
+	return ccs->wParam;
+}
+
+int RVPFileDeny(WPARAM wParam, LPARAM lParam)
+{
+	/*
+	CCSDATA *ccs = (CCSDATA *) lParam;
+	JABBER_FILE_TRANSFER *ft;
+	char *nick;
+
+	if (!jabberOnline) return 1;
+
+	ft = (JABBER_FILE_TRANSFER *) ccs->wParam;
+	nick = JabberNickFromJID(ft->jid);
+	JabberSend(jabberThreadInfo->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, nick);\
+	free(nick);
+	TlenFileFreeFt(ft);
+	*/
+	return 0;
+}
+
+int RVPFileCancel(WPARAM wParam, LPARAM lParam)
+{/*
+	CCSDATA *ccs = (CCSDATA *) lParam;
+	JABBER_FILE_TRANSFER *ft = (JABBER_FILE_TRANSFER *) ccs->wParam;
+	HANDLE hEvent;
+
+	JabberLog("Invoking FileCancel()");
+	if (ft->s) {
+		JabberLog("FT canceled");
+		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+		JabberLog("Closing ft->s = %d", ft->s);
+		ft->state = FT_ERROR;
+		Netlib_CloseHandle(ft->s);
+		ft->s = NULL;
+		if (ft->hFileEvent != NULL) {
+			hEvent = ft->hFileEvent;
+			ft->hFileEvent = NULL;
+			SetEvent(hEvent);
+		}
+		JabberLog("ft->s is now NULL, ft->state is now FT_ERROR");
+	}*/
+	return 0;
+}
+
+int RVPSendFile(WPARAM wParam, LPARAM lParam)
+{
+	/*
+	CCSDATA *ccs = (CCSDATA *) lParam;
+	char **files = (char **) ccs->lParam;
+	JABBER_FILE_TRANSFER *ft;
+	int i, j;
+	struct _stat statbuf;
+	DBVARIANT dbv;
+	char *nick, *p, idStr[10];
+	JABBER_LIST_ITEM *item;
+	int id;
+
+	if (!jabberOnline) return 0;
+//	if (DBGetContactSettingWord(ccs->hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) == ID_STATUS_OFFLINE) return 0;
+	if (DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) return 0;
+	ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
+	memset(ft, 0, sizeof(JABBER_FILE_TRANSFER));
+	for(ft->fileCount=0; files[ft->fileCount]; ft->fileCount++);
+	ft->files = (char **) malloc(sizeof(char *) * ft->fileCount);
+	ft->filesSize = (long *) malloc(sizeof(long) * ft->fileCount);
+	ft->allFileTotalSize = 0;
+	for(i=j=0; i<ft->fileCount; i++) {
+		if (_stat(files[i], &statbuf))
+			JabberLog("'%s' is an invalid filename", files[i]);
+		else {
+			ft->filesSize[j] = statbuf.st_size;
+			ft->files[j++] = _strdup(files[i]);
+			ft->allFileTotalSize += statbuf.st_size;
+		}
+	}
+	ft->fileCount = j;
+	ft->szDescription = _strdup((char *) ccs->wParam);
+	ft->hContact = ccs->hContact;
+	ft->currentFile = 0;
+	ft->jid = _strdup(dbv.pszVal);
+	DBFreeVariant(&dbv);
+
+	id = JabberSerialNext();
+	_snprintf(idStr, sizeof(idStr), "%d", id);
+	if ((item=JabberListAdd(LIST_FILE, idStr)) != NULL) {
+		ft->iqId = _strdup(idStr);
+		nick = JabberNickFromJID(ft->jid);
+		item->ft = ft;
+		if (ft->fileCount == 1) {
+			if ((p=strrchr(files[0], '\\')) != NULL)
+				p++;
+			else
+				p = files[0];
+			p = JabberTextEncode(p);
+			JabberSend(jabberThreadInfo->s, "<f t='%s' n='%s' e='1' i='%s' c='1' s='%d' v='1'/>", nick, p, idStr, ft->allFileTotalSize);
+			free(p);
+		}
+		else
+			JabberSend(jabberThreadInfo->s, "<f t='%s' e='1' i='%s' c='%d' s='%d' v='1'/>", nick, idStr, ft->fileCount, ft->allFileTotalSize);
+		free(nick);
+	}
+
+	return (int)(HANDLE) ft;
+	*/
+	return 0;
+}
+
+int RVPRecvFile(WPARAM wParam, LPARAM lParam)
+{
+	/*
+	DBEVENTINFO dbei;
+	CCSDATA *ccs = (CCSDATA *) lParam;
+	PROTORECVEVENT *pre = (PROTORECVEVENT *) ccs->lParam;
+	char *szDesc, *szFile;
+
+	DBDeleteContactSetting(ccs->hContact, "CList", "Hidden");
+	szFile = pre->szMessage + sizeof(DWORD);
+	szDesc = szFile + strlen(szFile) + 1;
+	JabberLog("Description = %s", szDesc);
+	ZeroMemory(&dbei, sizeof(dbei));
+	dbei.cbSize = sizeof(dbei);
+	dbei.szModule = jabberProtoName;
+	dbei.timestamp = pre->timestamp;
+	dbei.flags = pre->flags & (PREF_CREATEREAD ? DBEF_READ : 0);
+	dbei.eventType = EVENTTYPE_FILE;
+	dbei.cbBlob = sizeof(DWORD) + strlen(szFile) + strlen(szDesc) + 2;
+	dbei.pBlob = (PBYTE) pre->szMessage;
+	CallService(MS_DB_EVENT_ADD, (WPARAM) ccs->hContact, (LPARAM) &dbei);
+	*/
+	return 0;
+}
+
 
 int RVPSvcInit(void)
 {
@@ -444,6 +583,21 @@ int RVPSvcInit(void)
 
 	sprintf(s, "%s%s", rvpProtoName, PSR_MESSAGE);
 	CreateServiceFunction(s, RVPRecvMessage);
+	
+	sprintf(s, "%s%s", rvpProtoName, PSS_FILEALLOW);
+	CreateServiceFunction(s, RVPFileAllow);
+
+	sprintf(s, "%s%s", rvpProtoName, PSS_FILEDENY);
+	CreateServiceFunction(s, RVPFileDeny);
+
+	sprintf(s, "%s%s", rvpProtoName, PSS_FILECANCEL);
+	CreateServiceFunction(s, RVPFileCancel);
+
+	sprintf(s, "%s%s", rvpProtoName, PSS_FILE);
+	CreateServiceFunction(s, RVPSendFile);
+
+	sprintf(s, "%s%s", rvpProtoName, PSR_FILE);
+	CreateServiceFunction(s, RVPRecvFile);
 
 	sprintf(s, "%s%s", rvpProtoName, PSS_USERISTYPING);
 	CreateServiceFunction(s, RVPUserIsTyping);

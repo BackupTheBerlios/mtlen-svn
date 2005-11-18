@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global header files
  *******************************************************************/
+#undef _WIN32_WINNT
 #define _WIN32_WINNT 0x500
 #include <windows.h>
 #include <process.h>
@@ -96,7 +97,7 @@ typedef struct {
  * Global variables
  *******************************************************************/
 extern HINSTANCE hInst;
-extern RVPImpl rvplogin;
+extern RVPImpl rvpimpl;
 
 extern HANDLE hMainThread;
 extern char *rvpProtoName;

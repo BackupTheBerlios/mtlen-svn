@@ -269,7 +269,7 @@ int RVPImpl::signIn(const char *login, const char *manualServer, int initialStat
 	oldStatus = initialStatus;
 	client->sendPresence(initialStatus);
 	/* Get Display Name */
-	RVPSubscription *subscription = rvplogin.getProperty(NULL, "d:displayname");
+	RVPSubscription *subscription = getProperty(NULL, "d:displayname");
 	if (subscription != NULL) {
 		delete subscription;
 	}
@@ -343,6 +343,17 @@ int RVPImpl::sendTyping(HANDLE hContact, bool on) {
 			typingNotifications->release(item);
 		}
 	}
+	return 0;
+}
+
+
+int RVPImpl::sendFileAccept(const char *id, const char *path) {
+	//RVPImplAsyncData *data = new RVPImplAsyncData(this);
+	//data->hContact = hContact;
+	//typingNotifications->add(new ListItem(cid));
+//	if (!forkThread(TGROUP_NORMAL, RVPSendTypingAsyncThread, 0, data)) {
+	//	delete data;
+	//}
 	return 0;
 }
 

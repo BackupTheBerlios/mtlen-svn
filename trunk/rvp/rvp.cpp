@@ -29,8 +29,8 @@ PLUGINLINK *pluginLink;
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
 	"MS Exchange (RVP) Protocol",
-	PLUGIN_MAKE_VERSION(0,0,1,5),
-	"RVP protocol plugin for Miranda IM (0.0.1.5 "__DATE__")",
+	PLUGIN_MAKE_VERSION(0,0,1,6),
+	"RVP protocol plugin for Miranda IM (0.0.1.6 "__DATE__")",
 	"Piotr Piastucki",
 	"the_leech@users.berlios.de",
 	"(c) 2005 Piotr Piastucki",
@@ -97,7 +97,7 @@ static int PreShutdown(WPARAM wParam, LPARAM lParam)
 {
 	if (jabberConnected) {
 	/* TODO move to signout thread*/
-		rvplogin.signOut();
+		rvpimpl.signOut();
 	}
 
 	return 0;
