@@ -287,12 +287,6 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 									HTTPHeader *typingHdr = request->getHeader("TypingUser");
 									HTTPHeader *contentType = request->getHeader("Content-Type");
 									HTTPHeader *sessionId = request->getHeader("Session-Id");
-									HTTPHeader *applicationNameHdr = request->getHeader("Application-Name");
-									HTTPHeader *applicationGUID = request->getHeader("Application-GUID");
-									HTTPHeader *invitationCommandHdr = request->getHeader("Invitation-Command");
-									HTTPHeader *invitationCookieHdr = request->getHeader("Invitation-Cookie"); /* file transfer id */
-									HTTPHeader *applicationFileHdr = request->getHeader("Application-File");  /* file name */
-									HTTPHeader *applicationFileSizeHdr = request->getHeader("Application-FileSize"); /* file size */
 									if (sessionId != NULL) {
 										RVPSession::add(login, sessionId->getValue());
 										if (contentType != NULL) {
@@ -341,7 +335,20 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 													/* end TODO */
 												}
 											} else if (strstr(contentType->getValue(), "text/x-msmsgsinvite") == contentType->getValue()) {
-												MessageBoxA(NULL, "file invite step0", "FT", MB_OK);
+												HTTPRequest *inviteRequest = HTTPUtils::toRequest(request->getContent());
+												HTTPHeader *applicationNameHdr = inviteRequest->getHeader("Application-Name");
+												HTTPHeader *applicationGUID = inviteRequest->getHeader("Application-GUID");
+												HTTPHeader *invitationCommandHdr = inviteRequest->getHeader("Invitation-Command");
+												HTTPHeader *invitationCookieHdr = inviteRequest->getHeader("Invitation-Cookie"); /* file transfer id */
+												HTTPHeader *applicationFileHdr = inviteRequest->getHeader("Application-File");  /* file name */
+												HTTPHeader *applicationFileSizeHdr = inviteRequest->getHeader("Application-FileSize"); /* file size */
+												delete inviteRequest;
+												if (invitationCommandHdr != NULL) {
+													MessageBoxA(NULL, invitationCommandHdr->getValue(), "invitation command", MB_OK);
+												}
+												if (invitationCookieHdr != NULL) {
+													MessageBoxA(NULL, invitationCookieHdr->getValue(), "invitation cookie", MB_OK);
+												}
 												if (invitationCommandHdr != NULL && invitationCookieHdr != NULL) {
 													MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
 													if (!strcmpi(invitationCommandHdr->getValue(), "INVITE")) { /* INVITE */
