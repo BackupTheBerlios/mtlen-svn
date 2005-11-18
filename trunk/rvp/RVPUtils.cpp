@@ -342,17 +342,10 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 												HTTPHeader *invitationCookieHdr = inviteRequest->getHeader("Invitation-Cookie"); /* file transfer id */
 												HTTPHeader *applicationFileHdr = inviteRequest->getHeader("Application-File");  /* file name */
 												HTTPHeader *applicationFileSizeHdr = inviteRequest->getHeader("Application-FileSize"); /* file size */
-												delete inviteRequest;
-												if (invitationCommandHdr != NULL) {
-													MessageBoxA(NULL, invitationCommandHdr->getValue(), "invitation command", MB_OK);
-												}
-												if (invitationCookieHdr != NULL) {
-													MessageBoxA(NULL, invitationCookieHdr->getValue(), "invitation cookie", MB_OK);
-												}
 												if (invitationCommandHdr != NULL && invitationCookieHdr != NULL) {
-													MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
 													if (!strcmpi(invitationCommandHdr->getValue(), "INVITE")) { /* INVITE */
 														/* file transfer */
+														MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
 														if (applicationNameHdr != NULL && !strcmpi(applicationNameHdr->getValue(), "File Transfer")) {
 															MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
 															if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
@@ -394,6 +387,7 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 														
 													}
 												}
+												delete inviteRequest;
 											}
 										}
 									}
