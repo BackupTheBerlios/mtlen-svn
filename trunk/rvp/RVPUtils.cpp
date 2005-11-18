@@ -234,7 +234,6 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 					XMLObject *r_notificationFromXml = r_propnotificationXml->getChild("r:notification-from");
 					XMLObject *r_notificationToXml = r_propnotificationXml->getChild("r:notification-to");
 					XMLObject *d_propertyupdateXml = r_propnotificationXml->getChild("d:propertyupdate");
-					XMLObject *r_msgbodyXml = r_propnotificationXml->getChild("r:msgbody");
 					if (d_propertyupdateXml == NULL) {
 						d_propertyupdateXml = r_propnotificationXml->getChild("d:propstat");
 					}
@@ -267,77 +266,6 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 							}
 						}
 					}
-					if (r_msgbodyXml!=NULL && r_notificationFromXml!=NULL) {
-						/* file transfer invitation ?*/
-						XMLObject *r_mimeDataXml = r_msgbodyXml->getChild("r:mime-data");
-						XMLObject *r_contactXml = r_notificationFromXml->getChild("r:contact");
-						if (r_mimeDataXml!=NULL && r_contactXml!=NULL) {
-							XMLObject *d_hrefXml = r_contactXml->getChild("d:href");
-							XMLObject *r_descriptionXml = r_contactXml->getChild("r:description");
-							if (d_hrefXml!=NULL && r_mimeDataXml->getCDATA()!=NULL) {
-								char *hrefStr = d_hrefXml->getData()->toString();
-								char *login = RVPClient::getLoginFromUrl(hrefStr);
-								if (login != NULL) {
-									char *nick = r_descriptionXml->getData()->toString();
-									char *message = r_mimeDataXml->getCDATA()->getData()->toString();
-									HTTPRequest *request = HTTPUtils::toRequest(message);
-									HTTPHeader *applicationNameHdr = request->getHeader("Application-Name");
-									HTTPHeader *applicationGUID = request->getHeader("Application-GUID");
-									HTTPHeader *invitationCommandHdr = request->getHeader("Invitation-Command");
-									HTTPHeader *invitationCookieHdr = request->getHeader("Invitation-Cookie"); /* file transfer id */
-									HTTPHeader *applicationFileHdr = request->getHeader("Application-File");  /* file name */
-									HTTPHeader *applicationFileSizeHdr = request->getHeader("Application-FileSize"); /* file size */
-									if (invitationCommandHdr != NULL && invitationCookieHdr != NULL) {
-										if (!strcmpi(invitationCommandHdr->getValue(), "INVITE")) { /* INVITE */
-											if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
-											/* most likely it is a file transfer :) */
-											/* TODO invoke listener here */
-												PROTORECVEVENT pre;
-												CCSDATA ccs;
-												HANDLE hContact = Utils::contactFromID(login);
-												if (hContact==NULL) {
-													hContact = Utils::createContact(login, nick, FALSE);
-												}
-												RVPFile *rvpFile = new RVPFile();
-												DWORD fileSize = atol(applicationFileSizeHdr->getValue());
-												rvpFile->hContact = hContact;
-												rvpFile->id = Utils::dupString(invitationCookieHdr->getValue());
-												rvpFile->size = fileSize;
-												// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
-												char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 2);
-												*((PDWORD) szBlob) = (DWORD) rvpFile;
-												strcpy(szBlob + sizeof(DWORD), applicationFileHdr->getValue());
-												szBlob[sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 1] = '\0';												
-												pre.flags = 0;
-												pre.timestamp = time(NULL);
-												pre.szMessage = szBlob;
-												pre.lParam = 0;
-												ccs.szProtoService = PSR_FILE;
-												ccs.hContact = hContact;
-												ccs.wParam = 0;
-												ccs.lParam = (LPARAM) &pre;
-												CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
-												free(szBlob);
-											/* end TODO */
-												
-											}
-										} else if (!strcmpi(invitationCommandHdr->getValue(), "ACCEPT")) { /* ACCEPT */
-											
-										} else if (!strcmpi(invitationCommandHdr->getValue(), "CANCEL")) { /* CANCEL */
-											
-										}
-									}
-									delete request;
-									delete message;
-									delete nick;
-									delete login;
-								}
-								delete hrefStr;
-								
-							}
-							
-						}
-					}
 				}
 				for (XMLObject *r_messageXml = r_notificationXml->getChild("r:message");r_messageXml!=NULL;r_messageXml=r_messageXml->getNext("r:propnotification")) {
 					XMLObject *r_notificationFromXml = r_messageXml->getChild("r:notification-from");
@@ -359,11 +287,17 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 									HTTPHeader *typingHdr = request->getHeader("TypingUser");
 									HTTPHeader *contentType = request->getHeader("Content-Type");
 									HTTPHeader *sessionId = request->getHeader("Session-Id");
+									HTTPHeader *applicationNameHdr = request->getHeader("Application-Name");
+									HTTPHeader *applicationGUID = request->getHeader("Application-GUID");
+									HTTPHeader *invitationCommandHdr = request->getHeader("Invitation-Command");
+									HTTPHeader *invitationCookieHdr = request->getHeader("Invitation-Cookie"); /* file transfer id */
+									HTTPHeader *applicationFileHdr = request->getHeader("Application-File");  /* file name */
+									HTTPHeader *applicationFileSizeHdr = request->getHeader("Application-FileSize"); /* file size */
 									if (sessionId != NULL) {
 										RVPSession::add(login, sessionId->getValue());
 										if (contentType != NULL) {
 											if (strstr(contentType->getValue(), "text/x-msmsgscontrol") == contentType->getValue()) {
-												/* typing notification ? */
+												/* typing notification */
 												if (typingHdr!=NULL) {
 													/* TODO invoke listener here */
 													HANDLE hContact = Utils::contactFromID(login);
@@ -373,6 +307,7 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 													/* end TODO */
 												}
 											} else if (strstr(contentType->getValue(), "text/plain") == contentType->getValue()) {
+												/* message */
 												if (request->getContent()!=NULL && strlen(request->getContent())>0) {
 													/* TODO invoke listener here */
 													HANDLE hContact = Utils::contactFromID(login);
@@ -404,6 +339,53 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 														delete blob;
 													}
 													/* end TODO */
+												}
+											} else if (strstr(contentType->getValue(), "text/x-msmsgsinvite") == contentType->getValue()) {
+												MessageBoxA(NULL, "file invite step0", "FT", MB_OK);
+												if (invitationCommandHdr != NULL && invitationCookieHdr != NULL) {
+													MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
+													if (!strcmpi(invitationCommandHdr->getValue(), "INVITE")) { /* INVITE */
+														/* file transfer */
+														if (applicationNameHdr != NULL && !strcmpi(applicationNameHdr->getValue(), "File Transfer")) {
+															MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
+															if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
+																MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
+															/* TODO invoke listener here */
+																PROTORECVEVENT pre;
+																CCSDATA ccs;
+																HANDLE hContact = Utils::contactFromID(login);
+																if (hContact==NULL) {
+																	hContact = Utils::createContact(login, nick, FALSE);
+																}
+																RVPFile *rvpFile = new RVPFile();
+																DWORD fileSize = atol(applicationFileSizeHdr->getValue());
+																rvpFile->hContact = hContact;
+																rvpFile->id = Utils::dupString(invitationCookieHdr->getValue());
+																rvpFile->size = fileSize;
+																// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
+																char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 2);
+																*((PDWORD) szBlob) = (DWORD) rvpFile;
+																strcpy(szBlob + sizeof(DWORD), applicationFileHdr->getValue());
+																szBlob[sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 1] = '\0';												
+																pre.flags = 0;
+																pre.timestamp = time(NULL);
+																pre.szMessage = szBlob;
+																pre.lParam = 0;
+																ccs.szProtoService = PSR_FILE;
+																ccs.hContact = hContact;
+																ccs.wParam = 0;
+																ccs.lParam = (LPARAM) &pre;
+																CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
+																free(szBlob);
+															/* end TODO */
+																
+															}
+														}
+													} else if (!strcmpi(invitationCommandHdr->getValue(), "ACCEPT")) { /* ACCEPT */
+														
+													} else if (!strcmpi(invitationCommandHdr->getValue(), "CANCEL")) { /* CANCEL */
+														
+													}
 												}
 											}
 										}
