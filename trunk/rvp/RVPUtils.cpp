@@ -345,7 +345,6 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 												if (invitationCommandHdr != NULL && invitationCookieHdr != NULL) {
 													if (!strcmpi(invitationCommandHdr->getValue(), "INVITE")) { /* INVITE */
 														/* file transfer */
-														MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
 														if (applicationNameHdr != NULL && !strcmpi(applicationNameHdr->getValue(), "File Transfer")) {
 															MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
 															if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
@@ -366,7 +365,7 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 																char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 2);
 																*((PDWORD) szBlob) = (DWORD) rvpFile;
 																strcpy(szBlob + sizeof(DWORD), applicationFileHdr->getValue());
-																szBlob[sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 1] = '\0';												
+																szBlob[sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 1] = '\0';
 																pre.flags = 0;
 																pre.timestamp = time(NULL);
 																pre.szMessage = szBlob;
@@ -378,13 +377,13 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 																CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
 																free(szBlob);
 															/* end TODO */
-																
+
 															}
 														}
 													} else if (!strcmpi(invitationCommandHdr->getValue(), "ACCEPT")) { /* ACCEPT */
-														
+
 													} else if (!strcmpi(invitationCommandHdr->getValue(), "CANCEL")) { /* CANCEL */
-														
+
 													}
 												}
 												delete inviteRequest;
