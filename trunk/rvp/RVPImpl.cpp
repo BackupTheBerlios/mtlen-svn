@@ -26,9 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static void __cdecl RVPSubscribeAsyncThread(void *ptr) {
 	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
-	DBVARIANT dbv;
-	if (!DBGetContactSetting(data->hContact, rvpProtoName, "mseid", &dbv)) {
-		RVPSubscription *subscription = data->impl->getClient()->subscribe(dbv.pszVal);
+	char *contactId = Utils::getLogin(data->hContact);
+	if (contactId != NULL) {
+		RVPSubscription *subscription = data->impl->getClient()->subscribe(contactId);
 		if (subscription != NULL) {
 			if (DBGetContactSettingWord(data->hContact, rvpProtoName, "Status", ID_STATUS_OFFLINE) != subscription->getStatus()) {
 				DBWriteContactSettingWord(data->hContact, rvpProtoName, "Status", (WORD) subscription->getStatus());
@@ -41,7 +41,7 @@ static void __cdecl RVPSubscribeAsyncThread(void *ptr) {
 				DBWriteContactSettingString(data->hContact, rvpProtoName, "e-mail", subscription->getEmail());
 			}
 		}
-		DBFreeVariant(&dbv);
+		delete contactId;
 	}
 	delete data;
 }
@@ -65,9 +65,8 @@ static void __cdecl RVPSendMessageAsyncThread(void *ptr) {
 	char *principalDisplayname;
 	char *contactDisplayname;
 	DBVARIANT dbv;
-	if (!DBGetContactSetting(data->hContact, rvpProtoName, "mseid", &dbv)) {
-		contactID = Utils::dupString(dbv.pszVal);
-		DBFreeVariant(&dbv);
+	contactID = Utils::getLogin(data->hContact);
+	if (contactID != NULL) {
 		principalDisplayname = Utils::dupString("");
 		contactDisplayname = Utils::dupString("");
 		if (!DBGetContactSetting(data->hContact, rvpProtoName, "displayname", &dbv)) {
@@ -106,10 +105,9 @@ static void __cdecl RVPSendTypingAsyncThread(void *ptr) {
 	char *contactID;
 	char *principalDisplayname;
 	char *contactDisplayname;
-	DBVARIANT dbv;
-	if (!DBGetContactSetting(data->hContact, rvpProtoName, "mseid", &dbv)) {
-		contactID = Utils::dupString(dbv.pszVal);
-		DBFreeVariant(&dbv);
+	contactID = Utils::getLogin(data->hContact);
+	if (contactID != NULL) {
+		DBVARIANT dbv;
 		principalDisplayname = Utils::dupString("");
 		contactDisplayname = Utils::dupString("");
 		if (!DBGetContactSetting(data->hContact, rvpProtoName, "displayname", &dbv)) {
@@ -347,7 +345,7 @@ int RVPImpl::sendTyping(HANDLE hContact, bool on) {
 }
 
 
-int RVPImpl::sendFileAccept(const char *id, const char *path) {
+int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {
 	//RVPImplAsyncData *data = new RVPImplAsyncData(this);
 	//data->hContact = hContact;
 	//typingNotifications->add(new ListItem(cid));
@@ -416,10 +414,9 @@ int RVPImpl::subscribe(HANDLE hContact) {
 }
 
 int RVPImpl::unsubscribe(HANDLE hContact) {
-	DBVARIANT dbv;
-	if (!DBGetContactSetting(hContact, rvpProtoName, "mseid", &dbv)) {
-		RVPSubscription *subscription = client->getSubscription(dbv.pszVal);
-		DBFreeVariant(&dbv);
+	char *contactId = Utils::getLogin(hContact);
+	if (contactId != NULL) {
+		RVPSubscription *subscription = client->getSubscription(contactId);
 		if (subscription != NULL) {
 			RVPImplAsyncData *data = new RVPImplAsyncData(this);
 			data->subscription = subscription;
@@ -427,6 +424,7 @@ int RVPImpl::unsubscribe(HANDLE hContact) {
 				delete data;
 			}
 		}
+		delete contactId;
 	}
 	return 0;
 }

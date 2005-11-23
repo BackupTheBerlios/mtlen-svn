@@ -232,7 +232,7 @@ int RVPAddToList(WPARAM wParam, LPARAM lParam) {
 	HANDLE hContact;
 	RVP_SEARCH_RESULT *jsr = (RVP_SEARCH_RESULT *) lParam;
 	if (jsr->hdr.cbSize != sizeof(RVP_SEARCH_RESULT)) return 0;
-	if ((hContact=Utils::contactFromID(jsr->jid)) == NULL) {
+	if ((hContact=Utils::getContactFromId(jsr->jid)) == NULL) {
 		// not already there: add
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_ADD, 0, 0);
 		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) rvpProtoName);
@@ -411,8 +411,8 @@ int RVPUserIsTyping(WPARAM wParam, LPARAM lParam)
 int RVPFileAllow(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
-//	ft = (JABBER_FILE_TRANSFER *) ccs->wParam;
-	rvpimpl.sendFileAccept("", (const char *) ccs->lParam);
+	RVPFile *file = (RVPFile *) ccs->wParam;
+	rvpimpl.sendFileAccept(file, (const char *) ccs->lParam);
 	return ccs->wParam;
 }
 

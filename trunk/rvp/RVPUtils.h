@@ -99,13 +99,25 @@ public:
 	virtual void recvFileInvite(const char *login, const char *filename, int filesize) = 0;
 };
 
-class RVPFile {
+class RVPFile:public ListItem {
+private:
+	static List list;
+	HANDLE hContact;
+public:
+	RVPFile(HANDLE hContact, const char *id);
+	~RVPFile();
+	static find(const char *id);
+	int	   size;
+	HANDLE getContact();
+	void   setSize(int size);
+	int	   getSize();
+};
+
+class RVPContact:public ListItem {
 private:
 	static List list;
 public:
-	HANDLE hContact;
-	char *id;
-	int	  size;
+	static RVPContact* get(HANDLE);
 };
 
 class RVPClient {
@@ -144,6 +156,7 @@ public:
 	int 	sendMessage(const char *message, const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
 	int 	sendMessage(const wchar_t *message, const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
 	int		sendTyping(const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
+	int		sendFileAccept(RVPFile *);
 	int		getSubscribers();
 	int		getACL();
 	const char *getCallback();

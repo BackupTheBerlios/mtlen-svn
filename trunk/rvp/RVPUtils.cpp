@@ -215,6 +215,17 @@ void RVPSession::releaseAll() {
 	list.releaseAll();
 }
 
+List RVPFile::list;
+
+RVPFile::RVPFile(HANDLE hContact, const char *id):ListItem(id) {
+	this->hContact = hContact;
+	list.add(this);
+}
+
+RVPFile::~RVPFile() {
+	list.remove(this);
+}
+
 static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * pExtra) {
 	HTTPRequest *request;
 	RVPClient *rvpClient;
@@ -253,7 +264,7 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 										int status = RVPClient::getStatusFromString(statusString);
 										delete statusString;
 										/* TODO invoke listener here */
-										HANDLE hContact = Utils::contactFromID(login);
+										HANDLE hContact = Utils::getContactFromId(login);
 										if (hContact!=NULL) {
 											if (DBGetContactSettingWord(hContact, rvpProtoName, "Status", ID_STATUS_OFFLINE) != status)
 												DBWriteContactSettingWord(hContact, rvpProtoName, "Status", (WORD) status);
@@ -294,7 +305,7 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 												/* typing notification */
 												if (typingHdr!=NULL) {
 													/* TODO invoke listener here */
-													HANDLE hContact = Utils::contactFromID(login);
+													HANDLE hContact = Utils::getContactFromId(login);
 													if (hContact!=NULL) {
 														CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM) 10);//PROTOTYPE_CONTACTTYPING_INFINITE);
 													}
@@ -304,7 +315,7 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 												/* message */
 												if (request->getContent()!=NULL && strlen(request->getContent())>0) {
 													/* TODO invoke listener here */
-													HANDLE hContact = Utils::contactFromID(login);
+													HANDLE hContact = Utils::getContactFromId(login);
 													if (hContact==NULL) {
 														hContact = Utils::createContact(login, nick, FALSE);
 													}
@@ -352,15 +363,12 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 															/* TODO invoke listener here */
 																PROTORECVEVENT pre;
 																CCSDATA ccs;
-																HANDLE hContact = Utils::contactFromID(login);
+																HANDLE hContact = Utils::getContactFromId(login);
 																if (hContact==NULL) {
 																	hContact = Utils::createContact(login, nick, FALSE);
 																}
-																RVPFile *rvpFile = new RVPFile();
-																DWORD fileSize = atol(applicationFileSizeHdr->getValue());
-																rvpFile->hContact = hContact;
-																rvpFile->id = Utils::dupString(invitationCookieHdr->getValue());
-																rvpFile->size = fileSize;
+																RVPFile *rvpFile = new RVPFile(hContact, invitationCookieHdr->getValue());
+																rvpFile->size = atol(applicationFileSizeHdr->getValue());
 																// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
 																char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 2);
 																*((PDWORD) szBlob) = (DWORD) rvpFile;
@@ -621,7 +629,6 @@ char *RVPClient::getLoginFromUrl(const char *url) {
 
 int RVPClient::signIn(const char *signInName, const char *manualServer) {
 	int result = 1;
-	HTTPRequest *request, *response;
 	EnterCriticalSection(&mutex);
 	if (bOnline) {
 		LeaveCriticalSection(&mutex);
@@ -1320,6 +1327,30 @@ int RVPClient::getACL() {
 			delete response;
 		}
 	}
+	return 0;
+}
+
+
+int RVPClient::sendFileAccept(RVPFile *file) {
+	int result = 1;
+	if (bOnline) {
+		char *contactId = Utils::getLogin(file->getContact());
+		if (contactId != NULL) {
+			char *node = getUrlFromLogin(contactId);
+			if (node != NULL) {
+//				char *utf8Message = Utils::utf8Encode(message);
+				HTTPRequest *request, *response;
+				request = new HTTPRequest();
+				request->setMethod("NOTIFY");
+				request->setUrl(contactId);
+				request->addHeader("RVP-Notifications-Version", "0.2");
+				request->addHeader("RVP-From-Principal", principalUrl);
+				request->addHeader("Content-Type", "text/xml");
+				request->setCredentials(credentials);
+			}
+		}
+	}
+
 	return 0;
 }
 

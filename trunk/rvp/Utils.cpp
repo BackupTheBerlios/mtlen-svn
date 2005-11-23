@@ -576,7 +576,7 @@ char *Utils::getLine(const char *str, int* len) {
 HANDLE Utils::createContact(const char *id,const char *nick, BOOL temporary) {
 	HANDLE hContact;
 	if (id==NULL || id[0]=='\0') return NULL;
-	hContact = contactFromID(id);
+	hContact = getContactFromId(id);
 	if (hContact == NULL) {
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_ADD, 0, 0);
 		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) rvpProtoName);
@@ -609,7 +609,7 @@ char *Utils::getUserFromEmail(const char *email) {
 	return user;
 }
 
-HANDLE Utils::contactFromID(const char *id) {
+HANDLE Utils::getContactFromId(const char *id) {
 	HANDLE hContact;
 	DBVARIANT dbv;
 	char *szProto;
@@ -661,4 +661,14 @@ HANDLE Utils::contactFromID(const char *id) {
 	//if (server != NULL) delete server;
 	//if (user != NULL) delete user;
 	return NULL;
+}
+
+char *Utils::getLogin(HANDLE hContact) {
+	char *contactId = NULL;
+	DBVARIANT dbv;
+	if (!DBGetContactSetting(hContact, rvpProtoName, "mseid", &dbv)) {
+		contactId = Utils::dupString(dbv.pszVal);
+		DBFreeVariant(&dbv);
+	}
+	return contactId;
 }

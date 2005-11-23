@@ -52,7 +52,9 @@ public:
 	static wchar_t *utf8DecodeW(const char *str);
 	static char *getLine(const char *str, int* len);
 	static HANDLE createContact(const char *id, const char *nick, BOOL temporary);
-	static HANDLE contactFromID(const char *id);
+	static HANDLE getContactFromId(const char *id);
+	static char * getLogin(HANDLE hContact);
+
 	static const char *getErrorStr(int errorCode);
 	static char *getServerFromEmail(const char *email);
 	static char *getUserFromEmail(const char *email);
