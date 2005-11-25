@@ -106,7 +106,7 @@ private:
 public:
 	RVPFile(HANDLE hContact, const char *id);
 	~RVPFile();
-	static find(const char *id);
+	static RVPFile* find(const char *id);
 	int	   size;
 	HANDLE getContact();
 	void   setSize(int size);
@@ -117,6 +117,7 @@ class RVPContact:public ListItem {
 private:
 	static List list;
 public:
+	RVPContact();
 	static RVPContact* get(HANDLE);
 };
 

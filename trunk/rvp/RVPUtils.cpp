@@ -226,6 +226,10 @@ RVPFile::~RVPFile() {
 	list.remove(this);
 }
 
+HANDLE RVPFile::getContact() {
+	return hContact;
+}
+
 static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * pExtra) {
 	HTTPRequest *request;
 	RVPClient *rvpClient;
