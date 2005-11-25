@@ -523,26 +523,22 @@ int RVPSendFile(WPARAM wParam, LPARAM lParam)
 
 int RVPRecvFile(WPARAM wParam, LPARAM lParam)
 {
-	/*
 	DBEVENTINFO dbei;
 	CCSDATA *ccs = (CCSDATA *) lParam;
 	PROTORECVEVENT *pre = (PROTORECVEVENT *) ccs->lParam;
 	char *szDesc, *szFile;
-
 	DBDeleteContactSetting(ccs->hContact, "CList", "Hidden");
 	szFile = pre->szMessage + sizeof(DWORD);
 	szDesc = szFile + strlen(szFile) + 1;
-	JabberLog("Description = %s", szDesc);
 	ZeroMemory(&dbei, sizeof(dbei));
 	dbei.cbSize = sizeof(dbei);
-	dbei.szModule = jabberProtoName;
+	dbei.szModule = rvpProtoName;
 	dbei.timestamp = pre->timestamp;
 	dbei.flags = pre->flags & (PREF_CREATEREAD ? DBEF_READ : 0);
 	dbei.eventType = EVENTTYPE_FILE;
 	dbei.cbBlob = sizeof(DWORD) + strlen(szFile) + strlen(szDesc) + 2;
 	dbei.pBlob = (PBYTE) pre->szMessage;
 	CallService(MS_DB_EVENT_ADD, (WPARAM) ccs->hContact, (LPARAM) &dbei);
-	*/
 	return 0;
 }
 
