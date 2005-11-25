@@ -363,7 +363,7 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 														if (applicationNameHdr != NULL && !strcmpi(applicationNameHdr->getValue(), "File Transfer")) {
 															MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
 															if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
-																MessageBoxA(NULL, "file invite step1", "FT", MB_OK);
+																MessageBoxA(NULL, "file invite step2", "FT", MB_OK);
 															/* TODO invoke listener here */
 																PROTORECVEVENT pre;
 																CCSDATA ccs;
@@ -386,10 +386,10 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 																ccs.hContact = hContact;
 																ccs.wParam = 0;
 																ccs.lParam = (LPARAM) &pre;
+																MessageBoxA(NULL, applicationFileHdr->getValue(), "FT", MB_OK);
 																CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
 																free(szBlob);
 															/* end TODO */
-
 															}
 														}
 													} else if (!strcmpi(invitationCommandHdr->getValue(), "ACCEPT")) { /* ACCEPT */
