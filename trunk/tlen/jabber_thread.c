@@ -627,7 +627,9 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 			}
 			isChatRoomJid = JabberListExist(LIST_CHATROOM, from);
 
-			if (isChatRoomJid && type!=NULL && !strcmp(type, "groupchat")); //JabberGroupchatProcessMessage(node, userdata);
+			if (isChatRoomJid && type!=NULL && !strcmp(type, "groupchat")) {
+				//JabberGroupchatProcessMessage(node, userdata);
+			}
 			else if (type!=NULL && !strcmp(type, "pic")) {
 				idStr = JabberXmlGetAttrValue(node, "idt");
 				JabberSend(info->s, "<message type='pic' to='%s' crc_c='n' idt='%s'/>", from, idStr);
@@ -679,9 +681,11 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 
 						if (item != NULL) {
 							item->wantComposingEvent = composing;
-							item->isTyping = FALSE;
-							if ((hContact=JabberHContactFromJID(from)) != NULL) 
-								CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
+							if (item->isTyping) {
+								item->isTyping = FALSE;
+								if ((hContact=JabberHContactFromJID(from)) != NULL) 
+									CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
+							}
 						}
 
 						if ((hContact=JabberHContactFromJID(from)) == NULL) {
@@ -748,13 +752,21 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 							}
 							if (JabberXmlGetChild(xNode, "composing") != NULL) {
 								if ((hContact=JabberHContactFromJID(from)) != NULL) {
-									CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_INFINITE);
+									if (item != NULL) {
+										item->isTyping = TRUE;
+										CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_INFINITE);
+									}
 								}
 							}
 							if (xNode->numChild==0 || (xNode->numChild==1 && idNode!=NULL)) {
 								// Maybe a cancel to the previous composing
 								if ((hContact=JabberHContactFromJID(from)) != NULL) {
-									CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
+									if (item != NULL) {
+										if (item->isTyping) {
+											item->isTyping = FALSE;
+											CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
+										}
+									}
 								}
 							}
 						}
@@ -779,7 +791,6 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 	if ((info=(struct ThreadData *) userdata) == NULL) return;
 
 	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
-
 		if (JabberListExist(LIST_CHATROOM, from)); //JabberGroupchatProcessPresence(node, userdata);
 
 		else {
@@ -821,6 +832,11 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 							DBDeleteContactSetting(hContact, "CList", "StatusMsg");
 						}
 						if (p) free(p);
+					}
+					if (JabberXmlGetChild(node, "x") != NULL) {
+						DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", "MIRANDA");
+					} else {
+						DBDeleteContactSetting(hContact, jabberProtoName, "MirVer");
 					}
 					// Determine status to show for the contact
 					if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
@@ -872,6 +888,11 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 					if (item != NULL && item->isTyping) {
 						item->isTyping = FALSE;
 						CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
+					}
+					if (JabberXmlGetChild(node, "x") != NULL) {
+						DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", "MIRANDA");
+					} else {
+						DBDeleteContactSetting(hContact, jabberProtoName, "MirVer");
 					}
 					JabberLog("%s offline, set contact status to %d", from, status);
 				}
@@ -1355,12 +1376,16 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 			if ((tp=JabberXmlGetAttrValue(node, "tp")) != NULL) {
 				JABBER_LIST_ITEM *item = JabberListGetItemPtr(LIST_ROSTER, f);
 				if(!strcmp(tp, "t")) { //contact is writing 
-					if (item !=NULL ) item->isTyping = TRUE;
-					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_INFINITE);
+					if (item!=NULL ) {
+						item->isTyping = TRUE;
+						CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_INFINITE);
+					}
 				}
 				else if(!strcmp(tp, "u")) {//contact stopped writing 
-					if (item !=NULL ) item->isTyping = FALSE;
-					CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_OFF);
+					if (item!=NULL) {
+						item->isTyping = FALSE;
+						CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_OFF);
+					}
 				}
 				else if(!strcmp(tp, "a")) {//alert was received
 					int bAlert = TRUE;
