@@ -165,7 +165,7 @@ void __cdecl SignInThread(void *vPtr)
 	if (result != 0) {
 		char str [1024];
 		sprintf (str, "RVP Error: %d", result);
-		MessageBoxA(NULL, str, "RVP Error", MB_OK);
+//		MessageBoxA(NULL, str, "RVP Error", MB_OK);
 		oldStatus = jabberStatus;
 		jabberStatus = ID_STATUS_OFFLINE;
 		ProtoBroadcastAck(rvpProtoName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, jabberStatus);
