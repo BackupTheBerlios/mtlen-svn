@@ -218,16 +218,39 @@ void RVPSession::releaseAll() {
 List RVPFile::list;
 
 RVPFile::RVPFile(HANDLE hContact, const char *id):ListItem(id) {
+	file = NULL;
 	this->hContact = hContact;
 	list.add(this);
 }
 
 RVPFile::~RVPFile() {
 	list.remove(this);
+	if (file != NULL) delete file;
 }
 
 HANDLE RVPFile::getContact() {
 	return hContact;
+}
+
+const char *RVPFile::getCookie() {
+	return getId();
+}
+
+void RVPFile::setSize(int s) {
+	size = s;
+}
+
+int RVPFile::getSize() {
+	return size;
+}
+
+void RVPFile::setFile(const char *f) {
+	if (file != NULL) delete file;
+	file = Utils::dupString(f);
+}
+
+const char *RVPFile::getFile() {
+	return file;
 }
 
 static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * pExtra) {
@@ -370,7 +393,8 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 																	hContact = Utils::createContact(login, nick, FALSE);
 																}
 																RVPFile *rvpFile = new RVPFile(hContact, invitationCookieHdr->getValue());
-																rvpFile->size = atol(applicationFileSizeHdr->getValue());
+																rvpFile->setFile(applicationFileHdr->getValue());
+																rvpFile->setSize(atol(applicationFileSizeHdr->getValue()));
 																// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
 																char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 2);
 																*((PDWORD) szBlob) = (DWORD) rvpFile;
@@ -1339,21 +1363,76 @@ int RVPClient::sendFileAccept(RVPFile *file) {
 		if (contactId != NULL) {
 			char *node = getUrlFromLogin(contactId);
 			if (node != NULL) {
-//				char *utf8Message = Utils::utf8Encode(message);
+				int bufferSize = 0;
+				char *buffer = NULL;
+				char *utf8Message;
 				HTTPRequest *request, *response;
 				request = new HTTPRequest();
 				request->setMethod("NOTIFY");
-				request->setUrl(contactId);
+				request->setUrl(node);
 				request->addHeader("RVP-Notifications-Version", "0.2");
 				request->addHeader("RVP-From-Principal", principalUrl);
-				request->addHeader("Content-Type", "text/xml");
+				request->addHeader("Content-Type", "text/x-msmsgsinvite; charset=UTF-8");
 				request->setCredentials(credentials);
+				Utils::appendText(&buffer, &bufferSize, "Invitation-Command: ACCEPT\r\n");
+				Utils::appendText(&buffer, &bufferSize, "Invitation-Cookie: %s\r\n", file->getCookie());
+				Utils::appendText(&buffer, &bufferSize, "Launch-Application: FALSE\r\n");
+				Utils::appendText(&buffer, &bufferSize, "Request-Data: IP-Address:\r\n");
+				Utils::appendText(&buffer, &bufferSize, "\r\n");
+				utf8Message = Utils::utf8Encode2(buffer);
+				free(buffer);
+				request->setContent(utf8Message, strlen(utf8Message));
+				delete utf8Message;
+				response = HTTPUtils::performTransaction(request);
+				delete request;
+				if (response != NULL) {
+					result = response->resultCode;
+					delete response;
+				}
 			}
 		}
 	}
-
-	return 0;
+	return (result/100 == 2) ? 0 : result;
 }
+
+int RVPClient::sendFileReject(RVPFile *file) {
+	int result = 1;
+	if (bOnline) {
+		char *contactId = Utils::getLogin(file->getContact());
+		if (contactId != NULL) {
+			char *node = getUrlFromLogin(contactId);
+			if (node != NULL) {
+				int bufferSize = 0;
+				char *buffer = NULL;
+				char *utf8Message;
+				HTTPRequest *request, *response;
+				request = new HTTPRequest();
+				request->setMethod("NOTIFY");
+				request->setUrl(node);
+				request->addHeader("RVP-Notifications-Version", "0.2");
+				request->addHeader("RVP-From-Principal", principalUrl);
+				request->addHeader("Content-Type", "text/x-msmsgsinvite; charset=UTF-8");
+				request->setCredentials(credentials);
+				Utils::appendText(&buffer, &bufferSize, "Invitation-Command: CANCEL\r\n");
+				Utils::appendText(&buffer, &bufferSize, "Invitation-Cookie: %s\r\n", file->getCookie());
+				Utils::appendText(&buffer, &bufferSize, "Cancel-Code: REJECT\r\n");
+				Utils::appendText(&buffer, &bufferSize, "\r\n");
+				utf8Message = Utils::utf8Encode2(buffer);
+				free(buffer);
+				request->setContent(utf8Message, strlen(utf8Message));
+				delete utf8Message;
+				response = HTTPUtils::performTransaction(request);
+				delete request;
+				if (response != NULL) {
+					result = response->resultCode;
+					delete response;
+				}
+			}
+		}
+	}
+	return (result/100 == 2) ? 0 : result;
+}
+
 
 const char *RVPClient::getCallback() {
 	return callbackHost;

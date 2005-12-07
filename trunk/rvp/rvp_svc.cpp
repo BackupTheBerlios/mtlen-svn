@@ -418,19 +418,9 @@ int RVPFileAllow(WPARAM wParam, LPARAM lParam)
 
 int RVPFileDeny(WPARAM wParam, LPARAM lParam)
 {
-	/*
 	CCSDATA *ccs = (CCSDATA *) lParam;
-	JABBER_FILE_TRANSFER *ft;
-	char *nick;
-
-	if (!jabberOnline) return 1;
-
-	ft = (JABBER_FILE_TRANSFER *) ccs->wParam;
-	nick = JabberNickFromJID(ft->jid);
-	JabberSend(jabberThreadInfo->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, nick);\
-	free(nick);
-	TlenFileFreeFt(ft);
-	*/
+	RVPFile *file = (RVPFile *) ccs->wParam;
+	rvpimpl.sendFileReject(file);
 	return 0;
 }
 
@@ -579,7 +569,7 @@ int RVPSvcInit(void)
 
 	sprintf(s, "%s%s", rvpProtoName, PSR_MESSAGE);
 	CreateServiceFunction(s, RVPRecvMessage);
-	
+
 	sprintf(s, "%s%s", rvpProtoName, PSS_FILEALLOW);
 	CreateServiceFunction(s, RVPFileAllow);
 

@@ -99,6 +99,19 @@ static void __cdecl RVPSendMessageAsyncThread(void *ptr) {
 	delete data;
 }
 
+static void __cdecl RVPSendFileAccept(void *ptr) {
+	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
+	data->impl->getClient()->sendFileAccept(data->file);
+	delete data;
+}
+
+static void __cdecl RVPSendFileReject(void *ptr) {
+	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
+	data->impl->getClient()->sendFileReject(data->file);
+	delete data->file;
+	delete data;
+}
+
 static void __cdecl RVPSendTypingAsyncThread(void *ptr) {
 	int counter = 0;
 	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
@@ -346,15 +359,23 @@ int RVPImpl::sendTyping(HANDLE hContact, bool on) {
 
 
 int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {
-	//RVPImplAsyncData *data = new RVPImplAsyncData(this);
-	//data->hContact = hContact;
-	//typingNotifications->add(new ListItem(cid));
-//	if (!forkThread(TGROUP_NORMAL, RVPSendTypingAsyncThread, 0, data)) {
-	//	delete data;
-	//}
+	RVPImplAsyncData *data = new RVPImplAsyncData(this);
+	data->file = file;
+	if (!forkThread(TGROUP_NORMAL, RVPSendFileAccept, 0, data)) {
+		delete data;
+	}
 	return 0;
 }
 
+int RVPImpl::sendFileReject(RVPFile *file) {
+	RVPImplAsyncData *data = new RVPImplAsyncData(this);
+	data->file = file;
+	if (!forkThread(TGROUP_NORMAL, RVPSendFileReject, 0, data)) {
+		delete data;
+		delete file;
+	}
+	return 0;
+}
 
 int	RVPImpl::searchContact(const char *login) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);

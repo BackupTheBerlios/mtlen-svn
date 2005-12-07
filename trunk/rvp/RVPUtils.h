@@ -103,14 +103,18 @@ class RVPFile:public ListItem {
 private:
 	static List list;
 	HANDLE hContact;
+	int size;
+	char *file;
 public:
 	RVPFile(HANDLE hContact, const char *id);
 	~RVPFile();
 	static RVPFile* find(const char *id);
-	int	   size;
 	HANDLE getContact();
+	const char *getCookie();
 	void   setSize(int size);
 	int	   getSize();
+	void   setFile(const char *f);
+	const char *getFile();
 };
 
 class RVPContact:public ListItem {
@@ -158,6 +162,7 @@ public:
 	int 	sendMessage(const wchar_t *message, const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
 	int		sendTyping(const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
 	int		sendFileAccept(RVPFile *);
+	int		sendFileReject(RVPFile *);
 	int		getSubscribers();
 	int		getACL();
 	const char *getCallback();

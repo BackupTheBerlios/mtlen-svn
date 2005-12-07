@@ -42,6 +42,7 @@ public:
 	int	id;
 	RVPImpl *impl;
 	RVPSubscription *subscription;
+	RVPFile *file;
 	HANDLE hContact;
 	int	status;
 	int	oldStatus;
@@ -78,7 +79,7 @@ public:
 	int	sendMessage(CCSDATA *ccs);
 	int	sendTyping(HANDLE hContact, bool on);
 	int	sendFileAccept(RVPFile *file, const char *path);
-	int	sendFileDeny(const char *id);
+	int	sendFileReject(RVPFile *file);
 	int	sendFileInvite(HANDLE hContact, const char * filenames[] , int filenum);
 	int	searchContact(const char *login);
 	bool isTyping(HANDLE hContact);
