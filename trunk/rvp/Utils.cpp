@@ -672,3 +672,15 @@ char *Utils::getLogin(HANDLE hContact) {
 	}
 	return contactId;
 }
+
+char *Utils::getDisplayName(HANDLE hContact) {
+	char *contactId = NULL;
+	DBVARIANT dbv;
+	if (!DBGetContactSetting(hContact, rvpProtoName, "displayname", &dbv)) {
+		contactId = Utils::dupString(dbv.pszVal);
+		DBFreeVariant(&dbv);
+	} else {
+		contactId = Utils::dupString("");
+	}
+	return contactId;
+}

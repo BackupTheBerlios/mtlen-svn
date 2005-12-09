@@ -161,8 +161,8 @@ public:
 	int 	sendMessage(const char *message, const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
 	int 	sendMessage(const wchar_t *message, const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
 	int		sendTyping(const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
-	int		sendFileAccept(RVPFile *);
-	int		sendFileReject(RVPFile *);
+	int		sendFileAccept(RVPFile *, const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
+	int		sendFileReject(RVPFile *, const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
 	int		getSubscribers();
 	int		getACL();
 	const char *getCallback();

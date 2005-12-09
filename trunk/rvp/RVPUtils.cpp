@@ -1356,77 +1356,101 @@ int RVPClient::getACL() {
 }
 
 
-int RVPClient::sendFileAccept(RVPFile *file) {
+int RVPClient::sendFileAccept(RVPFile *file, const char *contactID, const char *contactDisplayname, const char *principalDisplayname) {
 	int result = 1;
 	if (bOnline) {
-		char *contactId = Utils::getLogin(file->getContact());
-		if (contactId != NULL) {
-			char *node = getUrlFromLogin(contactId);
-			if (node != NULL) {
-				int bufferSize = 0;
-				char *buffer = NULL;
-				char *utf8Message;
-				HTTPRequest *request, *response;
-				request = new HTTPRequest();
-				request->setMethod("NOTIFY");
-				request->setUrl(node);
-				request->addHeader("RVP-Notifications-Version", "0.2");
-				request->addHeader("RVP-From-Principal", principalUrl);
-				request->addHeader("Content-Type", "text/x-msmsgsinvite; charset=UTF-8");
-				request->setCredentials(credentials);
-				Utils::appendText(&buffer, &bufferSize, "Invitation-Command: ACCEPT\r\n");
-				Utils::appendText(&buffer, &bufferSize, "Invitation-Cookie: %s\r\n", file->getCookie());
-				Utils::appendText(&buffer, &bufferSize, "Launch-Application: FALSE\r\n");
-				Utils::appendText(&buffer, &bufferSize, "Request-Data: IP-Address:\r\n");
-				Utils::appendText(&buffer, &bufferSize, "\r\n");
-				utf8Message = Utils::utf8Encode2(buffer);
-				free(buffer);
-				request->setContent(utf8Message, strlen(utf8Message));
-				delete utf8Message;
-				response = HTTPUtils::performTransaction(request);
-				delete request;
-				if (response != NULL) {
-					result = response->resultCode;
-					delete response;
-				}
+		char *node = getUrlFromLogin(contactID);
+		if (node != NULL) {
+			int bufferSize = 0;
+			char *buffer = NULL;
+			char *utf8Message;
+			HTTPRequest *request, *response;
+			RVPSession *session = RVPSession::get(contactID);
+			request = new HTTPRequest();
+			request->setMethod("NOTIFY");
+			request->setUrl(node);
+			request->addHeader("RVP-Ack-Type", "DeepOr");
+			request->addHeader("RVP-Hop-Count", "1");
+			request->addHeader("RVP-Notifications-Version", "0.2");
+			request->addHeader("RVP-From-Principal", principalUrl);
+			request->addHeader("Content-Type", "text/xml");
+			request->setCredentials(credentials);
+			/* TODO: get url from login here*/
+			Utils::appendText(&buffer, &bufferSize,
+			"<?xml version=\"1.0\"?>"
+			"<r:notification xmlns:d='DAV:' xmlns:r='http://schemas.microsoft.com/rvp/' xmlns:a='http://schemas.microsoft.com/rvp/acl/'>"
+			"<r:message><r:notification-from><r:contact><d:href>%s</d:href>"
+			"<r:description>%s</r:description></r:contact></r:notification-from>"
+			"<r:notification-to><r:contact><d:href>%s</d:href>"
+			"<r:description>%s</r:description></r:contact></r:notification-to>"
+			"<r:msgbody><r:mime-data><![CDATA[MIME-Version: 1.0\r\n"
+			"Content-Type: text/x-msmsgsinvite; charset=UTF-8\r\n"
+			"Session-Id: %s\r\n\r\n"
+			"Invitation-Command: ACCEPT\r\n"
+			"Invitation-Cookie: %s\r\n"
+			"Launch-Application: FALSE\r\n"
+			"Request-Data: IP-Address:\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
+			principalUrl, principalDisplayname, node, contactDisplayname, session->getSid(), file->getCookie());
+			utf8Message = Utils::utf8Encode2(buffer);
+			free(buffer);
+			request->setContent(utf8Message, strlen(utf8Message));
+			delete utf8Message;
+			response = HTTPUtils::performTransaction(request);
+			delete request;
+			delete node;
+			if (response != NULL) {
+				result = response->resultCode;
+				delete response;
 			}
 		}
 	}
 	return (result/100 == 2) ? 0 : result;
 }
 
-int RVPClient::sendFileReject(RVPFile *file) {
+int RVPClient::sendFileReject(RVPFile *file, const char *contactID, const char *contactDisplayname, const char *principalDisplayname) {
 	int result = 1;
 	if (bOnline) {
-		char *contactId = Utils::getLogin(file->getContact());
-		if (contactId != NULL) {
-			char *node = getUrlFromLogin(contactId);
-			if (node != NULL) {
-				int bufferSize = 0;
-				char *buffer = NULL;
-				char *utf8Message;
-				HTTPRequest *request, *response;
-				request = new HTTPRequest();
-				request->setMethod("NOTIFY");
-				request->setUrl(node);
-				request->addHeader("RVP-Notifications-Version", "0.2");
-				request->addHeader("RVP-From-Principal", principalUrl);
-				request->addHeader("Content-Type", "text/x-msmsgsinvite; charset=UTF-8");
-				request->setCredentials(credentials);
-				Utils::appendText(&buffer, &bufferSize, "Invitation-Command: CANCEL\r\n");
-				Utils::appendText(&buffer, &bufferSize, "Invitation-Cookie: %s\r\n", file->getCookie());
-				Utils::appendText(&buffer, &bufferSize, "Cancel-Code: REJECT\r\n");
-				Utils::appendText(&buffer, &bufferSize, "\r\n");
-				utf8Message = Utils::utf8Encode2(buffer);
-				free(buffer);
-				request->setContent(utf8Message, strlen(utf8Message));
-				delete utf8Message;
-				response = HTTPUtils::performTransaction(request);
-				delete request;
-				if (response != NULL) {
-					result = response->resultCode;
-					delete response;
-				}
+		char *node = getUrlFromLogin(contactID);
+		if (node != NULL) {
+			int bufferSize = 0;
+			char *buffer = NULL;
+			char *utf8Message;
+			HTTPRequest *request, *response;
+			RVPSession *session = RVPSession::get(contactID);
+			request = new HTTPRequest();
+			request->setMethod("NOTIFY");
+			request->setUrl(node);
+			request->addHeader("RVP-Ack-Type", "DeepOr");
+			request->addHeader("RVP-Hop-Count", "1");
+			request->addHeader("RVP-Notifications-Version", "0.2");
+			request->addHeader("RVP-From-Principal", principalUrl);
+			request->addHeader("Content-Type", "text/xml");
+			request->setCredentials(credentials);
+			/* TODO: get url from login here*/
+			Utils::appendText(&buffer, &bufferSize,
+			"<?xml version=\"1.0\"?>"
+			"<r:notification xmlns:d='DAV:' xmlns:r='http://schemas.microsoft.com/rvp/' xmlns:a='http://schemas.microsoft.com/rvp/acl/'>"
+			"<r:message><r:notification-from><r:contact><d:href>%s</d:href>"
+			"<r:description>%s</r:description></r:contact></r:notification-from>"
+			"<r:notification-to><r:contact><d:href>%s</d:href>"
+			"<r:description>%s</r:description></r:contact></r:notification-to>"
+			"<r:msgbody><r:mime-data><![CDATA[MIME-Version: 1.0\r\n"
+			"Content-Type: text/x-msmsgsinvite; charset=UTF-8\r\n"
+			"Session-Id: %s\r\n\r\n"
+			"Invitation-Command: CANCEL\r\n"
+			"Invitation-Cookie: %s\r\n"
+			"Cancel-Code: REJECT\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
+			principalUrl, principalDisplayname, node, contactDisplayname, session->getSid(), file->getCookie());
+			utf8Message = Utils::utf8Encode2(buffer);
+			free(buffer);
+			request->setContent(utf8Message, strlen(utf8Message));
+			delete utf8Message;
+			response = HTTPUtils::performTransaction(request);
+			delete request;
+			delete node;
+			if (response != NULL) {
+				result = response->resultCode;
+				delete response;
 			}
 		}
 	}

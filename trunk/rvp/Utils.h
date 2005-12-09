@@ -54,6 +54,7 @@ public:
 	static HANDLE createContact(const char *id, const char *nick, BOOL temporary);
 	static HANDLE getContactFromId(const char *id);
 	static char * getLogin(HANDLE hContact);
+	static char * getDisplayName(HANDLE hContact);
 
 	static const char *getErrorStr(int errorCode);
 	static char *getServerFromEmail(const char *email);

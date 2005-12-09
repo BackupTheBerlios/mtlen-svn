@@ -67,18 +67,8 @@ static void __cdecl RVPSendMessageAsyncThread(void *ptr) {
 	DBVARIANT dbv;
 	contactID = Utils::getLogin(data->hContact);
 	if (contactID != NULL) {
-		principalDisplayname = Utils::dupString("");
-		contactDisplayname = Utils::dupString("");
-		if (!DBGetContactSetting(data->hContact, rvpProtoName, "displayname", &dbv)) {
-			delete contactDisplayname;
-			contactDisplayname = Utils::dupString(dbv.pszVal);
-			DBFreeVariant(&dbv);
-		}
-		if (!DBGetContactSetting(NULL, rvpProtoName, "displayname", &dbv)) {
-			delete principalDisplayname;
-			principalDisplayname = Utils::dupString(dbv.pszVal);
-			DBFreeVariant(&dbv);
-		}
+		principalDisplayname = Utils::getDisplayName(NULL);
+		contactDisplayname = Utils::getDisplayName(data->hContact);
 		if (data->getMessageW() != NULL) {
 			if (!data->impl->getClient()->sendMessage(data->getMessageW(), contactID, contactDisplayname, principalDisplayname)) {
 				ProtoBroadcastAck(rvpProtoName, data->hContact, ACKTYPE_MESSAGE, ACKRESULT_SUCCESS, (HANDLE) data->id, 0);
@@ -101,14 +91,36 @@ static void __cdecl RVPSendMessageAsyncThread(void *ptr) {
 
 static void __cdecl RVPSendFileAccept(void *ptr) {
 	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
-	data->impl->getClient()->sendFileAccept(data->file);
+	char *contactID;
+	char *principalDisplayname;
+	char *contactDisplayname;
+	contactID = Utils::getLogin(data->hContact);
+	if (contactID != NULL) {
+		principalDisplayname = Utils::getDisplayName(NULL);
+		contactDisplayname = Utils::getDisplayName(data->hContact);
+		data->impl->getClient()->sendFileAccept(data->file, contactID, contactDisplayname, principalDisplayname);
+		delete contactID;
+		delete contactDisplayname;
+		delete principalDisplayname;
+	}
 	delete data;
 }
 
 static void __cdecl RVPSendFileReject(void *ptr) {
 	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
-	data->impl->getClient()->sendFileReject(data->file);
-	delete data->file;
+	char *contactID;
+	char *principalDisplayname;
+	char *contactDisplayname;
+	contactID = Utils::getLogin(data->hContact);
+	if (contactID != NULL) {
+		principalDisplayname = Utils::getDisplayName(NULL);
+		contactDisplayname = Utils::getDisplayName(data->hContact);
+		data->impl->getClient()->sendFileReject(data->file, contactID, contactDisplayname, principalDisplayname);
+		delete contactID;
+		delete contactDisplayname;
+		delete principalDisplayname;
+		delete data->file;
+	}
 	delete data;
 }
 
@@ -121,18 +133,8 @@ static void __cdecl RVPSendTypingAsyncThread(void *ptr) {
 	contactID = Utils::getLogin(data->hContact);
 	if (contactID != NULL) {
 		DBVARIANT dbv;
-		principalDisplayname = Utils::dupString("");
-		contactDisplayname = Utils::dupString("");
-		if (!DBGetContactSetting(data->hContact, rvpProtoName, "displayname", &dbv)) {
-			delete contactDisplayname;
-			contactDisplayname = Utils::dupString(dbv.pszVal);
-			DBFreeVariant(&dbv);
-		}
-		if (!DBGetContactSetting(NULL, rvpProtoName, "displayname", &dbv)) {
-			delete principalDisplayname;
-			principalDisplayname = Utils::dupString(dbv.pszVal);
-			DBFreeVariant(&dbv);
-		}
+		principalDisplayname = Utils::getDisplayName(NULL);
+		contactDisplayname = Utils::getDisplayName(data->hContact);
 		while (data->impl->isGroupAllowed(RVPImpl::TGROUP_NORMAL) && data->impl->isTyping(data->hContact)) {
 			if (counter == 0) {
 				data->impl->getClient()->sendTyping(contactID, contactDisplayname, principalDisplayname);
@@ -360,6 +362,7 @@ int RVPImpl::sendTyping(HANDLE hContact, bool on) {
 
 int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
+	data->hContact = file->getContact();
 	data->file = file;
 	if (!forkThread(TGROUP_NORMAL, RVPSendFileAccept, 0, data)) {
 		delete data;
@@ -369,6 +372,7 @@ int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {
 
 int RVPImpl::sendFileReject(RVPFile *file) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
+	data->hContact = file->getContact();
 	data->file = file;
 	if (!forkThread(TGROUP_NORMAL, RVPSendFileReject, 0, data)) {
 		delete data;
