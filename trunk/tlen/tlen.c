@@ -182,6 +182,8 @@ static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 	SkinAddNewSound("TlenMailNotify", str, "tlennotify.wav");
 	sprintf(str, "%s: %s", jabberModuleName, Translate("Alert"));
 	SkinAddNewSound("TlenAlertNotify", str, "tlennotify.wav");
+	sprintf(str, "%s: %s", jabberModuleName, Translate("Voice chat"));
+	SkinAddNewSound("TlenVoiceNotify", str, "tlennotify.wav");
 	return 0;
 }
 

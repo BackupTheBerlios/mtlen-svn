@@ -939,6 +939,7 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 		break;
 	}
 	if (presenceType) {
+		extra = NULL;
 		if (statusMsg)
 			JabberSend(jabberThreadInfo->s, "<presence%s type='%s'><status>%s</status>%s%s</presence>", toStr, presenceType, statusMsg, priorityStr, (extra!=NULL)?extra:"");
 		else

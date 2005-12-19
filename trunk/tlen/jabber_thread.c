@@ -1685,6 +1685,7 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 		if ((e=JabberXmlGetAttrValue(node, "e")) != NULL) {
 			if (!strcmp(e, "1")) {
 				if ((id=JabberXmlGetAttrValue(node, "i")) != NULL) {
+					SkinPlaySound("TlenVoiceNotify");
 					TlenVoiceAccept(id, from);
 				}
 			} else if (!strcmp(e, "3")) {
