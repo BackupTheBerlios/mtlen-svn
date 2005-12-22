@@ -22,8 +22,8 @@ class RVPSubscription;
 class RVPSession;
 class RVPClient;
 
-#ifndef RVPUTILS_INCLUDED
-#define RVPUTILS_INCLUDED
+#ifndef RVPCLIENT_INCLUDED
+#define RVPCLIENT_INCLUDED
 
 #include <windows.h>
 #include "httplib/HTTPLib.h"
@@ -125,7 +125,7 @@ public:
 	static RVPContact* get(HANDLE);
 };
 
-class RVPClient {
+class RVPClient:public ConnectionListener {
 private:
 	static List dnsList;
 	static const char *getStatusString(int status);
@@ -138,7 +138,7 @@ private:
 	char *server;
 	int	 serverPort;
 	char *principalUrl;
-	HANDLE lSocket;
+	Connection *bindConnection;
 	DWORD localIP;
 	char  callbackHost[256];
 	int	 lastStatus;
@@ -169,6 +169,7 @@ public:
 	RVPSubscription*	getProperty(const char *login, const char *property);
 	List*	getSubscriptions();
 	RVPSubscription* getSubscription(const char *login);
+	void	onNewConnection(Connection *connection, DWORD dwRemoteIP);
 	static int	getStatusFromString(const char *statusString);
 	static char *getServerFromLogin(const char *signInName, const char *manualServer);
 	static char *getUrlFromLogin(const char *signInName);

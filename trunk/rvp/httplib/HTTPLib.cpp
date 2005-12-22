@@ -27,45 +27,21 @@ static	JLogger *logger = new JLogger("h:/httplib.log");
 
 static PSecurityFunctionTable pSecurityFunctions=NULL;
 static HINSTANCE hInstSecurityDll=LoadLibrary("security.dll");
-
-HANDLE HTTPConnection::hNetlibUser;
-
-HTTPConnection::HTTPConnection() {
-	eof = false;
-	bufferPos = 0;
-	bufferLen = 0;
-	socket = NULL;
-}
-
-HTTPConnection::HTTPConnection(HANDLE socket) {
-	eof = false;
-	bufferPos = 0;
-	bufferLen = 0;
-	this->socket = socket;
-}
-
-HTTPConnection::HTTPConnection(const char *host, int port) {
-	eof = false;
-	bufferPos = 0;
-	bufferLen = 0;
-	socket = connect(host, port);
-}
-
-HTTPConnection::~HTTPConnection() {
-	if (socket != NULL) {
-		Netlib_CloseHandle(socket);
-	}
-}
-
+/*
 void HTTPConnection::release() {
 	if (hNetlibUser!=NULL) Netlib_CloseHandle(hNetlibUser);
 }
 
 bool HTTPConnection::init(const char * protoName, const char *moduleName) {
+	char name[256];
+//	sprintf(name, "%s %s", moduleName, Translate("connection"));
+	sprintf(name, "%s %s", moduleName, "connection");
+	Connection::init("HTTPLIB", protoName, name);
+
+
 	NETLIBUSER nlu = {0};
 	NETLIBUSERSETTINGS nlus = {0};
-	char name[256];
-	sprintf(name, "%s %s", moduleName, Translate("connection"));
+
 	nlu.cbSize = sizeof(nlu);
 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_HTTPCONNS;	// | NUF_HTTPGATEWAY;
 	nlu.szDescriptiveName = name;
@@ -73,54 +49,7 @@ bool HTTPConnection::init(const char * protoName, const char *moduleName) {
 	hNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
 	return (hNetlibUser!=NULL)?true:false;
 }
-
-HANDLE HTTPConnection::connect(const char *host, int port) {
-	NETLIBOPENCONNECTION nloc;
-	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
-	nloc.szHost = host;
-	nloc.wPort = port;
-	nloc.flags = 0;
-	return (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hNetlibUser, (LPARAM) &nloc);
-}
-
-HANDLE HTTPConnection::bind(NETLIBBIND *nlb) {
-	return (HANDLE) CallService(MS_NETLIB_BINDPORT, (WPARAM) hNetlibUser, (LPARAM) nlb);
-}
-
-int HTTPConnection::recv(char *data, long datalen) {
-	int totalret = 0;
-	while (datalen>0) {
-		if (bufferLen==0) {
-			bufferLen = Netlib_Recv(socket, buffer, 1024, MSG_DUMPASTEXT);
-			if(bufferLen == SOCKET_ERROR) {
-				eof = true;
-				return 0;
-			}
-			if(bufferLen == 0) {
-				eof = true;
-				return 0;
-			}
-			bufferPos = 0;
-		}
-		int ret = min(bufferLen, datalen);
-		memcpy (data, buffer+bufferPos, ret);
-		data += ret;
-		bufferPos += ret;
-		bufferLen -= ret;
-		datalen -= ret;
-		totalret += ret;
-	}
-	return totalret;
-}
-
-int HTTPConnection::send(const char *data, long datalen) {
-	int len;
-	if ((len=Netlib_Send(socket, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT))==SOCKET_ERROR || len!=datalen) {
-		return FALSE;
-	}
-	return TRUE;
-}
-
+*/
 
 HTTPCredentials::HTTPCredentials() {
 	domain = NULL;
@@ -682,7 +611,7 @@ bool HTTPRequest::authNTLM(HTTPHeader *header) {
 }
 
 
-char *HTTPUtils::readLine(HTTPConnection *con)
+char *HTTPUtils::readLine(Connection *con)
 {
 	int i, lineSize = 0;
 	char *line = NULL;
@@ -742,7 +671,7 @@ HTTPRequest *HTTPUtils::toRequest(const char *text)  {
 	return request;
 }
 
-HTTPRequest *HTTPUtils::recvHeaders(HTTPConnection *con)  {
+HTTPRequest *HTTPUtils::recvHeaders(Connection *con)  {
 	int i;
 	char *line;
 	HTTPHeader *header = NULL;
@@ -801,7 +730,7 @@ HTTPRequest *HTTPUtils::recvHeaders(HTTPConnection *con)  {
  * Add auto headers, send request and receive response.
  */
 
-HTTPRequest *HTTPUtils::performRequest(HTTPConnection *con, HTTPRequest *request)  {
+HTTPRequest *HTTPUtils::performRequest(Connection *con, HTTPRequest *request)  {
 	HTTPRequest *response = NULL;
 	if (con!=NULL) {
 		request->addAutoRequestHeaders();
@@ -835,7 +764,7 @@ HTTPRequest *HTTPUtils::performRequest(HTTPConnection *con, HTTPRequest *request
 }
 
 
-HTTPRequest *HTTPUtils::recvRequest(HTTPConnection *con)  {
+HTTPRequest *HTTPUtils::recvRequest(Connection *con)  {
 	HTTPRequest *response = NULL;
 	if (con!=NULL) {
 		response = recvHeaders(con);
@@ -860,7 +789,7 @@ HTTPRequest *HTTPUtils::recvRequest(HTTPConnection *con)  {
 }
 
 
-int HTTPUtils::sendResponse(HTTPConnection *con, HTTPRequest *response)  {
+int HTTPUtils::sendResponse(Connection *con, HTTPRequest *response)  {
 	int result = 500;
 	if (con!=NULL) {
 		response->addAutoResponseHeaders();
@@ -881,7 +810,7 @@ HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
 	char *str;
 	HTTPRequest *response = NULL;
 	int authRejects = 0;
-	HTTPConnection *con = NULL;
+	Connection *con = NULL;
 	request->keepAlive = false;
 	request->authRejectsMax = 1;
 	request->authRejects = 0;
@@ -890,7 +819,8 @@ HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
 	free(str);
 	while (1) {
 		if (con == NULL) {
-			con = new HTTPConnection(request->getHost(), request->getPort());
+			con = new Connection("HTTP");
+			con->connect(request->getHost(), request->getPort());
 		}
 		response = HTTPUtils::performRequest(con, request);
 		if (response != NULL) {

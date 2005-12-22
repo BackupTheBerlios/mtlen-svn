@@ -105,7 +105,7 @@ static int PreShutdown(WPARAM wParam, LPARAM lParam)
 
 static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 {
-	HTTPConnection::init(rvpProtoName, rvpModuleName);
+	Connection::init("HTTP", rvpProtoName, rvpModuleName);
 	return 0;
 }
 

@@ -24,7 +24,8 @@ class RVPImplAsyncData;
 #ifndef RVPIMPL_INCLUDED
 #define RVPIMPL_INCLUDED
 
-#include "RVPUtils.h"
+#include "rvp.h"
+#include "RVPClient.h"
 #include "ThreadManager.h"
 #include "List.h"
 

@@ -22,10 +22,10 @@ class HTTPCredentials;
 class HTTPHeader;
 class HTTPRequest;
 
-#include "../rvp.h"
+#include "../Connection.h"
 
-#ifndef HTTPUTILS_INCLUDED
-#define HTTPUTILS_INCLUDED
+#ifndef HTTPLIB_INCLUDED
+#define HTTPLIB_INCLUDED
 
 #define SECURITY_WIN32
 #include <security.h>
@@ -53,27 +53,6 @@ class HTTPRequest;
 	#  define SECURITY_ENTRYPOINT_ANSI SECURITY_ENTRYPOINT16
 	#endif // SECURITY_WIN32
 #endif
-
-class HTTPConnection {
-private:
-	static HANDLE hNetlibUser;
-	bool eof;
-	int	 bufferLen;
-	int	 bufferPos;
-	char buffer[1024];
-	HANDLE socket;
-public:
-	static bool init(const char * protoName, const char *moduleName);
-	static void release();
-	static HANDLE connect(const char *host, int port);
-	static HANDLE bind(NETLIBBIND *nlb);
-	HTTPConnection();
-	HTTPConnection(HANDLE socket);
-	HTTPConnection(const char *host, int port);
-	~HTTPConnection();
-	int recv(char *data, long datalen);
-	int send(const char *data, long datalen);
-};
 
 class HTTPCredentials {
 private:
@@ -169,13 +148,13 @@ public:
 
 class HTTPUtils {
 protected:
-	static char *			readLine(HTTPConnection *con);
-	static HTTPRequest *	performRequest(HTTPConnection *con, HTTPRequest *request);
+	static char *			readLine(Connection *con);
+	static HTTPRequest *	performRequest(Connection *con, HTTPRequest *request);
 public:
 	static HTTPRequest *	toRequest(const char *text);
-	static HTTPRequest *	recvHeaders(HTTPConnection *con);
-	static HTTPRequest *	recvRequest(HTTPConnection *con);
-	static int				sendResponse(HTTPConnection *con, HTTPRequest *response);
+	static HTTPRequest *	recvHeaders(Connection *con);
+	static HTTPRequest *	recvRequest(Connection *con);
+	static int				sendResponse(Connection *con, HTTPRequest *response);
 	static HTTPRequest *	performTransaction(HTTPRequest *request);
 };
 

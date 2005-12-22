@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 #include "rvp.h"
-#include "RVPUtils.h"
+#include "RVPClient.h"
 #include "time.h"
 #include "math.h"
 #include "Utils.h"
@@ -253,11 +253,11 @@ const char *RVPFile::getFile() {
 	return file;
 }
 
-static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * pExtra) {
+void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HANDLE hConnection, DWORD dwRemoteIP, void * pExtra) {
 	HTTPRequest *request;
-	RVPClient *rvpClient;
-	HTTPConnection *connection = new HTTPConnection(hConnection);
-	rvpClient = (RVPClient *) pExtra;
+//	RVPClient *rvpClient;
+//	HTTPConnection *connection = new HTTPConnection(hConnection);
+//	rvpClient = (RVPClient *) pExtra;
 	request = HTTPUtils::recvRequest(connection);
 	if (!strcmpi("NOTIFY", request->getMethod())) {
 		if (request->dataLength > 0) {
@@ -442,7 +442,7 @@ static void RVPIncomingConnection(HANDLE hConnection, DWORD dwRemoteIP, void * p
 		response->addHeader("Content-Type", "text/html");
 		response->addHeader("RVP-Notifications-Version", "0.2");
 		char respString[2048];
-		sprintf(respString, "<HTML><HEAD><TITLE>Successful</TITLE></HEAD><BODY><H2>Success 200 (Successful)</H2><HR>NOTIFY on node %s succeeded<HR></BODY></HTML></p>", rvpClient->getCallback());
+		sprintf(respString, "<HTML><HEAD><TITLE>Successful</TITLE></HEAD><BODY><H2>Success 200 (Successful)</H2><HR>NOTIFY on node %s succeeded<HR></BODY></HTML></p>", getCallback());
 		response->setContent(respString);
 		HTTPUtils::sendResponse(connection, response);
 		delete response;
@@ -460,6 +460,7 @@ RVPClient::RVPClient() {
 	principalUrl = NULL;
 	serverPort = 80;
 	credentials = NULL;
+	bindConnection = NULL;
 	lastStatus = ID_STATUS_OFFLINE;
 	InitializeCriticalSection(&mutex);
 }
@@ -671,13 +672,14 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 		return result;
 	}
 	/* Try to connect to the server and determine local IP */
-	HANDLE s = HTTPConnection::connect(server, serverPort);
-	if (s==NULL) {
+	Connection *con = new Connection("HTTP");
+	if (!con->connect(server, serverPort)) {
 		// connection to server failed
+		delete con;
 		LeaveCriticalSection(&mutex);
 		return result;
 	} else {
-		int socket = CallService(MS_NETLIB_GETSOCKET, (WPARAM) s, 0);
+		int socket = con->socket();
 		if (socket!=INVALID_SOCKET) {
 			struct sockaddr_in saddr;
 			int len;
@@ -688,53 +690,27 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 			LeaveCriticalSection(&mutex);
 			return result;
 		}
-		Netlib_CloseHandle(s);
 	}
-	/* Start listening to incoming connection */
-	NETLIBBIND nlb = {0};
-	struct sockaddr_in saddr;
-	nlb.cbSize = sizeof(NETLIBBIND);
-	nlb.pfnNewConnectionV2 = RVPIncomingConnection;
-	nlb.wPort = 0;
-	nlb.pExtra = this;
-	lSocket = HTTPConnection::bind(&nlb);
-	if (lSocket == NULL) {
+	delete con;
+	bindConnection = new Connection("HTTP");
+	int wPort = bindConnection->bind(NULL, 0, this);
+	if (wPort == 0) {
+		delete bindConnection;
+		bindConnection = NULL;
 		LeaveCriticalSection(&mutex);
 		return result;
 	}
+	struct sockaddr_in saddr;
 	saddr.sin_addr.S_un.S_addr = localIP;
-	sprintf(callbackHost, "http://%s:%d", inet_ntoa(saddr.sin_addr), nlb.wPort);
+	sprintf(callbackHost, "http://%s:%d", inet_ntoa(saddr.sin_addr), wPort);
 	/* Sign In */
 	result = subscribeMain(callbackHost);
 	if (result) {
-		Netlib_CloseHandle(lSocket);
+		delete bindConnection;
+		bindConnection = NULL;
 	} else {
 		bOnline = true;
 	}
-
-	/*
-	request = new HTTPRequest();
-	request->setMethod("SUBSCRIBE");
-	request->setUrl(principalUrl);
-	request->addHeader("Subscription-Lifetime", "14400");
-	request->addHeader("Notification-Type", "pragma/notify");
-	request->addHeader("User-Agent", "msmsgs/5.1.0.639");
-	request->addHeader("Call-Back", callbackHost);
-	request->addHeader("RVP-Notifications-Version", "0.2");
-	request->addHeader("RVP-From-Principal", principalUrl);
-	request->setCredentials(credentials);
-	response = HTTPUtils::performTransaction(request);
-	delete request;
-	if (response != NULL) {
-		result = response->resultCode;
-		delete response;
-		if (result/100 != 2) {
-			Netlib_CloseHandle(lSocket);
-		} else {
-			bOnline = true;
-		}
-	}*/
-
 	LeaveCriticalSection(&mutex);
 	return result;
 }
@@ -742,7 +718,7 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 int RVPClient::stopListening() {
 	EnterCriticalSection(&mutex);
 	if (bOnline) {
-		if (lSocket!=NULL) Netlib_CloseHandle(lSocket);
+		if (bindConnection!=NULL) delete bindConnection;
 	}
 	LeaveCriticalSection(&mutex);
 	return 0;
