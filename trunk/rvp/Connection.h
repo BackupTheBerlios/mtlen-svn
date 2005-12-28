@@ -25,15 +25,6 @@ class ConnectionListener;
 #ifndef CONNECTION_H_INCLUDED
 #define CONNECTION_H_INCLUDED
 
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#endif
-
-/*******************************************************************
- * Global header files
- *******************************************************************/
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x500
 #include <windows.h>
@@ -47,6 +38,8 @@ class ConnectionListener;
 #include <m_system.h>
 #include <m_netlib.h>
 #include "Utils.h"
+
+#define DEFAULT_CONNECTION_POOL "DEFAULT"
 
 class ConnectionListener {
 public:
@@ -78,7 +71,9 @@ public:
 	Connection(const char *poolName);
 	~Connection();
 	int recv(char *buffer, long len);
+	char *recvLine();
 	int send(const char *buffer, long len);
+	int send(const char *buffer);
 	int close();
 	int connect(const char *host, int port);
 	int bind(const char *host, int port, ConnectionListener* listener);

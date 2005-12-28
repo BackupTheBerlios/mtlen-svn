@@ -19,43 +19,63 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 #include "RVPFileTransfer.h"
-#include "Connection.h"
-//#include "rvp.h"
-//#include "RVPClient.h"
 #include "Utils.h"
 
 /* Receive file thread */
 
 static void __cdecl RVPFileTransferRecv(void *ptr) {
 	RVPFileTransfer *ft = (RVPFileTransfer *) ptr;
-//	ft->
+	ft->doRecvFile();
+	delete ft;
 }
 
 /* Send file thread */
 
 static void __cdecl RVPFileTransferSend(void *ptr) {
 	RVPFileTransfer *ft = (RVPFileTransfer *) ptr;
-//	ft->
+	ft->doSendFile();
+	delete ft;
 }
 
-RVPFileTransfer::RVPFileTransfer(RVPFile *file, RVPFileTransferListener *listener) {
+RVPFileTransfer::RVPFileTransfer(RVPFile *file, RVPFileTransferListener *listener):ListItem(file->getContact(), file->getCookie()) {
 	this->file = file;
 	this->listener = listener;
 }
 
 void RVPFileTransfer::recvFile() {
-
+	forkThread(TGROUP1, RVPFileTransferRecv, 0, this);
 }
 
 void RVPFileTransfer::sendFile() {
+	forkThread(TGROUP1, RVPFileTransferSend, 0, this);
+}
 
+void RVPFileTransfer::doRecvFile() {
+	Connection * con = new Connection(DEFAULT_CONNECTION_POOL);
+	char *line;
+	if (con->connect(file->getHost(), file->getPort())) {
+		con->send("VER MSNFTP");
+		line = con->recvLine();
+		if (line != NULL && strstr(line, "MSNFTP") != NULL) {
+
+		}		
+	}
+	delete con;
+}
+
+void RVPFileTransfer::doSendFile() {
+	Connection * con = new Connection(DEFAULT_CONNECTION_POOL);
+	delete con;
 }
 
 void RVPFileTransfer::recvFile(RVPFile *file, RVPFileTransferListener *listener) {
-
+	RVPFileTransfer* ft = new RVPFileTransfer(file, listener);
+	ft->recvFile();
 }
 
 void RVPFileTransfer::sendFile(RVPFile *file, RVPFileTransferListener *listener) {
+	RVPFileTransfer* ft = new RVPFileTransfer(file, listener);
+	ft->sendFile();
 }
 
 void RVPFileTransfer::cancelFile(RVPFile *file) {

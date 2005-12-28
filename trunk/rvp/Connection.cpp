@@ -128,6 +128,36 @@ int Connection::send(const char *data, long datalen) {
 }
 
 
+char *Connection::recvLine() {
+	int i, lineSize = 0;
+	char *line = NULL;
+	for (i=0;;i++) {
+		if (i>=lineSize) {
+			line = (char *)realloc(line, lineSize+128);
+			lineSize += 128;
+		}
+		if (recv(line+i, 1) != 0) {
+			if (line[i]=='\r') {
+				i--;
+			}
+			if (line[i]=='\n') {
+				break;
+			}
+		} else {
+			free(line);
+			return NULL;
+		}
+
+	}
+	line[i]='\0';
+	return line;
+}
+
+
+int Connection::send(const char *data) {
+	return send(data, strlen(data));
+}
+
 void Connection::onNewConnection(HANDLE sock, DWORD dwRemoteIP)  {
 	Connection *c = new Connection(hNetLibUser, sock);
 	if (listener != NULL) {

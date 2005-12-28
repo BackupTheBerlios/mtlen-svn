@@ -64,7 +64,6 @@ static void __cdecl RVPSendMessageAsyncThread(void *ptr) {
 	char *contactID;
 	char *principalDisplayname;
 	char *contactDisplayname;
-	DBVARIANT dbv;
 	contactID = Utils::getLogin(data->hContact);
 	if (contactID != NULL) {
 		principalDisplayname = Utils::getDisplayName(NULL);
@@ -132,7 +131,6 @@ static void __cdecl RVPSendTypingAsyncThread(void *ptr) {
 	char *contactDisplayname;
 	contactID = Utils::getLogin(data->hContact);
 	if (contactID != NULL) {
-		DBVARIANT dbv;
 		principalDisplayname = Utils::getDisplayName(NULL);
 		contactDisplayname = Utils::getDisplayName(data->hContact);
 		while (data->impl->isGroupAllowed(RVPImpl::TGROUP_NORMAL) && data->impl->isTyping(data->hContact)) {
@@ -362,7 +360,7 @@ int RVPImpl::sendTyping(HANDLE hContact, bool on) {
 
 int RVPImpl::sendFileAccept(RVPFile *file) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
-	data->hContact = file->getContact();
+	data->hContact = Utils::getContactFromId(file->getContact());
 	data->file = file;
 	if (!forkThread(TGROUP_NORMAL, RVPSendFileAccept, 0, data)) {
 		delete data;
@@ -372,7 +370,7 @@ int RVPImpl::sendFileAccept(RVPFile *file) {
 
 int RVPImpl::sendFileReject(RVPFile *file) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
-	data->hContact = file->getContact();
+	data->hContact = Utils::getContactFromId(file->getContact());
 	data->file = file;
 	if (!forkThread(TGROUP_NORMAL, RVPSendFileReject, 0, data)) {
 		delete data;
@@ -530,7 +528,7 @@ void RVPImpl::onFileInvite(const char *login, const char *nick, const char *cook
 	if (hContact==NULL) {
 		hContact = Utils::createContact(login, nick, FALSE);
 	}
-	RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, hContact, cookie);
+	RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, login, cookie, client->getSignInName());
 	rvpFile->setFile(filename);
 	rvpFile->setSize(filesize);
 	// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)

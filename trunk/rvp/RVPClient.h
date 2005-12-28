@@ -18,16 +18,20 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+class RVPDNSMapping;
 class RVPSubscription;
 class RVPSession;
+class RVPFile;
+class RVPClientListener;
 class RVPClient;
 
 #ifndef RVPCLIENT_INCLUDED
 #define RVPCLIENT_INCLUDED
 
 #include <windows.h>
-#include "httplib/HTTPLib.h"
 #include "List.h"
+#include "httplib/HTTPLib.h"
+#include "RVPFileTransfer.h"
 
 class RVPDNSMapping:public ListItem {
 private:
@@ -102,8 +106,9 @@ class RVPFile:public ListItem {
 private:
 	static List list;
 	int	 mode;
-	HANDLE hContact;
 	int size;
+	char *contact;
+	char *login;
 	char *file;
 	char *path;
 	char *host;
@@ -113,11 +118,11 @@ public:
 		MODE_RECV,
 		MODE_SEND
 	};
-	RVPFile(int mode, HANDLE hContact, const char *id);
+	RVPFile(int mode, const char *contact, const char *id, const char *login);
 	~RVPFile();
-	static RVPFile* find(const char *id);
+	static RVPFile* find(const char *contact, const char *id);
 	int		getMode();
-	HANDLE getContact();
+	const char *getContact();
 	const char *getCookie();
 	void   setSize(int size);
 	int	   getSize();
@@ -139,7 +144,7 @@ public:
 	static RVPContact* get(HANDLE);
 };
 
-class RVPClient:public ConnectionListener {
+class RVPClient:public ConnectionListener, public RVPFileTransferListener {
 private:
 	static List dnsList;
 	static const char *getStatusString(int status);
@@ -157,6 +162,7 @@ private:
 	DWORD localIP;
 	char  callbackHost[256];
 	int	 lastStatus;
+	const char *getCallback();
 public:
 	RVPClient(RVPClientListener *listener);
 	~RVPClient();
@@ -180,7 +186,7 @@ public:
 	int		sendFileReject(RVPFile *, const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
 	int		getSubscribers();
 	int		getACL();
-	const char *getCallback();
+	const char *getSignInName();
 	RVPSubscription*	getProperty(const char *login, const char *property);
 	List*	getSubscriptions();
 	RVPSubscription* getSubscription(const char *login);

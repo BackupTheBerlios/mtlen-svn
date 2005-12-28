@@ -26,6 +26,15 @@ ListItem::ListItem(const char *id) {
 	prev = next = NULL;
 }
 
+ListItem::ListItem(const char *id1, const char *id2) {
+	char *id = NULL;
+	int idSize = 0;
+	Utils::appendText(&id, &idSize, "%s%s", id1, id2);
+	this->id = Utils::dupString(id);
+	free(id);
+	prev = next = NULL;
+}
+
 ListItem::~ListItem() {
 	if (id != NULL) delete id;
 }
@@ -85,6 +94,21 @@ ListItem * List::find(const char *id) {
 	leaveCritical();
 	return ptr;
 }
+
+ListItem * List::find(const char *id1, const char *id2) {
+	ListItem *ptr;
+	char *id = NULL;
+	int idSize = 0;
+	Utils::appendText(&id, &idSize, "%s%s", id1, id2);
+	enterCritical();
+	for (ptr=items; ptr!=NULL; ptr=ptr->getNext()) {
+		if (!strcmp(ptr->getId(), id)) break;
+	}
+	leaveCritical();
+	free(id);
+	return ptr;
+}
+
 
 void List::add(ListItem *item) {
 	ListItem *ptr;

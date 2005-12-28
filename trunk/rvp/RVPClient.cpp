@@ -217,12 +217,17 @@ void RVPSession::releaseAll() {
 
 List RVPFile::list;
 
-RVPFile::RVPFile(int mode, HANDLE hContact, const char *id):ListItem(id) {
+RVPFile* RVPFile::find(const char *id1, const char *id2) {
+	return (RVPFile*)list.find(id1, id2);
+}
+
+RVPFile::RVPFile(int mode, const char *contact, const char *id, const char *login):ListItem(contact, id) {
 	file = NULL;
 	path = NULL;
 	host = NULL;
 	this->mode = mode;
-	this->hContact = hContact;
+	this->contact = Utils::dupString(contact);
+	this->login = Utils::dupString(login);
 	list.add(this);
 }
 
@@ -231,14 +236,16 @@ RVPFile::~RVPFile() {
 	if (file != NULL) delete file;
 	if (path != NULL) delete path;
 	if (host != NULL) delete host;
+	if (contact != NULL) delete contact;
+	if (login != NULL) delete login;
 }
 
 int RVPFile::getMode() {
 	return mode;
 }
 
-HANDLE RVPFile::getContact() {
-	return hContact;
+const char *RVPFile::getContact() {
+	return contact;
 }
 
 const char *RVPFile::getCookie() {
@@ -328,13 +335,6 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 										if (listener != NULL) {
 											listener->onStatus(login, status);
 										}
-										/* TODO invoke listener here */
-										HANDLE hContact = Utils::getContactFromId(login);
-										if (hContact!=NULL) {
-											if (DBGetContactSettingWord(hContact, rvpProtoName, "Status", ID_STATUS_OFFLINE) != status)
-												DBWriteContactSettingWord(hContact, rvpProtoName, "Status", (WORD) status);
-										}
-										/* end TODO */
 									}
 									delete login;
 								}
@@ -372,52 +372,15 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 													if (listener != NULL) {
 														listener->onTyping(login);
 													}
-													/* TODO invoke listener here */
-													HANDLE hContact = Utils::getContactFromId(login);
-													if (hContact!=NULL) {
-														CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM) 10);//PROTOTYPE_CONTACTTYPING_INFINITE);
-													}
-													/* end TODO */
 												}
 											} else if (strstr(contentType->getValue(), "text/plain") == contentType->getValue()) {
 												/* message */
 												if (request->getContent()!=NULL && strlen(request->getContent())>0) {
-													/* TODO invoke listener here */
 													if (listener != NULL) {
 														wchar_t *messageW = Utils::utf8DecodeW(request->getContent());
 														listener->onMessage(login, nick, messageW);
 														delete messageW;
 													}
-
-													HANDLE hContact = Utils::getContactFromId(login);
-													if (hContact==NULL) {
-														hContact = Utils::createContact(login, nick, FALSE);
-													}
-													if (hContact!=NULL) {
-														CCSDATA ccs;
-														PROTORECVEVENT recv;
-														wchar_t *messageW = Utils::utf8DecodeW(request->getContent());
-														char *message = Utils::convertToString(messageW); // Utils::utf8Decode(request->getContent());
-														int len = strlen(message)+1;
-														int wlen = wcslen(messageW)+1;
-														char *blob = new char[(len + sizeof(wchar_t)) * wlen];
-														memcpy(blob, message, len);
-														memcpy(blob+len, messageW, wlen * sizeof(wchar_t));
-														delete message;
-														delete messageW;
-														recv.flags = PREF_UNICODE;
-														recv.timestamp = (DWORD) time(NULL);
-														recv.szMessage = blob;
-														recv.lParam = 0;
-														ccs.hContact = hContact;
-														ccs.wParam = 0;
-														ccs.szProtoService = PSR_MESSAGE;
-														ccs.lParam = (LPARAM) &recv;
-														CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_OFF);
-														CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
-														delete blob;
-													}
-													/* end TODO */
 												}
 											} else if (strstr(contentType->getValue(), "text/x-msmsgsinvite") == contentType->getValue()) {
 												HTTPRequest *inviteRequest = HTTPUtils::toRequest(request->getContent());
@@ -437,65 +400,46 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 																if (listener != NULL) {
 																	listener->onFileInvite(login, nick, invitationCookieHdr->getValue(), applicationFileHdr->getValue(), atol(applicationFileSizeHdr->getValue()));
 																}
-															/* TODO invoke listener here */
-																PROTORECVEVENT pre;
-																CCSDATA ccs;
-																HANDLE hContact = Utils::getContactFromId(login);
-																if (hContact==NULL) {
-																	hContact = Utils::createContact(login, nick, FALSE);
-																}
-																RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, hContact, invitationCookieHdr->getValue());
-																rvpFile->setFile(applicationFileHdr->getValue());
-																rvpFile->setSize(atol(applicationFileSizeHdr->getValue()));
-																// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
-																char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 2);
-																*((PDWORD) szBlob) = (DWORD) rvpFile;
-																strcpy(szBlob + sizeof(DWORD), applicationFileHdr->getValue());
-																szBlob[sizeof(DWORD) + strlen(applicationFileHdr->getValue()) + 1] = '\0';
-																pre.flags = 0;
-																pre.timestamp = time(NULL);
-																pre.szMessage = szBlob;
-																pre.lParam = 0;
-																ccs.szProtoService = PSR_FILE;
-																ccs.hContact = hContact;
-																ccs.wParam = 0;
-																ccs.lParam = (LPARAM) &pre;
-																CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
-																free(szBlob);
-															/* end TODO */
 															}
 														}
 													} else if (!strcmpi(invitationCommandHdr->getValue(), "ACCEPT")) { /* ACCEPT */
-														RVPFile *file = RVPFile::find(invitationCookieHdr->getValue());
-														if (file != NULL) {
-															/* Stop transfer */
-															if (file->getMode() == RVPFile::MODE_RECV) {
-																/* Connect to given host/port */
-																if (ipAddressHdr != NULL && portHdr != NULL) {
-																	file->setHost(ipAddressHdr->getValue());
-																	file->setPort(atol(portHdr->getValue()));
-
+														char *login = RVPClient::getLoginFromUrl(hrefStr);
+														if (login != NULL) {
+															RVPFile *file = RVPFile::find(login, invitationCookieHdr->getValue());
+															if (file != NULL) {
+																/* Stop transfer */
+																if (file->getMode() == RVPFile::MODE_RECV) {
+																	/* Connect to given host/port */
+																	if (ipAddressHdr != NULL && portHdr != NULL) {
+																		file->setHost(ipAddressHdr->getValue());
+																		file->setPort(atol(portHdr->getValue()));
+																		RVPFileTransfer::recvFile(file, NULL);
+																	} else {
+																		/* cancel */
+																	}
 																} else {
-																	/* cancel */
+																	/* Start server and send details */
+																	RVPFileTransfer::sendFile(file, NULL);
 																}
-															} else {
-																/* Start server and send details */
-
+																delete file;
 															}
-															delete file;
+															delete login;
 														}
 													} else if (!strcmpi(invitationCommandHdr->getValue(), "CANCEL")) { /* CANCEL */
-														RVPFile *file = RVPFile::find(invitationCookieHdr->getValue());
-														if (file != NULL) {
-															/* Stop transfer */
-															if (file->getMode() == RVPFile::MODE_RECV) {
+														char *login = RVPClient::getLoginFromUrl(hrefStr);
+														if (login != NULL) {
+															RVPFile *file = RVPFile::find(login, invitationCookieHdr->getValue());
+															if (file != NULL) {
+																/* Stop transfer */
+																if (file->getMode() == RVPFile::MODE_RECV) {
 
-															} else {
+																} else {
 
+																}
+																delete file;
 															}
-															delete file;
+															delete login;
 														}
-														/* TODO: find appropriate */
 													}
 												}
 												delete inviteRequest;
@@ -541,7 +485,7 @@ RVPClient::RVPClient(RVPClientListener *listener) {
 	credentials = NULL;
 	bindConnection = NULL;
 	lastStatus = ID_STATUS_OFFLINE;
-	this->listener = NULL;
+	this->listener = listener;
 	InitializeCriticalSection(&mutex);
 }
 
@@ -752,7 +696,7 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 		return result;
 	}
 	/* Try to connect to the server and determine local IP */
-	Connection *con = new Connection("HTTP");
+	Connection *con = new Connection(DEFAULT_CONNECTION_POOL);
 	if (!con->connect(server, serverPort)) {
 		// connection to server failed
 		delete con;
@@ -772,7 +716,7 @@ int RVPClient::signIn(const char *signInName, const char *manualServer) {
 		}
 	}
 	delete con;
-	bindConnection = new Connection("HTTP");
+	bindConnection = new Connection(DEFAULT_CONNECTION_POOL);
 	int wPort = bindConnection->bind(NULL, 0, this);
 	if (wPort == 0) {
 		delete bindConnection;
@@ -1516,6 +1460,11 @@ int RVPClient::sendFileReject(RVPFile *file, const char *contactID, const char *
 
 const char *RVPClient::getCallback() {
 	return callbackHost;
+}
+
+
+const char *RVPClient::getSignInName() {
+	return signInName;
 }
 
 

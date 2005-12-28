@@ -27,29 +27,6 @@ static	JLogger *logger = new JLogger("h:/httplib.log");
 
 static PSecurityFunctionTable pSecurityFunctions=NULL;
 static HINSTANCE hInstSecurityDll=LoadLibrary("security.dll");
-/*
-void HTTPConnection::release() {
-	if (hNetlibUser!=NULL) Netlib_CloseHandle(hNetlibUser);
-}
-
-bool HTTPConnection::init(const char * protoName, const char *moduleName) {
-	char name[256];
-//	sprintf(name, "%s %s", moduleName, Translate("connection"));
-	sprintf(name, "%s %s", moduleName, "connection");
-	Connection::init("HTTPLIB", protoName, name);
-
-
-	NETLIBUSER nlu = {0};
-	NETLIBUSERSETTINGS nlus = {0};
-
-	nlu.cbSize = sizeof(nlu);
-	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_HTTPCONNS;	// | NUF_HTTPGATEWAY;
-	nlu.szDescriptiveName = name;
-	nlu.szSettingsModule = (char *)protoName;
-	hNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
-	return (hNetlibUser!=NULL)?true:false;
-}
-*/
 
 HTTPCredentials::HTTPCredentials() {
 	domain = NULL;
@@ -736,7 +713,7 @@ HTTPRequest *HTTPUtils::performRequest(Connection *con, HTTPRequest *request)  {
 		request->addAutoRequestHeaders();
 		char *str = request->toStringReq();
 		logger->info("REQUEST:\n%s\n", str);
-		if (con->send(str, strlen(str))) {
+		if (con->send(str)) {
 			if (con->send(request->getContent(), request->dataLength)) {
 				response = recvHeaders(con);
 				for (HTTPHeader *header=response->getHeaders(); header!=NULL; header=header->next) {
@@ -794,7 +771,7 @@ int HTTPUtils::sendResponse(Connection *con, HTTPRequest *response)  {
 	if (con!=NULL) {
 		response->addAutoResponseHeaders();
 		char *str = response->toStringRsp();
-		if (con->send(str, strlen(str))) {
+		if (con->send(str)) {
 			if (con->send(response->getContent(), response->dataLength)) {
 				result = 0;
 			}
@@ -819,7 +796,7 @@ HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
 	free(str);
 	while (1) {
 		if (con == NULL) {
-			con = new Connection("HTTP");
+			con = new Connection(DEFAULT_CONNECTION_POOL);
 			con->connect(request->getHost(), request->getPort());
 		}
 		response = HTTPUtils::performRequest(con, request);

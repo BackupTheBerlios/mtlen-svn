@@ -30,6 +30,7 @@ private:
 	ListItem *next;
 public:
 	ListItem(const char *id);
+	ListItem(const char *id1, const char *id2);
 	virtual ~ListItem();
 	virtual void	setNext(ListItem *);
 	virtual void	setPrev(ListItem *);
@@ -48,6 +49,7 @@ public:
 	List();
 	~List();
 	ListItem *find(const char *);
+	ListItem *find(const char *id1, const char *id2);
 	ListItem *get(int);
 	void	add(ListItem *);
 	void	remove(ListItem *);
