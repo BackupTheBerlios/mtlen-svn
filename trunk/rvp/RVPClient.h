@@ -165,7 +165,7 @@ private:
 	const char *getCallback();
 public:
 	RVPClient(RVPClientListener *listener);
-	~RVPClient();
+	virtual ~RVPClient();
 	void	setCredentials(HTTPCredentials *c);
 	bool	isOnline();
 	int		signIn(const char *principal, const char *manualServer); //synchronized

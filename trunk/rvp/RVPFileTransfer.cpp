@@ -21,9 +21,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "RVPFileTransfer.h"
 #include "Utils.h"
 
+List RVPFileTransfer::list;
+
 /* Receive file thread */
 
-static void __cdecl RVPFileTransferRecv(void *ptr) {
+void __cdecl RVPFileTransferRecv(void *ptr) {
 	RVPFileTransfer *ft = (RVPFileTransfer *) ptr;
 	ft->doRecvFile();
 	delete ft;
@@ -31,7 +33,7 @@ static void __cdecl RVPFileTransferRecv(void *ptr) {
 
 /* Send file thread */
 
-static void __cdecl RVPFileTransferSend(void *ptr) {
+void __cdecl RVPFileTransferSend(void *ptr) {
 	RVPFileTransfer *ft = (RVPFileTransfer *) ptr;
 	ft->doSendFile();
 	delete ft;
@@ -40,17 +42,28 @@ static void __cdecl RVPFileTransferSend(void *ptr) {
 RVPFileTransfer::RVPFileTransfer(RVPFile *file, RVPFileTransferListener *listener):ListItem(file->getContact(), file->getCookie()) {
 	this->file = file;
 	this->listener = listener;
+	list.add(this);
+}
+
+RVPFileTransfer::~RVPFileTransfer() {
+	while (getThreadCount(TGROUP_RECV | TGROUP_SEND) > 0) {
+	}
+	list.remove(this);
 }
 
 void RVPFileTransfer::recvFile() {
-	forkThread(TGROUP1, RVPFileTransferRecv, 0, this);
+	forkThread(TGROUP_RECV, RVPFileTransferRecv, 0, this);
 }
 
 void RVPFileTransfer::sendFile() {
-	forkThread(TGROUP1, RVPFileTransferSend, 0, this);
+	forkThread(TGROUP_SEND, RVPFileTransferSend, 0, this);
+}
+
+void RVPFileTransfer::cancelFile() {
 }
 
 void RVPFileTransfer::doRecvFile() {
+	bool completed = false;
 	Connection * con = new Connection(DEFAULT_CONNECTION_POOL);
 	char *line;
 	if (con->connect(file->getHost(), file->getPort())) {
@@ -61,11 +74,22 @@ void RVPFileTransfer::doRecvFile() {
 		}		
 	}
 	delete con;
+	if (completed) {
+		
+	} else {
+
+	}
 }
 
 void RVPFileTransfer::doSendFile() {
+	bool completed = false;
 	Connection * con = new Connection(DEFAULT_CONNECTION_POOL);
 	delete con;
+	if (completed) {
+		
+	} else {
+
+	}
 }
 
 void RVPFileTransfer::recvFile(RVPFile *file, RVPFileTransferListener *listener) {
@@ -79,5 +103,8 @@ void RVPFileTransfer::sendFile(RVPFile *file, RVPFileTransferListener *listener)
 }
 
 void RVPFileTransfer::cancelFile(RVPFile *file) {
-
+	RVPFileTransfer* ft = (RVPFileTransfer*) list.find(file->getContact(), file->getCookie());
+	if (ft != NULL) {
+		ft->cancelFile();
+	}
 }
