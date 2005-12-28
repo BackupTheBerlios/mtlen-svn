@@ -90,31 +90,45 @@ public:
 	static void releaseAll();
 };
 
-class RVPListener {
+class RVPClientListener {
 public:
-	virtual void recvTyping(const char *login) = 0;
-	virtual void recvMessage(const char *login, const char *message) = 0;
-	virtual void recvMessage(const char *login, const wchar_t *message) = 0;
-	virtual void recvStatus(const char *login, int status) = 0;
-	virtual void recvFileInvite(const char *login, const char *filename, int filesize) = 0;
+	virtual void onStatus(const char *login, int status) = 0;
+	virtual void onTyping(const char *login) = 0;
+	virtual void onMessage(const char *login, const char *nick, const wchar_t *message) = 0;
+	virtual void onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize) = 0;
 };
 
 class RVPFile:public ListItem {
 private:
 	static List list;
+	int	 mode;
 	HANDLE hContact;
 	int size;
 	char *file;
+	char *path;
+	char *host;
+	int port;
 public:
-	RVPFile(HANDLE hContact, const char *id);
+	enum MODES {
+		MODE_RECV,
+		MODE_SEND
+	};
+	RVPFile(int mode, HANDLE hContact, const char *id);
 	~RVPFile();
 	static RVPFile* find(const char *id);
+	int		getMode();
 	HANDLE getContact();
 	const char *getCookie();
 	void   setSize(int size);
 	int	   getSize();
 	void   setFile(const char *f);
 	const char *getFile();
+	void   setPath(const char *f);
+	const char *getPath();
+	void	setHost(const char *f);
+	const char *getHost();
+	void	setPort(int p);
+	int		getPort();
 };
 
 class RVPContact:public ListItem {
@@ -130,6 +144,7 @@ private:
 	static List dnsList;
 	static const char *getStatusString(int status);
 	static int 	getRVPStatus(int status);
+	RVPClientListener *listener;
 	CRITICAL_SECTION mutex;
 	bool bStarted;
 	bool bOnline;
@@ -143,7 +158,7 @@ private:
 	char  callbackHost[256];
 	int	 lastStatus;
 public:
-	RVPClient();
+	RVPClient(RVPClientListener *listener);
 	~RVPClient();
 	void	setCredentials(HTTPCredentials *c);
 	bool	isOnline();

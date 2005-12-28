@@ -412,7 +412,8 @@ int RVPFileAllow(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
 	RVPFile *file = (RVPFile *) ccs->wParam;
-	rvpimpl.sendFileAccept(file, (const char *) ccs->lParam);
+	file->setPath((const char *) ccs->lParam);
+	rvpimpl.sendFileAccept(file);
 	return ccs->wParam;
 }
 

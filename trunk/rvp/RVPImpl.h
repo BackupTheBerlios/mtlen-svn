@@ -49,7 +49,7 @@ public:
 	int	oldStatus;
 };
 
-class RVPImpl:public ThreadManager {
+class RVPImpl:public ThreadManager, public RVPClientListener {
 private:
 	RVPClient* client;
 	int oldStatus;
@@ -79,12 +79,17 @@ public:
 	int sendStatus();
 	int	sendMessage(CCSDATA *ccs);
 	int	sendTyping(HANDLE hContact, bool on);
-	int	sendFileAccept(RVPFile *file, const char *path);
+	int	sendFileAccept(RVPFile *file);
 	int	sendFileReject(RVPFile *file);
 	int	sendFileInvite(HANDLE hContact, const char * filenames[] , int filenum);
 	int	searchContact(const char *login);
 	bool isTyping(HANDLE hContact);
 	RVPSubscription* getProperty(const char *node, const char *property);
+	/* RVPClientListener */
+	void onTyping(const char *login);
+	void onMessage(const char *login, const char *nick, const wchar_t *message);
+	void onStatus(const char *login, int status);
+	void onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize);
 
 };
 

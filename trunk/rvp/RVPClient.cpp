@@ -217,8 +217,11 @@ void RVPSession::releaseAll() {
 
 List RVPFile::list;
 
-RVPFile::RVPFile(HANDLE hContact, const char *id):ListItem(id) {
+RVPFile::RVPFile(int mode, HANDLE hContact, const char *id):ListItem(id) {
 	file = NULL;
+	path = NULL;
+	host = NULL;
+	this->mode = mode;
 	this->hContact = hContact;
 	list.add(this);
 }
@@ -226,6 +229,12 @@ RVPFile::RVPFile(HANDLE hContact, const char *id):ListItem(id) {
 RVPFile::~RVPFile() {
 	list.remove(this);
 	if (file != NULL) delete file;
+	if (path != NULL) delete path;
+	if (host != NULL) delete host;
+}
+
+int RVPFile::getMode() {
+	return mode;
 }
 
 HANDLE RVPFile::getContact() {
@@ -251,6 +260,32 @@ void RVPFile::setFile(const char *f) {
 
 const char *RVPFile::getFile() {
 	return file;
+}
+
+void RVPFile::setPath(const char *f) {
+	if (path != NULL) delete path;
+	path = Utils::dupString(f);
+}
+
+const char *RVPFile::getPath() {
+	return path;
+}
+
+void RVPFile::setHost(const char *f) {
+	if (host != NULL) delete host;
+	host = Utils::dupString(f);
+}
+
+const char *RVPFile::getHost() {
+	return host;
+}
+
+void RVPFile::setPort(int p) {
+	port = p;
+}
+
+int RVPFile::getPort() {
+	return port;
 }
 
 void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HANDLE hConnection, DWORD dwRemoteIP, void * pExtra) {
@@ -290,6 +325,9 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 										char *statusString = r_stateXml->getChild()->getName()->toString();
 										int status = RVPClient::getStatusFromString(statusString);
 										delete statusString;
+										if (listener != NULL) {
+											listener->onStatus(login, status);
+										}
 										/* TODO invoke listener here */
 										HANDLE hContact = Utils::getContactFromId(login);
 										if (hContact!=NULL) {
@@ -331,6 +369,9 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 											if (strstr(contentType->getValue(), "text/x-msmsgscontrol") == contentType->getValue()) {
 												/* typing notification */
 												if (typingHdr!=NULL) {
+													if (listener != NULL) {
+														listener->onTyping(login);
+													}
 													/* TODO invoke listener here */
 													HANDLE hContact = Utils::getContactFromId(login);
 													if (hContact!=NULL) {
@@ -342,6 +383,12 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 												/* message */
 												if (request->getContent()!=NULL && strlen(request->getContent())>0) {
 													/* TODO invoke listener here */
+													if (listener != NULL) {
+														wchar_t *messageW = Utils::utf8DecodeW(request->getContent());
+														listener->onMessage(login, nick, messageW);
+														delete messageW;
+													}
+
 													HANDLE hContact = Utils::getContactFromId(login);
 													if (hContact==NULL) {
 														hContact = Utils::createContact(login, nick, FALSE);
@@ -380,11 +427,16 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 												HTTPHeader *invitationCookieHdr = inviteRequest->getHeader("Invitation-Cookie"); /* file transfer id */
 												HTTPHeader *applicationFileHdr = inviteRequest->getHeader("Application-File");  /* file name */
 												HTTPHeader *applicationFileSizeHdr = inviteRequest->getHeader("Application-FileSize"); /* file size */
+												HTTPHeader *ipAddressHdr = inviteRequest->getHeader("IP-Address"); /* host ip */
+												HTTPHeader *portHdr = inviteRequest->getHeader("Port"); /* port */
 												if (invitationCommandHdr != NULL && invitationCookieHdr != NULL) {
 													if (!strcmpi(invitationCommandHdr->getValue(), "INVITE")) { /* INVITE */
 														/* file transfer */
 														if (applicationNameHdr != NULL && !strcmpi(applicationNameHdr->getValue(), "File Transfer")) {
 															if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
+																if (listener != NULL) {
+																	listener->onFileInvite(login, nick, invitationCookieHdr->getValue(), applicationFileHdr->getValue(), atol(applicationFileSizeHdr->getValue()));
+																}
 															/* TODO invoke listener here */
 																PROTORECVEVENT pre;
 																CCSDATA ccs;
@@ -392,7 +444,7 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 																if (hContact==NULL) {
 																	hContact = Utils::createContact(login, nick, FALSE);
 																}
-																RVPFile *rvpFile = new RVPFile(hContact, invitationCookieHdr->getValue());
+																RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, hContact, invitationCookieHdr->getValue());
 																rvpFile->setFile(applicationFileHdr->getValue());
 																rvpFile->setSize(atol(applicationFileSizeHdr->getValue()));
 																// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
@@ -414,9 +466,36 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 															}
 														}
 													} else if (!strcmpi(invitationCommandHdr->getValue(), "ACCEPT")) { /* ACCEPT */
+														RVPFile *file = RVPFile::find(invitationCookieHdr->getValue());
+														if (file != NULL) {
+															/* Stop transfer */
+															if (file->getMode() == RVPFile::MODE_RECV) {
+																/* Connect to given host/port */
+																if (ipAddressHdr != NULL && portHdr != NULL) {
+																	file->setHost(ipAddressHdr->getValue());
+																	file->setPort(atol(portHdr->getValue()));
 
+																} else {
+																	/* cancel */
+																}
+															} else {
+																/* Start server and send details */
+
+															}
+															delete file;
+														}
 													} else if (!strcmpi(invitationCommandHdr->getValue(), "CANCEL")) { /* CANCEL */
+														RVPFile *file = RVPFile::find(invitationCookieHdr->getValue());
+														if (file != NULL) {
+															/* Stop transfer */
+															if (file->getMode() == RVPFile::MODE_RECV) {
 
+															} else {
+
+															}
+															delete file;
+														}
+														/* TODO: find appropriate */
 													}
 												}
 												delete inviteRequest;
@@ -453,7 +532,7 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 	delete connection;
 }
 
-RVPClient::RVPClient() {
+RVPClient::RVPClient(RVPClientListener *listener) {
 	bOnline = false;
 	server = NULL;
 	signInName = NULL;
@@ -462,6 +541,7 @@ RVPClient::RVPClient() {
 	credentials = NULL;
 	bindConnection = NULL;
 	lastStatus = ID_STATUS_OFFLINE;
+	this->listener = NULL;
 	InitializeCriticalSection(&mutex);
 }
 

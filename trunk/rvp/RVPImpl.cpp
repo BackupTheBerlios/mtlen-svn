@@ -255,7 +255,7 @@ const char *RVPImplAsyncData::getMessage() {
 }
 
 RVPImpl::RVPImpl() {
-	client = new RVPClient();
+	client = new RVPClient(this);
 	oldStatus = ID_STATUS_OFFLINE;
 	typingNotifications = new List();
 	msgCounter = typingCoutner = renewCounter = searchCounter = 0;
@@ -360,7 +360,7 @@ int RVPImpl::sendTyping(HANDLE hContact, bool on) {
 }
 
 
-int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {
+int RVPImpl::sendFileAccept(RVPFile *file) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
 	data->hContact = file->getContact();
 	data->file = file;
@@ -478,3 +478,90 @@ bool RVPImpl::isTyping(HANDLE hContact) {
 	return (typingNotifications->find(cid) != NULL);
 }
 
+
+void RVPImpl::onStatus(const char *login, int status) {
+	HANDLE hContact = Utils::getContactFromId(login);
+	if (hContact!=NULL) {
+		if (DBGetContactSettingWord(hContact, rvpProtoName, "Status", ID_STATUS_OFFLINE) != status)
+			DBWriteContactSettingWord(hContact, rvpProtoName, "Status", (WORD) status);
+	}
+}
+
+void RVPImpl::onTyping(const char *login) {
+	HANDLE hContact = Utils::getContactFromId(login);
+	if (hContact!=NULL) {
+		CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM) 10);//PROTOTYPE_CONTACTTYPING_INFINITE);
+	}
+}
+
+void RVPImpl::onMessage(const char *login, const char *nick, const wchar_t *message) {
+	HANDLE hContact = Utils::getContactFromId(login);
+	if (hContact==NULL) {
+		hContact = Utils::createContact(login, nick, FALSE);
+	}
+	if (hContact!=NULL) {
+		CCSDATA ccs;
+		PROTORECVEVENT recv;
+		char *messageA = Utils::convertToString(message); // Utils::utf8Decode(request->getContent());
+		int len = strlen(messageA)+1;
+		int wlen = wcslen(message)+1;
+		char *blob = new char[(len + sizeof(wchar_t)) * wlen];
+		memcpy(blob, messageA, len);
+		memcpy(blob+len, message, wlen * sizeof(wchar_t));
+		delete messageA;
+		recv.flags = PREF_UNICODE;
+		recv.timestamp = (DWORD) time(NULL);
+		recv.szMessage = blob;
+		recv.lParam = 0;
+		ccs.hContact = hContact;
+		ccs.wParam = 0;
+		ccs.szProtoService = PSR_MESSAGE;
+		ccs.lParam = (LPARAM) &recv;
+		CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_OFF);
+		CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
+		delete blob;
+	}
+}
+
+void RVPImpl::onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize) {
+	PROTORECVEVENT pre;
+	CCSDATA ccs;
+	HANDLE hContact = Utils::getContactFromId(login);
+	if (hContact==NULL) {
+		hContact = Utils::createContact(login, nick, FALSE);
+	}
+	RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, hContact, cookie);
+	rvpFile->setFile(filename);
+	rvpFile->setSize(filesize);
+	// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
+	char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(filename) + 2);
+	*((PDWORD) szBlob) = (DWORD) rvpFile;
+	strcpy(szBlob + sizeof(DWORD), filename);
+	szBlob[sizeof(DWORD) + strlen(filename) + 1] = '\0';
+	pre.flags = 0;
+	pre.timestamp = time(NULL);
+	pre.szMessage = szBlob;
+	pre.lParam = 0;
+	ccs.szProtoService = PSR_FILE;
+	ccs.hContact = hContact;
+	ccs.wParam = 0;
+	ccs.lParam = (LPARAM) &pre;
+	CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
+	free(szBlob);
+}
+/*
+void RVPImpl::onFileReject(const char *login, const char *filename, int filesize) {
+}
+
+void RVPImpl::onFileAccept(const char *login, const char *filename, int filesize) {
+}
+
+void RVPImpl::onFileProgress(const char *login, const char *filename, int filesize) {
+}
+
+void RVPImpl::onFileComplete(const char *login, const char *filename, int filesize) {
+}
+
+void RVPImpl::onFileError(const char *login, const char *filename, int filesize) {
+}
+*/
