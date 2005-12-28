@@ -90,7 +90,7 @@ public:
 	void onMessage(const char *login, const char *nick, const wchar_t *message);
 	void onStatus(const char *login, int status);
 	void onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize);
-
+	void onFileProgress(const char *login, const char *cookie, int file, int fileProgress, int fileSize, int totalProgress, int totalSize);
 };
 
 #endif

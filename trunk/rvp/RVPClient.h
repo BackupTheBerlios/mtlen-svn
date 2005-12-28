@@ -100,6 +100,8 @@ public:
 	virtual void onTyping(const char *login) = 0;
 	virtual void onMessage(const char *login, const char *nick, const wchar_t *message) = 0;
 	virtual void onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize) = 0;
+	virtual void onFileProgress(const char *login, const char *cookie, int file, int fileProgress, int fileSize, int totalProgress, int totalSize) = 0;
+
 };
 
 class RVPFile:public ListItem {
@@ -123,6 +125,7 @@ public:
 	static RVPFile* find(const char *contact, const char *id);
 	int		getMode();
 	const char *getContact();
+	const char *getLogin();
 	const char *getCookie();
 	void   setSize(int size);
 	int	   getSize();
@@ -191,6 +194,7 @@ public:
 	List*	getSubscriptions();
 	RVPSubscription* getSubscription(const char *login);
 	void	onNewConnection(Connection *connection, DWORD dwRemoteIP);
+	void	onFileProgress(int type, int progress, int size);
 	static int	getStatusFromString(const char *statusString);
 	static char *getServerFromLogin(const char *signInName, const char *manualServer);
 	static char *getUrlFromLogin(const char *signInName);

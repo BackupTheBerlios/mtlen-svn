@@ -38,10 +38,9 @@ Connection::Connection(HANDLE pool, HANDLE sock) {
 }
 
 Connection::~Connection() {
-	if (sock != NULL) {
-		Netlib_CloseHandle(sock);
-	}
+	close();
 }
+
 
 HANDLE Connection::getNetLibUser(const char *poolName) {
 	NetLibUser *c;
@@ -52,6 +51,15 @@ HANDLE Connection::getNetLibUser(const char *poolName) {
 	}
 	return NULL;
 }
+
+int Connection::close() {
+	if (sock != NULL) {
+		Netlib_CloseHandle(sock);
+		sock = NULL;
+	}
+	return TRUE;
+}
+
 
 int Connection::connect(const char *host, int port) {
 	if (hNetLibUser != NULL && sock == NULL) {
@@ -156,6 +164,22 @@ char *Connection::recvLine() {
 
 int Connection::send(const char *data) {
 	return send(data, strlen(data));
+}
+
+int Connection::sendText(const char *fmt, ...) {
+	va_list vararg;
+	int size = 512;
+	char *str;
+	va_start(vararg, fmt);
+	str = (char *) malloc(size);
+	while (_vsnprintf(str, size, fmt, vararg) == -1) {
+		size += 512;
+		str = (char *) realloc(str, size);
+	}
+	va_end(vararg);
+	int result = send(str);
+	free(str);
+	return result;
 }
 
 void Connection::onNewConnection(HANDLE sock, DWORD dwRemoteIP)  {

@@ -547,6 +547,28 @@ void RVPImpl::onFileInvite(const char *login, const char *nick, const char *cook
 	CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
 	free(szBlob);
 }
+
+void RVPImpl::onFileProgress(const char *login, const char *cookie, int file, int fileProgress, int fileSize, int totalProgress, int totalSize) {
+		PROTOFILETRANSFERSTATUS pfts;
+		RVPFile *rvpFile = RVPFile::find(login, cookie);
+		if (rvpFile != NULL) {
+			memset(&pfts, 0, sizeof(PROTOFILETRANSFERSTATUS));
+			pfts.cbSize = sizeof(PROTOFILETRANSFERSTATUS);
+			/*
+			pfts.hContact = ft->hContact;
+			pfts.sending = FALSE;
+			pfts.files = 1;//ft->files;
+			pfts.totalFiles = 1;//ft->fileCount;
+			pfts.currentFileNumber = 1;//ft->currentFile;
+			pfts.totalBytes = ft->allFileTotalSize;
+			pfts.workingDir = NULL;
+			pfts.currentFile = ft->files[ft->currentFile];
+			pfts.currentFileSize = ft->filesSize[ft->currentFile];
+			pfts.currentFileTime = 0;
+			*/
+		}
+}
+
 /*
 void RVPImpl::onFileReject(const char *login, const char *filename, int filesize) {
 }

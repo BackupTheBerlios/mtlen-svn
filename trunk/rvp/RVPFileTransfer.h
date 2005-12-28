@@ -11,7 +11,7 @@ class RVPFileTransfer;
 
 class RVPFileTransferListener {
 public:
-	virtual void onNewConnection(Connection *, DWORD dwRemoteIP) = 0;
+	virtual void onFileProgress(int type, int progress, int size) = 0;
 };
 
 #include "RVPClient.h"
@@ -23,6 +23,7 @@ private:
 		TGROUP_SEND = 2
 	};
 	static List list;
+	Connection *connection;
 	RVPFile *file;
 	RVPFileTransferListener *listener;
 	void	recvFile();
@@ -33,6 +34,7 @@ protected:
 	friend void __cdecl RVPFileTransferSend(void *ptr);
 	void	doRecvFile();
 	void	doSendFile();
+	bool	msnftp();
 public:
 	RVPFileTransfer(RVPFile *file, RVPFileTransferListener *listener);
 	~RVPFileTransfer();

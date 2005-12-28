@@ -248,6 +248,10 @@ const char *RVPFile::getContact() {
 	return contact;
 }
 
+const char *RVPFile::getLogin() {
+	return login;
+}
+
 const char *RVPFile::getCookie() {
 	return getId();
 }
@@ -1479,4 +1483,7 @@ List* RVPClient::getSubscriptions() {
 
 RVPSubscription* RVPClient::getSubscription(const char *login) {
 	return RVPSubscription::find(login);
+}
+
+void RVPClient::onFileProgress(int type, int progress, int size) {
 }

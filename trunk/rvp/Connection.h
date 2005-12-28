@@ -74,6 +74,7 @@ public:
 	char *recvLine();
 	int send(const char *buffer, long len);
 	int send(const char *buffer);
+	int sendText(const char *fmt, ...);
 	int close();
 	int connect(const char *host, int port);
 	int bind(const char *host, int port, ConnectionListener* listener);
