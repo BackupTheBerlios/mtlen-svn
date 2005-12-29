@@ -219,8 +219,6 @@ char *JabberLocalNickFromJID(const char *jid)
 	return localNick;
 }
 
-// Tlen should not do Utf8Decode
-#ifndef TLEN_PLUGIN
 char *JabberUtf8Decode(const char *str)
 {
 	int i, len;
@@ -262,7 +260,6 @@ char *JabberUtf8Decode(const char *str)
 
 	return szOut;
 }
-#endif
 
 char *JabberUtf8Encode(const char *str)
 {
@@ -738,7 +735,7 @@ time_t  TlenTimeToUTC(time_t time) {
 		 (timestamp->tm_mon == 2 && timestamp->tm_mday - timestamp->tm_wday >= 25) ||
 		 (timestamp->tm_mon == 9 && timestamp->tm_mday - timestamp->tm_wday < 25)) {
 	} else {
-		time -= 3600;
+		time += 3600;
 	}
 	return time;
 }
@@ -789,7 +786,7 @@ time_t JabberIsoToUnixTime(char *stamp)
 	_tzset();
 	t = mktime(&timestamp);
 	t -= _timezone;
-//	t = TlenTimeToUTC(t);
+	t = TlenTimeToUTC(t);
 	JabberLog("%s is %s (%d)", stamp, ctime(&t), _timezone);
 
 	if (t >= 0)

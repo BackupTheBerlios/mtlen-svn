@@ -55,6 +55,7 @@
 [Multi-User Conference]
 [Tlen Chats...]
 [Voice Chat]
+[Voice chat]
 [Request authorization]
 [Grant authorization]
 [You have been kicked. Reason: %s ]

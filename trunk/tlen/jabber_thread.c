@@ -683,7 +683,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 							item->wantComposingEvent = composing;
 							if (item->isTyping) {
 								item->isTyping = FALSE;
-								if ((hContact=JabberHContactFromJID(from)) != NULL) 
+								if ((hContact=JabberHContactFromJID(from)) != NULL)
 									CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
 							}
 						}
@@ -1375,13 +1375,13 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 		if ((hContact=JabberHContactFromJID(f)) != NULL) {
 			if ((tp=JabberXmlGetAttrValue(node, "tp")) != NULL) {
 				JABBER_LIST_ITEM *item = JabberListGetItemPtr(LIST_ROSTER, f);
-				if(!strcmp(tp, "t")) { //contact is writing 
+				if(!strcmp(tp, "t")) { //contact is writing
 					if (item!=NULL ) {
 						item->isTyping = TRUE;
 						CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_INFINITE);
 					}
 				}
-				else if(!strcmp(tp, "u")) {//contact stopped writing 
+				else if(!strcmp(tp, "u")) {//contact stopped writing
 					if (item!=NULL) {
 						item->isTyping = FALSE;
 						CallService(MS_PROTO_CONTACTISTYPING, (WPARAM)hContact, (LPARAM)PROTOTYPE_CONTACTTYPING_OFF);

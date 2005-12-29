@@ -631,7 +631,7 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		free(msg);
-	} 
+	}
 	DBFreeVariant(&dbv);
 	return 1;
 }
@@ -848,10 +848,10 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
 					DBFreeVariant(&dbv);
-					if (!DBGetContactSettingStringUtf(hContact, "CList", "MyHandle", &dbv)) {
+					if (!DBGetContactSetting(hContact, "CList", "MyHandle", &dbv)) {
 						nick = JabberTextEncode(dbv.pszVal);
 						DBFreeVariant(&dbv);
-					} else if (!DBGetContactSettingStringUtf(hContact, jabberProtoName, "Nick", &dbv)) {
+					} else if (!DBGetContactSetting(hContact, jabberProtoName, "Nick", &dbv)) {
 						nick = JabberTextEncode(dbv.pszVal);
 						DBFreeVariant(&dbv);
 					} else {
@@ -862,13 +862,21 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 						if (cws->value.type==DBVT_DELETED && item->group!=NULL) {
 							JabberLog("Group set to nothing");
 							JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'></item></query></iq>", nick, item->jid);
-						}
-						else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL && (item->group==NULL || strcmp(cws->value.pszVal, item->group))) {
-							JabberLog("Group set to %s", cws->value.pszVal);
-							if ((group=TlenGroupEncode(cws->value.pszVal)) != NULL) {
-								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, item->jid, group);
-								free(group);
-							} 
+						} else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL) {
+							char *newGroup;
+							if (cws->value.type==DBVT_UTF8) {
+								newGroup = JabberUtf8Decode(cws->value.pszVal);
+							} else {
+								newGroup = strdup(cws->value.pszVal);
+							}
+							if (item->group==NULL || strcmp(newGroup, item->group)) {
+								JabberLog("Group set to %s", newGroup);
+								if ((group=TlenGroupEncode(newGroup)) != NULL) {
+									JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, item->jid, group);
+									free(group);
+								}
+							}
+							if (newGroup != NULL) free (newGroup);
 						}
 						free(nick);
 					}
@@ -886,15 +894,20 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 //			szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
 //			if (szProto==NULL || strcmp(szProto, jabberProtoName)) return 0;
 
-			if (!DBGetContactSettingStringUtf(hContact, jabberProtoName, "jid", &dbv)) {
+			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 				jid = dbv.pszVal;
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
-					if (cws->value.type == DBVT_DELETED)
-						newNick = (char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, GCDNF_NOMYHANDLE);
-					else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL)
-						newNick = cws->value.pszVal;
-					else
+					if (cws->value.type == DBVT_DELETED) {
+						newNick = strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, GCDNF_NOMYHANDLE));
+					} else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL) {
+						if (cws->value.type==DBVT_UTF8) {
+							newNick = JabberUtf8Decode(cws->value.pszVal);
+						} else {
+							newNick = strdup(cws->value.pszVal);
+						}
+					} else {
 						newNick = NULL;
+					}
 					// Note: we need to compare with item->nick to prevent infinite loop
 					if (newNick!=NULL && (item->nick==NULL || (item->nick!=NULL && strcmp(item->nick, newNick)))) {
 						if ((nick=JabberTextEncode(newNick)) != NULL) {
@@ -902,12 +915,13 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 							if (item->group!=NULL && (group=TlenGroupEncode(item->group))!=NULL) {
 								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, jid, group);
 								free(group);
-							}
-							else
+							} else {
 								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'></item></query></iq>", nick, jid);
+							}
 							free(nick);
 						}
 					}
+					if (newNick != NULL) free(newNick);
 				}
 				DBFreeVariant(&dbv);
 			}

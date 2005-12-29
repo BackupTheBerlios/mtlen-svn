@@ -74,6 +74,7 @@ static char *getDisplayName(const char *id)
 	DBVARIANT dbv;
 	if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
 		_snprintf(jid, sizeof(jid), "%s@%s", id, dbv.pszVal);
+		JabberLog("JID: %s", jid);
 		DBFreeVariant(&dbv);
 		if (((hContact=JabberHContactFromJID(jid)) != NULL) || !strcmp(id, jabberThreadInfo->username)) {
 			ZeroMemory(&ci, sizeof(ci));
@@ -85,6 +86,7 @@ static char *getDisplayName(const char *id)
 				if (ci.type == CNFT_ASCIIZ) {
 					if (ci.pszVal) {
 						char * str = _strdup(ci.pszVal);
+						JabberLog("NICK %s", str);
 						miranda_sys_free(ci.pszVal);
 						return str;
 					}
