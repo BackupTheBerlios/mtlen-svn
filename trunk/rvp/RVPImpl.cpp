@@ -34,11 +34,11 @@ static void __cdecl RVPSubscribeAsyncThread(void *ptr) {
 				DBWriteContactSettingWord(data->hContact, rvpProtoName, "Status", (WORD) subscription->getStatus());
 			}
 			if (subscription->getDisplayName() != NULL) {
-				DBWriteContactSettingString(data->hContact, rvpProtoName, "Nick", subscription->getDisplayName());
-				DBWriteContactSettingString(data->hContact, rvpProtoName, "displayname", subscription->getDisplayName());
+				DBWriteContactSettingStringUtf(data->hContact, rvpProtoName, "Nick", subscription->getDisplayName());
+				DBWriteContactSettingStringUtf(data->hContact, rvpProtoName, "displayname", subscription->getDisplayName());
 			}
 			if (subscription->getEmail() != NULL) {
-				DBWriteContactSettingString(data->hContact, rvpProtoName, "e-mail", subscription->getEmail());
+				DBWriteContactSettingStringUtf(data->hContact, rvpProtoName, "e-mail", subscription->getEmail());
 			}
 		}
 		delete contactId;
@@ -548,25 +548,38 @@ void RVPImpl::onFileInvite(const char *login, const char *nick, const char *cook
 	free(szBlob);
 }
 
-void RVPImpl::onFileProgress(const char *login, const char *cookie, int file, int fileProgress, int fileSize, int totalProgress, int totalSize) {
-		PROTOFILETRANSFERSTATUS pfts;
-		RVPFile *rvpFile = RVPFile::find(login, cookie);
-		if (rvpFile != NULL) {
-			memset(&pfts, 0, sizeof(PROTOFILETRANSFERSTATUS));
-			pfts.cbSize = sizeof(PROTOFILETRANSFERSTATUS);
-			/*
-			pfts.hContact = ft->hContact;
-			pfts.sending = FALSE;
-			pfts.files = 1;//ft->files;
-			pfts.totalFiles = 1;//ft->fileCount;
-			pfts.currentFileNumber = 1;//ft->currentFile;
-			pfts.totalBytes = ft->allFileTotalSize;
-			pfts.workingDir = NULL;
-			pfts.currentFile = ft->files[ft->currentFile];
-			pfts.currentFileSize = ft->filesSize[ft->currentFile];
-			pfts.currentFileTime = 0;
-			*/
+void RVPImpl::onFileProgress(RVPFile *file, int type, int progress) {
+	HANDLE hContact = Utils::getContactFromId(file->getContact());
+	if (hContact != NULL) {
+		if (type == RVPFileListener::PROGRESS_CONNECTING) {
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
+		} else if (type == RVPFileListener::PROGRESS_CONNECTED) {
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
+		} else if (type == RVPFileListener::PROGRESS_INITIALIZING) {
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_INITIALISING, file, 0);
+		} else if (type == RVPFileListener::PROGRESS_PROGRESS) {
+			PROTOFILETRANSFERSTATUS pfts;
+			if (file != NULL) {
+				char *files[1];
+				files[0] = (char *)file->getFile();
+				memset(&pfts, 0, sizeof(PROTOFILETRANSFERSTATUS));
+				pfts.cbSize = sizeof(PROTOFILETRANSFERSTATUS);
+				pfts.hContact = hContact;
+				pfts.sending = file->getMode() == RVPFile::MODE_SEND ? TRUE : FALSE;
+				pfts.files = files;
+				pfts.totalFiles = 1;
+				pfts.currentFileNumber = 0;
+				pfts.totalBytes = file->getSize();
+				pfts.workingDir = NULL;
+				pfts.currentFile = (char *)file->getFile();
+				pfts.currentFileSize = file->getSize();
+				pfts.currentFileTime = 0;
+				pfts.totalProgress = progress;
+				pfts.currentFileProgress = progress;
+				ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_DATA, file, (LPARAM) &pfts);
+			}
 		}
+	}
 }
 
 /*

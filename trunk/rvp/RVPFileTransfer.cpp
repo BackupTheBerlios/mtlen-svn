@@ -39,7 +39,7 @@ void __cdecl RVPFileTransferSend(void *ptr) {
 	delete ft;
 }
 
-RVPFileTransfer::RVPFileTransfer(RVPFile *file, RVPFileTransferListener *listener):ListItem(file->getContact(), file->getCookie()) {
+RVPFileTransfer::RVPFileTransfer(RVPFile *file, RVPFileListener *listener):ListItem(file->getContact(), file->getCookie()) {
 	this->file = file;
 	this->listener = listener;
 	list.add(this);
@@ -115,20 +115,30 @@ bool RVPFileTransfer::msnftp() {
 						file->setSize(atol(filesize));
 						connection->send("TFR\r\n");
 						/* ack initializing */
-
+						if (listener != NULL) {
+							listener->onFileProgress(file, RVPFileListener::PROGRESS_INITIALIZING, 0);
+						}
 						/* receive data */
 					}
 				}
 				break;
 			case ' EYB':
+				if (listener != NULL) {
+					listener->onFileProgress(file, RVPFileListener::PROGRESS_COMPLETED, 0);
+				}
 				return !error;
 				break;
 			case ' RFT':
 				/* ack initializing */
-
+				if (listener != NULL) {
+					listener->onFileProgress(file, RVPFileListener::PROGRESS_INITIALIZING, 0);
+				}
 				/* send data */ 
 				break;
 		}
+	}
+	if (listener != NULL) {
+		listener->onFileProgress(file, RVPFileListener::PROGRESS_ERROR, 0);
 	}
 	return !error;
 }
@@ -165,12 +175,12 @@ void RVPFileTransfer::doSendFile() {
 	}
 }
 
-void RVPFileTransfer::recvFile(RVPFile *file, RVPFileTransferListener *listener) {
+void RVPFileTransfer::recvFile(RVPFile *file, RVPFileListener *listener) {
 	RVPFileTransfer* ft = new RVPFileTransfer(file, listener);
 	ft->recvFile();
 }
 
-void RVPFileTransfer::sendFile(RVPFile *file, RVPFileTransferListener *listener) {
+void RVPFileTransfer::sendFile(RVPFile *file, RVPFileListener *listener) {
 	RVPFileTransfer* ft = new RVPFileTransfer(file, listener);
 	ft->sendFile();
 }

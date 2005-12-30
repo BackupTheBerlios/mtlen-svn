@@ -9,11 +9,6 @@ class RVPFileTransfer;
 #include "ThreadManager.h"
 #include "Connection.h"
 
-class RVPFileTransferListener {
-public:
-	virtual void onFileProgress(int type, int progress, int size) = 0;
-};
-
 #include "RVPClient.h"
 
 class RVPFileTransfer:public ThreadManager, public ListItem {
@@ -25,10 +20,11 @@ private:
 	static List list;
 	Connection *connection;
 	RVPFile *file;
-	RVPFileTransferListener *listener;
+	RVPFileListener *listener;
 	void	recvFile();
 	void	sendFile();
 	void	cancelFile();
+	RVPFileTransfer(RVPFile *file, RVPFileListener *listener);
 protected:
 	friend void __cdecl RVPFileTransferRecv(void *ptr);
 	friend void __cdecl RVPFileTransferSend(void *ptr);
@@ -36,10 +32,9 @@ protected:
 	void	doSendFile();
 	bool	msnftp();
 public:
-	RVPFileTransfer(RVPFile *file, RVPFileTransferListener *listener);
 	~RVPFileTransfer();
-	static void recvFile(RVPFile *file, RVPFileTransferListener *listener);
-	static void sendFile(RVPFile *file, RVPFileTransferListener *listener);
+	static void recvFile(RVPFile *file, RVPFileListener *listener);
+	static void sendFile(RVPFile *file, RVPFileListener *listener);
 	static void cancelFile(RVPFile *file);
 };
 

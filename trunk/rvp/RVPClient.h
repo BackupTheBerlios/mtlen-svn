@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class RVPDNSMapping;
 class RVPSubscription;
 class RVPSession;
+class RVPFileListener;
 class RVPFile;
 class RVPClientListener;
 class RVPClient;
@@ -94,14 +95,17 @@ public:
 	static void releaseAll();
 };
 
-class RVPClientListener {
+class RVPFileListener {
 public:
-	virtual void onStatus(const char *login, int status) = 0;
-	virtual void onTyping(const char *login) = 0;
-	virtual void onMessage(const char *login, const char *nick, const wchar_t *message) = 0;
-	virtual void onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize) = 0;
-	virtual void onFileProgress(const char *login, const char *cookie, int file, int fileProgress, int fileSize, int totalProgress, int totalSize) = 0;
-
+	enum PROGRESS {
+		PROGRESS_CONNECTING,
+		PROGRESS_CONNECTED,
+		PROGRESS_INITIALIZING,
+		PROGRESS_PROGRESS,
+		PROGRESS_COMPLETED,
+		PROGRESS_ERROR
+	};
+	virtual void onFileProgress(RVPFile *file, int type, int progress) = 0;
 };
 
 class RVPFile:public ListItem {
@@ -139,6 +143,7 @@ public:
 	int		getPort();
 };
 
+
 class RVPContact:public ListItem {
 private:
 	static List list;
@@ -147,7 +152,18 @@ public:
 	static RVPContact* get(HANDLE);
 };
 
-class RVPClient:public ConnectionListener, public RVPFileTransferListener {
+class RVPClientListener: public RVPFileListener {
+public:
+	virtual void onStatus(const char *login, int status) = 0;
+	virtual void onTyping(const char *login) = 0;
+	virtual void onMessage(const char *login, const char *nick, const wchar_t *message) = 0;
+	virtual void onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize) = 0;
+//	virtual void onFileProgress(RVPFile *file, int type, int progress) = 0;
+
+};
+
+
+class RVPClient:public ConnectionListener, public RVPFileListener {
 private:
 	static List dnsList;
 	static const char *getStatusString(int status);
@@ -194,7 +210,7 @@ public:
 	List*	getSubscriptions();
 	RVPSubscription* getSubscription(const char *login);
 	void	onNewConnection(Connection *connection, DWORD dwRemoteIP);
-	void	onFileProgress(int type, int progress, int size);
+	void	onFileProgress(RVPFile * file, int type, int progress);
 	static int	getStatusFromString(const char *statusString);
 	static char *getServerFromLogin(const char *signInName, const char *manualServer);
 	static char *getUrlFromLogin(const char *signInName);

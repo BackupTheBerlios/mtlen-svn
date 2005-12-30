@@ -417,13 +417,13 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 																	if (ipAddressHdr != NULL && portHdr != NULL) {
 																		file->setHost(ipAddressHdr->getValue());
 																		file->setPort(atol(portHdr->getValue()));
-																		RVPFileTransfer::recvFile(file, NULL);
+																		RVPFileTransfer::recvFile(file, listener);
 																	} else {
 																		/* cancel */
 																	}
 																} else {
 																	/* Start server and send details */
-																	RVPFileTransfer::sendFile(file, NULL);
+																	RVPFileTransfer::sendFile(file, listener);
 																}
 																delete file;
 															}
@@ -1485,5 +1485,8 @@ RVPSubscription* RVPClient::getSubscription(const char *login) {
 	return RVPSubscription::find(login);
 }
 
-void RVPClient::onFileProgress(int type, int progress, int size) {
+void RVPClient::onFileProgress(RVPFile * file, int type, int progress) {
+	if (listener != NULL) {
+		listener->onFileProgress(file, type, progress);
+	}
 }
