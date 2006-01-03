@@ -92,7 +92,7 @@ bool RVPFileTransfer::msnftp() {
 						if (file->getMode() == RVPFile::MODE_SEND) {
 							connection->send("VER MSNFTP\r\n");
 						} else {
-							connection->sendText("USR %s %s\r\n",file->getLogin(),file->getCookie());
+							connection->sendText("USR %s %s\r\n",file->getLogin(),file->getAuthCookie());
 						}
 					} 
 				}
@@ -101,7 +101,7 @@ bool RVPFileTransfer::msnftp() {
 				{
 					char email[130], cookie[14];
 					if (sscanf(params,"%129s %13s",email, cookie) >= 2) {
-						if (!strcmp(email, file->getContact()) && !strcmp(cookie, file->getCookie())) {
+						if (!strcmp(email, file->getContact()) && !strcmp(cookie, file->getAuthCookie())) {
 							connection->sendText("FIL %i\r\n", file->getSize());
 						}
 						break;
@@ -146,8 +146,6 @@ bool RVPFileTransfer::msnftp() {
 void RVPFileTransfer::doRecvFile() {
 	bool completed = false;
 	connection = new Connection(DEFAULT_CONNECTION_POOL);
-	MessageBoxA(NULL, file->getHost(), "Host 2", MB_OK);
-	MessageBoxA(NULL,  file->getAuthCookie(), file->getHost(), MB_OK);
 	if (connection->connect(file->getHost(), file->getPort())) {
 		/* ack connected */
 		if (connection->send("VER MSNFTP\r\n")) {
