@@ -146,6 +146,7 @@ bool RVPFileTransfer::msnftp() {
 void RVPFileTransfer::doRecvFile() {
 	bool completed = false;
 	connection = new Connection(DEFAULT_CONNECTION_POOL);
+	MessageBoxA(NULL,  file->getAuthCookie(), file->getHost(), MB_OK);
 	if (connection->connect(file->getHost(), file->getPort())) {
 		/* ack connected */
 		if (connection->send("VER MSNFTP\r\n")) {

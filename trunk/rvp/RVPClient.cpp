@@ -225,9 +225,11 @@ RVPFile::RVPFile(int mode, const char *contact, const char *id, const char *logi
 	file = NULL;
 	path = NULL;
 	host = NULL;
+	authCookie = NULL;
 	this->mode = mode;
 	this->contact = Utils::dupString(contact);
 	this->login = Utils::dupString(login);
+	this->cookie = Utils::dupString(id);
 	list.add(this);
 }
 
@@ -238,6 +240,8 @@ RVPFile::~RVPFile() {
 	if (host != NULL) delete host;
 	if (contact != NULL) delete contact;
 	if (login != NULL) delete login;
+	if (cookie != NULL) delete cookie;
+	if (authCookie != NULL) delete authCookie;
 }
 
 int RVPFile::getMode() {
@@ -253,7 +257,16 @@ const char *RVPFile::getLogin() {
 }
 
 const char *RVPFile::getCookie() {
-	return getId();
+	return cookie;
+}
+
+const char *RVPFile::getAuthCookie() {
+	return authCookie;
+}
+
+void RVPFile::setAuthCookie(const char *f) {
+	if (authCookie != NULL) delete authCookie;
+	authCookie = Utils::dupString(f);
 }
 
 void RVPFile::setSize(int s) {
@@ -396,6 +409,7 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 												HTTPHeader *applicationFileSizeHdr = inviteRequest->getHeader("Application-FileSize"); /* file size */
 												HTTPHeader *ipAddressHdr = inviteRequest->getHeader("IP-Address"); /* host ip */
 												HTTPHeader *portHdr = inviteRequest->getHeader("Port"); /* port */
+												HTTPHeader *authCookieHdr = inviteRequest->getHeader("AuthCookie"); /* auth cookie */
 												if (invitationCommandHdr != NULL && invitationCookieHdr != NULL) {
 													if (!strcmpi(invitationCommandHdr->getValue(), "INVITE")) { /* INVITE */
 														/* file transfer */
@@ -414,7 +428,8 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 																/* Stop transfer */
 																if (file->getMode() == RVPFile::MODE_RECV) {
 																	/* Connect to given host/port */
-																	if (ipAddressHdr != NULL && portHdr != NULL) {
+																	if (ipAddressHdr != NULL && portHdr != NULL && authCookieHdr != NULL) {
+																		file->setAuthCookie(authCookieHdr->getValue());
 																		file->setHost(ipAddressHdr->getValue());
 																		file->setPort(atol(portHdr->getValue()));
 																		RVPFileTransfer::recvFile(file, listener);

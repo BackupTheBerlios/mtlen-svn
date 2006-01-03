@@ -118,6 +118,8 @@ private:
 	char *file;
 	char *path;
 	char *host;
+	char *cookie;
+	char *authCookie;
 	int port;
 public:
 	enum MODES {
@@ -133,6 +135,8 @@ public:
 	const char *getCookie();
 	void   setSize(int size);
 	int	   getSize();
+	void   setAuthCookie(const char *f);
+	const char *getAuthCookie();
 	void   setFile(const char *f);
 	const char *getFile();
 	void   setPath(const char *f);
