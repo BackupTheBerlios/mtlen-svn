@@ -435,12 +435,12 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 																		RVPFileTransfer::recvFile(file, listener);
 																	} else {
 																		/* cancel */
+																		
 																	}
 																} else {
 																	/* Start server and send details */
 																	RVPFileTransfer::sendFile(file, listener);
 																}
-																delete file;
 															}
 															delete login;
 														}
