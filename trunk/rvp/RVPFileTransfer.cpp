@@ -42,6 +42,7 @@ void __cdecl RVPFileTransferSend(void *ptr) {
 RVPFileTransfer::RVPFileTransfer(RVPFile *file, RVPFileListener *listener):ListItem(file->getContact(), file->getCookie()) {
 	this->file = file;
 	this->listener = listener;
+	MessageBoxA(NULL, file->getHost(), "Host 0", MB_OK);
 	list.add(this);
 }
 
@@ -53,6 +54,7 @@ RVPFileTransfer::~RVPFileTransfer() {
 }
 
 void RVPFileTransfer::recvFile() {
+	MessageBoxA(NULL, file->getHost(), "Host 5", MB_OK);
 	forkThread(TGROUP_RECV, RVPFileTransferRecv, 0, this);
 }
 
@@ -146,6 +148,7 @@ bool RVPFileTransfer::msnftp() {
 void RVPFileTransfer::doRecvFile() {
 	bool completed = false;
 	connection = new Connection(DEFAULT_CONNECTION_POOL);
+	MessageBoxA(NULL, file->getHost(), "Host 2", MB_OK);
 	MessageBoxA(NULL,  file->getAuthCookie(), file->getHost(), MB_OK);
 	if (connection->connect(file->getHost(), file->getPort())) {
 		/* ack connected */
@@ -178,6 +181,7 @@ void RVPFileTransfer::doSendFile() {
 
 void RVPFileTransfer::recvFile(RVPFile *file, RVPFileListener *listener) {
 	RVPFileTransfer* ft = new RVPFileTransfer(file, listener);
+	MessageBoxA(NULL, file->getHost(), "Host 1", MB_OK);
 	ft->recvFile();
 }
 
