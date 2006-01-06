@@ -177,6 +177,7 @@ bool RVPFileTransfer::msnftp() {
 			}
 		}
 	}
+	connection->send("BYE\r\n");
 	if (listener != NULL) {
 		if (error) {
 			listener->onFileProgress(file, RVPFileListener::PROGRESS_ERROR, 0);

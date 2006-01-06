@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "RVPImpl.h"
 #include "rvp.h"
 #include "time.h"
@@ -357,6 +359,18 @@ int RVPImpl::sendTyping(HANDLE hContact, bool on) {
 	return 0;
 }
 
+int	RVPImpl::sendFileInvite(HANDLE hContact, const char * filenames[] , int filenum) {
+	struct _stat statbuf;
+	char *contactID = Utils::getLogin(hContact);
+	if (_stat(filenames[0], &statbuf)) {
+      //   JabberLog("'%s' is an invalid filename", files[i]);
+	} else {
+		RVPFile *rvpFile = new RVPFile(RVPFile::MODE_SEND, contactID, "12345678", client->getSignInName());
+		rvpFile->setFile(filenames[0]);
+		rvpFile->setSize(statbuf.st_size);
+	}	
+	delete contactID;
+}
 
 int RVPImpl::sendFileAccept(RVPFile *file) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
