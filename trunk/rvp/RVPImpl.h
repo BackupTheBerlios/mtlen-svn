@@ -89,7 +89,7 @@ public:
 	void onTyping(const char *login);
 	void onMessage(const char *login, const char *nick, const wchar_t *message);
 	void onStatus(const char *login, int status);
-	void onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize);
+	void onFileInvite(const char *login, const char *nick, RVPFile *file);
 	void onFileProgress(RVPFile *file, int type, int progress);
 };
 

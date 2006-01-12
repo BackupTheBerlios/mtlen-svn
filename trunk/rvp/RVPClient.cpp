@@ -221,7 +221,7 @@ RVPFile* RVPFile::find(const char *id1, const char *id2) {
 	return (RVPFile*)list.find(id1, id2);
 }
 
-RVPFile::RVPFile(int mode, const char *contact, const char *id, const char *login):ListItem(contact, id) {
+RVPFile::RVPFile(int mode, const char *contact, const char *cookie, const char *login):ListItem(contact, cookie) {
 	file = NULL;
 	path = NULL;
 	host = NULL;
@@ -229,7 +229,7 @@ RVPFile::RVPFile(int mode, const char *contact, const char *id, const char *logi
 	this->mode = mode;
 	this->contact = Utils::dupString(contact);
 	this->login = Utils::dupString(login);
-	this->cookie = Utils::dupString(id);
+	this->cookie = Utils::dupString(cookie);
 	list.add(this);
 }
 
@@ -416,7 +416,12 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 														if (applicationNameHdr != NULL && !strcmpi(applicationNameHdr->getValue(), "File Transfer")) {
 															if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
 																if (listener != NULL) {
-																	listener->onFileInvite(login, nick, invitationCookieHdr->getValue(), applicationFileHdr->getValue(), atol(applicationFileSizeHdr->getValue()));
+																	char *node = getRealLoginFromLogin(getSignInName());
+																	RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, login, invitationCookieHdr->getValue(), node);
+																	delete node;
+																	rvpFile->setFile(applicationFileHdr->getValue());
+																	rvpFile->setSize(atol(applicationFileSizeHdr->getValue()));
+																	listener->onFileInvite(login, nick, rvpFile);
 																}
 															}
 														}
@@ -694,6 +699,28 @@ char *RVPClient::getLoginFromUrl(const char *url) {
 	}
 	delete str;
 	return login;
+}
+
+char *RVPClient::getRealLoginFromLogin(const char *login) {
+	char *reallogin = NULL;
+	char *str = Utils::dupString(login);
+	char *ptr = strchr(str, '@');
+	if (ptr != NULL) {
+		char *server = ptr + 1;
+		*ptr = '\0';
+		RVPDNSMapping *mapping = RVPDNSMapping::find(server);
+		if (mapping != NULL) {
+			server = (char *)mapping->getDestHost();
+		}
+		int len = strlen("@") + strlen(server) + strlen(str) + 1;
+		reallogin = new char[len];
+		_snprintf(reallogin, len, "%s@%s", str, server);
+	}
+	if (reallogin == NULL) {
+		reallogin = Utils::dupString(login);
+	}
+	delete str;
+	return reallogin;
 }
 
 int RVPClient::signIn(const char *signInName, const char *manualServer) {

@@ -535,21 +535,18 @@ void RVPImpl::onMessage(const char *login, const char *nick, const wchar_t *mess
 	}
 }
 
-void RVPImpl::onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize) {
+void RVPImpl::onFileInvite(const char *login, const char *nick, RVPFile *rvpFile) {
 	PROTORECVEVENT pre;
 	CCSDATA ccs;
 	HANDLE hContact = Utils::getContactFromId(login);
 	if (hContact==NULL) {
 		hContact = Utils::createContact(login, nick, FALSE);
 	}
-	RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, login, cookie, client->getSignInName());
-	rvpFile->setFile(filename);
-	rvpFile->setSize(filesize);
 	// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
-	char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(filename) + 2);
+	char *szBlob = (char *) malloc(sizeof(DWORD) + strlen(rvpFile->getFile()) + 2);
 	*((PDWORD) szBlob) = (DWORD) rvpFile;
-	strcpy(szBlob + sizeof(DWORD), filename);
-	szBlob[sizeof(DWORD) + strlen(filename) + 1] = '\0';
+	strcpy(szBlob + sizeof(DWORD), rvpFile->getFile());
+	szBlob[sizeof(DWORD) + strlen(rvpFile->getFile()) + 1] = '\0';
 	pre.flags = 0;
 	pre.timestamp = time(NULL);
 	pre.szMessage = szBlob;

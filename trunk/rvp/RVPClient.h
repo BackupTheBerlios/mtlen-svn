@@ -161,7 +161,7 @@ public:
 	virtual void onStatus(const char *login, int status) = 0;
 	virtual void onTyping(const char *login) = 0;
 	virtual void onMessage(const char *login, const char *nick, const wchar_t *message) = 0;
-	virtual void onFileInvite(const char *login, const char *nick, const char *cookie, const char *filename, int filesize) = 0;
+	virtual void onFileInvite(const char *login, const char *nick, RVPFile *file) = 0;
 //	virtual void onFileProgress(RVPFile *file, int type, int progress) = 0;
 
 };
@@ -219,7 +219,7 @@ public:
 	static int	getStatusFromString(const char *statusString);
 	static char *getServerFromLogin(const char *signInName, const char *manualServer);
 	static char *getUrlFromLogin(const char *signInName);
-//	static char *getFullUrlFromLogin(const char *signInName);
+	static char *getRealLoginFromLogin(const char *login);
 	static char *getLoginFromUrl(const char *url);
 };
 
