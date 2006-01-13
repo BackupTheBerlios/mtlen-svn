@@ -437,14 +437,14 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 																		file->setAuthCookie(authCookieHdr->getValue());
 																		file->setHost(ipAddressHdr->getValue());
 																		file->setPort(atol(portHdr->getValue()));
-																		RVPFileTransfer::recvFile(file, listener);
+																		RVPFileTransfer::recvFile(file, this);
 																	} else {
 																		/* cancel */
-																		
+
 																	}
 																} else {
 																	/* Start server and send details */
-																	RVPFileTransfer::sendFile(file, listener);
+																	RVPFileTransfer::sendFile(file, this);
 																}
 															}
 															delete login;
@@ -1584,5 +1584,8 @@ RVPSubscription* RVPClient::getSubscription(const char *login) {
 void RVPClient::onFileProgress(RVPFile * file, int type, int progress) {
 	if (listener != NULL) {
 		listener->onFileProgress(file, type, progress);
+	}
+	if (type == RVPFileListener::PROGRESS_ERROR || type == RVPFileListener::PROGRESS_COMPLETED) {
+		delete file;
 	}
 }

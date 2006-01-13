@@ -50,18 +50,20 @@ RVPFileTransfer::RVPFileTransfer(RVPFile *file, RVPFileListener *listener):ListI
 }
 
 RVPFileTransfer::~RVPFileTransfer() {
-	while (getThreadCount(TGROUP_RECV | TGROUP_SEND) > 0) {
-	}
 	list.remove(this);
+	if (connection != NULL) connection->close();
+	while (getThreadCount(TGROUP_TRANSFER > 0)) {
+		Sleep(100);
+	}
 	if (connection != NULL) delete connection;
 }
 
 void RVPFileTransfer::recvFile() {
-	forkThread(TGROUP_RECV, RVPFileTransferRecv, 0, this);
+	forkThread(TGROUP_TRANSFER, RVPFileTransferRecv, 0, this);
 }
 
 void RVPFileTransfer::sendFile() {
-	forkThread(TGROUP_SEND, RVPFileTransferSend, 0, this);
+	forkThread(TGROUP_TRANSFER, RVPFileTransferSend, 0, this);
 }
 
 void RVPFileTransfer::cancelFile() {
@@ -137,7 +139,7 @@ bool RVPFileTransfer::msnftp() {
 							strcat(fullFileName, file->getFile());
 							int fileId = _open(fullFileName, _O_BINARY|_O_WRONLY|_O_CREAT|_O_TRUNC, _S_IREAD|_S_IWRITE);
 							delete fullFileName;
-							
+
 							while (true) {
 								char buffer[2048];
 								int header = 0;
@@ -152,14 +154,14 @@ bool RVPFileTransfer::msnftp() {
 											error = true;
 											break;
 										}
-									}										
+									}
 									//listener->onFileProgress(file, RVPFileListener::PROGRESS_INITIALIZING, 0);
 									if (header&0xFF == 0) {
 										continue;
 									}
 								} else {
 									error = true;
-								}									
+								}
 								break;
 							}
 							_close(fileId);

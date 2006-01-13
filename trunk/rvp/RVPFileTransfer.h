@@ -1,5 +1,4 @@
 
-class RVPFileTransferListener;
 class RVPFileTransfer;
 
 #ifndef RVPFILETRANSFER_H_
@@ -14,8 +13,7 @@ class RVPFileTransfer;
 class RVPFileTransfer:public ThreadManager, public ListItem {
 private:
 	enum THREADGROUPS {
-		TGROUP_RECV = 1,
-		TGROUP_SEND = 2
+		TGROUP_TRANSFER = 1
 	};
 	static List list;
 	Connection *connection;
