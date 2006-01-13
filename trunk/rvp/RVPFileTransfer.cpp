@@ -137,11 +137,13 @@ bool RVPFileTransfer::msnftp() {
 							strcat(fullFileName, file->getFile());
 							int fileId = _open(fullFileName, _O_BINARY|_O_WRONLY|_O_CREAT|_O_TRUNC, _S_IREAD|_S_IWRITE);
 							delete fullFileName;
+							
 							while (true) {
 								char buffer[2048];
-								char header[3];
-								if (connection->recv(header, 3)) {
-									int blockSize = ((int)header[2]) | header[1];
+								int header = 0;
+								if (connection->recv((char *)&header, 3)) {
+									_write(fileId, (char *)&header, 3);
+									int blockSize = header >> 8;
 									while (blockSize > 0) {
 										int readSize = min(2048, blockSize);
 										blockSize -= readSize;
@@ -152,10 +154,12 @@ bool RVPFileTransfer::msnftp() {
 										}
 									}										
 									//listener->onFileProgress(file, RVPFileListener::PROGRESS_INITIALIZING, 0);
-									if (header[0] != 0) {
+									if (header&0xFF == 0) {
 										continue;
 									}
-								} 
+								} else {
+									error = true;
+								}									
 								break;
 							}
 							_close(fileId);
@@ -177,7 +181,13 @@ bool RVPFileTransfer::msnftp() {
 			}
 		}
 	}
-	connection->send("BYE\r\n");
+	if (file->getMode() == RVPFile::MODE_RECV) {
+		if (error) {
+			connection->send("BYE 2164261694\r\n");
+		} else {
+			connection->send("BYE 16777989\r\n");
+		}
+	}
 	if (listener != NULL) {
 		if (error) {
 			listener->onFileProgress(file, RVPFileListener::PROGRESS_ERROR, 0);
