@@ -365,6 +365,13 @@ int	RVPImpl::sendFileInvite(HANDLE hContact, const char * filenames[] , int file
 	if (_stat(filenames[0], &statbuf)) {
       //   JabberLog("'%s' is an invalid filename", files[i]);
 	} else {
+		/*
+if ((t=strrchr(ft->files[i], '\\')) != NULL)
+					t++;
+				else
+					t = ft->files[i];
+				_snprintf(filename, sizeof(filename)-1, t);
+*/
 //		RVPFile *rvpFile = new RVPFile(RVPFile::MODE_SEND, contactID, "12345678", client->getSignInName());
 	//	rvpFile->setFile(filenames[0]);
 		//rvpFile->setSize(statbuf.st_size);

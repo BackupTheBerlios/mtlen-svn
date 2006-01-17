@@ -9,7 +9,6 @@ class RVPFileListener;
 #include "ThreadManager.h"
 #include "Connection.h"
 
-
 class RVPFileListener {
 public:
 	enum PROGRESS {
@@ -24,7 +23,7 @@ public:
 	virtual void onFileProgress(RVPFile *file, int type, int progress) = 0;
 };
 
-class RVPFile:public ThreadManager, public ListItem {
+class RVPFile:public ThreadManager, public ListItem, public ConnectionListener {
 private:
 	enum THREADGROUPS {
 		TGROUP_TRANSFER = 1
@@ -54,9 +53,10 @@ public:
 		MODE_RECV,
 		MODE_SEND
 	};
+	static RVPFile* find(const char *contact, const char *id);
 	RVPFile(int mode, const char *contact, const char *id, const char *login, RVPFileListener *listener);
 	~RVPFile();
-	static RVPFile* find(const char *contact, const char *id);
+	void	onNewConnection(Connection *connection, DWORD dwRemoteIP);
 	int		getMode();
 	const char *getContact();
 	const char *getLogin();

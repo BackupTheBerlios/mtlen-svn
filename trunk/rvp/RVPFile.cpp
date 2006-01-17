@@ -233,35 +233,39 @@ bool RVPFile::msnftp() {
 							strcat(fullFileName, getFile());
 							int fileId = _open(fullFileName, _O_BINARY|_O_WRONLY|_O_CREAT|_O_TRUNC, _S_IREAD|_S_IWRITE);
 							delete fullFileName;
-							int receivedBytes = 0;
-							while (true) {
-								char buffer[2048];
-								int header = 0;
-								if (connection->recv((char *)&header, 3)) {
-									_write(fileId, (char *)&header, 3);
-									int blockSize = header >> 8;
-									while (blockSize > 0) {
-										int readSize = min(2048, blockSize);
-										blockSize -= readSize;
-										receivedBytes += readSize;
-										connection->recv(buffer, readSize);
-										if (_write(fileId, buffer, readSize) != readSize) {
-											error = true;
-											break;
+							if (fileId >= 0) {
+								int receivedBytes = 0;
+								while (receivedBytes < getSize()) {
+									char buffer[2048];
+									int header = 0;
+									if (connection->recv((char *)&header, 3)) {
+										_write(fileId, (char *)&header, 3);
+										int blockSize = header >> 8;
+										while (blockSize > 0) {
+											int readSize = min(2048, blockSize);
+											blockSize -= readSize;
+											receivedBytes += readSize;
+											connection->recv(buffer, readSize);
+											if (_write(fileId, buffer, readSize) != readSize) {
+												error = true;
+												break;
+											}
 										}
+										if (listener != NULL) {
+											listener->onFileProgress(this, RVPFileListener::PROGRESS_PROGRESS, receivedBytes);
+										}
+										if (header&0xFF == 0) {
+											continue;
+										}
+									} else {
+										error = true;
 									}
-									if (listener != NULL) {
-										listener->onFileProgress(this, RVPFileListener::PROGRESS_PROGRESS, receivedBytes);
-									}
-									if (header&0xFF == 0) {
-										continue;
-									}
-								} else {
-									error = true;
+									break;
 								}
-								break;
+								_close(fileId);
+							} else {
+								error = true;
 							}
-							_close(fileId);
 							completed = true;
 						}
 					}
@@ -275,6 +279,43 @@ bool RVPFile::msnftp() {
 						listener->onFileProgress(this, RVPFileListener::PROGRESS_INITIALIZING, 0);
 					}
 					/* send data */
+					char *fullFileName = new char[strlen(getFile()) + strlen(getPath()) + 2];
+					strcpy(fullFileName, getPath());
+					if (fullFileName[strlen(fullFileName)-1] != '\\') {
+						strcat(fullFileName, "\\");
+					}
+					strcat(fullFileName, getFile());
+					int fileId=_open(fullFileName, _O_BINARY|_O_RDONLY);
+					delete fullFileName;
+					if (fileId >= 0) {
+						int sentBytes = 0;
+						while (sentBytes < getSize()) {
+							char buffer[2048];
+							int numRead=_read(fileId, buffer+3, min(2045, getSize() - sentBytes));
+							if (numRead > 0) {
+								sentBytes += numRead;
+								if (getSize() - sentBytes > 0) {
+									buffer[0] = 0;
+								} else {
+									buffer[0] = 1;
+								}
+								buffer[1] = numRead & 0xFF;
+								buffer[2] = (numRead >> 8) & 0xFF;
+								if (connection->send(buffer, 3 + numRead) != 3 + numRead) {
+									error = true;
+									break;
+								}
+							} else {
+								break;
+							}
+							if (listener != NULL) {
+								listener->onFileProgress(this, RVPFileListener::PROGRESS_PROGRESS, sentBytes);
+							}
+						}	
+						_close(fileId);
+					} else {
+						error = true;
+					}
 					completed = true;
 					break;
 			}
@@ -320,11 +361,15 @@ void RVPFile::doSend() {
 	if (listener != NULL) {
 		listener->onFileProgress(this, RVPFileListener::PROGRESS_CONNECTING, 0);
 	}
+	int port = listenConnection->bind(NULL, 0, this);
 	/* Bind and send info */
 	
 	/* accept and call msnftp */
-	//msnftp(con);
 	delete listenConnection;
 	listenConnection = NULL;
 }
 
+void RVPFile::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
+	this->connection = connection;
+	msnftp();
+}

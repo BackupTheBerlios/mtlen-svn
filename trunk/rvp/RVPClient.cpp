@@ -1306,7 +1306,7 @@ int RVPClient::getACL() {
 }
 
 
-int RVPClient::sendFileInvite(RVPFile *file, const char *contactID, const char *contactDisplayname, const char *principalDisplayname) {
+int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contactDisplayname, const char *principalDisplayname) {
 	int result = 1;
 	if (bOnline) {
 		char *node = getUrlFromLogin(contactID);
