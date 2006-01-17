@@ -365,11 +365,12 @@ int	RVPImpl::sendFileInvite(HANDLE hContact, const char * filenames[] , int file
 	if (_stat(filenames[0], &statbuf)) {
       //   JabberLog("'%s' is an invalid filename", files[i]);
 	} else {
-		RVPFile *rvpFile = new RVPFile(RVPFile::MODE_SEND, contactID, "12345678", client->getSignInName());
-		rvpFile->setFile(filenames[0]);
-		rvpFile->setSize(statbuf.st_size);
+//		RVPFile *rvpFile = new RVPFile(RVPFile::MODE_SEND, contactID, "12345678", client->getSignInName());
+	//	rvpFile->setFile(filenames[0]);
+		//rvpFile->setSize(statbuf.st_size);
 	}	
 	delete contactID;
+	return 0;
 }
 
 int RVPImpl::sendFileAccept(RVPFile *file) {
@@ -563,11 +564,17 @@ void RVPImpl::onFileProgress(RVPFile *file, int type, int progress) {
 	HANDLE hContact = Utils::getContactFromId(file->getContact());
 	if (hContact != NULL) {
 		if (type == RVPFileListener::PROGRESS_CONNECTING) {
-			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, file, 0);
 		} else if (type == RVPFileListener::PROGRESS_CONNECTED) {
 			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
 		} else if (type == RVPFileListener::PROGRESS_INITIALIZING) {
 			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_INITIALISING, file, 0);
+		} else if (type == RVPFileListener::PROGRESS_ERROR) {
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
+		} else if (type == RVPFileListener::PROGRESS_COMPLETED) {
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
+		} else if (type == RVPFileListener::PROGRESS_CANCELLED) {
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
 		} else if (type == RVPFileListener::PROGRESS_PROGRESS) {
 			PROTOFILETRANSFERSTATUS pfts;
 			if (file != NULL) {
@@ -593,19 +600,3 @@ void RVPImpl::onFileProgress(RVPFile *file, int type, int progress) {
 	}
 }
 
-/*
-void RVPImpl::onFileReject(const char *login, const char *filename, int filesize) {
-}
-
-void RVPImpl::onFileAccept(const char *login, const char *filename, int filesize) {
-}
-
-void RVPImpl::onFileProgress(const char *login, const char *filename, int filesize) {
-}
-
-void RVPImpl::onFileComplete(const char *login, const char *filename, int filesize) {
-}
-
-void RVPImpl::onFileError(const char *login, const char *filename, int filesize) {
-}
-*/

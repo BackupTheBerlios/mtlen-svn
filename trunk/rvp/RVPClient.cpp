@@ -215,102 +215,6 @@ void RVPSession::releaseAll() {
 	list.releaseAll();
 }
 
-List RVPFile::list;
-
-RVPFile* RVPFile::find(const char *id1, const char *id2) {
-	return (RVPFile*)list.find(id1, id2);
-}
-
-RVPFile::RVPFile(int mode, const char *contact, const char *cookie, const char *login):ListItem(contact, cookie) {
-	file = NULL;
-	path = NULL;
-	host = NULL;
-	authCookie = NULL;
-	this->mode = mode;
-	this->contact = Utils::dupString(contact);
-	this->login = Utils::dupString(login);
-	this->cookie = Utils::dupString(cookie);
-	list.add(this);
-}
-
-RVPFile::~RVPFile() {
-	list.remove(this);
-	if (file != NULL) delete file;
-	if (path != NULL) delete path;
-	if (host != NULL) delete host;
-	if (contact != NULL) delete contact;
-	if (login != NULL) delete login;
-	if (cookie != NULL) delete cookie;
-	if (authCookie != NULL) delete authCookie;
-}
-
-int RVPFile::getMode() {
-	return mode;
-}
-
-const char *RVPFile::getContact() {
-	return contact;
-}
-
-const char *RVPFile::getLogin() {
-	return login;
-}
-
-const char *RVPFile::getCookie() {
-	return cookie;
-}
-
-const char *RVPFile::getAuthCookie() {
-	return authCookie;
-}
-
-void RVPFile::setAuthCookie(const char *f) {
-	if (authCookie != NULL) delete authCookie;
-	authCookie = Utils::dupString(f);
-}
-
-void RVPFile::setSize(int s) {
-	size = s;
-}
-
-int RVPFile::getSize() {
-	return size;
-}
-
-void RVPFile::setFile(const char *f) {
-	if (file != NULL) delete file;
-	file = Utils::dupString(f);
-}
-
-const char *RVPFile::getFile() {
-	return file;
-}
-
-void RVPFile::setPath(const char *f) {
-	if (path != NULL) delete path;
-	path = Utils::dupString(f);
-}
-
-const char *RVPFile::getPath() {
-	return path;
-}
-
-void RVPFile::setHost(const char *f) {
-	if (host != NULL) delete host;
-	host = Utils::dupString(f);
-}
-
-const char *RVPFile::getHost() {
-	return host;
-}
-
-void RVPFile::setPort(int p) {
-	port = p;
-}
-
-int RVPFile::getPort() {
-	return port;
-}
 
 void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HANDLE hConnection, DWORD dwRemoteIP, void * pExtra) {
 	HTTPRequest *request;
@@ -417,7 +321,7 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 															if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
 																if (listener != NULL) {
 																	char *node = getRealLoginFromLogin(getSignInName());
-																	RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, login, invitationCookieHdr->getValue(), node);
+																	RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, login, invitationCookieHdr->getValue(), node, this);
 																	delete node;
 																	rvpFile->setFile(applicationFileHdr->getValue());
 																	rvpFile->setSize(atol(applicationFileSizeHdr->getValue()));
@@ -437,14 +341,14 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 																		file->setAuthCookie(authCookieHdr->getValue());
 																		file->setHost(ipAddressHdr->getValue());
 																		file->setPort(atol(portHdr->getValue()));
-																		RVPFileTransfer::recvFile(file, this);
+																		file->recv();
 																	} else {
 																		/* cancel */
 
 																	}
 																} else {
 																	/* Start server and send details */
-																	RVPFileTransfer::sendFile(file, this);
+																	file->send();
 																}
 															}
 															delete login;

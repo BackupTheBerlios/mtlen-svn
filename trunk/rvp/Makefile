@@ -6,7 +6,7 @@ CC   = gcc.exe
 WINDRES = windres.exe
 RM = rm
 UPX = upx -9 -q --compress-icons=0
-SRC = ./xmllib/XMLObject.cpp ./xmllib/JString.cpp ./httplib/MD5.cpp ./httplib/HTTPLib.cpp Connection.cpp JLogger.cpp Utils.cpp List.cpp ThreadManager.cpp RVPClient.cpp RVPFileTransfer.cpp RVPImpl.cpp rvp_opt.cpp rvp_svc.cpp rvp.cpp
+SRC = ./xmllib/XMLObject.cpp ./xmllib/JString.cpp ./httplib/MD5.cpp ./httplib/HTTPLib.cpp Connection.cpp JLogger.cpp Utils.cpp List.cpp ThreadManager.cpp RVPClient.cpp RVPFile.cpp RVPImpl.cpp rvp_opt.cpp rvp_svc.cpp rvp.cpp
 RES  = rvp.res
 OBJ = $(SRC:.cpp=.o) $(RES)
 BIN  = rvp.dll

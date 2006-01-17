@@ -21,8 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class RVPDNSMapping;
 class RVPSubscription;
 class RVPSession;
-class RVPFileListener;
-class RVPFile;
 class RVPClientListener;
 class RVPClient;
 
@@ -32,7 +30,7 @@ class RVPClient;
 #include <windows.h>
 #include "List.h"
 #include "httplib/HTTPLib.h"
-#include "RVPFileTransfer.h"
+#include "RVPFile.h"
 
 class RVPDNSMapping:public ListItem {
 private:
@@ -93,58 +91,6 @@ public:
 	static RVPSession *get(const char *node);
 	static void add(const char *node, const char *sid);
 	static void releaseAll();
-};
-
-class RVPFileListener {
-public:
-	enum PROGRESS {
-		PROGRESS_CONNECTING,
-		PROGRESS_CONNECTED,
-		PROGRESS_INITIALIZING,
-		PROGRESS_PROGRESS,
-		PROGRESS_COMPLETED,
-		PROGRESS_ERROR
-	};
-	virtual void onFileProgress(RVPFile *file, int type, int progress) = 0;
-};
-
-class RVPFile:public ListItem {
-private:
-	static List list;
-	int	 mode;
-	int size;
-	char *contact;
-	char *login;
-	char *file;
-	char *path;
-	char *host;
-	char *cookie;
-	char *authCookie;
-	int port;
-public:
-	enum MODES {
-		MODE_RECV,
-		MODE_SEND
-	};
-	RVPFile(int mode, const char *contact, const char *id, const char *login);
-	~RVPFile();
-	static RVPFile* find(const char *contact, const char *id);
-	int		getMode();
-	const char *getContact();
-	const char *getLogin();
-	const char *getCookie();
-	void   setSize(int size);
-	int	   getSize();
-	void   setAuthCookie(const char *f);
-	const char *getAuthCookie();
-	void   setFile(const char *f);
-	const char *getFile();
-	void   setPath(const char *f);
-	const char *getPath();
-	void	setHost(const char *f);
-	const char *getHost();
-	void	setPort(int p);
-	int		getPort();
 };
 
 
