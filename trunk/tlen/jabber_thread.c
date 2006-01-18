@@ -761,11 +761,9 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 							if (xNode->numChild==0 || (xNode->numChild==1 && idNode!=NULL)) {
 								// Maybe a cancel to the previous composing
 								if ((hContact=JabberHContactFromJID(from)) != NULL) {
-									if (item != NULL) {
-										if (item->isTyping) {
-											item->isTyping = FALSE;
-											CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
-										}
+									if (item != NULL && item->isTyping) {
+										item->isTyping = FALSE;
+										CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
 									}
 								}
 							}
