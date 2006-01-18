@@ -24,8 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/stat.h>
 #include "Utils.h"
 #include "RVPFile.h"
+#include "JLogger.h"
 
 /* Receive file thread */
+
+static   JLogger *logger = new JLogger("g:/rvpfile.log");
 
 void __cdecl RVPFileRecv(void *ptr) {
 	RVPFile *ft = (RVPFile *) ptr;
@@ -233,35 +236,36 @@ bool RVPFile::msnftp() {
 							strcat(fullFileName, getFile());
 							int fileId = _open(fullFileName, _O_BINARY|_O_WRONLY|_O_CREAT|_O_TRUNC, _S_IREAD|_S_IWRITE);
 							delete fullFileName;
+							error = false;
 							if (fileId >= 0) {
 								int receivedBytes = 0;
-								while (receivedBytes < getSize()) {
+								while (!error && receivedBytes < getSize()) {
 									char buffer[2048];
 									int header = 0;
 									if (connection->recv((char *)&header, 3)) {
-										_write(fileId, (char *)&header, 3);
 										int blockSize = header >> 8;
-										while (blockSize > 0) {
+										while (!error && blockSize > 0) {
+											error = true;
 											int readSize = min(2048, blockSize);
-											blockSize -= readSize;
-											receivedBytes += readSize;
-											connection->recv(buffer, readSize);
-											if (_write(fileId, buffer, readSize) != readSize) {
-												error = true;
-												break;
+											if (connection->recv(buffer, readSize)) {
+												blockSize -= readSize;
+												receivedBytes += readSize;
+												if (_write(fileId, buffer, readSize) == readSize) {
+													error = false;
+												}
 											}
 										}
 										if (listener != NULL) {
 											listener->onFileProgress(this, RVPFileListener::PROGRESS_PROGRESS, receivedBytes);
 										}
-										if (header&0xFF == 0) {
-											continue;
+										if (header&0xFF != 0) {
+											break;
 										}
 									} else {
 										error = true;
 									}
-									break;
 								}
+								logger->info("before close : %s (%d)", error?"error":"ok", receivedBytes);
 								_close(fileId);
 							} else {
 								error = true;

@@ -7,19 +7,15 @@
 #include <windows.h>
 #include "JLogger.h"
 
-JLogger::JLogger()
-{
+JLogger::JLogger() {
 	strcpy(filename,"./logs/default.log");
 }
 
-JLogger::JLogger(const char *s)
-{	
+JLogger::JLogger(const char *s) {	
 	strcpy(filename,s);
 }
 
-JLogger::~JLogger()
-{
-
+JLogger::~JLogger() {
 }
 
 void JLogger::info(const char *fmt, ...) {
@@ -110,9 +106,9 @@ void JLogger::error(const char *fmt, ...) {
 #endif
 }
 
-void JLogger::log(const char *s)
-{	SYSTEMTIME time;
+void JLogger::log(const char *s) {	
 #ifndef JLOGGER_DISABLE_LOGS
+	SYSTEMTIME time;
 	GetLocalTime(&time);
 	flog=fopen(filename,"at");
 	if (flog!=NULL) {

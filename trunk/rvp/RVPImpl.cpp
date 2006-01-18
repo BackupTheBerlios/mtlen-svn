@@ -577,15 +577,15 @@ void RVPImpl::onFileProgress(RVPFile *file, int type, int progress) {
 		} else if (type == RVPFileListener::PROGRESS_INITIALIZING) {
 			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_INITIALISING, file, 0);
 		} else if (type == RVPFileListener::PROGRESS_ERROR) {
-			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_FAILED, file, 0);
 		} else if (type == RVPFileListener::PROGRESS_COMPLETED) {
-			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, file, 0);
 		} else if (type == RVPFileListener::PROGRESS_CANCELLED) {
-			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, file, 0);
+			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_FAILED, file, 0);
 		} else if (type == RVPFileListener::PROGRESS_PROGRESS) {
-			PROTOFILETRANSFERSTATUS pfts;
 			if (file != NULL) {
 				char *files[1];
+				PROTOFILETRANSFERSTATUS pfts;
 				files[0] = (char *)file->getFile();
 				memset(&pfts, 0, sizeof(PROTOFILETRANSFERSTATUS));
 				pfts.cbSize = sizeof(PROTOFILETRANSFERSTATUS);
