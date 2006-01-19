@@ -1,6 +1,7 @@
 1.0.6.9
 ---------
 + experimental client recognition
++ voice chat notification sound
 * bugfix: offline message timestamp
 * code clean-up
 1.0.6.8
