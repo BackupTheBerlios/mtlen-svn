@@ -1316,6 +1316,9 @@ int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contac
 			char *utf8Message;
 			HTTPRequest *request, *response;
 			RVPSession *session = RVPSession::get(contactID);
+			char *node = getRealLoginFromLogin(getSignInName());
+			char *cookie ="123456789";
+			RVPFile *rvpFile = new RVPFile(RVPFile::MODE_SEND, contactID, cookie, node, this);
 			request = new HTTPRequest();
 			request->setMethod("NOTIFY");
 			request->setUrl(node);

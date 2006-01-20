@@ -372,7 +372,15 @@ if ((t=strrchr(ft->files[i], '\\')) != NULL)
 					t = ft->files[i];
 				_snprintf(filename, sizeof(filename)-1, t);
 */
-//		RVPFile *rvpFile = new RVPFile(RVPFile::MODE_SEND, contactID, "12345678", client->getSignInName());
+
+		char *principalDisplayname;
+		char *contactDisplayname;
+		principalDisplayname = Utils::getDisplayName(NULL);
+		contactDisplayname = Utils::getDisplayName(data->hContact);
+		delete principalDisplayname;
+		delete contactDisplayname;
+		
+		//		RVPFile *rvpFile = new RVPFile(RVPFile::MODE_SEND, contactID, "12345678", client->getSignInName());
 	//	rvpFile->setFile(filenames[0]);
 		//rvpFile->setSize(statbuf.st_size);
 	}	
