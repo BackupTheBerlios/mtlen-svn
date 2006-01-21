@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/stat.h>
 #include "Utils.h"
 #include "RVPFile.h"
+#include "httplib/MD5.h"
 #include "JLogger.h"
 
 /* Receive file thread */
@@ -48,7 +49,8 @@ RVPFile* RVPFile::find(const char *id1, const char *id2) {
 	return (RVPFile*)list.find(id1, id2);
 }
 
-RVPFile::RVPFile(int mode, const char *contact, const char *cookie, const char *login, RVPFileListener *listener):ListItem(contact, cookie) {
+
+RVPFile::RVPFile(int mode, const char *contact, const char *login, RVPFileListener *listener):ListItem(contact, cookie) {
 	file = NULL;
 	path = NULL;
 	host = NULL;
@@ -58,8 +60,38 @@ RVPFile::RVPFile(int mode, const char *contact, const char *cookie, const char *
 	this->mode = mode;
 	this->contact = Utils::dupString(contact);
 	this->login = Utils::dupString(login);
+	this->listener = listener;
+	list.add(this);
+	char *out = new char[128];
+	unsigned int output[4];
+	time_t tim = time(NULL);
+	int rnd = rand();
+	MD5 md5;
+	md5.init();
+	md5.update((unsigned char *)contact, strlen(login));
+	md5.update((unsigned char *)&time, sizeof(tim));
+	md5.update((unsigned char *)&rnd, sizeof(rnd));
+	md5.finalize();
+	md5.get(output);
+	output[0] ^= output[1] ^ output[2] ^ output[3];
+	output[0] &= 0x7FFFFFFF;
+	sprintf(out, "%d", output[0]);
+	this->cookie = Utils::dupString(out);
+}
+
+
+RVPFile::RVPFile(int mode, const char *contact, const char *cookie, const char *login, RVPFileListener *listener):ListItem(contact, cookie) {
+	file = NULL;
+	path = NULL;
+	host = NULL;
+	connection = NULL;
+	listenConnection = NULL;
+	this->mode = mode;
+	this->contact = Utils::dupString(contact);
+	this->login = Utils::dupString(login);
 	this->cookie = Utils::dupString(cookie);
 	this->listener = listener;
+	authCookie = NULL;
 	list.add(this);
 }
 
@@ -153,7 +185,12 @@ void RVPFile::recv() {
 }
 
 void RVPFile::send() {
-	forkThread(TGROUP_TRANSFER, RVPFileSend, 0, this);
+	listenConnection = new Connection(DEFAULT_CONNECTION_POOL);
+	port = listenConnection->bind(NULL, 0, this);
+	if (listener != NULL) {
+		listener->onFileProgress(this, RVPFileListener::PROGRESS_CONNECTING, 0);
+	}
+//	forkThread(TGROUP_TRANSFER, RVPFileSend, 0, this);
 }
 
 void RVPFile::cancel() {
@@ -361,19 +398,14 @@ void RVPFile::doRecv() {
 }
 
 void RVPFile::doSend() {
-	listenConnection = new Connection(DEFAULT_CONNECTION_POOL);
-	if (listener != NULL) {
-		listener->onFileProgress(this, RVPFileListener::PROGRESS_CONNECTING, 0);
-	}
-	int port = listenConnection->bind(NULL, 0, this);
 	/* Bind and send info */
 	
 	/* accept and call msnftp */
-	delete listenConnection;
-	listenConnection = NULL;
 }
 
 void RVPFile::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 	this->connection = connection;
+	delete listenConnection;
+	listenConnection = NULL;
 	msnftp();
 }

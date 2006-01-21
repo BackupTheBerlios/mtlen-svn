@@ -334,7 +334,6 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 														if (login != NULL) {
 															RVPFile *file = RVPFile::find(login, invitationCookieHdr->getValue());
 															if (file != NULL) {
-																/* Stop transfer */
 																if (file->getMode() == RVPFile::MODE_RECV) {
 																	/* Connect to given host/port */
 																	if (ipAddressHdr != NULL && portHdr != NULL && authCookieHdr != NULL) {
@@ -348,6 +347,11 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 																	}
 																} else {
 																	/* Start server and send details */
+																	struct sockaddr_in saddr;
+																	saddr.sin_addr.S_un.S_addr = localIP;
+//																	sprintf(callbackHost, "http://%s:%d", inet_ntoa(saddr.sin_addr), wPort);
+																	file->setHost(inet_ntoa(saddr.sin_addr));
+																	file->setPort(0);
 																	file->send();
 																}
 															}
@@ -359,12 +363,7 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 															RVPFile *file = RVPFile::find(login, invitationCookieHdr->getValue());
 															if (file != NULL) {
 																/* Stop transfer */
-																if (file->getMode() == RVPFile::MODE_RECV) {
-
-																} else {
-
-																}
-																delete file;
+																file->cancel();
 															}
 															delete login;
 														}
@@ -1306,7 +1305,7 @@ int RVPClient::getACL() {
 }
 
 
-int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contactDisplayname, const char *principalDisplayname) {
+int RVPClient::sendFile(const char *filename, const char *contactID, const char *contactDisplayname, const char *principalDisplayname) {
 	int result = 1;
 	if (bOnline) {
 		char *node = getUrlFromLogin(contactID);
@@ -1317,8 +1316,7 @@ int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contac
 			HTTPRequest *request, *response;
 			RVPSession *session = RVPSession::get(contactID);
 			char *node = getRealLoginFromLogin(getSignInName());
-			char *cookie ="123456789";
-			RVPFile *rvpFile = new RVPFile(RVPFile::MODE_SEND, contactID, cookie, node, this);
+			RVPFile *file = new RVPFile(RVPFile::MODE_SEND, contactID, node, this);
 			request = new HTTPRequest();
 			request->setMethod("NOTIFY");
 			request->setUrl(node);
@@ -1346,6 +1344,61 @@ int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contac
 			"Application-File: %s\r\n"
 			"Application-FileSize: %d\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
 			principalUrl, principalDisplayname, node, contactDisplayname, session->getSid(), file->getCookie(), file->getFile(), file->getSize());
+			utf8Message = Utils::utf8Encode2(buffer);
+			free(buffer);
+			request->setContent(utf8Message, strlen(utf8Message));
+			delete utf8Message;
+			response = HTTPUtils::performTransaction(request);
+			delete request;
+			delete node;
+			if (response != NULL) {
+				result = response->resultCode;
+				delete response;
+			}
+		}
+	}
+	return (result/100 == 2) ? 0 : result;
+}
+
+int RVPClient::sendFileAcceptResponse(RVPFile *file, const char *contactID, const char *contactDisplayname, const char *principalDisplayname) {
+	int result = 1;
+	if (bOnline) {
+		char *node = getUrlFromLogin(contactID);
+		if (node != NULL) {
+			int bufferSize = 0;
+			char *buffer = NULL;
+			char *utf8Message;
+			HTTPRequest *request, *response;
+			RVPSession *session = RVPSession::get(contactID);
+			request = new HTTPRequest();
+			request->setMethod("NOTIFY");
+			request->setUrl(node);
+			request->addHeader("RVP-Ack-Type", "DeepOr");
+			request->addHeader("RVP-Hop-Count", "1");
+			request->addHeader("RVP-Notifications-Version", "0.2");
+			request->addHeader("RVP-From-Principal", principalUrl);
+			request->addHeader("Content-Type", "text/xml");
+			request->setCredentials(credentials);
+			/* TODO: get url from login here*/
+			Utils::appendText(&buffer, &bufferSize,
+			"<?xml version=\"1.0\"?>"
+			"<r:notification xmlns:d='DAV:' xmlns:r='http://schemas.microsoft.com/rvp/' xmlns:a='http://schemas.microsoft.com/rvp/acl/'>"
+			"<r:message><r:notification-from><r:contact><d:href>%s</d:href>"
+			"<r:description>%s</r:description></r:contact></r:notification-from>"
+			"<r:notification-to><r:contact><d:href>%s</d:href>"
+			"<r:description>%s</r:description></r:contact></r:notification-to>"
+			"<r:msgbody><r:mime-data><![CDATA[MIME-Version: 1.0\r\n"
+			"Content-Type: text/x-msmsgsinvite; charset=UTF-8\r\n"
+			"Session-Id: %s\r\n\r\n"
+			"Invitation-Command: ACCEPT\r\n"
+			"Invitation-Cookie: %s\r\n"
+			"IP-Address: %s\r\n"
+			"Port: %d\r\n"
+			"AuthCookie: %s\r\n"
+			"Launch-Application: FALSE\r\n"
+			"Request-Data: IP-Address:\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
+			principalUrl, principalDisplayname, node, contactDisplayname, session->getSid(), file->getCookie(),
+			file->getHost(), file->getPort(), file->getAuthCookie());
 			utf8Message = Utils::utf8Encode2(buffer);
 			free(buffer);
 			request->setContent(utf8Message, strlen(utf8Message));

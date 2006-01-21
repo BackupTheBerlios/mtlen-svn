@@ -376,7 +376,7 @@ if ((t=strrchr(ft->files[i], '\\')) != NULL)
 		char *principalDisplayname;
 		char *contactDisplayname;
 		principalDisplayname = Utils::getDisplayName(NULL);
-		contactDisplayname = Utils::getDisplayName(data->hContact);
+		contactDisplayname = Utils::getDisplayName(hContact);
 		delete principalDisplayname;
 		delete contactDisplayname;
 		

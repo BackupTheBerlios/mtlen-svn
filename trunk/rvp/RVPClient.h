@@ -132,6 +132,7 @@ private:
 	char  callbackHost[256];
 	int	 lastStatus;
 	const char *getCallback();
+	int		sendFileAcceptResponse(RVPFile *, const char *contactID, const char *contactDisplayname, const char *principalDisplayname);
 public:
 	RVPClient(RVPClientListener *listener);
 	virtual ~RVPClient();

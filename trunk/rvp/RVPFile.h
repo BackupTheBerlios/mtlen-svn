@@ -54,7 +54,8 @@ public:
 		MODE_SEND
 	};
 	static RVPFile* find(const char *contact, const char *id);
-	RVPFile(int mode, const char *contact, const char *id, const char *login, RVPFileListener *listener);
+	RVPFile(int mode, const char *contact, const char *login, RVPFileListener *listener);
+	RVPFile(int mode, const char *contact, const char *cookie, const char *login, RVPFileListener *listener);
 	~RVPFile();
 	void	onNewConnection(Connection *connection, DWORD dwRemoteIP);
 	int		getMode();

@@ -426,34 +426,17 @@ int RVPFileDeny(WPARAM wParam, LPARAM lParam)
 }
 
 int RVPFileCancel(WPARAM wParam, LPARAM lParam)
-{/*
+{
 	CCSDATA *ccs = (CCSDATA *) lParam;
-	JABBER_FILE_TRANSFER *ft = (JABBER_FILE_TRANSFER *) ccs->wParam;
-	HANDLE hEvent;
-
-	JabberLog("Invoking FileCancel()");
-	if (ft->s) {
-		JabberLog("FT canceled");
-		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-		JabberLog("Closing ft->s = %d", ft->s);
-		ft->state = FT_ERROR;
-		Netlib_CloseHandle(ft->s);
-		ft->s = NULL;
-		if (ft->hFileEvent != NULL) {
-			hEvent = ft->hFileEvent;
-			ft->hFileEvent = NULL;
-			SetEvent(hEvent);
-		}
-		JabberLog("ft->s is now NULL, ft->state is now FT_ERROR");
-	}*/
+	RVPFile *file = (RVPFile *) ccs->wParam;
 	return 0;
 }
 
 int RVPSendFile(WPARAM wParam, LPARAM lParam)
 {
-	/*
 	CCSDATA *ccs = (CCSDATA *) lParam;
 	char **files = (char **) ccs->lParam;
+	/*
 	JABBER_FILE_TRANSFER *ft;
 	int i, j;
 	struct _stat statbuf;
@@ -462,7 +445,6 @@ int RVPSendFile(WPARAM wParam, LPARAM lParam)
 	JABBER_LIST_ITEM *item;
 	int id;
 
-	if (!jabberOnline) return 0;
 //	if (DBGetContactSettingWord(ccs->hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) == ID_STATUS_OFFLINE) return 0;
 	if (DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) return 0;
 	ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
@@ -525,7 +507,7 @@ int RVPRecvFile(WPARAM wParam, LPARAM lParam)
 	dbei.cbSize = sizeof(dbei);
 	dbei.szModule = rvpProtoName;
 	dbei.timestamp = pre->timestamp;
-	dbei.flags = pre->flags & (PREF_CREATEREAD ? DBEF_READ : 0);
+	dbei.flags = pre->flags & (PREF_CREATEREAD) ? DBEF_READ : 0;
 	dbei.eventType = EVENTTYPE_FILE;
 	dbei.cbBlob = sizeof(DWORD) + strlen(szFile) + strlen(szDesc) + 2;
 	dbei.pBlob = (PBYTE) pre->szMessage;
