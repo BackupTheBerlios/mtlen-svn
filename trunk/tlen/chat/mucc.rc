@@ -491,8 +491,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,6,8
- PRODUCTVERSION 1,0,6,8
+ FILEVERSION 1,0,6,9
+ PRODUCTVERSION 1,0,6,9
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -510,14 +510,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Group Chats GUI Plugin for Miranda IM\0"
-            VALUE "FileVersion", "1.0.6.8\0"
-            VALUE "InternalName", "mucc\0"
-            VALUE "LegalCopyright", "Copyright (c) 2004-2005 Piotr Piastucki\0"
+            VALUE "FileVersion", "1.0.6.9\0"
+            VALUE "InternalName", "tlen_chat\0"
+            VALUE "LegalCopyright", "Copyright (c) 2004-2006 Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "mucc.dll\0"
+            VALUE "OriginalFilename", "tlen_chat.dll\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "MUCC Plugin\0"
-            VALUE "ProductVersion", "1.0.6.8\0"
+            VALUE "ProductName", "Tlen Chat Plugin\0"
+            VALUE "ProductVersion", "1.0.6.9\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -555,8 +555,8 @@ IDI_PREV                ICON    DISCARDABLE     "icos\\prev.ico"
 IDI_NEXT                ICON    DISCARDABLE     "icos\\next.ico"
 IDI_INVITE              ICON    DISCARDABLE     "icos\\invite.ico"
 IDI_ADMINISTRATION      ICON    DISCARDABLE     "icos\\administration.ico"
-IDI_SMILEY				ICON    DISCARDABLE     "icos\\smile.ico"
-IDI_MESSAGE				ICON    DISCARDABLE     "icos\\message.ico"
+IDI_SMILEY		ICON    DISCARDABLE     "icos\\smile.ico"
+IDI_MESSAGE		ICON    DISCARDABLE     "icos\\message.ico"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

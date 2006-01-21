@@ -178,12 +178,12 @@ static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 	//JabberSslInit();
 	TlenMUCInit();
 	HookEvent(ME_USERINFO_INITIALISE, TlenUserInfoInit);
-	sprintf(str, "%s: %s", jabberModuleName, Translate("Incoming mail"));
-	SkinAddNewSound("TlenMailNotify", str, "tlennotify.wav");
-	sprintf(str, "%s: %s", jabberModuleName, Translate("Alert"));
-	SkinAddNewSound("TlenAlertNotify", str, "tlennotify.wav");
-	sprintf(str, "%s: %s", jabberModuleName, Translate("Voice chat"));
-	SkinAddNewSound("TlenVoiceNotify", str, "tlennotify.wav");
+	sprintf(str, "%s", Translate("Incoming mail"));
+	SkinAddNewSoundEx("TlenMailNotify", jabberModuleName, str);
+	sprintf(str, "%s", Translate("Alert"));
+	SkinAddNewSoundEx("TlenAlertNotify", jabberModuleName, str);
+	sprintf(str, "%s", Translate("Voice chat"));
+	SkinAddNewSoundEx("TlenVoiceNotify", jabberModuleName, str);
 	return 0;
 }
 
