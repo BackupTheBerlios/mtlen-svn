@@ -27,6 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "httplib/MD5.h"
 #include "xmllib/XMLObject.h"
 #include <windns.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 static HINSTANCE hInstDNSDll=LoadLibrary("dnsapi.dll");
 
@@ -190,7 +192,7 @@ RVPSession* RVPSession::get(const char *login) {
 	RVPSession *session = NULL;
 	ListItem* item = list.find(login);
 	if (item == NULL) {
-		char *out = new char[128];
+		char out[128];
 		unsigned int output[4];
 		time_t tim = time(NULL);
 		int rnd = rand();
@@ -1305,7 +1307,7 @@ int RVPClient::getACL() {
 }
 
 
-int RVPClient::sendFile(const char *filename, const char *contactID, const char *contactDisplayname, const char *principalDisplayname) {
+int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contactDisplayname, const char *principalDisplayname) {
 	int result = 1;
 	if (bOnline) {
 		char *node = getUrlFromLogin(contactID);
@@ -1316,7 +1318,6 @@ int RVPClient::sendFile(const char *filename, const char *contactID, const char 
 			HTTPRequest *request, *response;
 			RVPSession *session = RVPSession::get(contactID);
 			char *node = getRealLoginFromLogin(getSignInName());
-			RVPFile *file = new RVPFile(RVPFile::MODE_SEND, contactID, node, this);
 			request = new HTTPRequest();
 			request->setMethod("NOTIFY");
 			request->setUrl(node);

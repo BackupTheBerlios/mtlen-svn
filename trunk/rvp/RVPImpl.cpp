@@ -90,6 +90,25 @@ static void __cdecl RVPSendMessageAsyncThread(void *ptr) {
 	delete data;
 }
 
+static void __cdecl RVPSendFileInvite(void *ptr) {
+	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
+	char *contactID;
+	char *principalDisplayname;
+	char *contactDisplayname;
+	contactID = Utils::getLogin(data->hContact);
+	if (contactID != NULL) {
+		principalDisplayname = Utils::getDisplayName(NULL);
+		contactDisplayname = Utils::getDisplayName(data->hContact);
+		if (data->impl->getClient()->sendFile(data->file, contactID, contactDisplayname, principalDisplayname)) {
+			delete data->file;
+		}
+		delete contactID;
+		delete contactDisplayname;
+		delete principalDisplayname;
+	}
+	delete data;
+}
+
 static void __cdecl RVPSendFileAccept(void *ptr) {
 	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
 	char *contactID;
@@ -230,6 +249,7 @@ RVPImplAsyncData::RVPImplAsyncData(RVPImpl *c) {
 	hContact = NULL;
 	message = NULL;
 	messageW = NULL;
+	file = NULL;
 	status = oldStatus = ID_STATUS_OFFLINE;
 }
 
@@ -323,9 +343,9 @@ int RVPImpl::setStatus(int status) {
 	return 0;
 }
 
-int RVPImpl::sendMessage(CCSDATA *ccs) {
+int RVPImpl::sendMessage(HANDLE hContact, CCSDATA *ccs) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
-	data->hContact = ccs->hContact;
+	data->hContact = hContact;
 	char *msg = (char *)ccs->lParam;
 	if ( ccs->wParam & PREF_UNICODE ) {
 		data->setMessage((wchar_t *)&msg[strlen(msg) + 1]);
@@ -359,38 +379,43 @@ int RVPImpl::sendTyping(HANDLE hContact, bool on) {
 	return 0;
 }
 
-int	RVPImpl::sendFileInvite(HANDLE hContact, const char * filenames[] , int filenum) {
+RVPFile *RVPImpl::sendFileInvite(HANDLE hContact, const char * filename) {
 	struct _stat statbuf;
 	char *contactID = Utils::getLogin(hContact);
-	if (_stat(filenames[0], &statbuf)) {
-      //   JabberLog("'%s' is an invalid filename", files[i]);
+	if (!_stat(filename, &statbuf)) {
+		RVPImplAsyncData *data = new RVPImplAsyncData(this);
+		RVPFile *file = new RVPFile(RVPFile::MODE_SEND, contactID, "", client);
+		const char *t;
+		if ((t=strrchr(filename, '\\')) != NULL) {
+			t++;
+		} else {
+			t = filename;
+		}
+		file->setSize(statbuf.st_size);
+		file->setFile(t);
+		file->setPath(filename);
+		if (forkThread(TGROUP_NORMAL, RVPSendFileInvite, 0, data)) {
+			return file;
+		}
+		delete file;
+		delete data;
 	} else {
-		/*
-if ((t=strrchr(ft->files[i], '\\')) != NULL)
-					t++;
-				else
-					t = ft->files[i];
-				_snprintf(filename, sizeof(filename)-1, t);
-*/
-
-		char *principalDisplayname;
-		char *contactDisplayname;
-		principalDisplayname = Utils::getDisplayName(NULL);
-		contactDisplayname = Utils::getDisplayName(hContact);
-		delete principalDisplayname;
-		delete contactDisplayname;
-		
-		//		RVPFile *rvpFile = new RVPFile(RVPFile::MODE_SEND, contactID, "12345678", client->getSignInName());
-	//	rvpFile->setFile(filenames[0]);
-		//rvpFile->setSize(statbuf.st_size);
-	}	
-	delete contactID;
-	return 0;
+      //   JabberLog("'%s' is an invalid filename", files[i]);
+	}
+	return NULL;
 }
 
-int RVPImpl::sendFileAccept(RVPFile *file) {
+int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
 	data->hContact = Utils::getContactFromId(file->getContact());
+	char *fullFileName = new char[strlen(file->getFile()) + strlen(path) + 2];
+	strcpy(fullFileName, path);
+	if (fullFileName[strlen(fullFileName)-1] != '\\') {
+		strcat(fullFileName, "\\");
+	}
+	strcat(fullFileName, file->getFile());
+	file->setPath(fullFileName);
+	delete fullFileName;
 	data->file = file;
 	if (!forkThread(TGROUP_NORMAL, RVPSendFileAccept, 0, data)) {
 		delete data;

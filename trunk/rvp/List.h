@@ -28,6 +28,9 @@ private:
 	char *id;
 	ListItem *prev;
 	ListItem *next;
+protected:
+	void setId(const char *id);
+	void setId(const char *id1, const char *id2);
 public:
 	ListItem(const char *id);
 	ListItem(const char *id1, const char *id2);

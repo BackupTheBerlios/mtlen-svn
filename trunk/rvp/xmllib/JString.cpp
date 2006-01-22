@@ -128,7 +128,7 @@ bool JString::equals(JString *s)
 
 bool JString::equals(const char *s)
 {
-	if (strlen(s)!=len) return false;
+	if (strlen(s)!=(unsigned int)len) return false;
 	for (int i=0;i<len;i++) {
 		if (s[i]!=getChar(i)) return false;
 	}

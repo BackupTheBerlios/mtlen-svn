@@ -22,21 +22,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 
 ListItem::ListItem(const char *id) {
-	this->id = Utils::dupString(id);
+	setId(id);
 	prev = next = NULL;
 }
 
 ListItem::ListItem(const char *id1, const char *id2) {
-	char *id = NULL;
-	int idSize = 0;
-	Utils::appendText(&id, &idSize, "%s%s", id1, id2);
-	this->id = Utils::dupString(id);
-	free(id);
+	setId(id1, id2);
 	prev = next = NULL;
 }
 
 ListItem::~ListItem() {
 	if (id != NULL) delete id;
+}
+
+void ListItem::setId(const char *id) {
+	if (this->id != NULL) delete this->id;
+	this->id = Utils::dupString(id);
+}
+
+void ListItem::setId(const char *id1, const char *id2) {
+	if (this->id != NULL) delete this->id;
+	char *id = NULL;
+	int idSize = 0;
+	Utils::appendText(&id, &idSize, "%s%s", id1, id2);
+	this->id = Utils::dupString(id);
+	free(id);
 }
 
 void ListItem::setNext(ListItem *ptr) {

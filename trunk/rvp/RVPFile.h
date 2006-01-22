@@ -42,6 +42,7 @@ private:
 	Connection *connection;
 	Connection *listenConnection;
 	RVPFileListener *listener;
+	void   setAuthCookie();
 protected:
 	friend void __cdecl RVPFileRecv(void *ptr);
 	friend void __cdecl RVPFileSend(void *ptr);

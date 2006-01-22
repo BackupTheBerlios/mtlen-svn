@@ -77,11 +77,11 @@ public:
 	int	unsubscribeAll();
 	int setStatus(int status);
 	int sendStatus();
-	int	sendMessage(CCSDATA *ccs);
+	int	sendMessage(HANDLE hContact, CCSDATA *ccs);
 	int	sendTyping(HANDLE hContact, bool on);
-	int	sendFileAccept(RVPFile *file);
+	int	sendFileAccept(RVPFile *file, const char *path);
 	int	sendFileReject(RVPFile *file);
-	int	sendFileInvite(HANDLE hContact, const char * filenames[] , int filenum);
+	RVPFile *sendFileInvite(HANDLE hContact, const char * filename);
 	int	searchContact(const char *login);
 	bool isTyping(HANDLE hContact);
 	RVPSubscription* getProperty(const char *node, const char *property);

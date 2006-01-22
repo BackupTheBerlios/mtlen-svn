@@ -340,7 +340,8 @@ int RVPGetInfo(WPARAM wParam, LPARAM lParam)
 }
 
 int RVPSendMessage(WPARAM wParam, LPARAM lParam) {
-	return rvpimpl.sendMessage((CCSDATA *) lParam);
+	CCSDATA *ccs = (CCSDATA *) lParam;
+	return rvpimpl.sendMessage(ccs->hContact, (CCSDATA *) lParam);
 }
 
 int RVPRecvMessage(WPARAM wParam, LPARAM lParam)
@@ -412,8 +413,7 @@ int RVPFileAllow(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
 	RVPFile *file = (RVPFile *) ccs->wParam;
-	file->setPath((const char *) ccs->lParam);
-	rvpimpl.sendFileAccept(file);
+	rvpimpl.sendFileAccept(file, (const char *) ccs->lParam);
 	return ccs->wParam;
 }
 
@@ -436,62 +436,7 @@ int RVPSendFile(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
 	char **files = (char **) ccs->lParam;
-	/*
-	JABBER_FILE_TRANSFER *ft;
-	int i, j;
-	struct _stat statbuf;
-	DBVARIANT dbv;
-	char *nick, *p, idStr[10];
-	JABBER_LIST_ITEM *item;
-	int id;
-
-//	if (DBGetContactSettingWord(ccs->hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) == ID_STATUS_OFFLINE) return 0;
-	if (DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) return 0;
-	ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
-	memset(ft, 0, sizeof(JABBER_FILE_TRANSFER));
-	for(ft->fileCount=0; files[ft->fileCount]; ft->fileCount++);
-	ft->files = (char **) malloc(sizeof(char *) * ft->fileCount);
-	ft->filesSize = (long *) malloc(sizeof(long) * ft->fileCount);
-	ft->allFileTotalSize = 0;
-	for(i=j=0; i<ft->fileCount; i++) {
-		if (_stat(files[i], &statbuf))
-			JabberLog("'%s' is an invalid filename", files[i]);
-		else {
-			ft->filesSize[j] = statbuf.st_size;
-			ft->files[j++] = _strdup(files[i]);
-			ft->allFileTotalSize += statbuf.st_size;
-		}
-	}
-	ft->fileCount = j;
-	ft->szDescription = _strdup((char *) ccs->wParam);
-	ft->hContact = ccs->hContact;
-	ft->currentFile = 0;
-	ft->jid = _strdup(dbv.pszVal);
-	DBFreeVariant(&dbv);
-
-	id = JabberSerialNext();
-	_snprintf(idStr, sizeof(idStr), "%d", id);
-	if ((item=JabberListAdd(LIST_FILE, idStr)) != NULL) {
-		ft->iqId = _strdup(idStr);
-		nick = JabberNickFromJID(ft->jid);
-		item->ft = ft;
-		if (ft->fileCount == 1) {
-			if ((p=strrchr(files[0], '\\')) != NULL)
-				p++;
-			else
-				p = files[0];
-			p = JabberTextEncode(p);
-			JabberSend(jabberThreadInfo->s, "<f t='%s' n='%s' e='1' i='%s' c='1' s='%d' v='1'/>", nick, p, idStr, ft->allFileTotalSize);
-			free(p);
-		}
-		else
-			JabberSend(jabberThreadInfo->s, "<f t='%s' e='1' i='%s' c='%d' s='%d' v='1'/>", nick, idStr, ft->fileCount, ft->allFileTotalSize);
-		free(nick);
-	}
-
-	return (int)(HANDLE) ft;
-	*/
-	return 0;
+	return (int) rvpimpl.sendFileInvite(ccs->hContact, files[0]);
 }
 
 int RVPRecvFile(WPARAM wParam, LPARAM lParam)

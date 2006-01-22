@@ -49,20 +49,17 @@ RVPFile* RVPFile::find(const char *id1, const char *id2) {
 	return (RVPFile*)list.find(id1, id2);
 }
 
-
-RVPFile::RVPFile(int mode, const char *contact, const char *login, RVPFileListener *listener):ListItem(contact, cookie) {
+RVPFile::RVPFile(int mode, const char *contact, const char *login, RVPFileListener *listener):ListItem(contact) {
 	file = NULL;
 	path = NULL;
 	host = NULL;
-	authCookie = NULL;
 	connection = NULL;
 	listenConnection = NULL;
 	this->mode = mode;
 	this->contact = Utils::dupString(contact);
 	this->login = Utils::dupString(login);
 	this->listener = listener;
-	list.add(this);
-	char *out = new char[128];
+	char out[128];
 	unsigned int output[4];
 	time_t tim = time(NULL);
 	int rnd = rand();
@@ -76,7 +73,10 @@ RVPFile::RVPFile(int mode, const char *contact, const char *login, RVPFileListen
 	output[0] ^= output[1] ^ output[2] ^ output[3];
 	output[0] &= 0x7FFFFFFF;
 	sprintf(out, "%d", output[0]);
-	this->cookie = Utils::dupString(out);
+	cookie = Utils::dupString(out);
+	setId(contact, cookie);
+	setAuthCookie();
+	list.add(this);
 }
 
 
@@ -91,7 +91,7 @@ RVPFile::RVPFile(int mode, const char *contact, const char *cookie, const char *
 	this->login = Utils::dupString(login);
 	this->cookie = Utils::dupString(cookie);
 	this->listener = listener;
-	authCookie = NULL;
+	setAuthCookie();
 	list.add(this);
 }
 
@@ -135,6 +135,24 @@ const char *RVPFile::getAuthCookie() {
 void RVPFile::setAuthCookie(const char *f) {
 	if (authCookie != NULL) delete authCookie;
 	authCookie = Utils::dupString(f);
+}
+
+void RVPFile::setAuthCookie() {
+	char out[128];
+	unsigned int output[4];
+	time_t tim = time(NULL);
+	int rnd = rand();
+	MD5 md5;
+	md5.init();
+	md5.update((unsigned char *)contact, strlen(login));
+	md5.update((unsigned char *)&time, sizeof(tim));
+	md5.update((unsigned char *)&rnd, sizeof(rnd));
+	md5.finalize();
+	md5.get(output);
+	output[0] ^= output[1] ^ output[2] ^ output[3];
+	output[0] &= 0x7FFFFFFF;
+	sprintf(out, "%d", output[0]);
+	authCookie = Utils::dupString(out);
 }
 
 void RVPFile::setSize(int s) {
@@ -265,14 +283,7 @@ bool RVPFile::msnftp() {
 								listener->onFileProgress(this, RVPFileListener::PROGRESS_INITIALIZING, 0);
 							}
 							/* receive data */
-							char *fullFileName = new char[strlen(getFile()) + strlen(getPath()) + 2];
-							strcpy(fullFileName, getPath());
-							if (fullFileName[strlen(fullFileName)-1] != '\\') {
-								strcat(fullFileName, "\\");
-							}
-							strcat(fullFileName, getFile());
-							int fileId = _open(fullFileName, _O_BINARY|_O_WRONLY|_O_CREAT|_O_TRUNC, _S_IREAD|_S_IWRITE);
-							delete fullFileName;
+							int fileId = _open(getPath(), _O_BINARY|_O_WRONLY|_O_CREAT|_O_TRUNC, _S_IREAD|_S_IWRITE);
 							error = false;
 							if (fileId >= 0) {
 								int receivedBytes = 0;
@@ -320,14 +331,7 @@ bool RVPFile::msnftp() {
 						listener->onFileProgress(this, RVPFileListener::PROGRESS_INITIALIZING, 0);
 					}
 					/* send data */
-					char *fullFileName = new char[strlen(getFile()) + strlen(getPath()) + 2];
-					strcpy(fullFileName, getPath());
-					if (fullFileName[strlen(fullFileName)-1] != '\\') {
-						strcat(fullFileName, "\\");
-					}
-					strcat(fullFileName, getFile());
-					int fileId=_open(fullFileName, _O_BINARY|_O_RDONLY);
-					delete fullFileName;
+					int fileId=_open(getPath(), _O_BINARY|_O_RDONLY);
 					if (fileId >= 0) {
 						int sentBytes = 0;
 						while (sentBytes < getSize()) {
