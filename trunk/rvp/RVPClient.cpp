@@ -1317,7 +1317,6 @@ int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contac
 			char *utf8Message;
 			HTTPRequest *request, *response;
 			RVPSession *session = RVPSession::get(contactID);
-			char *node = getRealLoginFromLogin(getSignInName());
 			request = new HTTPRequest();
 			request->setMethod("NOTIFY");
 			request->setUrl(node);
@@ -1328,6 +1327,7 @@ int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contac
 			request->addHeader("Content-Type", "text/xml");
 			request->setCredentials(credentials);
 			/* TODO: get url from login here*/
+		MessageBoxA(NULL, file->getCookie(), file->getFile(), MB_OK);
 			Utils::appendText(&buffer, &bufferSize,
 			"<?xml version=\"1.0\"?>"
 			"<r:notification xmlns:d='DAV:' xmlns:r='http://schemas.microsoft.com/rvp/' xmlns:a='http://schemas.microsoft.com/rvp/acl/'>"
@@ -1345,6 +1345,7 @@ int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contac
 			"Application-File: %s\r\n"
 			"Application-FileSize: %d\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
 			principalUrl, principalDisplayname, node, contactDisplayname, session->getSid(), file->getCookie(), file->getFile(), file->getSize());
+			MessageBoxA(NULL, buffer, "HTTP", MB_OK);
 			utf8Message = Utils::utf8Encode2(buffer);
 			free(buffer);
 			request->setContent(utf8Message, strlen(utf8Message));

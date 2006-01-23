@@ -26,6 +26,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "math.h"
 #include "Utils.h"
 
+#include "JLogger.h"
+
+/* Receive file thread */
+
+static   JLogger *logger = new JLogger("g:/rvpimpl.log");
+
 static void __cdecl RVPSubscribeAsyncThread(void *ptr) {
 	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
 	char *contactId = Utils::getLogin(data->hContact);
@@ -380,29 +386,32 @@ int RVPImpl::sendTyping(HANDLE hContact, bool on) {
 }
 
 RVPFile *RVPImpl::sendFileInvite(HANDLE hContact, const char * filename) {
+	RVPFile *file = NULL;
 	struct _stat statbuf;
 	char *contactID = Utils::getLogin(hContact);
-	if (!_stat(filename, &statbuf)) {
-		RVPImplAsyncData *data = new RVPImplAsyncData(this);
-		RVPFile *file = new RVPFile(RVPFile::MODE_SEND, contactID, "", client);
-		const char *t;
-		if ((t=strrchr(filename, '\\')) != NULL) {
-			t++;
-		} else {
-			t = filename;
-		}
-		file->setSize(statbuf.st_size);
-		file->setFile(t);
-		file->setPath(filename);
-		if (forkThread(TGROUP_NORMAL, RVPSendFileInvite, 0, data)) {
-			return file;
-		}
-		delete file;
-		delete data;
-	} else {
-      //   JabberLog("'%s' is an invalid filename", files[i]);
+	if (contactID != NULL) {
+		if (!_stat(filename, &statbuf)) {
+			RVPImplAsyncData *data = new RVPImplAsyncData(this);
+			file = new RVPFile(RVPFile::MODE_SEND, contactID, "", client);
+			const char *t;
+			if ((t=strrchr(filename, '\\')) != NULL) {
+				t++;
+			} else {
+				t = filename;
+			}
+			file->setSize(statbuf.st_size);
+			file->setFile(t);
+			file->setPath(filename);
+			data->file = file;
+			if (!forkThread(TGROUP_NORMAL, RVPSendFileInvite, 0, data)) {
+				delete file;
+				delete data;
+				file = NULL;
+			}
+		} 
+		delete contactID;
 	}
-	return NULL;
+	return file;
 }
 
 int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {
