@@ -22,11 +22,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 
 ListItem::ListItem(const char *id) {
+	this->id = NULL;
 	setId(id);
 	prev = next = NULL;
 }
 
 ListItem::ListItem(const char *id1, const char *id2) {
+	this->id = NULL;
 	setId(id1, id2);
 	prev = next = NULL;
 }
