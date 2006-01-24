@@ -29,6 +29,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <windns.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "JLogger.h"
+
+/* Receive file thread */
+
+static   JLogger *logger = new JLogger("g:/rvpfile.log");
 
 static HINSTANCE hInstDNSDll=LoadLibrary("dnsapi.dll");
 
@@ -218,13 +223,22 @@ void RVPSession::releaseAll() {
 }
 
 
-void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HANDLE hConnection, DWORD dwRemoteIP, void * pExtra) {
+void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
+	HTTPRequest *response;
 	HTTPRequest *request;
-//	RVPClient *rvpClient;
-//	HTTPConnection *connection = new HTTPConnection(hConnection);
-//	rvpClient = (RVPClient *) pExtra;
 	request = HTTPUtils::recvRequest(connection);
-	if (!strcmpi("NOTIFY", request->getMethod())) {
+	logger->info("New connection %d %d", connection, request);
+	if (request!= NULL && !strcmpi("NOTIFY", request->getMethod())) {
+		response = new HTTPRequest();
+		response->resultCode = 200;
+		response->addHeader("Content-Type", "text/html");
+		response->addHeader("RVP-Notifications-Version", "0.2");
+		char respString[2048];
+		sprintf(respString, "<HTML><HEAD><TITLE>Successful</TITLE></HEAD><BODY><H2>Success 200 (Successful)</H2><HR>NOTIFY on node %s succeeded<HR></BODY></HTML></p>", getCallback());
+		response->setContent(respString);
+		HTTPUtils::sendResponse(connection, response);
+		delete response;
+		
 		if (request->dataLength > 0) {
 			char *utf8Message = Utils::utf8Decode2(request->getContent(), request->dataLength);
 			JString *js = new JString(utf8Message, strlen(utf8Message));//request->getContent(), request->dataLength);
@@ -332,9 +346,13 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 															}
 														}
 													} else if (!strcmpi(invitationCommandHdr->getValue(), "ACCEPT")) { /* ACCEPT */
-														char *login = RVPClient::getLoginFromUrl(hrefStr);
 														if (login != NULL) {
-															RVPFile *file = RVPFile::find(login, invitationCookieHdr->getValue());
+															int mode = RVPFile::MODE_SEND;
+															if (ipAddressHdr != NULL && portHdr != NULL && authCookieHdr != NULL) {
+																mode = RVPFile::MODE_RECV;
+															} 
+															char *node = RVPClient::getRealLoginFromLogin(login);
+															RVPFile *file = RVPFile::find(mode, node, invitationCookieHdr->getValue());
 															if (file != NULL) {
 																if (file->getMode() == RVPFile::MODE_RECV) {
 																	/* Connect to given host/port */
@@ -345,30 +363,33 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 																		file->recv();
 																	} else {
 																		/* cancel */
-
 																	}
 																} else {
 																	/* Start server and send details */
+																	char *principalDisplayname = Utils::getDisplayName(NULL);
 																	struct sockaddr_in saddr;
 																	saddr.sin_addr.S_un.S_addr = localIP;
 //																	sprintf(callbackHost, "http://%s:%d", inet_ntoa(saddr.sin_addr), wPort);
 																	file->setHost(inet_ntoa(saddr.sin_addr));
 																	file->setPort(0);
 																	file->send();
+																	if (sendFileAcceptResponse(file, login, nick, principalDisplayname)) {
+																		MessageBoxA(NULL, "sendFileAcceptResponse failed", "ERROR1", MB_OK);
+																		// cancel file
+																	}
+																	delete principalDisplayname;
 																}
 															}
-															delete login;
+															delete node;
 														}
 													} else if (!strcmpi(invitationCommandHdr->getValue(), "CANCEL")) { /* CANCEL */
-														char *login = RVPClient::getLoginFromUrl(hrefStr);
-														if (login != NULL) {
-															RVPFile *file = RVPFile::find(login, invitationCookieHdr->getValue());
-															if (file != NULL) {
+														//if (login != NULL) {
+														//	RVPFile *file = RVPFile::find(login, invitationCookieHdr->getValue());
+														//	if (file != NULL) {
 																/* Stop transfer */
-																file->cancel();
-															}
-															delete login;
-														}
+														//		file->cancel();
+														//	}
+														//}
 													}
 												}
 												delete inviteRequest;
@@ -388,21 +409,11 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {//HAN
 			}
 			delete xml;
 		}
-		HTTPRequest *response;
-		response = new HTTPRequest();
-		response->resultCode = 200;
-		response->addHeader("Content-Type", "text/html");
-		response->addHeader("RVP-Notifications-Version", "0.2");
-		char respString[2048];
-		sprintf(respString, "<HTML><HEAD><TITLE>Successful</TITLE></HEAD><BODY><H2>Success 200 (Successful)</H2><HR>NOTIFY on node %s succeeded<HR></BODY></HTML></p>", getCallback());
-		response->setContent(respString);
-		HTTPUtils::sendResponse(connection, response);
-		delete response;
 	}
 	if (request != NULL) {
 		delete request;
 	}
-	delete connection;
+	logger->info("Bye bye %d %d", connection, request);
 }
 
 RVPClient::RVPClient(RVPClientListener *listener) {
@@ -895,7 +906,7 @@ int RVPClient::sendTyping(const char *contactID, const char *contactDisplayname,
 			"<r:msgbody><r:mime-data><![CDATA[MIME-Version: 1.0\r\n"
 			"Content-Type: text/x-msmsgscontrol\r\n"
 			"TypingUser: %s\r\n"
-			"Session-Id: %s\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
+			"Session-Id: %s\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
 			principalUrl, principalDisplayname, node, contactDisplayname, signInName, session->getSid());
 			utf8Message = Utils::utf8Encode2(buffer);
 			free(buffer);
@@ -1342,7 +1353,7 @@ int RVPClient::sendFile(RVPFile *file, const char *contactID, const char *contac
 			"Invitation-Command: INVITE\r\n"
 			"Invitation-Cookie: %s\r\n"
 			"Application-File: %s\r\n"
-			"Application-FileSize: %d\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
+			"Application-FileSize: %d\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
 			principalUrl, principalDisplayname, node, contactDisplayname, session->getSid(), file->getCookie(), file->getFile(), file->getSize());
 			utf8Message = Utils::utf8Encode2(buffer);
 			free(buffer);
@@ -1396,7 +1407,7 @@ int RVPClient::sendFileAcceptResponse(RVPFile *file, const char *contactID, cons
 			"Port: %d\r\n"
 			"AuthCookie: %s\r\n"
 			"Launch-Application: FALSE\r\n"
-			"Request-Data: IP-Address:\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
+			"Request-Data: IP-Address:\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
 			principalUrl, principalDisplayname, node, contactDisplayname, session->getSid(), file->getCookie(),
 			file->getHost(), file->getPort(), file->getAuthCookie());
 			utf8Message = Utils::utf8Encode2(buffer);
@@ -1449,7 +1460,7 @@ int RVPClient::sendFileAccept(RVPFile *file, const char *contactID, const char *
 			"Invitation-Command: ACCEPT\r\n"
 			"Invitation-Cookie: %s\r\n"
 			"Launch-Application: FALSE\r\n"
-			"Request-Data: IP-Address:\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
+			"Request-Data: IP-Address:\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
 			principalUrl, principalDisplayname, node, contactDisplayname, session->getSid(), file->getCookie());
 			utf8Message = Utils::utf8Encode2(buffer);
 			free(buffer);
@@ -1499,7 +1510,7 @@ int RVPClient::sendFileReject(RVPFile *file, const char *contactID, const char *
 			"Session-Id: %s\r\n\r\n"
 			"Invitation-Command: CANCEL\r\n"
 			"Invitation-Cookie: %s\r\n"
-			"Cancel-Code: REJECT\r\n\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
+			"Cancel-Code: REJECT\r\n\r\n]]></r:mime-data></r:msgbody></r:message></r:notification>",
 			principalUrl, principalDisplayname, node, contactDisplayname, session->getSid(), file->getCookie());
 			utf8Message = Utils::utf8Encode2(buffer);
 			free(buffer);

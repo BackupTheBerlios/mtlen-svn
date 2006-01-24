@@ -26,12 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "math.h"
 #include "Utils.h"
 
-#include "JLogger.h"
-
-/* Receive file thread */
-
-static   JLogger *logger = new JLogger("g:/rvpimpl.log");
-
 static void __cdecl RVPSubscribeAsyncThread(void *ptr) {
 	RVPImplAsyncData *data = (RVPImplAsyncData *)ptr;
 	char *contactId = Utils::getLogin(data->hContact);
@@ -105,8 +99,10 @@ static void __cdecl RVPSendFileInvite(void *ptr) {
 	if (contactID != NULL) {
 		principalDisplayname = Utils::getDisplayName(NULL);
 		contactDisplayname = Utils::getDisplayName(data->hContact);
-		if (data->impl->getClient()->sendFile(data->file, contactID, contactDisplayname, principalDisplayname)) {
-			delete data->file;
+		int result = data->impl->getClient()->sendFile(data->file, contactID, contactDisplayname, principalDisplayname);
+		if (result) {
+			MessageBoxA(NULL, "RVPSendFileInvite failed", "ERROR0", MB_OK);
+//			delete data->file;
 		}
 		delete contactID;
 		delete contactDisplayname;
@@ -124,7 +120,10 @@ static void __cdecl RVPSendFileAccept(void *ptr) {
 	if (contactID != NULL) {
 		principalDisplayname = Utils::getDisplayName(NULL);
 		contactDisplayname = Utils::getDisplayName(data->hContact);
-		data->impl->getClient()->sendFileAccept(data->file, contactID, contactDisplayname, principalDisplayname);
+		if (data->impl->getClient()->sendFileAccept(data->file, contactID, contactDisplayname, principalDisplayname)) {
+			MessageBoxA(NULL, "RVPSendFileAccept failed", "ERROR0", MB_OK);
+			// delete data->file;
+		}
 		delete contactID;
 		delete contactDisplayname;
 		delete principalDisplayname;
@@ -142,10 +141,10 @@ static void __cdecl RVPSendFileReject(void *ptr) {
 		principalDisplayname = Utils::getDisplayName(NULL);
 		contactDisplayname = Utils::getDisplayName(data->hContact);
 		data->impl->getClient()->sendFileReject(data->file, contactID, contactDisplayname, principalDisplayname);
+		delete data->file;
 		delete contactID;
 		delete contactDisplayname;
 		delete principalDisplayname;
-		delete data->file;
 	}
 	delete data;
 }
@@ -392,7 +391,10 @@ RVPFile *RVPImpl::sendFileInvite(HANDLE hContact, const char * filename) {
 	if (contactID != NULL) {
 		if (!_stat(filename, &statbuf)) {
 			RVPImplAsyncData *data = new RVPImplAsyncData(this);
-			file = new RVPFile(RVPFile::MODE_SEND, contactID, "", client);
+			data->hContact = hContact;
+			char *node = RVPClient::getRealLoginFromLogin(contactID);
+			file = new RVPFile(RVPFile::MODE_SEND, node, "", client);
+			delete node;
 			const char *t;
 			if ((t=strrchr(filename, '\\')) != NULL) {
 				t++;

@@ -43,10 +43,14 @@ void __cdecl RVPFileSend(void *ptr) {
 	ft->doSend();
 }
 
-List RVPFile::list;
+List RVPFile::sendList;
+List RVPFile::recvList;
 
-RVPFile* RVPFile::find(const char *id1, const char *id2) {
-	return (RVPFile*)list.find(id1, id2);
+RVPFile* RVPFile::find(int mode, const char *id1, const char *id2) {
+	if (mode == MODE_RECV) {
+		return (RVPFile*)recvList.find(id1, id2);
+	} 
+	return (RVPFile*)sendList.find(id1, id2);
 }
 
 RVPFile::RVPFile(int mode, const char *contact, const char *login, RVPFileListener *listener):ListItem(contact) {
@@ -76,7 +80,11 @@ RVPFile::RVPFile(int mode, const char *contact, const char *login, RVPFileListen
 	cookie = Utils::dupString(out);
 	setId(contact, cookie);
 	setAuthCookie();
-	list.add(this);
+	if (mode == MODE_RECV) {
+		recvList.add(this);
+	} else {
+		sendList.add(this);
+	}
 }
 
 
@@ -92,11 +100,20 @@ RVPFile::RVPFile(int mode, const char *contact, const char *cookie, const char *
 	this->cookie = Utils::dupString(cookie);
 	this->listener = listener;
 	setAuthCookie();
-	list.add(this);
+	if (mode == MODE_RECV) {
+		recvList.add(this);
+	} else {
+		sendList.add(this);
+	}
 }
 
 RVPFile::~RVPFile() {
-	list.remove(this);
+	if (mode == MODE_RECV) {
+		recvList.remove(this);
+	} else {
+		sendList.remove(this);
+
+	}
 	if (connection != NULL) connection->close();
 	if (listenConnection != NULL) listenConnection->close();
 	while (getThreadCount(TGROUP_TRANSFER > 0)) {
@@ -208,6 +225,7 @@ void RVPFile::send() {
 	if (listener != NULL) {
 		listener->onFileProgress(this, RVPFileListener::PROGRESS_CONNECTING, 0);
 	}
+	
 //	forkThread(TGROUP_TRANSFER, RVPFileSend, 0, this);
 }
 
@@ -227,15 +245,16 @@ void RVPFile::cancel() {
 bool RVPFile::msnftp() {
 	bool completed = false;
 	bool error = false;
-	char *params = "";
-	char *line;
 	while (!completed) {
-		line = connection->recvLine();
-		if (line != NULL) {
+		char *params = "";
+		char *line = connection->recvLine();
+		if (line != NULL && strlen(line) > 2) {
 			if (strlen(line) > 3) {
 				params = line + 4;
 			}
-			switch ((((int *)line)[0]&0x00FFFFFF)|0x20000000) {
+			int command = (int)line[0] | (((int)line[1]) << 8) | (((int)line[2]) << 16);
+			command = (command&0x00FFFFFF)|0x20000000;
+			switch (command) {
 				case ' REV':
 					{
 						char protocol[7];
@@ -313,7 +332,6 @@ bool RVPFile::msnftp() {
 										error = true;
 									}
 								}
-								logger->info("before close : %s (%d)", error?"error":"ok", receivedBytes);
 								_close(fileId);
 							} else {
 								error = true;
@@ -346,7 +364,8 @@ bool RVPFile::msnftp() {
 								}
 								buffer[1] = numRead & 0xFF;
 								buffer[2] = (numRead >> 8) & 0xFF;
-								if (connection->send(buffer, 3 + numRead) != 3 + numRead) {
+								//if (connection->send(buffer, 3 + numRead) != 3 + numRead) {
+								if (!connection->send(buffer, 3 + numRead)) {
 									error = true;
 									break;
 								}
@@ -402,14 +421,16 @@ void RVPFile::doRecv() {
 }
 
 void RVPFile::doSend() {
-	/* Bind and send info */
-	
-	/* accept and call msnftp */
+	listenConnection = new Connection(DEFAULT_CONNECTION_POOL);
+	port = listenConnection->bind(NULL, 0, this);
+	if (listener != NULL) {
+		listener->onFileProgress(this, RVPFileListener::PROGRESS_CONNECTING, 0);
+	}
 }
 
 void RVPFile::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 	this->connection = connection;
-	delete listenConnection;
 	listenConnection = NULL;
 	msnftp();
+	delete listenConnection;
 }

@@ -28,7 +28,8 @@ private:
 	enum THREADGROUPS {
 		TGROUP_TRANSFER = 1
 	};
-	static List list;
+	static List sendList;
+	static List recvList;
 	int	 mode;
 	int size;
 	char *contact;
@@ -54,7 +55,7 @@ public:
 		MODE_RECV,
 		MODE_SEND
 	};
-	static RVPFile* find(const char *contact, const char *id);
+	static RVPFile* find(int mode, const char *contact, const char *id);
 	RVPFile(int mode, const char *contact, const char *login, RVPFileListener *listener);
 	RVPFile(int mode, const char *contact, const char *cookie, const char *login, RVPFileListener *listener);
 	~RVPFile();
