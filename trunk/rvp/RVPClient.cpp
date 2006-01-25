@@ -336,8 +336,9 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 														if (applicationNameHdr != NULL && !strcmpi(applicationNameHdr->getValue(), "File Transfer")) {
 															if (applicationFileHdr != NULL && applicationFileSizeHdr != NULL) {
 																if (listener != NULL) {
+																	HANDLE hContact = Utils::getContactFromId(login);
 																	char *node = getRealLoginFromLogin(getSignInName());
-																	RVPFile *rvpFile = new RVPFile(RVPFile::MODE_RECV, login, invitationCookieHdr->getValue(), node, this);
+																	RVPFile *rvpFile = new RVPFile(hContact, RVPFile::MODE_RECV, login, invitationCookieHdr->getValue(), node, this);
 																	delete node;
 																	rvpFile->setFile(applicationFileHdr->getValue());
 																	rvpFile->setSize(atol(applicationFileSizeHdr->getValue()));
@@ -352,7 +353,7 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 																mode = RVPFile::MODE_RECV;
 															} 
 															char *node = RVPClient::getRealLoginFromLogin(login);
-															RVPFile *file = RVPFile::find(mode, node, invitationCookieHdr->getValue());
+															RVPFile *file = RVPFile::find(mode, login, invitationCookieHdr->getValue());
 															if (file != NULL) {
 																if (file->getMode() == RVPFile::MODE_RECV) {
 																	/* Connect to given host/port */

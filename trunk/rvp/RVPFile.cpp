@@ -53,12 +53,13 @@ RVPFile* RVPFile::find(int mode, const char *id1, const char *id2) {
 	return (RVPFile*)sendList.find(id1, id2);
 }
 
-RVPFile::RVPFile(int mode, const char *contact, const char *login, RVPFileListener *listener):ListItem(contact) {
+RVPFile::RVPFile(HANDLE hContact, int mode, const char *contact, const char *login, RVPFileListener *listener):ListItem(contact) {
 	file = NULL;
 	path = NULL;
 	host = NULL;
 	connection = NULL;
 	listenConnection = NULL;
+	this->hContact = hContact;
 	this->mode = mode;
 	this->contact = Utils::dupString(contact);
 	this->login = Utils::dupString(login);
@@ -88,12 +89,13 @@ RVPFile::RVPFile(int mode, const char *contact, const char *login, RVPFileListen
 }
 
 
-RVPFile::RVPFile(int mode, const char *contact, const char *cookie, const char *login, RVPFileListener *listener):ListItem(contact, cookie) {
+RVPFile::RVPFile(HANDLE hContact, int mode, const char *contact, const char *cookie, const char *login, RVPFileListener *listener):ListItem(contact, cookie) {
 	file = NULL;
 	path = NULL;
 	host = NULL;
 	connection = NULL;
 	listenConnection = NULL;
+	this->hContact = hContact;
 	this->mode = mode;
 	this->contact = Utils::dupString(contact);
 	this->login = Utils::dupString(login);
@@ -132,9 +134,13 @@ RVPFile::~RVPFile() {
 int RVPFile::getMode() {
 	return mode;
 }
-
+/*
 const char *RVPFile::getContact() {
 	return contact;
+}
+*/
+HANDLE RVPFile::getHContact() {
+	return hContact;
 }
 
 const char *RVPFile::getLogin() {
@@ -223,6 +229,7 @@ void RVPFile::send() {
 	listenConnection = new Connection(DEFAULT_CONNECTION_POOL);
 	port = listenConnection->bind(NULL, 0, this);
 	if (listener != NULL) {
+		logger->info("listener->onFileProgress(this, RVPFileListener::PROGRESS_CONNECTING, 0);");
 		listener->onFileProgress(this, RVPFileListener::PROGRESS_CONNECTING, 0);
 	}
 	
@@ -282,7 +289,7 @@ bool RVPFile::msnftp() {
 					{
 						char email[130], cookie[14];
 						if (sscanf(params,"%129s %13s",email, cookie) >= 2) {
-							if (!strcmp(email, getContact()) && !strcmp(cookie, getAuthCookie())) {
+							if (!strcmp(email, getLogin()) && !strcmp(cookie, getAuthCookie())) {
 								connection->sendText("FIL %i\r\n", getSize());
 							} else {
 								/* error */
@@ -305,8 +312,8 @@ bool RVPFile::msnftp() {
 							int fileId = _open(getPath(), _O_BINARY|_O_WRONLY|_O_CREAT|_O_TRUNC, _S_IREAD|_S_IWRITE);
 							error = false;
 							if (fileId >= 0) {
-								int receivedBytes = 0;
-								while (!error && receivedBytes < getSize()) {
+								int bytesToReceive = getSize();
+								while (!error && bytesToReceive > 0) {
 									char buffer[2048];
 									int header = 0;
 									if (connection->recv((char *)&header, 3)) {
@@ -316,14 +323,14 @@ bool RVPFile::msnftp() {
 											int readSize = min(2048, blockSize);
 											if (connection->recv(buffer, readSize)) {
 												blockSize -= readSize;
-												receivedBytes += readSize;
+												bytesToReceive -= readSize;
 												if (_write(fileId, buffer, readSize) == readSize) {
 													error = false;
 												}
 											}
 										}
 										if (listener != NULL) {
-											listener->onFileProgress(this, RVPFileListener::PROGRESS_PROGRESS, receivedBytes);
+											listener->onFileProgress(this, RVPFileListener::PROGRESS_PROGRESS, getSize() - bytesToReceive);
 										}
 										if (header&0xFF != 0) {
 											break;
@@ -351,17 +358,14 @@ bool RVPFile::msnftp() {
 					/* send data */
 					int fileId=_open(getPath(), _O_BINARY|_O_RDONLY);
 					if (fileId >= 0) {
-						int sentBytes = 0;
-						while (sentBytes < getSize()) {
+						int bytesToSend = getSize();
+						while (bytesToSend > 0) {
 							char buffer[2048];
-							int numRead=_read(fileId, buffer+3, min(2045, getSize() - sentBytes));
+							int numRead=_read(fileId, buffer+3, min(2045, bytesToSend));
 							if (numRead > 0) {
-								sentBytes += numRead;
-								if (getSize() - sentBytes > 0) {
-									buffer[0] = 0;
-								} else {
-									buffer[0] = 1;
-								}
+								bytesToSend -= numRead;
+								logger->info("Bytes left: %d", bytesToSend);
+								buffer[0] = bytesToSend > 0 ? 0 : 1;
 								buffer[1] = numRead & 0xFF;
 								buffer[2] = (numRead >> 8) & 0xFF;
 								//if (connection->send(buffer, 3 + numRead) != 3 + numRead) {
@@ -373,7 +377,7 @@ bool RVPFile::msnftp() {
 								break;
 							}
 							if (listener != NULL) {
-								listener->onFileProgress(this, RVPFileListener::PROGRESS_PROGRESS, sentBytes);
+								listener->onFileProgress(this, RVPFileListener::PROGRESS_PROGRESS, getSize() - bytesToSend);
 							}
 						}	
 						_close(fileId);
@@ -430,7 +434,10 @@ void RVPFile::doSend() {
 
 void RVPFile::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 	this->connection = connection;
-	listenConnection = NULL;
+	if (listener != NULL) {
+		listener->onFileProgress(this, RVPFileListener::PROGRESS_CONNECTED, 0);
+	}
 	msnftp();
 	delete listenConnection;
+	listenConnection = NULL;
 }

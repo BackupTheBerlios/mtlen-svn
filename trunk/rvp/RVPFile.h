@@ -32,6 +32,7 @@ private:
 	static List recvList;
 	int	 mode;
 	int size;
+	HANDLE hContact;
 	char *contact;
 	char *login;
 	char *file;
@@ -56,12 +57,13 @@ public:
 		MODE_SEND
 	};
 	static RVPFile* find(int mode, const char *contact, const char *id);
-	RVPFile(int mode, const char *contact, const char *login, RVPFileListener *listener);
-	RVPFile(int mode, const char *contact, const char *cookie, const char *login, RVPFileListener *listener);
+	RVPFile(HANDLE hContact, int mode, const char *contact, const char *login, RVPFileListener *listener);
+	RVPFile(HANDLE hContact, int mode, const char *contact, const char *cookie, const char *login, RVPFileListener *listener);
 	~RVPFile();
 	void	onNewConnection(Connection *connection, DWORD dwRemoteIP);
 	int		getMode();
-	const char *getContact();
+//	const char *getContact();
+	HANDLE getHContact();
 	const char *getLogin();
 	const char *getCookie();
 	void   setSize(int size);

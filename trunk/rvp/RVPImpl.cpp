@@ -393,7 +393,7 @@ RVPFile *RVPImpl::sendFileInvite(HANDLE hContact, const char * filename) {
 			RVPImplAsyncData *data = new RVPImplAsyncData(this);
 			data->hContact = hContact;
 			char *node = RVPClient::getRealLoginFromLogin(contactID);
-			file = new RVPFile(RVPFile::MODE_SEND, node, "", client);
+			file = new RVPFile(hContact, RVPFile::MODE_SEND, contactID, node, client);
 			delete node;
 			const char *t;
 			if ((t=strrchr(filename, '\\')) != NULL) {
@@ -418,7 +418,7 @@ RVPFile *RVPImpl::sendFileInvite(HANDLE hContact, const char * filename) {
 
 int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
-	data->hContact = Utils::getContactFromId(file->getContact());
+	data->hContact = file->getHContact();
 	char *fullFileName = new char[strlen(file->getFile()) + strlen(path) + 2];
 	strcpy(fullFileName, path);
 	if (fullFileName[strlen(fullFileName)-1] != '\\') {
@@ -436,7 +436,7 @@ int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {
 
 int RVPImpl::sendFileReject(RVPFile *file) {
 	RVPImplAsyncData *data = new RVPImplAsyncData(this);
-	data->hContact = Utils::getContactFromId(file->getContact());
+	data->hContact = file->getHContact();
 	data->file = file;
 	if (!forkThread(TGROUP_NORMAL, RVPSendFileReject, 0, data)) {
 		delete data;
@@ -612,7 +612,7 @@ void RVPImpl::onFileInvite(const char *login, const char *nick, RVPFile *rvpFile
 }
 
 void RVPImpl::onFileProgress(RVPFile *file, int type, int progress) {
-	HANDLE hContact = Utils::getContactFromId(file->getContact());
+	HANDLE hContact = file->getHContact();
 	if (hContact != NULL) {
 		if (type == RVPFileListener::PROGRESS_CONNECTING) {
 			ProtoBroadcastAck(rvpProtoName, hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, file, 0);
