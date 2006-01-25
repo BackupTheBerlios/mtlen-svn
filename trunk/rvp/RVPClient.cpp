@@ -29,11 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <windns.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "JLogger.h"
-
-/* Receive file thread */
-
-static   JLogger *logger = new JLogger("g:/rvpfile.log");
 
 static HINSTANCE hInstDNSDll=LoadLibrary("dnsapi.dll");
 
@@ -227,7 +222,6 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 	HTTPRequest *response;
 	HTTPRequest *request;
 	request = HTTPUtils::recvRequest(connection);
-	logger->info("New connection %d %d", connection, request);
 	if (request!= NULL && !strcmpi("NOTIFY", request->getMethod())) {
 		response = new HTTPRequest();
 		response->resultCode = 200;
@@ -414,7 +408,6 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 	if (request != NULL) {
 		delete request;
 	}
-	logger->info("Bye bye %d %d", connection, request);
 }
 
 RVPClient::RVPClient(RVPClientListener *listener) {
