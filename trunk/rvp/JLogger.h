@@ -12,9 +12,9 @@
  *  \date    2002
  */
 
-//#define JLOGGER_DISABLE_LOGS
+#define JLOGGER_DISABLE_LOGS
 #include <stdio.h>
-class JLogger  
+class JLogger
 {
 private:
 	FILE*   flog;
