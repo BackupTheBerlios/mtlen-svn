@@ -332,7 +332,7 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 																if (listener != NULL) {
 																	HANDLE hContact = Utils::getContactFromId(login);
 																	char *node = getRealLoginFromLogin(getSignInName());
-																	RVPFile *rvpFile = new RVPFile(hContact, RVPFile::MODE_RECV, login, invitationCookieHdr->getValue(), node, this);
+																	RVPFile *rvpFile = new RVPFile(hContact, RVPFile::MODE_RECV, login, invitationCookieHdr->getValue(), node, listener);
 																	delete node;
 																	rvpFile->setFile(applicationFileHdr->getValue());
 																	rvpFile->setSize(atol(applicationFileSizeHdr->getValue()));
@@ -357,7 +357,7 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 																		file->setPort(atol(portHdr->getValue()));
 																		file->recv();
 																	} else {
-																		/* cancel */
+																		file->cancel();
 																	}
 																} else {
 																	/* Start server and send details */
@@ -369,8 +369,7 @@ void RVPClient::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 																	file->setPort(0);
 																	file->send();
 																	if (sendFileAcceptResponse(file, login, nick, principalDisplayname)) {
-																		MessageBoxA(NULL, "sendFileAcceptResponse failed", "ERROR1", MB_OK);
-																		// cancel file
+																		file->cancel();
 																	}
 																	delete principalDisplayname;
 																}
@@ -1544,13 +1543,4 @@ List* RVPClient::getSubscriptions() {
 
 RVPSubscription* RVPClient::getSubscription(const char *login) {
 	return RVPSubscription::find(login);
-}
-
-void RVPClient::onFileProgress(RVPFile * file, int type, int progress) {
-	if (listener != NULL) {
-		listener->onFileProgress(file, type, progress);
-	}
-	if (type == RVPFileListener::PROGRESS_ERROR || type == RVPFileListener::PROGRESS_COMPLETED) {
-		delete file;
-	}
 }

@@ -425,6 +425,7 @@ int RVPFileCancel(WPARAM wParam, LPARAM lParam)
 {
    CCSDATA *ccs = (CCSDATA *) lParam;
    RVPFile *file = (RVPFile *) ccs->wParam;
+   rvpimpl.cancelFile(file);
    return 0;
 }
 

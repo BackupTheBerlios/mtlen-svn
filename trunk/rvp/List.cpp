@@ -71,6 +71,10 @@ const char *ListItem::getId() {
 	return id;
 }
 
+bool ListItem::isValid() {
+	return true;
+}
+
 List::List() {
 	items = NULL;
 	InitializeCriticalSection(&mutex);
@@ -114,7 +118,9 @@ ListItem * List::find(const char *id1, const char *id2) {
 	Utils::appendText(&id, &idSize, "%s%s", id1, id2);
 	enterCritical();
 	for (ptr=items; ptr!=NULL; ptr=ptr->getNext()) {
-		if (!strcmp(ptr->getId(), id)) break;
+		if (ptr->isValid()) {
+			if (!strcmp(ptr->getId(), id)) break;
+		}
 	}
 	leaveCritical();
 	free(id);
@@ -185,6 +191,21 @@ void List::releaseAll() {
 		ptr->setPrev(NULL);
 		ptr->setNext(NULL);
 		delete ptr;
+	}
+	items = NULL;
+	leaveCritical();
+}
+
+void List::cleanUp() {
+	ListItem *ptr, *ptr2;
+	enterCritical();
+	for (ptr=items; ptr!=NULL; ptr=ptr2) {
+		ptr2=ptr->getNext();
+		if (!ptr->isValid()) {
+			ptr->setPrev(NULL);
+			ptr->setNext(NULL);
+			delete ptr;
+		}
 	}
 	items = NULL;
 	leaveCritical();

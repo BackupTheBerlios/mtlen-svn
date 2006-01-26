@@ -59,6 +59,7 @@ RVPFile::RVPFile(HANDLE hContact, int mode, const char *contact, const char *log
 	host = NULL;
 	connection = NULL;
 	listenConnection = NULL;
+	completed = false;
 	this->hContact = hContact;
 	this->mode = mode;
 	this->contact = Utils::dupString(contact);
@@ -81,6 +82,8 @@ RVPFile::RVPFile(HANDLE hContact, int mode, const char *contact, const char *log
 	cookie = Utils::dupString(out);
 	setId(contact, cookie);
 	setAuthCookie();
+	recvList.cleanUp();
+	sendList.cleanUp();
 	if (mode == MODE_RECV) {
 		recvList.add(this);
 	} else {
@@ -95,6 +98,7 @@ RVPFile::RVPFile(HANDLE hContact, int mode, const char *contact, const char *coo
 	host = NULL;
 	connection = NULL;
 	listenConnection = NULL;
+	completed = false;
 	this->hContact = hContact;
 	this->mode = mode;
 	this->contact = Utils::dupString(contact);
@@ -102,6 +106,8 @@ RVPFile::RVPFile(HANDLE hContact, int mode, const char *contact, const char *coo
 	this->cookie = Utils::dupString(cookie);
 	this->listener = listener;
 	setAuthCookie();
+	recvList.cleanUp();
+	sendList.cleanUp();
 	if (mode == MODE_RECV) {
 		recvList.add(this);
 	} else {
@@ -247,10 +253,10 @@ void RVPFile::cancel() {
 			listener->onFileProgress(this, RVPFileListener::PROGRESS_CANCELLED, 0);
 		}
 	}
+	completed = true;
 }
 
 bool RVPFile::msnftp() {
-	bool completed = false;
 	bool error = false;
 	while (!completed) {
 		char *params = "";
@@ -440,4 +446,8 @@ void RVPFile::onNewConnection(Connection *connection, DWORD dwRemoteIP) {
 	msnftp();
 	delete listenConnection;
 	listenConnection = NULL;
+}
+
+bool RVPFile::isValid() {
+	return !completed;
 }

@@ -32,6 +32,7 @@ private:
 	static List recvList;
 	int	 mode;
 	int size;
+	bool completed;
 	HANDLE hContact;
 	char *contact;
 	char *login;
@@ -81,6 +82,7 @@ public:
 	void 	recv();
 	void 	send();
 	void 	cancel();
+	bool	isValid();
 };
 
 #endif /*RVPFILETRANSFER_H_*/

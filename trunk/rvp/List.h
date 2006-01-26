@@ -40,6 +40,7 @@ public:
 	virtual const char *getId();
 	virtual ListItem *getPrev();
 	virtual ListItem *getNext();
+	virtual bool isValid();
 };
 
 class List {
@@ -59,5 +60,6 @@ public:
 	void	release(ListItem *);
 	void	removeAll();
 	void	releaseAll();
+	void	cleanUp();
 };
 #endif

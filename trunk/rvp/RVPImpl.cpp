@@ -393,7 +393,7 @@ RVPFile *RVPImpl::sendFileInvite(HANDLE hContact, const char * filename) {
 			RVPImplAsyncData *data = new RVPImplAsyncData(this);
 			data->hContact = hContact;
 			char *node = RVPClient::getRealLoginFromLogin(contactID);
-			file = new RVPFile(hContact, RVPFile::MODE_SEND, contactID, node, client);
+			file = new RVPFile(hContact, RVPFile::MODE_SEND, contactID, node, this);
 			delete node;
 			const char *t;
 			if ((t=strrchr(filename, '\\')) != NULL) {
@@ -414,6 +414,11 @@ RVPFile *RVPImpl::sendFileInvite(HANDLE hContact, const char * filename) {
 		delete contactID;
 	}
 	return file;
+}
+
+int RVPImpl::cancelFile(RVPFile *file) {
+	file->cancel();
+	return 0;
 }
 
 int RVPImpl::sendFileAccept(RVPFile *file, const char *path) {

@@ -113,7 +113,7 @@ public:
 };
 
 
-class RVPClient:public ConnectionListener, public RVPFileListener {
+class RVPClient:public ConnectionListener {
 private:
 	static List dnsList;
 	static const char *getStatusString(int status);
@@ -162,7 +162,6 @@ public:
 	List*	getSubscriptions();
 	RVPSubscription* getSubscription(const char *login);
 	void	onNewConnection(Connection *connection, DWORD dwRemoteIP);
-	void	onFileProgress(RVPFile * file, int type, int progress);
 	static int	getStatusFromString(const char *statusString);
 	static char *getServerFromLogin(const char *signInName, const char *manualServer);
 	static char *getUrlFromLogin(const char *signInName);

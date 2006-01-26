@@ -81,6 +81,7 @@ public:
 	int	sendTyping(HANDLE hContact, bool on);
 	int	sendFileAccept(RVPFile *file, const char *path);
 	int	sendFileReject(RVPFile *file);
+	int cancelFile(RVPFile *file);
 	RVPFile *sendFileInvite(HANDLE hContact, const char * filename);
 	int	searchContact(const char *login);
 	bool isTyping(HANDLE hContact);
