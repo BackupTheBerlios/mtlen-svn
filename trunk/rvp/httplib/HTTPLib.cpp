@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "MD5.h"
 
 #include "../JLogger.h"
-static	JLogger *logger = new JLogger("h:/httplib.log");
+static	JLogger *logger = new JLogger("g:/httplib.log");
 
 static PSecurityFunctionTable pSecurityFunctions=NULL;
 static HINSTANCE hInstSecurityDll=LoadLibrary("security.dll");
@@ -137,6 +137,51 @@ HTTPHeader * HTTPHeader::get(const char *name) {
 	return NULL;
 }
 
+List HTTPRedirectCache::list;
+
+HTTPRedirectCache::HTTPRedirectCache(const char *source, const char *destination, time_t timestamp):ListItem(source) {
+	this->timestamp = timestamp;
+	this->destination = Utils::dupString(destination);
+}
+
+HTTPRedirectCache::~HTTPRedirectCache() {
+	if (destination != NULL) {
+		delete destination;
+	}
+}
+
+void HTTPRedirectCache::setDestination(const char *destination) {
+	char *str = this->destination;
+	this->destination = Utils::dupString(destination);
+	if (str != NULL) {
+		delete str;
+	}
+}
+
+const char* HTTPRedirectCache::getDestination() {
+	return destination;
+}
+
+void HTTPRedirectCache::add(const char *source, const char *destination) {
+	HTTPRedirectCache *cache = (HTTPRedirectCache *)list.find(source);
+	if (cache != NULL) {
+		cache->timestamp = time(NULL);
+		cache->setDestination(destination);
+	} else {
+		cache = new HTTPRedirectCache(source, destination, time(NULL));
+		list.add(cache);
+	}
+}
+
+HTTPRedirectCache* HTTPRedirectCache::find(const char *source) {
+	HTTPRedirectCache *cache = (HTTPRedirectCache *)list.find(source);
+	if (cache != NULL) {
+		if (time(NULL) < cache->timestamp + 600) {
+			return cache;
+		}
+	}
+	return NULL;
+}
 
 //free() the return value
 void HTTPRequest::NtlmDestroy() {
@@ -352,7 +397,7 @@ void HTTPRequest::addHeader(const char *name, const char *value) {
 
 void HTTPRequest::removeHeader(const char *name) {
 	for (HTTPHeader *ptr=headers, *lastPtr=NULL;ptr!=NULL;) {
-		if (!strcmp(ptr->name, name)) {
+		if (!strcmp(ptr->getName(), name)) {
 			if (lastPtr==NULL) {
 				headers=ptr->next;
 				ptr->next = NULL;
@@ -378,7 +423,7 @@ HTTPHeader *HTTPRequest::getHeaders() {
 
 HTTPHeader *HTTPRequest::getHeader(const char *name) {
 	for (HTTPHeader *header = headers; header!=NULL; header=header->next) {
-		if (!strcmpi(header->name, name)) return header;
+		if (!strcmpi(header->getName(), name)) return header;
 	}
 	return NULL;
 }
@@ -386,8 +431,8 @@ HTTPHeader *HTTPRequest::getHeader(const char *name) {
 void HTTPRequest::addAutoRequestHeaders() {
 	bool isContentLen = false, isHost = false;
 	for (HTTPHeader *header = headers; header!=NULL; header=header->next) {
-		if (!strcmpi(header->name, "Host")) isHost = true;
-		if (!strcmpi(header->name, "Content-Length")) isContentLen = true;
+		if (!strcmpi(header->getName(), "Host")) isHost = true;
+		if (!strcmpi(header->getName(), "Content-Length")) isContentLen = true;
 	}
 	if (!isHost) {
 		addHeader("Host", host);
@@ -402,7 +447,7 @@ void HTTPRequest::addAutoRequestHeaders() {
 void HTTPRequest::addAutoResponseHeaders() {
 	bool isContentLen = false;
 	for (HTTPHeader *header = headers; header!=NULL; header=header->next) {
-		if (!strcmpi(header->name, "Content-Length")) isContentLen = true;
+		if (!strcmpi(header->getName(), "Content-Length")) isContentLen = true;
 	}
 	if (!isContentLen) {
 		char str[64];
@@ -417,7 +462,7 @@ char * HTTPRequest::toStringReq() {
 	char *output = NULL;
 	Utils::appendText(&output, &outputSize, "%s %s HTTP/1.1\n", method, uri);
 	for (HTTPHeader *header = headers; header!=NULL; header=header->next) {
-		Utils::appendText(&output, &outputSize, "%s: %s\n", header->name, header->value);
+		Utils::appendText(&output, &outputSize, "%s: %s\n", header->getName(), header->getValue());
 	}
 	Utils::appendText(&output, &outputSize, "\n");
 	return output;
@@ -428,7 +473,7 @@ char * HTTPRequest::toStringRsp() {
 	char *output = NULL;
 	Utils::appendText(&output, &outputSize, "HTTP/1.1 %03d %s\n", resultCode, (resultCode/100==2) ? "Successful" :"Error");
 	for (HTTPHeader *header = headers; header!=NULL; header=header->next) {
-		Utils::appendText(&output, &outputSize, "%s: %s\n", header->name, header->value);
+		Utils::appendText(&output, &outputSize, "%s: %s\n", header->getName(), header->getValue());
 	}
 	Utils::appendText(&output, &outputSize, "\n");
 	return output;
@@ -439,8 +484,8 @@ bool HTTPRequest::authBasic(HTTPHeader *header) {
 		return false;
 	}
 	for (; header!=NULL; header=header->next) {
-		if (!strcmpi(header->name, "WWW-Authenticate")) {
-			if (!strncmp("Basic", header->value, 5)) {
+		if (!strcmpi(header->getName(), "WWW-Authenticate")) {
+			if (!strncmp("Basic", header->getValue(), 5)) {
 				int resultSize =0;
 				char *result=NULL;
 				if (getCredentials()->getDomain()!=NULL) {
@@ -468,8 +513,8 @@ bool HTTPRequest::authDigest(HTTPHeader *header) {
 		return false;
 	}
 	for (; header!=NULL; header=header->next) {
-		if (!strcmpi(header->name, "WWW-Authenticate")) {
-			 if (!strncmp("Digest", header->value, 6)) {
+		if (!strcmpi(header->getName(), "WWW-Authenticate")) {
+			 if (!strncmp("Digest", header->getValue(), 6)) {
 				HTTPHeader *hAttributes = header->getAttributes(7);
 				if (hAttributes!=NULL) {
 					HTTPHeader *hRealm = hAttributes->get("realm");
@@ -497,7 +542,7 @@ bool HTTPRequest::authDigest(HTTPHeader *header) {
 					}
 					md5.update((unsigned char *)getCredentials()->getUsername(), strlen(getCredentials()->getUsername()));
 					md5.update((unsigned char *)":", 1);
-					md5.update((unsigned char *)hRealm->value, strlen(hRealm->value));
+					md5.update((unsigned char *)hRealm->getValue(), strlen(hRealm->getValue()));
 					md5.update((unsigned char *)":", 1);
 					md5.update((unsigned char *)getCredentials()->getPassword(), strlen(getCredentials()->getPassword()));
 					md5.finalize();
@@ -514,14 +559,14 @@ bool HTTPRequest::authDigest(HTTPHeader *header) {
 					md5.init();
 					md5.update((unsigned char *)ha1, 32);
 					md5.update((unsigned char *)":", 1);
-					md5.update((unsigned char *)hNonce->value, strlen(hNonce->value));
+					md5.update((unsigned char *)hNonce->getValue(), strlen(hNonce->getValue()));
 					if (hQop) {
 						md5.update((unsigned char *)":", 1);
 						md5.update((unsigned char *)nc, strlen(nc));
 						md5.update((unsigned char *)":", 1);
 						md5.update((unsigned char *)cnonce, strlen(cnonce));
 						md5.update((unsigned char *)":", 1);
-						md5.update((unsigned char *)hQop->value, strlen(hQop->value));
+						md5.update((unsigned char *)hQop->getValue(), strlen(hQop->getValue()));
 					}
 					md5.update((unsigned char *)":", 1);
 					md5.update((unsigned char *)ha2, strlen(ha2));
@@ -536,12 +581,12 @@ bool HTTPRequest::authDigest(HTTPHeader *header) {
 					} else {
 						Utils::appendText(&result, &resultSize, "username=\"%s\", ",getCredentials()->getUsername());
 					}
-					Utils::appendText(&result, &resultSize, "realm=\"%s\", ",hRealm->value);
+					Utils::appendText(&result, &resultSize, "realm=\"%s\", ",hRealm->getValue());
 					Utils::appendText(&result, &resultSize, "algorithm=\"MD5\", ");
 					Utils::appendText(&result, &resultSize, "uri=\"%s\", ",getUri());
-					Utils::appendText(&result, &resultSize, "nonce=\"%s\", ",hNonce->value);
+					Utils::appendText(&result, &resultSize, "nonce=\"%s\", ",hNonce->getValue());
 					if (hQop) {
-						Utils::appendText(&result, &resultSize, "qop=\"%s\", ",hQop->value);
+						Utils::appendText(&result, &resultSize, "qop=\"%s\", ",hQop->getValue());
 						Utils::appendText(&result, &resultSize, "nc=\"%s\", ",nc);
 						Utils::appendText(&result, &resultSize, "cnonce=\"%s\", ",cnonce);
 					}
@@ -558,10 +603,10 @@ bool HTTPRequest::authDigest(HTTPHeader *header) {
 
 bool HTTPRequest::authNTLM(HTTPHeader *header) {
 	for (; header!=NULL; header=header->next) {
-		if (!strcmpi(header->name, "WWW-Authenticate")) {
-			if (!strncmp("NTLM", header->value, 4)) {
+		if (!strcmpi(header->getName(), "WWW-Authenticate")) {
+			if (!strncmp("NTLM", header->getValue(), 4)) {
 				authRejectsMax = 2;
-				if (strlen(header->value)==4) {
+				if (strlen(header->getValue())==4) {
 					char *ntlmToken = NtlmInitialiseAndGetDomainPacket(hInstSecurityDll);
 					int resultSize =0;
 					char *result=NULL;
@@ -571,7 +616,7 @@ bool HTTPRequest::authNTLM(HTTPHeader *header) {
 					delete ntlmToken;
 					return true;
 				} else {
-					char *ntlmToken = NtlmCreateResponseFromChallenge(header->value + 5);
+					char *ntlmToken = NtlmCreateResponseFromChallenge((char *)header->getValue() + 5);
 					int resultSize =0;
 					char *result=NULL;
 					Utils::appendText(&result, &resultSize, "NTLM %s", ntlmToken);
@@ -717,8 +762,8 @@ HTTPRequest *HTTPUtils::performRequest(Connection *con, HTTPRequest *request)  {
 			if (con->send(request->getContent(), request->dataLength)) {
 				response = recvHeaders(con);
 				for (HTTPHeader *header=response->getHeaders(); header!=NULL; header=header->next) {
-					if (!strcmpi(header->name, "Content-Length")) {
-						int len = atol(header->value);
+					if (!strcmpi(header->getName(), "Content-Length")) {
+						int len = atol(header->getValue());
 						char *data = new char[len+1];
 						for (int l=0;l<len;) {
 							int j = con->recv(data+l, len-l);
@@ -746,8 +791,8 @@ HTTPRequest *HTTPUtils::recvRequest(Connection *con)  {
 	if (con!=NULL) {
 		response = recvHeaders(con);
 		for (HTTPHeader *header=response->getHeaders(); header!=NULL; header=header->next) {
-			if (!strcmpi(header->name, "Content-Length")) {
-				int len = atol(header->value);
+			if (!strcmpi(header->getName(), "Content-Length")) {
+				int len = atol(header->getValue());
 				char *data = new char[len+1];
 				for (int l=0;l<len;) {
 					int j = con->recv(data+l, len-l);
@@ -784,16 +829,23 @@ int HTTPUtils::sendResponse(Connection *con, HTTPRequest *response)  {
 
 
 HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
-	char *str;
 	HTTPRequest *response = NULL;
 	int authRejects = 0;
 	Connection *con = NULL;
+	bool isRedirect = false;
+	//char *originalUrl = Utils::dupString(request->getUrl());
+
 	request->keepAlive = false;
 	request->authRejectsMax = 1;
 	request->authRejects = 0;
 
-	str = request->toStringReq();
-	free(str);
+	for (HTTPRedirectCache *cache = HTTPRedirectCache::find(request->getUrl()); cache!=NULL; cache = HTTPRedirectCache::find(request->getUrl())) {
+		request->setUrl(cache->getDestination());
+		isRedirect = true;
+	}
+	if (isRedirect) {
+	//	logger->info("Redirect cache: %s -> %s", originalUrl, request->getUrl());
+	}
 	while (1) {
 		if (con == NULL) {
 			con = new Connection(DEFAULT_CONNECTION_POOL);
@@ -804,8 +856,8 @@ HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
 			/* Look for important headers: Connection, */
 			request->keepAlive = true;
 			for (HTTPHeader *header=response->getHeaders(); header!=NULL; header=header->next) {
-				if (!strcmpi(header->name, "Connection")) {
-					if (!strcmpi(header->value, "close")) {
+				if (!strcmpi(header->getName(), "Connection")) {
+					if (!strcmpi(header->getValue(), "close")) {
 						request->keepAlive = false;
 					}
 				}
@@ -813,9 +865,10 @@ HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
 			if (response->resultCode == 302) {
 				HTTPHeader *header;
 				for (header=response->getHeaders(); header!=NULL; header=header->next) {
-					if (!strcmpi(header->name, "Location")) {
+					if (!strcmpi(header->getName(), "Location")) {
+						HTTPRedirectCache::add(request->getUrl(), header->getValue());
 						request->removeHeader("Host");
-						request->setUrl(header->value);
+						request->setUrl(header->getValue());
 						request->keepAlive = false;
 						break;
 					}
@@ -839,6 +892,8 @@ HTTPRequest *HTTPUtils::performTransaction(HTTPRequest *request)  {
 			} else if (response->resultCode/100 == 2) {
 				break;
 			} else {
+				if (isRedirect) {
+				}
 				break;
 			}
 			delete response;

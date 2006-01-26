@@ -23,6 +23,7 @@ class HTTPHeader;
 class HTTPRequest;
 
 #include "../Connection.h"
+#include "../List.h"
 
 #ifndef HTTPLIB_INCLUDED
 #define HTTPLIB_INCLUDED
@@ -79,9 +80,10 @@ public:
 };
 
 class HTTPHeader {
-public:
+private:	
 	char *name;
 	char *value;
+public:
 	HTTPHeader *next;
 	HTTPHeader(const char *, const char *);
 	~HTTPHeader();
@@ -89,7 +91,8 @@ public:
 	HTTPHeader* get(const char *);
 	const char *getValue();
 	const char *getName();
-
+	HTTPHeader *getNext();
+	void setNext(HTTPHeader *);
 };
 
 class HTTPRequest {
@@ -145,6 +148,21 @@ public:
 	HTTPHeader *	getHeader(const char *name);
 };
 
+class HTTPRedirectCache:public ListItem {
+private:
+	static List list;
+	char *destination;
+	time_t timestamp;
+	HTTPRedirectCache(const char *, const char *, time_t timestamp);
+	~HTTPRedirectCache();
+	void	setDestination(const char *);
+public:
+	const char *getSource();
+	const char *getDestination();
+	time_t getTimestamp();
+	static 	HTTPRedirectCache* find(const char *source);
+	static	void add(const char *source, const char *destination);
+};
 
 class HTTPUtils {
 protected:
