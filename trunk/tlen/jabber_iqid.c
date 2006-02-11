@@ -131,6 +131,14 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 								item->group = NULL;
 								DBDeleteContactSetting(hContact, "CList", "Group");
 							}
+							if (!DBGetContactSetting(hContact, jabberProtoName, "AvatarHash", &dbv)) {
+								if (item->newAvatarHash) free(item->newAvatarHash);
+								if (item->avatarHash) free(item->avatarHash);
+								item->avatarHash = strdup(dbv.pszVal);
+								item->newAvatarHash = strdup(dbv.pszVal);
+								DBFreeVariant(&dbv);
+							}
+							item->avatarFormat = DBGetContactSettingDword(hContact, jabberProtoName, "AvatarFormat", PA_FORMAT_UNKNOWN);
 							JabberLog("Adding contact to roster: %s (%s) %d", item->jid, item->group, item->subscription);
 						}
 					}

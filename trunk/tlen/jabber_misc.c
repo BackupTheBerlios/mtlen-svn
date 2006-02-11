@@ -175,6 +175,39 @@ void JabberContactListCreateGroup(char *groupName)
 	JabberContactListCreateClistGroup(name);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// JabberGetAvatarFileName() - gets a file name for the avatar image
+
+void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen)
+{
+	int tPathLen;
+	int format;
+	char* szFileType;
+	CallService( MS_DB_GETPROFILEPATH, cbLen, (LPARAM) pszDest );
+
+	tPathLen = strlen( pszDest );
+	tPathLen += mir_snprintf( pszDest + tPathLen, cbLen - tPathLen, "\\%s\\", jabberModuleName  );
+	CreateDirectoryA( pszDest, NULL );
+	format = item == NULL ? PA_FORMAT_JPEG : item->avatarFormat;
+	szFileType = "bmp";
+	switch(format) {
+		case PA_FORMAT_JPEG: szFileType = "jpg";   break;
+		case PA_FORMAT_ICON: szFileType = "ico";   break;
+		case PA_FORMAT_PNG:  szFileType = "png";   break;
+		case PA_FORMAT_GIF:  szFileType = "gif";   break;
+		case PA_FORMAT_BMP:  szFileType = "bmp";   break;
+	}
+	if ( item != NULL ) {
+		char* hash;
+		hash = JabberSha1(item->jid);
+		mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s.%s", hash, szFileType );
+		free( hash );
+	}
+	else mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s avatar.%s", jabberProtoName, szFileType );
+}
+
+
+
 struct FORK_ARG {
 	HANDLE hEvent;
 	void (__cdecl *threadcode)(void*);

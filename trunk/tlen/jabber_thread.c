@@ -601,6 +601,138 @@ static void JabberProcessProtocol(XmlNode *node, void *userdata)
 
 }
 
+static void TlenProcessIqVersion(XmlNode* node)
+{
+	OSVERSIONINFO osvi = { 0 };
+	char mversion[64];
+	char* from, *version;
+	char* os = NULL;
+
+	if (( from=JabberXmlGetAttrValue( node, "from" )) == NULL )
+		return;
+
+	version = JabberTextEncode( TLEN_VERSION_STRING );
+	osvi.dwOSVersionInfoSize = sizeof( OSVERSIONINFO );
+	if ( GetVersionEx( &osvi )) {
+		switch ( osvi.dwPlatformId ) {
+		case VER_PLATFORM_WIN32_NT:
+			if ( osvi.dwMajorVersion == 5 ) {
+				if ( osvi.dwMinorVersion == 2 ) os = JabberTextEncode( Translate( "Windows Server 2003" ));
+				else if ( osvi.dwMinorVersion == 1 ) os = JabberTextEncode( Translate( "Windows XP" ));
+				else if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( Translate( "Windows 2000" ));
+			}
+			else if ( osvi.dwMajorVersion <= 4 ) {
+				os = JabberTextEncode( Translate( "Windows NT" ));
+			}
+			break;
+		case VER_PLATFORM_WIN32_WINDOWS:
+			if ( osvi.dwMajorVersion == 4 ) {
+				if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( Translate( "Windows 95" ));
+				if ( osvi.dwMinorVersion == 10 ) os = JabberTextEncode( Translate( "Windows 98" ));
+				if ( osvi.dwMinorVersion == 90 ) os = JabberTextEncode( Translate( "Windows ME" ));
+			}
+			break;
+	}	}
+
+	if ( os == NULL ) os = JabberTextEncode( Translate( "Windows" ));
+
+	CallService( MS_SYSTEM_GETVERSIONTEXT, sizeof( mversion ), ( LPARAM )mversion );
+	JabberSend( jabberThreadInfo->s, "<message to='%s' type='iq'><iq type='result'><query xmlns='jabber:iq:version'><name>Miranda IM %s</name><version>%s</version><os>%s</os></query></iq></message>", from, mversion, version?version:"", os?os:"" );
+
+	if ( version ) free( version );
+	if ( os ) free( os );
+}
+
+
+// Support for tAvatar-compatible avatars
+static void TlenProcessTAvatar(XmlNode* node) 
+{
+	JABBER_LIST_ITEM *item;
+	char *from;
+	HANDLE hContact;
+	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
+		if ((item = JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
+			if ((hContact=JabberHContactFromJID(from)) != NULL) {
+				XmlNode *tavatarNode;
+				int i = 1;
+				while ((tavatarNode=JabberXmlGetNthChild(node, "tavatar", i)) != NULL) {
+					char *tavatarText = tavatarNode->text;
+					char *tavatarType = JabberXmlGetAttrValue(tavatarNode, "type");
+					if (tavatarType != NULL) {
+						if (!strcmp(tavatarType, "request")) {
+							if (!strcmp(tavatarText, "get_hash")) {
+								/* send avatar hash */
+							} else if (!strcmp(tavatarText, "get_file")) {
+								/* send avatar file */
+							} else if (!strcmp(tavatarText, "remove_avatar")) {
+								/* remove contact's avatar*/
+								if (item->newAvatarHash != NULL) free (item->newAvatarHash);
+								if (item->avatarHash != NULL) free (item->avatarHash);
+								item->newAvatarHash = NULL;
+								item->avatarHash = NULL;
+								DBDeleteContactSetting(hContact, jabberProtoName, "AvatarHash");
+								DBDeleteContactSetting(hContact, "ContactPhoto", "File");
+								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
+							}
+						} else if (!strcmp(tavatarType, "hash")) {
+							/* contact's avatar hash*/
+							int refresh = 1;
+							if (item->avatarHash != NULL && !strcmp(item->avatarHash, tavatarText)) {
+								refresh = 0;
+							}
+							if (refresh) {
+								if (item->newAvatarHash != NULL) free (item->newAvatarHash);
+								item->newAvatarHash = strdup(tavatarText);
+								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
+								JabberLog( "Avatar was changed" );
+							}
+						} else if (!strcmp(tavatarType, "file")) {
+							if (item->newAvatarHash != NULL) {
+								/* contact's avatar*/
+								FILE* out;
+								int resultLen = 0;
+								char* data;
+								char* mimeType = JabberXmlGetAttrValue( tavatarNode, "mimetype" );
+								PROTO_AVATAR_INFORMATION AI;
+								AI.cbSize = sizeof AI;
+								AI.hContact = hContact;
+								AI.format = PA_FORMAT_UNKNOWN;
+								data = JabberBase64Decode(tavatarText, &resultLen);
+								if ( mimeType != NULL ) {
+									if ( !strcmp( mimeType, "image/jpeg" ))     AI.format = PA_FORMAT_JPEG;
+									else if ( !strcmp( mimeType, "image/png" )) AI.format = PA_FORMAT_PNG;
+									else if ( !strcmp( mimeType, "image/gif" )) AI.format = PA_FORMAT_GIF;
+									else if ( !strcmp( mimeType, "image/bmp" )) AI.format = PA_FORMAT_BMP;
+									else if ( !strcmp( mimeType, "image/ico" )) AI.format = PA_FORMAT_ICON;
+								} else if (resultLen > 4) {
+									AI.format = JabberGetPictureType(data);
+								}
+								item->avatarFormat = AI.format;
+								if (item->avatarHash != NULL) free (item->avatarHash);
+								item->avatarHash = strdup(item->newAvatarHash);
+								TlenGetAvatarFileName(item, AI.filename, sizeof AI.filename);
+								DBWriteContactSettingString( hContact, "ContactPhoto", "File", AI.filename );
+								DBWriteContactSettingString(hContact, jabberProtoName, "AvatarHash",  item->avatarHash);
+								DBWriteContactSettingDword(hContact, jabberProtoName, "AvatarFormat",  item->avatarFormat);
+								DeleteFile(AI.filename);
+								out = fopen( AI.filename, "wb" );
+								if ( out != NULL ) {
+									fwrite( data, resultLen, 1, out );
+									fclose( out );
+									ProtoBroadcastAck( jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_SUCCESS, (HANDLE) &AI , 0);
+								}
+								else ProtoBroadcastAck( jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_FAILED, (HANDLE) &AI , 0);
+								free(data);
+							}
+						} 
+					}
+					i++;
+				}
+			}
+		}
+	}
+}
+
 static void JabberProcessMessage(XmlNode *node, void *userdata)
 {
 	struct ThreadData *info;
@@ -625,18 +757,25 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 			if (DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", TRUE) && !strcmp(from, "b73@tlen.pl")) {
 				return;
 			}
+			// If message is from a stranger (not in roster), item is NULL
+			item = JabberListGetItemPtr(LIST_ROSTER, from);
 			isChatRoomJid = JabberListExist(LIST_CHATROOM, from);
 
 			if (isChatRoomJid && type!=NULL && !strcmp(type, "groupchat")) {
 				//JabberGroupchatProcessMessage(node, userdata);
-			}
-			else if (type!=NULL && !strcmp(type, "pic")) {
+			} else if (type!=NULL && !strcmp(type, "pic")) {
 				idStr = JabberXmlGetAttrValue(node, "idt");
 				JabberSend(info->s, "<message type='pic' to='%s' crc_c='n' idt='%s'/>", from, idStr);
+			} else if (type!=NULL && !strcmp(type, "iq")) {
+				XmlNode *iqNode;
+				// Jabber-compatible iq 
+				if ((iqNode=JabberXmlGetChild(node, "iq")) != NULL) {
+					JabberXmlAddAttr(iqNode, "from", from);
+					JabberProcessIq(iqNode, userdata);
+				}
+			} else if (type!=NULL && !strcmp(type, "tavatar")) {
+				TlenProcessTAvatar(node);
 			} else {
-
-				// If message is from a stranger (not in roster), item is NULL
-				item = JabberListGetItemPtr(LIST_ROSTER, from);
 
 				if ((bodyNode=JabberXmlGetChild(node, "body")) != NULL) {
 					if (bodyNode->text != NULL) {
@@ -645,8 +784,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 							sprintf(p, "Subject: %s\r\n%s", subjectNode->text, bodyNode->text);
 							localMessage = JabberTextDecode(p);
 							free(p);
-						}
-						else {
+						} else {
 							localMessage = JabberTextDecode(bodyNode->text);
 						}
 
@@ -815,29 +953,37 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 							}
 						}
 					}
-					if (status == ID_STATUS_OFFLINE)
-						JabberListRemoveResource(LIST_ROSTER, from);
-					else {
-						statusNode = JabberXmlGetChild(node, "status");
-						if (statusNode)
-							p = JabberTextDecode(statusNode->text);
-						else
-							p = NULL;
-						JabberListAddResource(LIST_ROSTER, from, status, statusNode?p:NULL);
-						if (p) {
-							DBWriteContactSettingString(hContact, "CList", "StatusMsg", p);
-						} else {
-							DBDeleteContactSetting(hContact, "CList", "StatusMsg");
-						}
-						if (p) free(p);
-					}
-					if (JabberXmlGetChild(node, "x") != NULL) {
-						DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", "MIRANDA");
+
+					statusNode = JabberXmlGetChild(node, "status");
+					if (statusNode)
+						p = JabberTextDecode(statusNode->text);
+					else
+						p = NULL;
+					JabberListAddResource(LIST_ROSTER, from, status, statusNode?p:NULL);
+					if (p) {
+						DBWriteContactSettingString(hContact, "CList", "StatusMsg", p);
+						free(p);
 					} else {
-						DBDeleteContactSetting(hContact, jabberProtoName, "MirVer");
+						DBDeleteContactSetting(hContact, "CList", "StatusMsg");
 					}
-					// Determine status to show for the contact
+					// Determine status to show for the contact and request version information
 					if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
+						char *tavatarHash = NULL;
+						XmlNode *tavatarNode;
+						if ((tavatarNode = JabberXmlGetChild(node, "tavatar"))!=NULL) {
+							char *tavatarType = JabberXmlGetAttrValue(tavatarNode, "type");
+							if (tavatarType != NULL) {
+								if (!strcmp(tavatarType, "hash")) {
+									tavatarHash = tavatarNode->text;
+								}
+							}
+						}
+						if (item->status == ID_STATUS_OFFLINE ) {//&& jabberStatus != ID_STATUS_INVISIBLE) {
+							//JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
+							if (tavatarHash == NULL) {
+								JabberSend( info->s, "<message to='%s' type='tavatar'><tavatar type='request'>get_hash</tavatar></message>", from);
+							}
+						}
 						item->status = status;
 					}
 
@@ -886,11 +1032,6 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 					if (item != NULL && item->isTyping) {
 						item->isTyping = FALSE;
 						CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
-					}
-					if (JabberXmlGetChild(node, "x") != NULL) {
-						DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", "MIRANDA");
-					} else {
-						DBDeleteContactSetting(hContact, jabberProtoName, "MirVer");
 					}
 					JabberLog("%s offline, set contact status to %d", from, status);
 				}
@@ -1033,6 +1174,51 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 			}
 		}
 
+	} 
+	// RECVED: <iq type='get'><query ...
+	else if ( !strcmp( type, "get" ) && queryNode!=NULL && ( xmlns=JabberXmlGetAttrValue( queryNode, "xmlns" ))!=NULL ) {
+		// RECVED: software version query
+		// ACTION: return my software version
+		if ( !strcmp( xmlns, "jabber:iq:version" )) TlenProcessIqVersion(node);
+//		else if ( !strcmp( xmlns, "jabber:iq:avatar" ))
+//			JabberProcessIqAvatar( idStr, node );
+	}
+	// RECVED: <iq type='result'><query ...
+	else if ( !strcmp( type, "result" ) && queryNode!=NULL && ( xmlns=JabberXmlGetAttrValue( queryNode, "xmlns" ))!=NULL ) {
+
+		// RECVED: software version result
+		// ACTION: update version information for the specified jid/resource
+		if ( !strcmp( xmlns, "jabber:iq:version" )) {
+			char* from;
+			XmlNode *n;
+			JABBER_LIST_ITEM *item;
+			if (( from=JabberXmlGetAttrValue( node, "from" )) != NULL ) {
+				if (( item=JabberListGetItemPtr( LIST_ROSTER, from ))!=NULL) {
+					if ( item->software ) free( item->software );
+					if ( item->version ) free( item->version );
+					if ( item->system ) free( item->system );
+					if (( n=JabberXmlGetChild( queryNode, "name" ))!=NULL && n->text ) {
+						item->software = JabberTextDecode( n->text );
+					} else 
+						item->software = NULL;
+					if (( n=JabberXmlGetChild( queryNode, "version" ))!=NULL && n->text )
+						item->version = JabberTextDecode( n->text );
+					else
+						item->version = NULL;
+					if (( n=JabberXmlGetChild( queryNode, "os" ))!=NULL && n->text )
+						item->system = JabberTextDecode( n->text );
+					else
+						item->system = NULL;
+					if (( hContact=JabberHContactFromJID( item->jid )) != NULL ) {
+						if (item->software != NULL) {
+							DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", item->software);
+						} else {
+							DBDeleteContactSetting(hContact, jabberProtoName, "MirVer");
+						}
+					}
+				}
+			}
+		}
 	}
 	// RECVED: <iq type='error'> ...
 	else if (!strcmp(type, "error")) {
@@ -1141,7 +1327,7 @@ static void __cdecl JabberKeepAliveThread(JABBER_SOCKET s)
 static void TlenProcessF(XmlNode *node, void *userdata)
 {
 	struct ThreadData *info;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 	CCSDATA ccs;
 	PROTORECVEVENT pre;
 	char *szBlob, *from, *p, *e, *nick;
@@ -1159,8 +1345,8 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 			if (!strcmp(e, "1")) {
 				// FILE_RECV : e='1' : File transfer request
 				_snprintf(jid, sizeof(jid), "%s@%s", from, info->server);
-				ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
-				memset(ft, 0, sizeof(JABBER_FILE_TRANSFER));
+				ft = (TLEN_FILE_TRANSFER *) malloc(sizeof(TLEN_FILE_TRANSFER));
+				memset(ft, 0, sizeof(TLEN_FILE_TRANSFER));
 				ft->jid = _strdup(jid);
 				ft->hContact = JabberHContactFromJID(jid);
 

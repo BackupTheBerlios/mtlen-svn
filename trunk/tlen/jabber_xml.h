@@ -70,12 +70,10 @@ void JabberXmlDumpAll(XmlState *xmlState);
 void JabberXmlDumpNode(XmlNode *node);
 XmlNode *JabberXmlCopyNode(XmlNode *node);
 
-#ifdef _DEBUG
 XmlNode *JabberXmlCreateNode(char *name);
 void JabberXmlAddAttr(XmlNode *n, char *name, char *value);
 XmlNode *JabberXmlAddChild(XmlNode *n, char *name);
 void JabberXmlAddText(XmlNode *n, char *text);
-#endif
 
 #endif
 

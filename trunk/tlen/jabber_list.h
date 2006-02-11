@@ -50,7 +50,13 @@ typedef struct {
 				// On normal contact, this is the same status as shown on contact list.
 	JABBER_SUBSCRIPTION subscription;
 	char *statusMessage;	// Status message when the update is to JID with no resource specified (e.g. transport user)
+	char *software;
+	char *version;
+	char *system;
 	char *group;
+	int	 avatarFormat;
+	char *avatarHash;
+	char *newAvatarHash;
 	char *photoFileName;
 	int idMsgAckPending;
 	char *messageEventIdStr;
@@ -70,7 +76,7 @@ typedef struct {
 
 	// LIST_FILE
 	// jid = string representation of port number
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 	//WORD port;
 } JABBER_LIST_ITEM;
 
@@ -89,6 +95,8 @@ JABBER_LIST_ITEM *JabberListGetItemPtrFromIndex(int index);
 
 void JabberListAddResource(JABBER_LIST list, const char *jid, int status, const char *statusMessage);
 void JabberListRemoveResource(JABBER_LIST list, const char *jid);
+
+void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen );
 
 #endif
 

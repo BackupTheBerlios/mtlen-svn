@@ -90,6 +90,11 @@ static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item)
 //	if (item->type) free(item->type);
 	//if (item->ft) JabberFileFreeFt(item->ft); // No need to free (it is always free when exit from JabberFileServerThread())
 	if (item->roomName) free(item->roomName);
+	if (item->version) free(item->version);
+	if (item->software) free(item->software);
+	if (item->system) free(item->system);
+	if (item->avatarHash) free(item->avatarHash);
+	if (item->newAvatarHash) free(item->newAvatarHash);
 }
 
 int JabberListExist(JABBER_LIST list, const char *jid)
@@ -153,6 +158,12 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 //	item->type = NULL;
 	item->ft = NULL;
 	item->roomName = NULL;
+	item->version = NULL;
+	item->software = NULL;
+	item->system = NULL;
+	item->avatarHash = NULL;
+	item->newAvatarHash = NULL;
+	item->avatarFormat = PA_FORMAT_UNKNOWN;
 	count++;
 	LeaveCriticalSection(&csLists);
 

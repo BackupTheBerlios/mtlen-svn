@@ -25,12 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <windows.h>
 
-extern void __cdecl TlenVoiceSendingThread(JABBER_FILE_TRANSFER *ft);
-extern void __cdecl TlenVoiceReceiveThread(JABBER_FILE_TRANSFER *ft);
+extern void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft);
+extern void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft);
 extern int TlenVoiceIsInUse();
 extern int TlenVoiceContactMenuHandleVoice(WPARAM wParam, LPARAM lParam);
 extern int TlenVoiceCancelAll();
-extern int TlenVoiceStart(JABBER_FILE_TRANSFER *ft, int mode) ;
+extern int TlenVoiceStart(TLEN_FILE_TRANSFER *ft, int mode) ;
 extern int TlenVoiceAccept(const char *id, const char *from);
 extern int TlenVoiceBuildInDeviceList(HWND hWnd);
 extern int TlenVoiceBuildOutDeviceList(HWND hWnd);

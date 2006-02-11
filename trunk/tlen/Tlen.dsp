@@ -157,10 +157,6 @@ SOURCE=.\jabber_thread.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\jabber_userinfo.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\jabber_util.c
 # End Source File
 # Begin Source File
@@ -194,6 +190,10 @@ SOURCE=.\tlen_file.c
 # Begin Source File
 
 SOURCE=.\tlen_muc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tlen_userinfo.c
 # End Source File
 # Begin Source File
 

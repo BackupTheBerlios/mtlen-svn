@@ -48,19 +48,19 @@ STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Tlen",IDC_TLEN,5,4,286,57
-    LTEXT           "Username:",IDC_STATIC,14,18,52,8
-    EDITTEXT        IDC_EDIT_USERNAME,70,16,86,12,ES_AUTOHSCROLL
+    GROUPBOX        "Tlen",IDC_TLEN,5,3,286,45
+    LTEXT           "Username:",IDC_STATIC,14,17,52,8
+    EDITTEXT        IDC_EDIT_USERNAME,70,15,86,12,ES_AUTOHSCROLL
     CONTROL         "Create a new account",IDC_REGISTERACCOUNT,"Hyperlink",
-                    0x0,170,18,90,8
-    LTEXT           "Password:",IDC_STATIC,14,32,52,8
-    EDITTEXT        IDC_EDIT_PASSWORD,70,30,86,12,ES_PASSWORD |
+                    0x0,170,17,100,8
+    LTEXT           "Password:",IDC_STATIC,14,31,52,8
+    EDITTEXT        IDC_EDIT_PASSWORD,70,29,86,12,ES_PASSWORD |
                     ES_AUTOHSCROLL
     CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,70,45,188,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,170,31,100,10
     CONTROL         "Use SSL",IDC_USE_SSL,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,14,89,69,10
-    GROUPBOX        "Options",IDC_SIMPLE,5,66,286,109
+    GROUPBOX        "Options",IDC_SIMPLE,5,53,286,122
     CONTROL         "Automatically reconnect after unintentional disconnection",
                     IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
                     79,249,10
@@ -101,20 +101,7 @@ STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Expert Options",IDC_STATIC,5,4,286,74
-    LTEXT           "Login server:",IDC_STATIC,14,18,75,8
-    EDITTEXT        IDC_EDIT_LOGIN_SERVER,90,16,90,12,ES_AUTOHSCROLL
-    LTEXT           "Connection Host:",IDC_STATIC,14,32,75,8
-    EDITTEXT        IDC_HOST,90,30,90,12,ES_AUTOHSCROLL | WS_DISABLED
-    LTEXT           "Port:",IDC_STATIC,194,32,35,8
-    EDITTEXT        IDC_HOSTPORT,230,30,26,12,ES_AUTOHSCROLL | ES_NUMBER |
-                    WS_DISABLED
-    CONTROL         "Keep connection alive",IDC_KEEPALIVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,14,47,250,10
-    CONTROL         "Enable Always Visible and Never Visible",
-                    IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,14,60,250,10
-    GROUPBOX        "File Transfer and Voice Chats",IDC_STATIC,5,100,286,110
+    GROUPBOX        "P2P Connections",IDC_STATIC,5,100,286,110
     CONTROL         "Use proxy for incoming connections",IDC_FILE_USE_PROXY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,114,271,10
     LTEXT           "Proxy type:",IDC_FILE_PROXY_TYPE_LABEL,16,130,48,8,
@@ -140,6 +127,20 @@ BEGIN
                     WS_DISABLED
     EDITTEXT        IDC_FILE_PROXY_PASSWORD,204,175,81,12,ES_PASSWORD |
                     ES_AUTOHSCROLL | WS_DISABLED
+
+    GROUPBOX        "Expert Options",IDC_STATIC,5,4,286,74
+    LTEXT           "Login server:",IDC_STATIC,14,18,75,8
+    EDITTEXT        IDC_EDIT_LOGIN_SERVER,90,16,90,12,ES_AUTOHSCROLL
+    LTEXT           "Connection Host:",IDC_STATIC,14,32,75,8
+    EDITTEXT        IDC_HOST,90,30,90,12,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Port:",IDC_STATIC,194,32,35,8
+    EDITTEXT        IDC_HOSTPORT,230,30,26,12,ES_AUTOHSCROLL | ES_NUMBER |
+                    WS_DISABLED
+    CONTROL         "Keep connection alive",IDC_KEEPALIVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,47,250,10
+    CONTROL         "Enable Always Visible and Never Visible",
+                    IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE |
+                    WS_TABSTOP,14,60,250,10
 
 END
 
@@ -212,6 +213,19 @@ BEGIN
     CONTROL         "Publicly visible status",IDC_PUBLICSTATUS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,112,130,107,10
     PUSHBUTTON      "Save changes",IDC_SAVE,164,111,53,16
+END
+
+IDD_USER_SETAVATAR DIALOGEX 0, 0, 222, 131
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_AVATAR,"Static",SS_BITMAP | SS_CENTERIMAGE |
+                    SS_SUNKEN,9,11,96,96
+    LTEXT           "Note: Image size max 64x64\nFile size max 6kB",
+                    IDC_STATIC,112,54,106,34
+    PUSHBUTTON      "Set",IDC_SETAVATAR,9,112,45,13
+    PUSHBUTTON      "Delete",IDC_DELETEAVATAR,61,112,41,13
 END
 
 IDD_USER_INFO DIALOG DISCARDABLE  0, 0, 222, 132

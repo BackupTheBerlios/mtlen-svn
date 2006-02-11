@@ -39,7 +39,7 @@ int JabberGetCaps(WPARAM wParam, LPARAM lParam)
 	if (wParam == PFLAGNUM_3)
 		return PF2_ONLINE|PF2_INVISIBLE|PF2_SHORTAWAY|PF2_LONGAWAY|PF2_HEAVYDND|PF2_FREECHAT;
 	if (wParam == PFLAGNUM_4)
-		return PF4_FORCEAUTH|PF4_NOCUSTOMAUTH|PF4_SUPPORTTYPING;
+		return PF4_FORCEAUTH|PF4_NOCUSTOMAUTH|PF4_SUPPORTTYPING|PF4_AVATARS;
 	if (wParam == PFLAG_UNIQUEIDTEXT)
 		return (int) Translate("Tlen login");
 	if (wParam == PFLAG_UNIQUEIDSETTING)
@@ -636,6 +636,66 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 	return 1;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// JabberGetAvatarInfo - retrieves the avatar info
+
+static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
+{
+	char *avatarHash = NULL;
+	char *newAvatarHash = NULL;
+	JABBER_LIST_ITEM *item = NULL;
+	DBVARIANT dbv;
+	int refresh = 1;
+	PROTO_AVATAR_INFORMATION* AI = ( PROTO_AVATAR_INFORMATION* )lParam;
+	/*
+	if ( !JGetByte( "EnableAvatars", TRUE ))
+		return GAIR_NOAVATAR;
+*/
+	JabberLog("TlenGetAvatarInfo ");
+
+	if (AI->hContact != NULL) {
+		if (!DBGetContactSetting(AI->hContact, jabberProtoName, "jid", &dbv)) {
+			item = JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal);
+			DBFreeVariant(&dbv);
+			if (item != NULL) {
+				newAvatarHash = item->newAvatarHash;
+				avatarHash = item->avatarHash;
+			}
+		}
+	} else {
+		newAvatarHash = "ASA";
+		avatarHash = "ASAS";
+	}
+	JabberLog("TlenGetAvatarInfo - current hash: %s, new hash: %s", avatarHash, newAvatarHash);
+	if (newAvatarHash == NULL) {
+		return GAIR_NOAVATAR;
+	}
+	TlenGetAvatarFileName(item, AI->filename, sizeof AI->filename);
+//	AI->format = ( AI->hContact == NULL ) ? PA_FORMAT_PNG : JGetByte( AI->hContact, "AvatarType", 0 );
+	{
+		if (avatarHash != NULL && !strcmp(avatarHash, newAvatarHash)) {
+			return GAIR_SUCCESS;
+		}
+	}
+	/*
+
+	if ( ::access( AI->filename, 0 ) == 0 ) {
+		char szSavedHash[ 256 ];
+		if ( !JGetStaticString( "AvatarSaved", AI->hContact, szSavedHash, sizeof szSavedHash )) {
+			if ( !strcmp( szSavedHash, szHashValue )) {
+				JabberLog( "Avatar is Ok: %s == %s", szSavedHash, szHashValue );
+				return GAIR_SUCCESS;
+	}	}	}
+*/
+	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline ) {
+		/* get avatart */
+		JabberLog( "Rereading avatar for %s", item->jid);
+		JabberSend(jabberThreadInfo->s, "<message to='%s' type='tavatar'><tavatar type='request'>get_file</tavatar></message>", item->jid);
+		return GAIR_WAITFOR;
+	}
+	return GAIR_NOAVATAR;
+}
+
 static void __cdecl JabberGetAwayMsgThread(HANDLE hContact)
 {
 	DBVARIANT dbv;
@@ -666,13 +726,13 @@ int JabberGetAwayMsg(WPARAM wParam, LPARAM lParam)
 int JabberFileAllow(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 	JABBER_LIST_ITEM *item;
 	char *nick;
 
 	if (!jabberOnline) return 0;
 
-	ft = (JABBER_FILE_TRANSFER *) ccs->wParam;
+	ft = (TLEN_FILE_TRANSFER *) ccs->wParam;
 	ft->szSavePath = _strdup((char *) ccs->lParam);
 	if ((item=JabberListAdd(LIST_FILE, ft->iqId)) != NULL) {
 		item->ft = ft;
@@ -686,12 +746,12 @@ int JabberFileAllow(WPARAM wParam, LPARAM lParam)
 int JabberFileDeny(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 	char *nick;
 
 	if (!jabberOnline) return 1;
 
-	ft = (JABBER_FILE_TRANSFER *) ccs->wParam;
+	ft = (TLEN_FILE_TRANSFER *) ccs->wParam;
 	nick = JabberNickFromJID(ft->jid);
 	JabberSend(jabberThreadInfo->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, nick);\
 	free(nick);
@@ -702,7 +762,7 @@ int JabberFileDeny(WPARAM wParam, LPARAM lParam)
 int JabberFileCancel(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
-	JABBER_FILE_TRANSFER *ft = (JABBER_FILE_TRANSFER *) ccs->wParam;
+	TLEN_FILE_TRANSFER *ft = (TLEN_FILE_TRANSFER *) ccs->wParam;
 	HANDLE hEvent;
 
 	JabberLog("Invoking FileCancel()");
@@ -727,7 +787,7 @@ int JabberSendFile(WPARAM wParam, LPARAM lParam)
 {
 	CCSDATA *ccs = (CCSDATA *) lParam;
 	char **files = (char **) ccs->lParam;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 	int i, j;
 	struct _stat statbuf;
 	DBVARIANT dbv;
@@ -738,8 +798,8 @@ int JabberSendFile(WPARAM wParam, LPARAM lParam)
 	if (!jabberOnline) return 0;
 //	if (DBGetContactSettingWord(ccs->hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) == ID_STATUS_OFFLINE) return 0;
 	if (DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) return 0;
-	ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
-	memset(ft, 0, sizeof(JABBER_FILE_TRANSFER));
+	ft = (TLEN_FILE_TRANSFER *) malloc(sizeof(TLEN_FILE_TRANSFER));
+	memset(ft, 0, sizeof(TLEN_FILE_TRANSFER));
 	for(ft->fileCount=0; files[ft->fileCount]; ft->fileCount++);
 	ft->files = (char **) malloc(sizeof(char *) * ft->fileCount);
 	ft->filesSize = (long *) malloc(sizeof(long) * ft->fileCount);
@@ -1126,6 +1186,9 @@ int JabberSvcInit(void)
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_USERISTYPING);
 	CreateServiceFunction(s, JabberUserIsTyping);
+
+	sprintf(s, "%s%s", jabberProtoName, PS_GETAVATARINFO);
+	CreateServiceFunction(s, TlenGetAvatarInfo);
 
 	return 0;
 }

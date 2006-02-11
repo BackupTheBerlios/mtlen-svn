@@ -678,10 +678,23 @@ char *JabberBase64Decode(const char *str, int *resultLen)
 	count = 0;
 	for (p=(unsigned char *)str,r=(unsigned char *)res; *p!='\0';) {
 		for (n=0; n<4; n++) {
-			if (*p=='\0' || b64rtable[*p]==0x80) {
-				free(res);
+			if ( *p == '\r' || *p == '\n' ) {
+				n--; p++;
+				continue;
+			}
+
+			if ( *p=='\0' ) {
+				if ( n == 0 )
+					goto LBL_Exit;
+				free( res );
 				return NULL;
 			}
+
+			if ( b64rtable[*p]==0x80 ) {
+				free( res );
+				return NULL;
+			}
+
 			a[n] = *p;
 			igroup[n] = b64rtable[*p];
 			p++;
@@ -690,14 +703,15 @@ char *JabberBase64Decode(const char *str, int *resultLen)
 		r[1] = igroup[1]<<4 | igroup[2]>>2;
 		r[2] = igroup[2]<<6 | igroup[3];
 		r += 3;
-		num = (a[2]=='='?1:(a[3]=='='?2:3));
+		num = ( a[2]=='='?1:( a[3]=='='?2:3 ));
 		count += num;
-		if (num < 3) break;
+		if ( num < 3 ) break;
 	}
+LBL_Exit:
 	*resultLen = count;
-
 	return res;
 }
+
 /*
 char *JabberGetVersionText()
 {
@@ -955,15 +969,15 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 
 void JabberSendPresence(int status)
 {
-	JabberSendPresenceTo(status, NULL, "<x/>");
-
-//	if (DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE)) {
+	JabberSendPresenceTo(status, NULL, NULL);
+/*
 	if (DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE)) {
 		if (status == ID_STATUS_INVISIBLE)
 			JabberSendVisiblePresence();
 		else
 			JabberSendInvisiblePresence();
 	}
+	*/
 }
 
 void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...)
@@ -1010,3 +1024,14 @@ char *JabberGetClientJID(char *jid)
 	return clientJID;
 }
 
+
+int JabberGetPictureType( const char* buf )
+{
+	if ( buf != NULL ) {
+		if ( memcmp( buf, "GIF89", 5 ) == 0 )   return PA_FORMAT_GIF;
+		if ( memcmp( buf, "\x89PNG", 4 ) == 0 ) return PA_FORMAT_PNG;
+		if ( memcmp( buf, "BM", 2 ) == 0 )      return PA_FORMAT_BMP;
+		if ( memcmp( buf+6, "JFIF", 4 ) == 0 )  return PA_FORMAT_JPEG;
+	}
+	return PA_FORMAT_UNKNOWN;
+}

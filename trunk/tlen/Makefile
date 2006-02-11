@@ -6,7 +6,7 @@ CC   = gcc.exe
 WINDRES = windres.exe
 RM = rm
 UPX = upx -9 -q --compress-icons=0
-SRC = codec/gsm_preprocess.c codec/gsm_long.c codec/gsm_short.c codec/gsm_rpe.c codec/gsm_lpc.c codec/gsm_codec.c tlen_file.c tlen_voice.c tlen_muc.c jabber_iq.c jabber_iqid.c jabber_list.c jabber_misc.c jabber_opt.c jabber_ssl.c jabber_svc.c jabber_thread.c jabber_userinfo.c jabber_util.c jabber_ws.c jabber_xml.c sha1.c tlen.c tlen_advsearch.c
+SRC = codec/gsm_preprocess.c codec/gsm_long.c codec/gsm_short.c codec/gsm_rpe.c codec/gsm_lpc.c codec/gsm_codec.c tlen_file.c tlen_voice.c tlen_muc.c jabber_iq.c jabber_iqid.c jabber_list.c jabber_misc.c jabber_opt.c jabber_ssl.c jabber_svc.c jabber_thread.c tlen_userinfo.c jabber_util.c jabber_ws.c jabber_xml.c sha1.c tlen.c tlen_advsearch.c md5.c
 RES  = tlen.res
 OBJ = $(SRC:.c=.o) $(RES)
 BIN  = tlen.dll

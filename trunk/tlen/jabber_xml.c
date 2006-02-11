@@ -588,7 +588,6 @@ XmlNode *JabberXmlCopyNode(XmlNode *node)
 	return n;
 }
 
-#ifdef _DEBUG
 XmlNode *JabberXmlCreateNode(char *name)
 {
 	XmlNode *n;
@@ -640,5 +639,4 @@ void JabberXmlAddText(XmlNode *n, char *text)
 		n->text = _strdup(text);
 	}
 }
-#endif
 

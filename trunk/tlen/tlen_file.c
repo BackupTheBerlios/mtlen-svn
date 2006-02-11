@@ -31,8 +31,8 @@ extern HANDLE hNetlibUser;
 extern struct ThreadData *jabberThreadInfo;
 extern DWORD jabberLocalIP;
 
-static void TlenFileReceiveParse(JABBER_FILE_TRANSFER *ft);
-static void TlenFileSendParse(JABBER_FILE_TRANSFER *ft);
+static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft);
+static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft);
 static void TlenFileSendingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 static void TlenFileReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 
@@ -155,7 +155,7 @@ static TLEN_FILE_PACKET* TlenFilePacketReceive(JABBER_SOCKET s)
 	return packet;
 }
 
-void TlenFileFreeFt(JABBER_FILE_TRANSFER *ft)
+void TlenFileFreeFt(TLEN_FILE_TRANSFER *ft)
 {
 	int i;
 
@@ -186,7 +186,7 @@ typedef struct {
 
 #define JABBER_NETWORK_BUFFER_SIZE 2048
 
-static JABBER_FILE_TRANSFER* TlenFileEstablishIncomingConnection(JABBER_SOCKET *s) 
+static TLEN_FILE_TRANSFER* TlenFileEstablishIncomingConnection(JABBER_SOCKET *s) 
 {
 	JABBER_LIST_ITEM *item = NULL;
 	TLEN_FILE_PACKET *packet;
@@ -244,7 +244,7 @@ static JABBER_FILE_TRANSFER* TlenFileEstablishIncomingConnection(JABBER_SOCKET *
 	return NULL;
 }
 
-static void TlenFileEstablishOutgoingConnection(JABBER_FILE_TRANSFER *ft) 
+static void TlenFileEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft) 
 {
 	char *hash;
 	char str[300];
@@ -274,7 +274,7 @@ static void TlenFileEstablishOutgoingConnection(JABBER_FILE_TRANSFER *ft)
 	} 
 }
 
-static void __cdecl TlenFileBindSocks4Thread(JABBER_FILE_TRANSFER* ft)
+static void __cdecl TlenFileBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
 {
 	BYTE buf[8];
 	int status;
@@ -312,7 +312,7 @@ static void __cdecl TlenFileBindSocks4Thread(JABBER_FILE_TRANSFER* ft)
 		SetEvent(ft->hFileEvent);
 
 }
-static JABBER_SOCKET TlenFileBindSocks4(SOCKSBIND * sb, JABBER_FILE_TRANSFER *ft)
+static JABBER_SOCKET TlenFileBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 {	//rfc1928
 	int len;
 	BYTE buf[256];
@@ -369,7 +369,7 @@ static JABBER_SOCKET TlenFileBindSocks4(SOCKSBIND * sb, JABBER_FILE_TRANSFER *ft
 	return s;
 }
 
-static void __cdecl TlenFileBindSocks5Thread(JABBER_FILE_TRANSFER* ft)
+static void __cdecl TlenFileBindSocks5Thread(TLEN_FILE_TRANSFER* ft)
 {
 	BYTE buf[256];
 	int status;
@@ -408,7 +408,7 @@ static void __cdecl TlenFileBindSocks5Thread(JABBER_FILE_TRANSFER* ft)
 
 }
 
-static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, JABBER_FILE_TRANSFER *ft)
+static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 {	//rfc1928
 	BYTE buf[512];
 	int len, status;
@@ -509,7 +509,7 @@ static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, JABBER_FILE_TRANSFER *ft
 	return s;
 }
 
-static JABBER_SOCKET TlenFileListen(JABBER_FILE_TRANSFER *ft)
+static JABBER_SOCKET TlenFileListen(TLEN_FILE_TRANSFER *ft)
 {
 	NETLIBBIND nlb = {0};
 	JABBER_SOCKET s = NULL;
@@ -582,7 +582,7 @@ static JABBER_SOCKET TlenFileListen(JABBER_FILE_TRANSFER *ft)
 	return s;
 }
 
-void __cdecl TlenFileReceiveThread(JABBER_FILE_TRANSFER *ft)
+void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 {
 	NETLIBOPENCONNECTION nloc;
 	JABBER_SOCKET s;
@@ -644,7 +644,7 @@ void __cdecl TlenFileReceiveThread(JABBER_FILE_TRANSFER *ft)
 static void TlenFileReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
 {
 	JABBER_SOCKET slisten;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 
 	ft = TlenFileEstablishIncomingConnection(hConnection);
 	if (ft != NULL) {
@@ -668,7 +668,7 @@ static void TlenFileReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemot
 		SetEvent(ft->hFileEvent);
 }
 
-static void TlenFileReceiveParse(JABBER_FILE_TRANSFER *ft)
+static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 {
 	int i;
 	char *p;
@@ -795,7 +795,7 @@ static void TlenFileReceiveParse(JABBER_FILE_TRANSFER *ft)
 }
 
 
-void __cdecl TlenFileSendingThread(JABBER_FILE_TRANSFER *ft)
+void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 {
 	JABBER_SOCKET s = NULL;
 	HANDLE hEvent;
@@ -883,7 +883,7 @@ void __cdecl TlenFileSendingThread(JABBER_FILE_TRANSFER *ft)
 static void TlenFileSendingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
 {
 	JABBER_SOCKET slisten;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 
 	ft = TlenFileEstablishIncomingConnection(hConnection);
 	if (ft != NULL) {
@@ -908,7 +908,7 @@ static void TlenFileSendingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteI
 		SetEvent(ft->hFileEvent);
 }
 
-static void TlenFileSendParse(JABBER_FILE_TRANSFER *ft)
+static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 {
 	int i;
 	char *p, *t;
@@ -1054,7 +1054,7 @@ static void TlenFileSendParse(JABBER_FILE_TRANSFER *ft)
 int TlenFileCancelAll()
 {
 	JABBER_LIST_ITEM *item;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 	HANDLE hEvent;
 	int i;
 

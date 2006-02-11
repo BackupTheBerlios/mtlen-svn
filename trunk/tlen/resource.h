@@ -20,6 +20,7 @@
 #define IDD_ADVSEARCH              		156
 #define IDD_VOICE						157
 #define IDD_ACCEPT_VOICE				158
+#define IDD_USER_SETAVATAR				159
 
 #define IDC_EDIT_USERNAME               1000
 #define IDC_SAVE                        1000
@@ -108,6 +109,10 @@
 #define IDC_OCCUPATION_TEXT             1199
 #define IDC_LOOKFOR_TEXT                1200
 #define IDC_GROUP                       1203
+#define IDC_AVATAR						1210
+#define IDC_SETAVATAR					1211
+#define IDC_DELETEAVATAR				1212
+
 #define IDC_STATUS                      1414
 #define IDC_PLAN                        1415
 #define IDC_PERSONALGROUP               1434

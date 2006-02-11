@@ -61,7 +61,7 @@ typedef struct {
 	int			isRunning;
 	int			stopThread;
 	gsm_state	*gsmstate;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 	int			vuMeter;
 	int			bytesSum;
 } TLEN_VOICE_CONTROL;
@@ -73,8 +73,8 @@ typedef struct {
 	DWORD len;
 } TLEN_FILE_PACKET;
 
-static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft);
-static void TlenVoiceSendParse(JABBER_FILE_TRANSFER *ft);
+static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft);
+static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft);
 static void TlenVoiceReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 static HWND voiceDlgHWND = NULL;
 static HWND voiceAcceptDlgHWND = NULL;
@@ -396,7 +396,7 @@ static TLEN_FILE_PACKET* TlenVoicePacketReceive(JABBER_SOCKET s)
 	return packet;
 }
 
-static void TlenVoiceFreeFt(JABBER_FILE_TRANSFER *ft)
+static void TlenVoiceFreeFt(TLEN_FILE_TRANSFER *ft)
 {
 	int i;
 
@@ -487,7 +487,7 @@ static void TlenVoiceCrypt(char *buffer, int len)
 	}
 }
 
-static JABBER_FILE_TRANSFER* TlenVoiceEstablishIncomingConnection(JABBER_SOCKET *s)
+static TLEN_FILE_TRANSFER* TlenVoiceEstablishIncomingConnection(JABBER_SOCKET *s)
 {
 	JABBER_LIST_ITEM *item = NULL;
 	TLEN_FILE_PACKET *packet;
@@ -546,7 +546,7 @@ static JABBER_FILE_TRANSFER* TlenVoiceEstablishIncomingConnection(JABBER_SOCKET 
 	return NULL;
 }
 
-static void TlenVoiceEstablishOutgoingConnection(JABBER_FILE_TRANSFER *ft)
+static void TlenVoiceEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft)
 {
 	char *hash;
 	char str[300];
@@ -576,7 +576,7 @@ static void TlenVoiceEstablishOutgoingConnection(JABBER_FILE_TRANSFER *ft)
 	}
 }
 
-static void __cdecl TlenVoiceBindSocks4Thread(JABBER_FILE_TRANSFER* ft)
+static void __cdecl TlenVoiceBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
 {
 	BYTE buf[8];
 	int status;
@@ -620,7 +620,7 @@ static void __cdecl TlenVoiceBindSocks4Thread(JABBER_FILE_TRANSFER* ft)
 		SetEvent(ft->hFileEvent);
 
 }
-static JABBER_SOCKET TlenVoiceBindSocks4(SOCKSBIND * sb, JABBER_FILE_TRANSFER *ft)
+static JABBER_SOCKET TlenVoiceBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 {	//rfc1928
 	int len;
 	BYTE buf[256];
@@ -677,7 +677,7 @@ static JABBER_SOCKET TlenVoiceBindSocks4(SOCKSBIND * sb, JABBER_FILE_TRANSFER *f
 	return s;
 }
 
-static void __cdecl TlenVoiceBindSocks5Thread(JABBER_FILE_TRANSFER* ft)
+static void __cdecl TlenVoiceBindSocks5Thread(TLEN_FILE_TRANSFER* ft)
 {
 	BYTE buf[256];
 	int status;
@@ -721,7 +721,7 @@ static void __cdecl TlenVoiceBindSocks5Thread(JABBER_FILE_TRANSFER* ft)
 
 }
 
-static JABBER_SOCKET TlenVoiceBindSocks5(SOCKSBIND * sb, JABBER_FILE_TRANSFER *ft)
+static JABBER_SOCKET TlenVoiceBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 {	//rfc1928
 	BYTE buf[512];
 	int len, status;
@@ -822,7 +822,7 @@ static JABBER_SOCKET TlenVoiceBindSocks5(SOCKSBIND * sb, JABBER_FILE_TRANSFER *f
 	return s;
 }
 
-static JABBER_SOCKET TlenVoiceListen(JABBER_FILE_TRANSFER *ft)
+static JABBER_SOCKET TlenVoiceListen(TLEN_FILE_TRANSFER *ft)
 {
 	NETLIBBIND nlb = {0};
 	JABBER_SOCKET s = NULL;
@@ -891,7 +891,7 @@ static JABBER_SOCKET TlenVoiceListen(JABBER_FILE_TRANSFER *ft)
 	return s;
 }
 
-void __cdecl TlenVoiceReceiveThread(JABBER_FILE_TRANSFER *ft)
+void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 {
 	NETLIBOPENCONNECTION nloc;
 	JABBER_SOCKET s;
@@ -965,7 +965,7 @@ void __cdecl TlenVoiceReceiveThread(JABBER_FILE_TRANSFER *ft)
 static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
 {
 	JABBER_SOCKET slisten;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 
 	ft = TlenVoiceEstablishIncomingConnection(hConnection);
 	if (ft != NULL) {
@@ -999,7 +999,7 @@ static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemo
 		SetEvent(ft->hFileEvent);
 }
 
-static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft)
+static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 {
 	char *statusTxt;
 	int i, j;
@@ -1124,7 +1124,7 @@ static void TlenVoiceReceiveParse(JABBER_FILE_TRANSFER *ft)
 }
 
 
-void __cdecl TlenVoiceSendingThread(JABBER_FILE_TRANSFER *ft)
+void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 {
 	JABBER_SOCKET s = NULL;
 	HANDLE hEvent;
@@ -1217,7 +1217,7 @@ void __cdecl TlenVoiceSendingThread(JABBER_FILE_TRANSFER *ft)
 	TlenVoiceFreeFt(ft);
 }
 
-static void TlenVoiceSendParse(JABBER_FILE_TRANSFER *ft)
+static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft)
 {
 	int codec, i;
 	TLEN_FILE_PACKET *packet;
@@ -1259,7 +1259,7 @@ static void TlenVoiceSendParse(JABBER_FILE_TRANSFER *ft)
 int TlenVoiceCancelAll()
 {
 	JABBER_LIST_ITEM *item;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 	HANDLE hEvent;
 	int i;
 
@@ -1296,7 +1296,7 @@ int TlenVoiceContactMenuHandleVoice(WPARAM wParam, LPARAM lParam)
 	HANDLE hContact;
 	DBVARIANT dbv;
 	JABBER_LIST_ITEM *item;
-	JABBER_FILE_TRANSFER *ft;
+	TLEN_FILE_TRANSFER *ft;
 	if (!jabberOnline) {
 		return 1;
 	}
@@ -1305,8 +1305,8 @@ int TlenVoiceContactMenuHandleVoice(WPARAM wParam, LPARAM lParam)
 			char serialId[32];
 			sprintf(serialId, "%d", JabberSerialNext());
 			if ((item = JabberListAdd(LIST_VOICE, serialId)) != NULL) {
-				ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
-				memset(ft, 0, sizeof(JABBER_FILE_TRANSFER));
+				ft = (TLEN_FILE_TRANSFER *) malloc(sizeof(TLEN_FILE_TRANSFER));
+				memset(ft, 0, sizeof(TLEN_FILE_TRANSFER));
 				ft->iqId = _strdup(serialId);
 				ft->jid = JabberNickFromJID(dbv.pszVal);
 				item->ft = ft;
@@ -1479,7 +1479,7 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 					int codec;
 					codec = SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_GETCURSEL, 0, 0) + 2;
 					if (codec!=recordingControl->codec && codec>1 && codec<6) {
-						JABBER_FILE_TRANSFER *ft = recordingControl->ft;
+						TLEN_FILE_TRANSFER *ft = recordingControl->ft;
 						TlenVoiceFreeVc(recordingControl);
 						recordingControl = TlenVoiceCreateVC(codec);
 						recordingControl->ft = ft;
@@ -1513,7 +1513,7 @@ static void __cdecl TlenVoiceDlgThread(void *ptr)
 	TlenVoiceCancelAll();
 }
 
-int TlenVoiceStart(JABBER_FILE_TRANSFER *ft, int mode)
+int TlenVoiceStart(TLEN_FILE_TRANSFER *ft, int mode)
 {
 
 	if (mode==0) {
@@ -1578,8 +1578,8 @@ static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
 	int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ACCEPT_VOICE), NULL, TlenVoiceAcceptDlgProc, (LPARAM) ptr);
 	item = (JABBER_LIST_ITEM *)ptr;
 	if (result && jabberOnline) {
-		item->ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
-		memset(item->ft, 0, sizeof(JABBER_FILE_TRANSFER));
+		item->ft = (TLEN_FILE_TRANSFER *) malloc(sizeof(TLEN_FILE_TRANSFER));
+		memset(item->ft, 0, sizeof(TLEN_FILE_TRANSFER));
 		item->ft->iqId = _strdup(item->jid);
 		item->ft->jid = _strdup(item->nick);
 		TlenVoiceStart(NULL, 2);
@@ -1650,8 +1650,8 @@ int TlenVoiceAccept(const char *id, const char *from)
 				if (ask) {
 					JabberForkThread((void (__cdecl *)(void*))TlenVoiceAcceptDlgThread, 0, item);
 				} else if (jabberOnline) {
-					item->ft = (JABBER_FILE_TRANSFER *) malloc(sizeof(JABBER_FILE_TRANSFER));
-					memset(item->ft, 0, sizeof(JABBER_FILE_TRANSFER));
+					item->ft = (TLEN_FILE_TRANSFER *) malloc(sizeof(TLEN_FILE_TRANSFER));
+					memset(item->ft, 0, sizeof(TLEN_FILE_TRANSFER));
 					item->ft->iqId = _strdup(id);
 					item->ft->jid = _strdup(from);
 					TlenVoiceStart(NULL, 2);

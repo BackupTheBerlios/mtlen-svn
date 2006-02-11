@@ -33,6 +33,23 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
+static void TlenLoadOptions() 
+{
+	/* TODO: Load options here */
+	/*
+			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE));
+			CheckDlgButton(hwndDlg, IDC_RECONNECT, DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE));
+			CheckDlgButton(hwndDlg, IDC_ROSTER_SYNC, DBGetContactSettingByte(NULL, jabberProtoName, "RosterSync", FALSE));
+			CheckDlgButton(hwndDlg, IDC_SHOW_OFFLINE, DBGetContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", FALSE));
+			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE));
+			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", 0), 0);
+			CheckDlgButton(hwndDlg, IDC_IGNORE_ADVERTISEMENTS, DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", TRUE));
+			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0), 0);
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", 0), 0);
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0), 0);
+*/
+}
+
 int TlenOptInit(WPARAM wParam, LPARAM lParam)
 {
 	OPTIONSDIALOGPAGE odp;
@@ -72,7 +89,7 @@ int TlenOptInit(WPARAM wParam, LPARAM lParam)
 		odp.nIDBottomSimpleControl = 0;
 		CallService(MS_OPT_ADDPAGE,wParam,(LPARAM)&odp);
 	}
-
+	TlenLoadOptions();
 	return 0;
 }
 

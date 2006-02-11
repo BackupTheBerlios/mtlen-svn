@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <crtdbg.h>
 #endif
 #define ENABLE_LOGGING
+
 /*******************************************************************
  * Global compilation flags
  *******************************************************************/
@@ -67,6 +68,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,8,0)
+#define TLEN_VERSION_STRING  "1.0.8.0"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "keh_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"
@@ -205,7 +208,7 @@ typedef struct {
 	long allFileReceivedBytes;
 	char *szDescription;
 	int currentFile;
-} JABBER_FILE_TRANSFER;
+} TLEN_FILE_TRANSFER;
 
 typedef struct {
 	PROTOSEARCHRESULT hdr;
@@ -223,6 +226,10 @@ typedef struct {
 	int id;
 	char *name;
 } JABBER_FIELD_MAP;
+
+typedef struct {
+	int a;
+} TLEN_OPTIONS;
 
 /*******************************************************************
  * Global variables
@@ -290,15 +297,14 @@ char *JabberHttpUrlEncode(const char *str);
 char *JabberErrorStr(int errorCode);
 char *JabberErrorMsg(XmlNode *errorNode);
 void JabberSendVisibleInvisiblePresence(BOOL invisible);
-#ifdef TLEN_PLUGIN
 char *TlenPasswordHash(const char *str);
 void TlenUrlDecode(char *str);
 char *TlenUrlEncode(const char *str);
-#endif
 char *JabberTextEncode(const char *str);
 char *JabberTextDecode(const char *str);
 char *JabberBase64Encode(const char *buffer, int bufferLen);
 char *JabberBase64Decode(const char *buffer, int *resultLen);
+int JabberGetPictureType(const char* buf);
 //char *JabberGetVersionText();
 time_t JabberIsoToUnixTime(char *stamp);
 time_t TlenTimeToUTC(time_t time);
