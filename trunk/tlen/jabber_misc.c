@@ -188,7 +188,7 @@ void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen)
 	tPathLen = strlen( pszDest );
 	tPathLen += mir_snprintf( pszDest + tPathLen, cbLen - tPathLen, "\\%s\\", jabberModuleName  );
 	CreateDirectoryA( pszDest, NULL );
-	format = item == NULL ? PA_FORMAT_JPEG : item->avatarFormat;
+	format = item == NULL ? userAvatarFormat : item->avatarFormat;
 	szFileType = "bmp";
 	switch(format) {
 		case PA_FORMAT_JPEG: szFileType = "jpg";   break;

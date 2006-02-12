@@ -22,8 +22,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "jabber.h"
 #include <commctrl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "jabber_list.h"
 #include "resource.h"
+#include "md5.h"
 
 JABBER_FIELD_MAP tlenFieldGender[] = {
 	{ 1, "Male" },
@@ -144,6 +147,7 @@ int TlenUserInfoInit(WPARAM wParam, LPARAM lParam)
 
 	}
 	if (!lParam) {
+	/* if not enabled - return */
 		CCSDATA ccs = {0};
 		char title[256];
 		mir_snprintf(title, sizeof(title), "%s Avatar", jabberModuleName);
@@ -151,7 +155,7 @@ int TlenUserInfoInit(WPARAM wParam, LPARAM lParam)
 		odp.hIcon = NULL;
 		odp.hInstance = hInst;
 		odp.pfnDlgProc = TlenSetAvatarDlgProc;
-		odp.position = -2000000000;
+		odp.position = 2000000001;
 		odp.pszTemplate = MAKEINTRESOURCE(IDD_USER_SETAVATAR);
 		odp.pszTitle = title;//jabberModuleName;
 		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
@@ -273,8 +277,10 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, Translate("none"));
 							break;
 						}
-					}
-					else {
+						SetDlgItemTextA(hwndDlg, IDC_SOFTWARE, item->software);
+						SetDlgItemTextA(hwndDlg, IDC_VERSION, item->version);
+						SetDlgItemTextA(hwndDlg, IDC_SYSTEM, item->system);
+					} else {
 						SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, Translate("not on roster"));
 					}
 				}
@@ -328,120 +334,145 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 static HBITMAP hAvatar;
 static char szFileName[ MAX_PATH ];
 
-/*
-static void sttSaveAvatar()
+static int sttSaveAvatar()
 {
+	FILE* in;
+	MD5Context md5;
+	unsigned char buf[ 512 ];
 	char tFileName[ MAX_PATH ];
-	JabberGetAvatarFileName( NULL, tFileName, sizeof tFileName );
-
+	int i, pictureType;
+	int bIsFirst = 1;
+	struct _stat statbuf;
+	
+	if (_stat(szFileName, &statbuf)) return 1;
+	JabberLog( "Filesize L %d",statbuf.st_size);
+	if (statbuf.st_size > 6 * 1024) return 1;
+	
+	TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName );
 	if ( CopyFileA( szFileName, tFileName, FALSE ) == FALSE ) {
 		JabberLog( "Copy failed with error %d", GetLastError() );
-		return;
+		return 1;
 	}
-
-	SHA1Context ctx;
-	uint8_t digest[20];
-	SHA1Reset( &ctx );
-
-	FILE* in = fopen( tFileName, "rb" );
+	md5_init(&md5);
+	in = fopen( tFileName, "rb" );
 	if ( in == NULL )
-		return;
+		return 1;
 
-	char buf[ 512 ];
-	bool bIsFirst = true;
-	int  pictureType;
 	while( !feof( in )) {
 		int bytes = fread( buf, 1, sizeof buf, in );
 		if ( bIsFirst ) {
 			pictureType = JabberGetPictureType( buf );
-			bIsFirst = false;
+			bIsFirst = 0;
 		}
-		SHA1Input( &ctx, ( const unsigned __int8* )buf, bytes );
+		md5_update(&md5, buf, bytes);
 	}
 	fclose( in );
-
 	if ( pictureType == PA_FORMAT_UNKNOWN )
-		return;
-
-	SHA1Result( &ctx, digest );
-	for ( int i=0; i<20; i++ )
-		sprintf( buf+( i<<1 ), "%02x", digest[i] );
-   JSetString( NULL, "AvatarHash", buf );
-	JSetByte( "AvatarType", pictureType );
-
-	JabberGetAvatarFileName( NULL, szFileName, MAX_PATH );
+		return 1;
+	md5_finalize(&md5);
+	for (i=0;i<16;i++) {
+		unsigned int val = (md5.state[i>>2] >> 8*(i%4)) & 0xFF;
+		sprintf( buf+( i<<1 ), "%02x", val);
+	}
+	DBWriteContactSettingString(NULL, jabberProtoName, "AvatarHash", buf);
+	DBWriteContactSettingDword(NULL, jabberProtoName, "AvatarFormat", pictureType);
+	if (userAvatarHash != NULL) {
+		free (userAvatarHash);
+		userAvatarHash = NULL;
+	}
+	userAvatarHash = strdup(buf);
+	userAvatarFormat = pictureType;
+	TlenGetAvatarFileName(NULL, szFileName, MAX_PATH);
 	if ( strcmp( szFileName, tFileName ))
 		MoveFileA( tFileName, szFileName );
+	return 0;
 }
-*/
+
+
+static int TlenEnterBitmapName( char* szDest )
+{
+	OPENFILENAMEA ofn = {0};
+	char str[ MAX_PATH ];
+	char szFilter[ 512 ];
+	*szDest = 0;
+	CallService( MS_UTILS_GETBITMAPFILTERSTRINGS, sizeof szFilter, ( LPARAM )szFilter );
+	str[0] = 0;
+	ofn.lStructSize = sizeof( OPENFILENAME );
+	ofn.lpstrFilter = szFilter;
+	ofn.lpstrFile = szDest;
+	ofn.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.nMaxFileTitle = MAX_PATH;
+	ofn.lpstrDefExt = "bmp";
+	if ( !GetOpenFileNameA( &ofn ))
+		return 1;
+
+	return ERROR_SUCCESS;
+}
+
 static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam )
 {
 	switch ( msg ) {
 	case WM_INITDIALOG:
 		TranslateDialogDefault( hwndDlg );
-			hAvatar = NULL;
-			szFileName[0] = 0;
-			{
-				char szAvatar[ MAX_PATH ];
-				TlenGetAvatarFileName( NULL, szAvatar, sizeof szAvatar );
-				hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)szAvatar );
-				if ( hAvatar )
-	            SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
-			}
-			/*
-
-			BOOL tValue = JGetByte( "EnableAvatars", 1 );
-			CheckDlgButton( hwndDlg, IDC_ENABLE_AVATARS,	tValue );
-			if ( tValue ) {
-				char szAvatar[ MAX_PATH ];
-				JabberGetAvatarFileName( NULL, szAvatar, sizeof szAvatar );
-				hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)szAvatar );
-				if ( hAvatar )
-	            SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
-		}	}
-		*/
+		hAvatar = NULL;
+		szFileName[0] = 0;/*
+		BOOL tValue = JGetByte( "EnableAvatars", 1 );
+		CheckDlgButton( hwndDlg, IDC_ENABLE_AVATARS,	tValue );
+		if ( tValue )*/ 
+		{
+			char szAvatar[ MAX_PATH ];
+			TlenGetAvatarFileName( NULL, szAvatar, sizeof szAvatar );
+			hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)szAvatar );
+			if (hAvatar)
+	        SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
+		}
 		return TRUE;
 	case WM_COMMAND:
-		/*
 		if ( HIWORD( wParam ) == BN_CLICKED )
 			switch( LOWORD( wParam )) {
 			case IDC_SETAVATAR:
-				if ( JabberEnterBitmapName( szFileName ) == ERROR_SUCCESS ) {
-					HBITMAP hBitmap = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)szFileName );
-					if ( hBitmap != NULL ) {
-						hAvatar = hBitmap;
-		            hBitmap = ( HBITMAP )SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hBitmap );
-						if ( hBitmap )
-							DeleteObject( hBitmap );
+				if ( TlenEnterBitmapName( szFileName ) == ERROR_SUCCESS ) {
+					if (!sttSaveAvatar()) {
+						HBITMAP hBitmap = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)szFileName );
+						if ( hBitmap != NULL ) {
+							hAvatar = hBitmap;
+							hBitmap = ( HBITMAP )SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hBitmap );
+							if ( hBitmap )
+								DeleteObject( hBitmap );
+							RedrawWindow(GetDlgItem(hwndDlg, IDC_AVATAR), NULL, NULL, RDW_INVALIDATE);
+						}
+					}	
 
-						sttSaveAvatar();
-						if ( jabberConnected )
-							JabberSendPresence( jabberDesiredStatus );
-						RedrawWindow(GetDlgItem(hwndDlg, IDC_AVATAR), NULL, NULL, RDW_INVALIDATE);
-				}	}
+				}
 				break;
-
 			case IDC_DELETEAVATAR:
-				char tFileName[ MAX_PATH ];
-				JabberGetAvatarFileName( NULL, tFileName, sizeof tFileName );
-				DeleteFileA( tFileName );
-				JDeleteSetting( NULL, "AvatarHash" );
-				JDeleteSetting( NULL, "AvatarType" );
+				{
+					char tFileName[ MAX_PATH ];
+					HBITMAP hBitmap;
+					TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName );
+					DeleteFileA( tFileName );
+					if (userAvatarHash != NULL) {
+						free (userAvatarHash);
+						userAvatarHash = NULL;
+					}
+					DBDeleteContactSetting(NULL, jabberProtoName, "AvatarHash");
+					DBDeleteContactSetting(NULL, jabberProtoName, "AvatarFormat");
+					DeleteObject( hAvatar ); hAvatar = NULL;
+					hBitmap = (HBITMAP)SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)NULL );
+					if ( hBitmap )
+						DeleteObject( hBitmap );
+					InvalidateRect( hwndDlg, NULL, TRUE );
+					break;
+				}
 
-				DeleteObject( hAvatar ); hAvatar = NULL;
-            HBITMAP hBitmap = (HBITMAP)SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)NULL );
-				if ( hBitmap )
-					DeleteObject( hBitmap );
-
-				if ( jabberConnected )
-					JabberSendPresence( jabberDesiredStatus );
-				break;
 			}
-			*/
 		break;
 	case WM_DESTROY:
 		if ( hAvatar )
 			DeleteObject( hAvatar );
+		if ( jabberConnected && jabberDesiredStatus != ID_STATUS_INVISIBLE)
+			JabberSendPresence(jabberDesiredStatus);
 		break;
 	}
 

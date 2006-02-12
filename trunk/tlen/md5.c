@@ -49,21 +49,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	(a)+=(b);\
 }
 
-void md5_init(MD5 *md5) {
-	md5->dataLength[0]=md5->dataLength[1]=0;
-	md5->bufferPos=0;
-	md5->state[0]=0x67452301;
-	md5->state[1]=0xefcdab89;
-	md5->state[2]=0x98badcfe;
-	md5->state[3]=0x10325476;
+void md5_init(MD5Context *ctx) {
+	ctx->dataLength[0]=ctx->dataLength[1]=0;
+	ctx->bufferPos=0;
+	ctx->state[0]=0x67452301;
+	ctx->state[1]=0xefcdab89;
+	ctx->state[2]=0x98badcfe;
+	ctx->state[3]=0x10325476;
 }
 
-void md5_transform(MD5 *md5, unsigned char *input) {
+void md5_transform(MD5Context *ctx, unsigned char *input) {
 	unsigned int i, a,b,c,d,x[16];
- 	a=md5->state[0];
-  	b=md5->state[1];
-   	c=md5->state[2];
-    d=md5->state[3];
+ 	a=ctx->state[0];
+  	b=ctx->state[1];
+   	c=ctx->state[2];
+    d=ctx->state[3];
     // byte to dword
     for (i=0;i<16;i++) {
     	int j=i<<2;
@@ -160,54 +160,53 @@ void md5_transform(MD5 *md5, unsigned char *input) {
   	II (d, a, b, c, x[11], S42, 0xbd3af235); /* 62 */
   	II (c, d, a, b, x[ 2], S43, 0x2ad7d2bb); /* 63 */
   	II (b, c, d, a, x[ 9], S44, 0xeb86d391); /* 64 */
-	md5->state[0]+=a;
-	md5->state[1]+=b;
-	md5->state[2]+=c;
-	md5->state[3]+=d;
+	ctx->state[0]+=a;
+	ctx->state[1]+=b;
+	ctx->state[2]+=c;
+	ctx->state[3]+=d;
 }
 
-void md5_update(MD5 *md5, unsigned char *input, unsigned  int inputLen) {
+void md5_update(MD5Context *ctx, unsigned char *input, unsigned  int inputLen) {
 	unsigned int i, bufferIndex, appendLen;
 
-	md5->dataLength[0]+=inputLen<<3;
-	bufferIndex=md5->bufferPos>>3;
+	ctx->dataLength[0]+=inputLen<<3;
+	bufferIndex=ctx->bufferPos>>3;
 	appendLen=64-bufferIndex;
 	if (appendLen<=inputLen) {
 		for (i=0;i<appendLen;i++) {
-			md5->buffer[bufferIndex+i]=*input;
+			ctx->buffer[bufferIndex+i]=*input;
 			input++;
  		}
-	 	md5_transform(md5, md5->buffer);
+	 	md5_transform(ctx, ctx->buffer);
 		inputLen=inputLen-appendLen;
 		for (;inputLen>64;inputLen-=64) {
-		 	md5_transform(md5, input);
+		 	md5_transform(ctx, input);
 	 		input+=64;
 	 	}
 		bufferIndex=0;
-		md5->bufferPos=0;
+		ctx->bufferPos=0;
 	}
 	for (i=0;i<inputLen;i++) {
-		md5->buffer[bufferIndex+i]=*input;
+		ctx->buffer[bufferIndex+i]=*input;
 		input++;
  	}
-	md5->bufferPos+=inputLen<<3;
-	md5->bufferPos&=511;
+	ctx->bufferPos+=inputLen<<3;
+	ctx->bufferPos&=511;
 }
 
-void md5_finalize(MD5 *md5) {
+void md5_finalize(MD5Context *ctx) {
 	unsigned int i,padLen, bufferIndex;
 	unsigned char padding[64];
 	unsigned int dataL[2];
-	bufferIndex=md5->bufferPos>>3;
-	padLen=bufferIndex<56?56-bufferIndex:64+56-bufferIndex;
-    // dword to byte
-	dataL[0]=md5->dataLength[0];
-	dataL[1]=md5->dataLength[1];
+	dataL[0]=ctx->dataLength[0];
+	dataL[1]=ctx->dataLength[1];
+	bufferIndex=ctx->bufferPos>>3;
+	padLen=bufferIndex<56?56-bufferIndex:120-bufferIndex;
 	for (i=0;i<padLen;i++) {
 		if (i==0) padding[i]=0x80;
 		else padding[i]=0x00;
 	}
-	md5_update(md5, padding,padLen);
- 	md5_update(md5, (unsigned char *)dataL, 8);
+	md5_update(ctx, padding,padLen);
+ 	md5_update(ctx, (unsigned char *)dataL, 8);
 }
 

@@ -969,6 +969,18 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 
 void JabberSendPresence(int status)
 {
+//	if ( JGetByte( "EnableAvatars", TRUE ))
+	{
+		if (userAvatarHash != NULL) {
+			char hash[256];
+			mir_snprintf(hash, sizeof hash, "<tavatar type='hash'>%s</tavatar>", userAvatarHash);
+			JabberSendPresenceTo(status, NULL, hash);
+		} else {
+			JabberSendPresenceTo(status, NULL, "<tavatar type='request'>remove_avatar</tavatar>");
+		}
+		return;
+	}
+
 	JabberSendPresenceTo(status, NULL, NULL);
 /*
 	if (DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE)) {

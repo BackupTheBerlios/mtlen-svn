@@ -157,7 +157,6 @@ struct ThreadData {
 	char newPassword[128];
 
 	HWND reg_hwndDlg;
-	BOOL reg_done;
 };
 
 typedef struct {
@@ -228,7 +227,16 @@ typedef struct {
 } JABBER_FIELD_MAP;
 
 typedef struct {
-	int a;
+	int useSSL;
+	int reconnect;
+	int rosterSync;
+	int offlineAsInvisible;
+	int leaveOfflineMessage;
+	int offlineMessageOption;
+	int ignoreAdvertisements;
+	int alertPolicy;
+	int groupChatPolicy;
+	int voiceChatPolicy;
 } TLEN_OPTIONS;
 
 /*******************************************************************
@@ -256,6 +264,7 @@ extern int jabberDesiredStatus;
 extern CRITICAL_SECTION modeMsgMutex;
 extern JABBER_MODEMSGS modeMsgs;
 extern BOOL jabberSendKeepAlive;
+extern TLEN_OPTIONS tlenOptions;
 
 extern HANDLE hEventSettingChanged;
 extern HANDLE hEventContactDeleted;
@@ -264,6 +273,10 @@ extern HANDLE hMenuMUC;
 extern HANDLE hMenuChats;
 extern HANDLE hMenuContactMUC;
 extern HANDLE hMenuContactVoice;
+
+extern char *userAvatarHash;
+extern int userAvatarFormat;
+
 /*******************************************************************
  * Function declarations
  *******************************************************************/

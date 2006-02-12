@@ -93,7 +93,7 @@ HWND hwndJabberChangePassword;
 
 HICON tlenIcons[TLEN_ICON_TOTAL];
 
-
+void TlenLoadOptions();
 int TlenOptInit(WPARAM wParam, LPARAM lParam);
 int TlenUserInfoInit(WPARAM wParam, LPARAM lParam);
 int JabberMsgUserTyping(WPARAM wParam, LPARAM lParam);
@@ -144,11 +144,9 @@ int __declspec(dllexport) Unload(void)
 	//free(jabberModeMsg);
 	free(jabberModuleName);
 	free(jabberProtoName);
-	if (jabberVcardPhotoFileName) {
-		DeleteFile(jabberVcardPhotoFileName);
-		free(jabberVcardPhotoFileName);
+	if (userAvatarHash) {
+		free(userAvatarHash);
 	}
-	if (jabberVcardPhotoType) free(jabberVcardPhotoType);
 	if (streamId) free(streamId);
 
 #ifdef _DEBUG
@@ -280,6 +278,8 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	//hLibSSL = NULL;
 //	hWndListGcLog = (HANDLE) CallService(MS_UTILS_ALLOCWINDOWLIST, 0, 0);
 
+	TlenLoadOptions();
+
 	HookEvent(ME_OPT_INITIALISE, TlenOptInit);
 	HookEvent(ME_SYSTEM_MODULESLOADED, ModulesLoaded);
 	HookEvent(ME_SYSTEM_PRESHUTDOWN, PreShutdown);
@@ -399,8 +399,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	jabberConnected = FALSE;
 	jabberOnline = FALSE;
 	jabberStatus = ID_STATUS_OFFLINE;
-	jabberVcardPhotoFileName = NULL;
-	jabberVcardPhotoType = NULL;
+	userAvatarHash = NULL;
 	memset((char *) &modeMsgs, 0, sizeof(JABBER_MODEMSGS));
 	//jabberModeMsg = NULL;
 	jabberCodePage = CP_ACP;

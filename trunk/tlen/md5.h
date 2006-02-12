@@ -26,11 +26,11 @@ typedef struct {
 	unsigned int	bufferPos;
 	unsigned int  	dataLength[2];
 	unsigned char 	buffer[64];
-} MD5;
+} MD5Context;
 
-extern void	md5_init(MD5 *);
-extern void	md5_transform(MD5 *, unsigned char *input);
-extern void	md5_update(MD5 *, unsigned char *input, unsigned int inputLen);
-extern void	md5_finalize(MD5 *);
+extern void	md5_init(MD5Context *);
+extern void	md5_transform(MD5Context *, unsigned char *input);
+extern void	md5_update(MD5Context *, unsigned char *input, unsigned int inputLen);
+extern void	md5_finalize(MD5Context *);
 
 #endif

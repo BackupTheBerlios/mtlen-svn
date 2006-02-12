@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_file.h"
 #include "tlen_muc.h"
 #include "tlen_voice.h"
+#include "io.h"
 
 //static void __cdecl TlenProcessInvitation(struct ThreadData *info);
 static void __cdecl JabberKeepAliveThread(JABBER_SOCKET s);
@@ -51,6 +52,9 @@ static VOID CALLBACK JabberDummyApcFunc(DWORD param)
 
 static char onlinePassword[128];
 static HANDLE hEventPasswdDlg;
+
+char *userAvatarHash = NULL;
+int userAvatarFormat;
 
 static BOOL CALLBACK JabberPasswordDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -167,6 +171,15 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 			JabberLog("Thread ended, login server is not configured");
 			return;
 		}
+		if (userAvatarHash != NULL) {
+			free (userAvatarHash);
+			userAvatarHash = NULL;
+		}
+		if (!DBGetContactSetting(NULL, jabberProtoName, "AvatarHash", &dbv)) {
+			userAvatarHash = strdup(dbv.pszVal);
+			DBFreeVariant(&dbv);
+		}
+		userAvatarFormat = DBGetContactSettingDword(NULL, jabberProtoName, "AvatarFormat", PA_FORMAT_UNKNOWN);
 
 		_snprintf(jidStr, sizeof(jidStr), "%s@%s", info->username, info->server);
 		DBWriteContactSettingString(NULL, jabberProtoName, "jid", jidStr);
@@ -645,11 +658,14 @@ static void TlenProcessIqVersion(XmlNode* node)
 
 
 // Support for tAvatar-compatible avatars
-static void TlenProcessTAvatar(XmlNode* node) 
+static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 {
+	struct ThreadData *info;
 	JABBER_LIST_ITEM *item;
 	char *from;
 	HANDLE hContact;
+	/* if not enabled - return */
+	if ((info=(struct ThreadData *) userdata) == NULL) return;
 	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
 		if ((item = JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
 			if ((hContact=JabberHContactFromJID(from)) != NULL) {
@@ -662,8 +678,39 @@ static void TlenProcessTAvatar(XmlNode* node)
 						if (!strcmp(tavatarType, "request")) {
 							if (!strcmp(tavatarText, "get_hash")) {
 								/* send avatar hash */
+								if (userAvatarHash == NULL) {
+									JabberSend(info->s, "<message to='%s' type='tavatar'><tavatar type='request'>remove_avatar</tavatar></message>", from);
+								} else {
+									JabberSend(info->s, "<message to='%s' type='tavatar'><tavatar type='hash'>%s</tavatar></message>", from, userAvatarHash);
+								}
 							} else if (!strcmp(tavatarText, "get_file")) {
 								/* send avatar file */
+								FILE* in;
+								char szFileName[ MAX_PATH ];
+								char* szMimeType, * buffer, *str;
+								long bytes;
+								switch(userAvatarFormat) {
+									case PA_FORMAT_JPEG: szMimeType = "image/jpeg";   break;
+									case PA_FORMAT_GIF:	 szMimeType = "image/gif";    break;
+									case PA_FORMAT_PNG:	 szMimeType = "image/png";    break;
+									case PA_FORMAT_BMP:	 szMimeType = "image/bmp";    break;
+									default:	return;
+								}
+								TlenGetAvatarFileName( NULL, szFileName, MAX_PATH );
+								in = fopen( szFileName, "rb" );
+								if ( in == NULL ) return;
+								bytes = filelength( fileno( in ));
+								buffer = ( char* )malloc( bytes*4/3 + bytes + 1000 );
+								if ( buffer == NULL ) {
+									fclose( in );
+									return;
+								}
+								fread( buffer, bytes, 1, in );
+								fclose( in );
+								str = JabberBase64Encode(buffer, bytes);
+								JabberSend(info->s, "<message to='%s' type='tavatar'><tavatar type='file' mimetype='%s'>%s</tavatar></message>", from, szMimeType, str);
+								free( str );
+								free( buffer );
 							} else if (!strcmp(tavatarText, "remove_avatar")) {
 								/* remove contact's avatar*/
 								if (item->newAvatarHash != NULL) free (item->newAvatarHash);
@@ -671,6 +718,7 @@ static void TlenProcessTAvatar(XmlNode* node)
 								item->newAvatarHash = NULL;
 								item->avatarHash = NULL;
 								DBDeleteContactSetting(hContact, jabberProtoName, "AvatarHash");
+								DBDeleteContactSetting(hContact, jabberProtoName, "AvatarFormat");
 								DBDeleteContactSetting(hContact, "ContactPhoto", "File");
 								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
 							}
@@ -774,7 +822,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 					JabberProcessIq(iqNode, userdata);
 				}
 			} else if (type!=NULL && !strcmp(type, "tavatar")) {
-				TlenProcessTAvatar(node);
+				TlenProcessTAvatar(node, userdata);
 			} else {
 
 				if ((bodyNode=JabberXmlGetChild(node, "body")) != NULL) {
@@ -968,25 +1016,18 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 					}
 					// Determine status to show for the contact and request version information
 					if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
-						char *tavatarHash = NULL;
-						XmlNode *tavatarNode;
-						if ((tavatarNode = JabberXmlGetChild(node, "tavatar"))!=NULL) {
-							char *tavatarType = JabberXmlGetAttrValue(tavatarNode, "type");
-							if (tavatarType != NULL) {
-								if (!strcmp(tavatarType, "hash")) {
-									tavatarHash = tavatarNode->text;
-								}
+						if (jabberStatus != ID_STATUS_INVISIBLE) {
+							if (JabberXmlGetChild(node, "tavatar")!=NULL) {
+								TlenProcessTAvatar(node, userdata);
+							} else if (item->status == ID_STATUS_OFFLINE) {
+								JabberSend(info->s, "<message to='%s' type='tavatar'><tavatar type='request'>get_hash</tavatar></message>", from);
 							}
-						}
-						if (item->status == ID_STATUS_OFFLINE ) {//&& jabberStatus != ID_STATUS_INVISIBLE) {
-							//JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
-							if (tavatarHash == NULL) {
-								JabberSend( info->s, "<message to='%s' type='tavatar'><tavatar type='request'>get_hash</tavatar></message>", from);
+							if (item->status == ID_STATUS_OFFLINE ) {
+								JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
 							}
 						}
 						item->status = status;
 					}
-
 					if (strchr(from, '@')!=NULL || DBGetContactSettingByte(NULL, jabberProtoName, "ShowTransport", TRUE)==TRUE) {
 						if (DBGetContactSettingWord(hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) != status)
 							DBWriteContactSettingWord(hContact, jabberProtoName, "Status", (WORD) status);

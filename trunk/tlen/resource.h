@@ -109,6 +109,9 @@
 #define IDC_OCCUPATION_TEXT             1199
 #define IDC_LOOKFOR_TEXT                1200
 #define IDC_GROUP                       1203
+#define IDC_SOFTWARE					1204
+#define IDC_VERSION						1205
+#define IDC_SYSTEM						1206
 #define IDC_AVATAR						1210
 #define IDC_SETAVATAR					1211
 #define IDC_DELETEAVATAR				1212

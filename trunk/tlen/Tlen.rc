@@ -63,20 +63,23 @@ BEGIN
     GROUPBOX        "Options",IDC_SIMPLE,5,53,286,122
     CONTROL         "Automatically reconnect after unintentional disconnection",
                     IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    79,249,10
+                    66,239,10
     CONTROL         "Leave status message after disconnection",
                     IDC_OFFLINE_MESSAGE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,14,92,168,10
+                    WS_TABSTOP,14,79,168,10
     COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,91,75,140,
                     CBS_DROPDOWNLIST | WS_TABSTOP
     CONTROL         "Ignore advertisements",
                     IDC_IGNORE_ADVERTISEMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    105,250,10
+                    92,250,10
     CONTROL         "Automatically delete contacts not in my roster",
                     IDC_ROSTER_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    118,250,10
+                    105,250,10
     CONTROL         "Show offline users with status messages as invisible in contact list",
                     IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,118,250,10
+    CONTROL         "Enable avatars",
+                    IDC_FILE_PROXY_TYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     14,131,250,10
     LTEXT           "Alert policy",IDC_STATIC,14,145,70,8
     COMBOBOX        IDC_ALERT_POLICY,95,143,190,100,
@@ -222,52 +225,61 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_AVATAR,"Static",SS_BITMAP | SS_CENTERIMAGE |
                     SS_SUNKEN,9,11,96,96
-    LTEXT           "Note: Image size max 64x64\nFile size max 6kB",
+    LTEXT           "Note: File size max 6kB",
                     IDC_STATIC,112,54,106,34
     PUSHBUTTON      "Set",IDC_SETAVATAR,9,112,45,13
     PUSHBUTTON      "Delete",IDC_DELETEAVATAR,61,112,41,13
 END
 
-IDD_USER_INFO DIALOG DISCARDABLE  0, 0, 222, 132
+IDD_USER_INFO DIALOG DISCARDABLE  0, 0, 222, 146
 STYLE DS_FIXEDSYS | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT           "Tlen login:",IDC_STATIC,5,7,48,8
-    EDITTEXT        IDC_INFO_JID,53,7,73,12,ES_AUTOHSCROLL | ES_READONLY |
+    LTEXT           "Tlen login:",IDC_STATIC,5,2,48,8
+    EDITTEXT        IDC_INFO_JID,53,2,73,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_BORDER
-    LTEXT           "Subscription:",IDC_STATIC,128,7,45,8,NOT WS_GROUP
-    EDITTEXT        IDC_SUBSCRIPTION,181,7,36,12,ES_READONLY | NOT WS_BORDER |
+    LTEXT           "Subscription:",IDC_STATIC,128,2,45,8,NOT WS_GROUP
+    EDITTEXT        IDC_SUBSCRIPTION,181,2,36,12,ES_READONLY | NOT WS_BORDER |
                     NOT WS_TABSTOP
-    LTEXT           "Nick name:",IDC_STATIC,5,20,48,8
-    EDITTEXT        IDC_NICKNAME,53,20,77,12,ES_AUTOHSCROLL | ES_READONLY |
+    LTEXT           "Nick name:",IDC_STATIC,5,14,48,8
+    EDITTEXT        IDC_NICKNAME,53,14,77,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_BORDER
-    LTEXT           "First name:",IDC_STATIC,5,33,48,8
-    EDITTEXT        IDC_FIRSTNAME,53,33,73,12,ES_AUTOHSCROLL | ES_READONLY |
+    LTEXT           "First name:",IDC_STATIC,5,26,48,8
+    EDITTEXT        IDC_FIRSTNAME,53,26,73,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_BORDER
-    LTEXT           "Gender:",IDC_STATIC,128,33,47,8
-    EDITTEXT        IDC_GENDER_TEXT,178,33,26,12,ES_AUTOHSCROLL |
+    LTEXT           "Gender:",IDC_STATIC,128,26,47,8
+    EDITTEXT        IDC_GENDER_TEXT,178,26,26,12,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_BORDER
-    LTEXT           "Last name:",IDC_STATIC,5,46,48,8
-    EDITTEXT        IDC_LASTNAME,53,46,73,12,ES_AUTOHSCROLL | ES_READONLY |
+    LTEXT           "Last name:",IDC_STATIC,5,38,48,8
+    EDITTEXT        IDC_LASTNAME,53,38,73,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_BORDER
-    LTEXT           "Age:",IDC_STATIC,128,46,33,8
-    EDITTEXT        IDC_AGE,178,46,22,12,ES_AUTOHSCROLL | ES_READONLY | NOT
+    LTEXT           "Age:",IDC_STATIC,128,38,47,8
+    EDITTEXT        IDC_AGE,178,38,22,12,ES_AUTOHSCROLL | ES_READONLY | NOT
                     WS_BORDER
-    LTEXT           "E-mail:",IDC_STATIC,5,59,48,8
-    EDITTEXT        IDC_EMAIL,54,59,120,12,ES_AUTOHSCROLL | ES_READONLY |
+    LTEXT           "E-mail:",IDC_STATIC,5,50,48,8
+    EDITTEXT        IDC_EMAIL,54,50,120,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_BORDER
-    LTEXT           "City:",IDC_STATIC,5,72,48,8
-    EDITTEXT        IDC_CITY,53,72,125,12,ES_AUTOHSCROLL | ES_READONLY | NOT
+    LTEXT           "City:",IDC_STATIC,5,62,48,8
+    EDITTEXT        IDC_CITY,53,62,125,12,ES_AUTOHSCROLL | ES_READONLY | NOT
                     WS_BORDER
-    LTEXT           "School:",IDC_STATIC,5,85,48,8
-    EDITTEXT        IDC_SCHOOL,53,85,131,12,ES_AUTOHSCROLL | ES_READONLY |
+    LTEXT           "School:",IDC_STATIC,5,74,48,8
+    EDITTEXT        IDC_SCHOOL,53,74,131,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_BORDER
-    LTEXT           "Occupation:",IDC_STATIC,5,98,48,8
-    EDITTEXT        IDC_OCCUPATION_TEXT,53,98,135,12,ES_AUTOHSCROLL |
+    LTEXT           "Occupation:",IDC_STATIC,5,86,48,8
+    EDITTEXT        IDC_OCCUPATION_TEXT,53,86,135,12,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_BORDER
-    LTEXT           "Looking for:",IDC_STATIC,5,111,48,8
-    EDITTEXT        IDC_LOOKFOR_TEXT,53,111,136,12,ES_AUTOHSCROLL |
+    LTEXT           "Looking for:",IDC_STATIC,5,98,48,8
+    EDITTEXT        IDC_LOOKFOR_TEXT,53,98,136,12,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_BORDER
+    LTEXT           "Software:",IDC_STATIC,5,110,48,8
+    LTEXT           "Version:",IDC_STATIC,5,122,48,8
+    LTEXT           "System:",IDC_STATIC,5,134,48,8
+    EDITTEXT        IDC_SOFTWARE,54,110,120,12,ES_READONLY |
+                    NOT WS_BORDER | NOT WS_TABSTOP
+    EDITTEXT        IDC_VERSION,54,122,120,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER | NOT WS_TABSTOP
+    EDITTEXT        IDC_SYSTEM,54,134,120,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER | NOT WS_TABSTOP
 END
 
 IDD_ADVSEARCH DIALOGEX 0, 0, 334, 178
