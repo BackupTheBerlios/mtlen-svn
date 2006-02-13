@@ -28,7 +28,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_file.h"
 #include "tlen_muc.h"
 #include "tlen_voice.h"
-#include "io.h"
+#include <io.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 
 //static void __cdecl TlenProcessInvitation(struct ThreadData *info);
 static void __cdecl JabberKeepAliveThread(JABBER_SOCKET s);
@@ -664,6 +667,7 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 	JABBER_LIST_ITEM *item;
 	char *from;
 	HANDLE hContact;
+	struct _stat statbuf;
 	/* if not enabled - return */
 	if ((info=(struct ThreadData *) userdata) == NULL) return;
 	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
@@ -697,6 +701,8 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 									default:	return;
 								}
 								TlenGetAvatarFileName( NULL, szFileName, MAX_PATH );
+								if (_stat(szFileName, &statbuf)) return;
+								if (statbuf.st_size > 6 * 1024) return;
 								in = fopen( szFileName, "rb" );
 								if ( in == NULL ) return;
 								bytes = filelength( fileno( in ));

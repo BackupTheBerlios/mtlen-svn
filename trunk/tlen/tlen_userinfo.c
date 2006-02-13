@@ -26,7 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/stat.h>
 #include "jabber_list.h"
 #include "resource.h"
-#include "md5.h"
+//#include "md5.h"
+#include "sha1.h"
 
 JABBER_FIELD_MAP tlenFieldGender[] = {
 	{ 1, "Male" },
@@ -337,15 +338,16 @@ static char szFileName[ MAX_PATH ];
 static int sttSaveAvatar()
 {
 	FILE* in;
-	MD5Context md5;
+	SHA1Context sha;
+//	MD5Context md5;
 	unsigned char buf[ 512 ];
 	char tFileName[ MAX_PATH ];
 	int i, pictureType;
 	int bIsFirst = 1;
 	struct _stat statbuf;
-	
+	uint8_t digest[20];
+
 	if (_stat(szFileName, &statbuf)) return 1;
-	JabberLog( "Filesize L %d",statbuf.st_size);
 	if (statbuf.st_size > 6 * 1024) return 1;
 	
 	TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName );
@@ -353,7 +355,8 @@ static int sttSaveAvatar()
 		JabberLog( "Copy failed with error %d", GetLastError() );
 		return 1;
 	}
-	md5_init(&md5);
+	SHA1Reset(&sha);
+//	md5_init(&md5);
 	in = fopen( tFileName, "rb" );
 	if ( in == NULL )
 		return 1;
@@ -364,15 +367,17 @@ static int sttSaveAvatar()
 			pictureType = JabberGetPictureType( buf );
 			bIsFirst = 0;
 		}
-		md5_update(&md5, buf, bytes);
+		SHA1Input(&sha, buf, bytes);
+//		md5_update(&md5, buf, bytes);
 	}
 	fclose( in );
 	if ( pictureType == PA_FORMAT_UNKNOWN )
 		return 1;
-	md5_finalize(&md5);
-	for (i=0;i<16;i++) {
-		unsigned int val = (md5.state[i>>2] >> 8*(i%4)) & 0xFF;
-		sprintf( buf+( i<<1 ), "%02x", val);
+	SHA1Result(&sha, digest);
+//	md5_finalize(&md5);
+	for (i=0;i<20;i++) {
+//		unsigned int val = (md5.state[i>>2] >> 8*(i%4)) & 0xFF;
+		sprintf( buf+( i<<1 ), "%02x", digest[i]);
 	}
 	DBWriteContactSettingString(NULL, jabberProtoName, "AvatarHash", buf);
 	DBWriteContactSettingDword(NULL, jabberProtoName, "AvatarFormat", pictureType);
