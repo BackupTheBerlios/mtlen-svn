@@ -970,7 +970,7 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 void JabberSendPresence(int status)
 {
 //	if ( JGetByte( "EnableAvatars", TRUE ))
-	{
+	if (tlenOptions.enableAvatars) {
 		if (userAvatarHash != NULL) {
 			char hash[256];
 			mir_snprintf(hash, sizeof hash, "<tavatar type='hash'>%s</tavatar>", userAvatarHash);

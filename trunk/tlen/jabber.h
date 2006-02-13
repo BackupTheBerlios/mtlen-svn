@@ -237,6 +237,8 @@ typedef struct {
 	int alertPolicy;
 	int groupChatPolicy;
 	int voiceChatPolicy;
+	int enableAvatars;
+	int enableVersion;
 } TLEN_OPTIONS;
 
 /*******************************************************************

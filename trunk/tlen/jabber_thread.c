@@ -233,8 +233,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 			DBFreeVariant(&dbv);
 		}
 		info->port = DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT);
-
-		info->useSSL = DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE);
+		info->useSSL = tlenOptions.useSSL;
 	}
 
 	else {
@@ -282,7 +281,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 					jabberStatus = ID_STATUS_OFFLINE;
 					ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_LOGIN, ACKRESULT_FAILED, NULL, LOGINERR_NONETWORK);
 					ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, jabberStatus);
-					if (DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE) == TRUE) {
+					if (tlenOptions.reconnect == TRUE) {
 						reconnectTime = rand() % reconnectMaxTime;
 						JabberLog("Sleeping %d seconds before automatic reconnecting...", reconnectTime);
 						SleepEx(reconnectTime * 1000, TRUE);
@@ -508,7 +507,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 		}
 #endif
 
-		if (info->type!=JABBER_SESSION_NORMAL || DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE)==FALSE)
+		if (info->type!=JABBER_SESSION_NORMAL || tlenOptions.reconnect==FALSE)
 			break;
 
 		if (jabberThreadInfo != info)	// Make sure this is still the main Jabber connection thread
@@ -669,6 +668,7 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 	HANDLE hContact;
 	struct _stat statbuf;
 	/* if not enabled - return */
+	if (!tlenOptions.enableAvatars) return;
 	if ((info=(struct ThreadData *) userdata) == NULL) return;
 	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
 		if ((item = JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {

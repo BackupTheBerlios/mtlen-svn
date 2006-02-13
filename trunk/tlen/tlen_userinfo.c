@@ -147,7 +147,7 @@ int TlenUserInfoInit(WPARAM wParam, LPARAM lParam)
 		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
 
 	}
-	if (!lParam) {
+	if (!lParam && tlenOptions.enableAvatars) {
 	/* if not enabled - return */
 		CCSDATA ccs = {0};
 		char title[256];
@@ -332,6 +332,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 	return FALSE;
 }
 
+static int avatarChanged;
 static HBITMAP hAvatar;
 static char szFileName[ MAX_PATH ];
 
@@ -420,8 +421,10 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 	switch ( msg ) {
 	case WM_INITDIALOG:
 		TranslateDialogDefault( hwndDlg );
+		avatarChanged = 0;
 		hAvatar = NULL;
 		szFileName[0] = 0;/*
+
 		BOOL tValue = JGetByte( "EnableAvatars", 1 );
 		CheckDlgButton( hwndDlg, IDC_ENABLE_AVATARS,	tValue );
 		if ( tValue )*/ 
@@ -447,6 +450,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 								DeleteObject( hBitmap );
 							RedrawWindow(GetDlgItem(hwndDlg, IDC_AVATAR), NULL, NULL, RDW_INVALIDATE);
 						}
+						avatarChanged = 1;
 					}	
 
 				}
@@ -468,6 +472,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 					if ( hBitmap )
 						DeleteObject( hBitmap );
 					InvalidateRect( hwndDlg, NULL, TRUE );
+					avatarChanged = 1;
 					break;
 				}
 
@@ -476,7 +481,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 	case WM_DESTROY:
 		if ( hAvatar )
 			DeleteObject( hAvatar );
-		if ( jabberConnected && jabberDesiredStatus != ID_STATUS_INVISIBLE)
+		if (avatarChanged && jabberConnected && jabberDesiredStatus != ID_STATUS_INVISIBLE)
 			JabberSendPresence(jabberDesiredStatus);
 		break;
 	}

@@ -48,54 +48,55 @@ STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Tlen",IDC_TLEN,5,3,286,45
-    LTEXT           "Username:",IDC_STATIC,14,17,52,8
-    EDITTEXT        IDC_EDIT_USERNAME,70,15,86,12,ES_AUTOHSCROLL
+    GROUPBOX        "Tlen",IDC_TLEN,5,3,288,45
+    LTEXT           "Username:",IDC_STATIC,14,16,52,8
+    EDITTEXT        IDC_EDIT_USERNAME,70,14,86,12,ES_AUTOHSCROLL
     CONTROL         "Create a new account",IDC_REGISTERACCOUNT,"Hyperlink",
-                    0x0,170,17,100,8
-    LTEXT           "Password:",IDC_STATIC,14,31,52,8
-    EDITTEXT        IDC_EDIT_PASSWORD,70,29,86,12,ES_PASSWORD |
+                    0x0,170,16,100,8
+    LTEXT           "Password:",IDC_STATIC,14,30,52,8
+    EDITTEXT        IDC_EDIT_PASSWORD,70,28,86,12,ES_PASSWORD |
                     ES_AUTOHSCROLL
     CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,170,31,100,10
-    CONTROL         "Use SSL",IDC_USE_SSL,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,14,89,69,10
-    GROUPBOX        "Options",IDC_SIMPLE,5,53,286,122
+                    BS_AUTOCHECKBOX | WS_TABSTOP,170,30,100,10
+    GROUPBOX        "Options",IDC_SIMPLE,5,51,288,131
     CONTROL         "Automatically reconnect after unintentional disconnection",
                     IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    66,239,10
+                    62,239,10
     CONTROL         "Leave status message after disconnection",
                     IDC_OFFLINE_MESSAGE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,14,79,168,10
-    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,91,75,140,
+                    WS_TABSTOP,14,75,168,10
+    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,74,75,140,
                     CBS_DROPDOWNLIST | WS_TABSTOP
     CONTROL         "Ignore advertisements",
                     IDC_IGNORE_ADVERTISEMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    92,250,10
+                    88,250,10
     CONTROL         "Automatically delete contacts not in my roster",
                     IDC_ROSTER_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    105,250,10
+                    101,250,10
     CONTROL         "Show offline users with status messages as invisible in contact list",
                     IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,118,250,10
+                    14,114,250,10
     CONTROL         "Enable avatars",
-                    IDC_FILE_PROXY_TYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,131,250,10
-    LTEXT           "Alert policy",IDC_STATIC,14,145,70,8
-    COMBOBOX        IDC_ALERT_POLICY,95,143,190,100,
+                    IDC_AVATARS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,127,250,10
+    CONTROL         "Send and receive client version information",
+                    IDC_VERSIONINFO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,140,250,10
+    LTEXT           "Alert policy",IDC_STATIC,14,153,70,8
+    COMBOBOX        IDC_ALERT_POLICY,95,151,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Group chat policy",IDC_STATIC,14,159,70,8
-    COMBOBOX        IDC_MUC_POLICY,95,157,190,100,
+    LTEXT           "Group chat policy",IDC_STATIC,14,166,70,8
+    COMBOBOX        IDC_MUC_POLICY,95,164,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-    GROUPBOX        "Voice Chats",IDC_STATIC,5,180,286,63
-    LTEXT           "Voice chat policy",IDC_STATIC,14,194,70,8
-    COMBOBOX        IDC_VOICE_POLICY,95,193,190,100,
+    GROUPBOX        "Voice Chats",IDC_STATIC,5,185,288,60
+    LTEXT           "Voice chat policy",IDC_STATIC,14,197,70,8
+    COMBOBOX        IDC_VOICE_POLICY,95,196,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-	LTEXT           "Recording device:",IDC_STATIC,14,210,105,8
-    COMBOBOX        IDC_VOICE_DEVICE_IN,120,208,110,100,CBS_DROPDOWNLIST |
+	LTEXT           "Recording device:",IDC_STATIC,14,213,105,8
+    COMBOBOX        IDC_VOICE_DEVICE_IN,120,211,110,100,CBS_DROPDOWNLIST |
                     WS_TABSTOP
-    LTEXT           "Playback device:",IDC_STATIC,14,224,105,8
-    COMBOBOX        IDC_VOICE_DEVICE_OUT,120,222,110,100,CBS_DROPDOWNLIST |
+    LTEXT           "Playback device:",IDC_STATIC,14,227,105,8
+    COMBOBOX        IDC_VOICE_DEVICE_OUT,120,225,110,100,CBS_DROPDOWNLIST |
                     WS_TABSTOP
 END
 
@@ -104,7 +105,7 @@ STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "P2P Connections",IDC_STATIC,5,100,286,110
+    GROUPBOX        "P2P Connections",IDC_STATIC,5,100,288,110
     CONTROL         "Use proxy for incoming connections",IDC_FILE_USE_PROXY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,114,271,10
     LTEXT           "Proxy type:",IDC_FILE_PROXY_TYPE_LABEL,16,130,48,8,
@@ -131,7 +132,7 @@ BEGIN
     EDITTEXT        IDC_FILE_PROXY_PASSWORD,204,175,81,12,ES_PASSWORD |
                     ES_AUTOHSCROLL | WS_DISABLED
 
-    GROUPBOX        "Expert Options",IDC_STATIC,5,4,286,74
+    GROUPBOX        "Expert Options",IDC_STATIC,5,4,288,74
     LTEXT           "Login server:",IDC_STATIC,14,18,75,8
     EDITTEXT        IDC_EDIT_LOGIN_SERVER,90,16,90,12,ES_AUTOHSCROLL
     LTEXT           "Connection Host:",IDC_STATIC,14,32,75,8

@@ -38,15 +38,14 @@ void TlenLoadOptions()
 	tlenOptions.reconnect = DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE);
 	tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0);
 	tlenOptions.rosterSync = DBGetContactSettingByte(NULL, jabberProtoName, "RosterSync", FALSE);
-	/* TODO: Load options here */
-	/*
-			CheckDlgButton(hwndDlg, IDC_SHOW_OFFLINE, DBGetContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", FALSE));
-			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE));
-			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", 0), 0);
-			CheckDlgButton(hwndDlg, IDC_IGNORE_ADVERTISEMENTS, DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", TRUE));
-			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", 0), 0);
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0), 0);
-*/
+	tlenOptions.offlineAsInvisible = DBGetContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", FALSE);
+	tlenOptions.leaveOfflineMessage = DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE);
+	tlenOptions.offlineMessageOption = DBGetContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", 0);
+	tlenOptions.ignoreAdvertisements = DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", TRUE);
+	tlenOptions.groupChatPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", 0);
+	tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0);
+	tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, jabberProtoName, "EnableAvatars", FALSE);
+	tlenOptions.enableVersion = DBGetContactSettingByte(NULL, jabberProtoName, "EnableVersion", FALSE);
 }
 
 int TlenOptInit(WPARAM wParam, LPARAM lParam)
@@ -130,32 +129,32 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			}
 			CheckDlgButton(hwndDlg, IDC_SAVEPASSWORD, DBGetContactSettingByte(NULL, jabberProtoName, "SavePassword", TRUE));
 
-			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE));
-
-			CheckDlgButton(hwndDlg, IDC_RECONNECT, DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE));
-			CheckDlgButton(hwndDlg, IDC_ROSTER_SYNC, DBGetContactSettingByte(NULL, jabberProtoName, "RosterSync", FALSE));
-			CheckDlgButton(hwndDlg, IDC_SHOW_OFFLINE, DBGetContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", FALSE));
-			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE));
-			CheckDlgButton(hwndDlg, IDC_IGNORE_ADVERTISEMENTS, DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", TRUE));
+			CheckDlgButton(hwndDlg, IDC_RECONNECT, tlenOptions.reconnect);
+			CheckDlgButton(hwndDlg, IDC_ROSTER_SYNC, tlenOptions.rosterSync);
+			CheckDlgButton(hwndDlg, IDC_SHOW_OFFLINE, tlenOptions.offlineAsInvisible);
+			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, tlenOptions.leaveOfflineMessage);
+			CheckDlgButton(hwndDlg, IDC_IGNORE_ADVERTISEMENTS, tlenOptions.ignoreAdvertisements);
+			CheckDlgButton(hwndDlg, IDC_AVATARS, tlenOptions.enableAvatars);
+			CheckDlgButton(hwndDlg, IDC_VERSIONINFO, tlenOptions.enableVersion);
 			
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all alerts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore alerts from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all alerts"));
-			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0), 0);
+			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_SETCURSEL, tlenOptions.alertPolicy, 0);
 			
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Always ask me"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from authorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all invitations"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all invitation"));
-			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", 0), 0);
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, tlenOptions.groupChatPolicy, 0);
 
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Always ask me"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from authorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all invitations"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all invitation"));
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0), 0);
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, tlenOptions.voiceChatPolicy, 0);
 
 			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("<Last message>"));
 	        //SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("<Ask me>"));
@@ -165,7 +164,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 	        SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("DND"));
 	        SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("Free for chat"));
 	        SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("Invisible"));
-			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", 0), 0);
+			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_SETCURSEL, tlenOptions.offlineMessageOption, 0);
 
 			oldProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_USERDATA, (LONG) oldProc);
@@ -233,9 +232,6 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 					DBDeleteContactSetting(NULL, jabberProtoName, "Password");
 
 				DBWriteContactSettingByte(NULL, jabberProtoName, "SavePassword", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD));
-
-				DBWriteContactSettingByte(NULL, jabberProtoName, "UseSSL", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_USE_SSL));
-
 				DBWriteContactSettingByte(NULL, jabberProtoName, "Reconnect", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_RECONNECT));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "RosterSync", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ROSTER_SYNC));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SHOW_OFFLINE));
@@ -247,9 +243,11 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_IN, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingByte(NULL, jabberProtoName, "EnableAvatars", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_AVATARS));
+				DBWriteContactSettingByte(NULL, jabberProtoName, "EnableVersion", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VERSIONINFO));
 				if (reconnectRequired && jabberConnected)
 					MessageBox(hwndDlg, Translate("These changes will take effect the next time you connect to the Tlen network."), Translate("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
-
+				TlenLoadOptions();
 				return TRUE;
 			}
 		}
@@ -276,7 +274,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, "tlen.pl");
 			}
 
-			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE));
+			CheckDlgButton(hwndDlg, IDC_USE_SSL, tlenOptions.useSSL);
 
 			EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), TRUE);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), TRUE);
