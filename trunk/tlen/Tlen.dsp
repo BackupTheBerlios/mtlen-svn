@@ -169,10 +169,6 @@ SOURCE=.\jabber_xml.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\md5.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\sha1.c
 # End Source File
 # Begin Source File
@@ -226,10 +222,6 @@ SOURCE=.\jabber_ssl.h
 # Begin Source File
 
 SOURCE=.\jabber_xml.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\md5.h
 # End Source File
 # Begin Source File
 

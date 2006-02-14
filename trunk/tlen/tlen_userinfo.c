@@ -481,7 +481,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 	case WM_DESTROY:
 		if ( hAvatar )
 			DeleteObject( hAvatar );
-		if (avatarChanged && jabberConnected && jabberDesiredStatus != ID_STATUS_INVISIBLE)
+		if (tlenOptions.enableAvatars && avatarChanged && jabberConnected && jabberDesiredStatus != ID_STATUS_INVISIBLE)
 			JabberSendPresence(jabberDesiredStatus);
 		break;
 	}

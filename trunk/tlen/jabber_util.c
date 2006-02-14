@@ -973,10 +973,10 @@ void JabberSendPresence(int status)
 	if (tlenOptions.enableAvatars) {
 		if (userAvatarHash != NULL) {
 			char hash[256];
-			mir_snprintf(hash, sizeof hash, "<tavatar type='hash'>%s</tavatar>", userAvatarHash);
+			mir_snprintf(hash, sizeof hash, "<tAvatar type='shahash'>%s</tAvatar>", userAvatarHash);
 			JabberSendPresenceTo(status, NULL, hash);
 		} else {
-			JabberSendPresenceTo(status, NULL, "<tavatar type='request'>remove_avatar</tavatar>");
+			JabberSendPresenceTo(status, NULL, "<tAvatar type='request'>remove_avatar</tAvatar>");
 		}
 		return;
 	}

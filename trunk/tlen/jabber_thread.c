@@ -623,6 +623,8 @@ static void TlenProcessIqVersion(XmlNode* node)
 	char* from, *version;
 	char* os = NULL;
 
+	if (jabberStatus == ID_STATUS_INVISIBLE) return;
+	if (!tlenOptions.enableVersion) return;
 	if (( from=JabberXmlGetAttrValue( node, "from" )) == NULL )
 		return;
 
@@ -668,6 +670,7 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 	HANDLE hContact;
 	struct _stat statbuf;
 	/* if not enabled - return */
+	if (jabberStatus == ID_STATUS_INVISIBLE) return;
 	if (!tlenOptions.enableAvatars) return;
 	if ((info=(struct ThreadData *) userdata) == NULL) return;
 	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
@@ -675,17 +678,17 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 			if ((hContact=JabberHContactFromJID(from)) != NULL) {
 				XmlNode *tavatarNode;
 				int i = 1;
-				while ((tavatarNode=JabberXmlGetNthChild(node, "tavatar", i)) != NULL) {
+				while ((tavatarNode=JabberXmlGetNthChild(node, "tAvatar", i)) != NULL) {
 					char *tavatarText = tavatarNode->text;
 					char *tavatarType = JabberXmlGetAttrValue(tavatarNode, "type");
 					if (tavatarType != NULL) {
 						if (!strcmp(tavatarType, "request")) {
-							if (!strcmp(tavatarText, "get_hash")) {
+							if (!strcmp(tavatarText, "get_shahash")) {
 								/* send avatar hash */
 								if (userAvatarHash == NULL) {
-									JabberSend(info->s, "<message to='%s' type='tavatar'><tavatar type='request'>remove_avatar</tavatar></message>", from);
+									JabberSend(info->s, "<message to='%s' type='tAvatar'><tAvatar type='request'>remove_avatar</tAvatar></message>", from);
 								} else {
-									JabberSend(info->s, "<message to='%s' type='tavatar'><tavatar type='hash'>%s</tavatar></message>", from, userAvatarHash);
+									JabberSend(info->s, "<message to='%s' type='tAvatar'><tAvatar type='shahash'>%s</tAvatar></message>", from, userAvatarHash);
 								}
 							} else if (!strcmp(tavatarText, "get_file")) {
 								/* send avatar file */
@@ -714,7 +717,7 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 								fread( buffer, bytes, 1, in );
 								fclose( in );
 								str = JabberBase64Encode(buffer, bytes);
-								JabberSend(info->s, "<message to='%s' type='tavatar'><tavatar type='file' mimetype='%s'>%s</tavatar></message>", from, szMimeType, str);
+								JabberSend(info->s, "<message to='%s' type='tAvatar'><tAvatar type='file' mimetype='%s'>%s</tAvatar></message>", from, szMimeType, str);
 								free( str );
 								free( buffer );
 							} else if (!strcmp(tavatarText, "remove_avatar")) {
@@ -728,7 +731,7 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 								DBDeleteContactSetting(hContact, "ContactPhoto", "File");
 								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
 							}
-						} else if (!strcmp(tavatarType, "hash")) {
+						} else if (!strcmp(tavatarType, "shahash")) {
 							/* contact's avatar hash*/
 							int refresh = 1;
 							if (item->avatarHash != NULL && !strcmp(item->avatarHash, tavatarText)) {
@@ -758,6 +761,7 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 									else if ( !strcmp( mimeType, "image/gif" )) AI.format = PA_FORMAT_GIF;
 									else if ( !strcmp( mimeType, "image/bmp" )) AI.format = PA_FORMAT_BMP;
 									else if ( !strcmp( mimeType, "image/ico" )) AI.format = PA_FORMAT_ICON;
+									else if ( !strcmp( mimeType, "image/jpg" )) AI.format = PA_FORMAT_JPEG;
 								} else if (resultLen > 4) {
 									AI.format = JabberGetPictureType(data);
 								}
@@ -827,7 +831,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 					JabberXmlAddAttr(iqNode, "from", from);
 					JabberProcessIq(iqNode, userdata);
 				}
-			} else if (type!=NULL && !strcmp(type, "tavatar")) {
+			} else if (type!=NULL && !strcmp(type, "tAvatar")) {
 				TlenProcessTAvatar(node, userdata);
 			} else {
 
@@ -1023,12 +1027,12 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 					// Determine status to show for the contact and request version information
 					if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
 						if (jabberStatus != ID_STATUS_INVISIBLE) {
-							if (JabberXmlGetChild(node, "tavatar")!=NULL) {
+							if (JabberXmlGetChild(node, "tAvatar")!=NULL) {
 								TlenProcessTAvatar(node, userdata);
-							} else if (item->status == ID_STATUS_OFFLINE) {
-								JabberSend(info->s, "<message to='%s' type='tavatar'><tavatar type='request'>get_hash</tavatar></message>", from);
+							} else if (item->status == ID_STATUS_OFFLINE && tlenOptions.enableAvatars) {
+								JabberSend(info->s, "<message to='%s' type='tAvatar'><tAvatar type='request'>get_hash</tAvatar></message>", from);
 							}
-							if (item->status == ID_STATUS_OFFLINE ) {
+							if (item->status == ID_STATUS_OFFLINE && tlenOptions.enableVersion) {
 								JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
 							}
 						}
