@@ -1,3 +1,9 @@
+1.0.7.0
+---------
++ full support for avatars (compatible with tAvatar 0.0.2.1 or higher)
++ sending and receiving full client version info
+* optimized DB usage
+* code cleanup
 1.0.6.9
 ---------
 + experimental client recognition
