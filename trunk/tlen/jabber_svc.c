@@ -647,11 +647,7 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 	DBVARIANT dbv;
 	int refresh = 1;
 	PROTO_AVATAR_INFORMATION* AI = ( PROTO_AVATAR_INFORMATION* )lParam;
-	/*
-	if ( !JGetByte( "EnableAvatars", TRUE ))
-		return GAIR_NOAVATAR;
-*/
-	JabberLog("TlenGetAvatarInfo ");
+	if (!tlenOptions.enableAvatars) return GAIR_NOAVATAR;
 
 	if (AI->hContact != NULL) {
 		if (!DBGetContactSetting(AI->hContact, jabberProtoName, "jid", &dbv)) {
@@ -663,15 +659,13 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 			}
 		}
 	} else {
-		newAvatarHash = "ASA";
-		avatarHash = "ASAS";
+		newAvatarHash = avatarHash = userAvatarHash;
 	}
-	JabberLog("TlenGetAvatarInfo - current hash: %s, new hash: %s", avatarHash, newAvatarHash);
 	if (newAvatarHash == NULL) {
 		return GAIR_NOAVATAR;
 	}
 	TlenGetAvatarFileName(item, AI->filename, sizeof AI->filename);
-//	AI->format = ( AI->hContact == NULL ) ? PA_FORMAT_PNG : JGetByte( AI->hContact, "AvatarType", 0 );
+	AI->format = ( AI->hContact == NULL ) ? userAvatarFormat : item->avatarFormat;
 	{
 		if (avatarHash != NULL && !strcmp(avatarHash, newAvatarHash)) {
 			return GAIR_SUCCESS;
@@ -687,10 +681,9 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 				return GAIR_SUCCESS;
 	}	}	}
 */
-	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline ) {
-		/* get avatart */
-		JabberLog( "Rereading avatar for %s", item->jid);
-		JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><tAvatar type='request'>get_file</tAvatar></message>", item->jid);
+	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline && jabberStatus != ID_STATUS_INVISIBLE) {
+		/* get avatar */
+		JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_file</avatar></message>", item->jid);
 		return GAIR_WAITFOR;
 	}
 	return GAIR_NOAVATAR;
