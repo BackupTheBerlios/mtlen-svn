@@ -611,7 +611,7 @@ static void JabberProcessProtocol(XmlNode *node, void *userdata)
 		else if (!strcmp(node->name, "v"))
 			TlenProcessV(node, userdata);
 		else
-			JabberLog("Invalid top-level tag (only <message/> <presence/> <iq/> <f/> <w/> <m/> <n/> and <p/> allowed)");
+			JabberLog("Invalid top-level tag (only <message/> <presence/> <iq/> <f/> <w/> <m/> <n/> <p/> and <v/> allowed)");
 	}
 
 }
@@ -619,8 +619,8 @@ static void JabberProcessProtocol(XmlNode *node, void *userdata)
 static void TlenProcessIqVersion(XmlNode* node)
 {
 	OSVERSIONINFO osvi = { 0 };
-	char mversion[64];
-	char* from, *version;
+	char mversion[128];
+	char* from, *version, *mver;
 	char* os = NULL;
 
 	if (jabberStatus == ID_STATUS_INVISIBLE) return;
@@ -653,9 +653,11 @@ static void TlenProcessIqVersion(XmlNode* node)
 
 	if ( os == NULL ) os = JabberTextEncode( Translate( "Windows" ));
 
-	CallService( MS_SYSTEM_GETVERSIONTEXT, sizeof( mversion ), ( LPARAM )mversion );
-	JabberSend( jabberThreadInfo->s, "<message to='%s' type='iq'><iq type='result'><query xmlns='jabber:iq:version'><name>Miranda IM %s</name><version>%s</version><os>%s</os></query></iq></message>", from, mversion, version?version:"", os?os:"" );
-
+	strcpy(mversion, "Miranda IM ");
+	CallService( MS_SYSTEM_GETVERSIONTEXT, sizeof( mversion ) - 11, ( LPARAM )mversion + 11 );
+	mver = JabberTextEncode( mversion );
+	JabberSend( jabberThreadInfo->s, "<message to='%s' type='iq'><iq type='result'><query xmlns='jabber:iq:version'><name>%s</name><version>%s</version><os>%s</os></query></iq></message>", from, mver?mver:"", version?version:"", os?os:"" );
+	if ( mver ) free( mver );
 	if ( version ) free( version );
 	if ( os ) free( os );
 }
@@ -978,7 +980,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 	XmlNode *showNode, *statusNode;
 	JABBER_LIST_ITEM *item;
 	char *from, *type, *nick, *show;
-	int status;
+	int status, laststatus = ID_STATUS_OFFLINE;
 	char *p;
 
 	if (!node || !node->name || strcmp(node->name, "presence")) return;
@@ -1026,6 +1028,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 					}
 					// Determine status to show for the contact and request version information
 					if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
+						laststatus = item->status;
 						item->status = status;
 					}
 					if (strchr(from, '@')!=NULL || DBGetContactSettingByte(NULL, jabberProtoName, "ShowTransport", TRUE)==TRUE) {
@@ -1041,7 +1044,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 							} else if (item->status == ID_STATUS_OFFLINE && tlenOptions.enableAvatars) {
 								JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_hash</avatar></message>", from);
 							}
-							if (item->status == ID_STATUS_OFFLINE && tlenOptions.enableVersion) {
+							if (laststatus == ID_STATUS_OFFLINE && tlenOptions.enableVersion) {
 								JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
 							}
 						}
