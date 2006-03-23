@@ -9,7 +9,7 @@ UPX = upx -9 -q --compress-icons=0
 SRC = chat/AdminWindow.cpp chat/ChatContainer.cpp chat/ChatEvent.cpp chat/ChatGroup.cpp chat/ChatRoom.cpp chat/ChatUser.cpp chat/ChatWindow.cpp chat/FontList.cpp chat/HelperDialog.cpp chat/ManagerWindow.cpp chat/mucc.cpp chat/Options.cpp chat/mucc_services.cpp chat/Utils.cpp
 RES  = chat/mucc.res
 OBJ = $(SRC:.cpp=.o) $(RES)
-BIN  = tlen_chat.dll
+BIN  = mucc.dll
 INCS =  -I"../../include"
 CFLAGS = $(INCS) -DBUILDING_DLL=1 -fno-exceptions -fexpensive-optimizations -O3 -Os -Wno-error -Wall
 CXXFLAGS = $(INCS) -DBUILDING_DLL=1 -fno-exceptions -fno-rtti -fexpensive-optimizations -O3 -Os -Wno-error -Wall

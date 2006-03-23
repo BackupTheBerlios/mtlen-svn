@@ -639,11 +639,14 @@ int ChatWindow::getDefaultOptions() {
 void ChatWindow::clearLog() {
 	if (getHWNDLog()!=NULL) {
 		IEVIEWEVENT iee;
-		iee.cbSize = sizeof(IEVIEWEVENT);
+		ZeroMemory(&iee, sizeof(iee));
+		iee.cbSize = sizeof(iee);
+		iee.iType = IEE_CLEAR_LOG;
 		iee.dwFlags = IEEF_NO_UNICODE;
 		iee.hwnd = hWndLog;
 		iee.hContact = NULL;
-		iee.iType = IEE_CLEAR_LOG;
+		iee.codepage = CP_ACP;
+		iee.pszProto = getModule();
 		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
 	} else {
 		SetDlgItemText(getHWND(), IDC_LOG, "");
@@ -657,11 +660,14 @@ void ChatWindow::rebuildLog() {
 	HWND hwndLog;
 	if (getHWNDLog()!=NULL) {
 		IEVIEWEVENT iee;
-		iee.cbSize = sizeof(IEVIEWEVENT);
+		ZeroMemory(&iee, sizeof(iee));
+		iee.cbSize = sizeof(iee);
+		iee.iType = IEE_CLEAR_LOG;
 		iee.dwFlags = IEEF_NO_UNICODE;
 		iee.hwnd = hWndLog;
 		iee.hContact = NULL;
-		iee.iType = IEE_CLEAR_LOG;
+		iee.codepage = CP_ACP;
+		iee.pszProto = getModule();
 		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
 	} else {
 		SetDlgItemText(getHWND(), IDC_LOG, "");
@@ -820,26 +826,28 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 		IEVIEWEVENTDATA ied;
 		IEVIEWEVENT iee;
 		IEVIEWWINDOW iew;
-		iee.cbSize = sizeof(IEVIEWEVENT);
+		ZeroMemory(&iee, sizeof(iee));
+		iee.cbSize = sizeof(iee);
 		iee.dwFlags = IEEF_NO_UNICODE;
 		iee.hwnd = hWndLog;
 		iee.hContact = NULL;
-		iee.iType = IEE_LOG_EVENTS;
+		iee.iType = IEE_LOG_MEM_EVENTS;
 		iee.codepage = CP_ACP;
-		iee.hDbEventFirst = &ied;
+		iee.pszProto = getModule();
+		iee.eventData = &ied;
 		iee.count = 1;
 
 		ied.cbSize = sizeof(IEVIEWEVENTDATA);
 		if (event->iType==MUCC_EVENT_MESSAGE) {
-			ied.iType = IEED_EVENT_MESSAGE;
+			ied.iType = IEED_MUCC_EVENT_MESSAGE;
 		} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_ONLINE) {
-			ied.iType = IEED_EVENT_JOINED;
+			ied.iType = IEED_MUCC_EVENT_JOINED;
 		} else if (event->iType==MUCC_EVENT_STATUS && event->dwData==ID_STATUS_OFFLINE) {
-			ied.iType = IEED_EVENT_LEFT;
+			ied.iType = IEED_MUCC_EVENT_LEFT;
 		} else if (event->iType==MUCC_EVENT_TOPIC) {
-			ied.iType = IEED_EVENT_TOPIC;
+			ied.iType = IEED_MUCC_EVENT_TOPIC;
 		} else if (event->iType==MUCC_EVENT_ERROR) {
-			ied.iType = IEED_EVENT_ERROR;
+			ied.iType = IEED_MUCC_EVENT_ERROR;
 		}
 		ied.dwFlags = getOptions() & FLAG_FORMAT_ALL;
 		ied.next = NULL;
@@ -848,7 +856,6 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 		ied.fontSize = event->iFontSize;
 		ied.fontStyle = event->dwFlags;
 		ied.fontName = getFontName(event->iFont);
-		ied.pszProto = getModule();
 		ied.pszNick = event->pszNick;
 		ied.pszText = event->pszText;
 		ied.time = event->time;
@@ -1601,7 +1608,8 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 							case ID_ADMINMENU_SAVELOG:
 								if (chatWindow->getHWNDLog()!=NULL) {
 									IEVIEWEVENT iee;
-									iee.cbSize = sizeof(IEVIEWEVENT);
+									ZeroMemory(&iee, sizeof(iee));
+									iee.cbSize = sizeof(iee);
 									iee.dwFlags = 0;
 									iee.hwnd = chatWindow->getHWNDLog();
 									iee.hContact = NULL;

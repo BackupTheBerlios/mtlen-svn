@@ -748,8 +748,9 @@ time_t  TlenTimeToUTC(time_t time) {
 	if ( (timestamp->tm_mon > 2 && timestamp->tm_mon < 9) ||
 		 (timestamp->tm_mon == 2 && timestamp->tm_mday - timestamp->tm_wday >= 25) ||
 		 (timestamp->tm_mon == 9 && timestamp->tm_mday - timestamp->tm_wday < 25)) {
+		time -= 3600;
 	} else {
-		time += 3600;
+		//time += 3600;
 	}
 	return time;
 }
