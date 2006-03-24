@@ -191,24 +191,7 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 			jabberOnline = TRUE;
 			JabberLog("Status changed via THREADSTART");
 			oldStatus = jabberStatus;
-			switch (jabberDesiredStatus) {
-			case ID_STATUS_ONLINE:
-			case ID_STATUS_NA:
-			case ID_STATUS_FREECHAT:
-			case ID_STATUS_INVISIBLE:
-				jabberStatus = jabberDesiredStatus;
-				break;
-			case ID_STATUS_AWAY:
-			case ID_STATUS_ONTHEPHONE:
-			case ID_STATUS_OUTTOLUNCH:
-				jabberStatus = ID_STATUS_AWAY;
-				break;
-			case ID_STATUS_DND:
-			case ID_STATUS_OCCUPIED:
-				jabberStatus = ID_STATUS_DND;
-				break;
-			}
-			JabberSendPresence(jabberStatus);
+			JabberSendPresence(jabberDesiredStatus);
 			ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, jabberStatus);
 			//////////////////////////////////
 		}

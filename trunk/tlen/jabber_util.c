@@ -971,13 +971,42 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 void JabberSendPresence(int status)
 {
 //	if ( JGetByte( "EnableAvatars", TRUE ))
-	if (tlenOptions.enableAvatars) {
+	int oldStatus = jabberStatus;
+	switch (status) {
+		case ID_STATUS_ONLINE:
+		case ID_STATUS_OFFLINE:
+		case ID_STATUS_NA:
+		case ID_STATUS_FREECHAT:
+		case ID_STATUS_INVISIBLE:
+			status = status;
+			break;
+		case ID_STATUS_AWAY:
+		case ID_STATUS_ONTHEPHONE:
+		case ID_STATUS_OUTTOLUNCH:
+		default:
+			status = ID_STATUS_AWAY;
+			break;
+		case ID_STATUS_DND:
+		case ID_STATUS_OCCUPIED:
+			status = ID_STATUS_DND;
+			break;
+	}
+	jabberStatus = status; 
+	if (tlenOptions.enableVersion && status != ID_STATUS_INVISIBLE && status != ID_STATUS_OFFLINE) {
+		if (oldStatus == ID_STATUS_INVISIBLE || oldStatus == ID_STATUS_OFFLINE) {
+
+		}
+	}
+	if (tlenOptions.enableAvatars && status != ID_STATUS_INVISIBLE && status != ID_STATUS_OFFLINE) {
 		if (userAvatarHash != NULL) {
 			char hash[256];
 			mir_snprintf(hash, sizeof hash, "<avatar type='hash'>%s</avatar>", userAvatarHash);
 			JabberSendPresenceTo(status, NULL, hash);
 		} else {
 			JabberSendPresenceTo(status, NULL, "<avatar type='request'>remove_avatar</avatar>");
+		}
+		if (oldStatus == ID_STATUS_INVISIBLE || oldStatus == ID_STATUS_OFFLINE) {
+
 		}
 		return;
 	}

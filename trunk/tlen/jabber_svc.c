@@ -410,27 +410,8 @@ int JabberSetStatus(WPARAM wParam, LPARAM lParam)
 		else {
 			// change status
 			oldStatus = jabberStatus;
-			switch (desiredStatus) {
-			case ID_STATUS_ONLINE:
-			case ID_STATUS_NA:
-			case ID_STATUS_FREECHAT:
-			case ID_STATUS_INVISIBLE:
-				jabberStatus = desiredStatus;
-				break;
-			case ID_STATUS_AWAY:
-			case ID_STATUS_ONTHEPHONE:
-			case ID_STATUS_OUTTOLUNCH:
-				jabberStatus = ID_STATUS_AWAY;
-				break;
-			case ID_STATUS_DND:
-			case ID_STATUS_OCCUPIED:
-				jabberStatus = ID_STATUS_DND;
-				break;
-			default:
-				return 1;
-			}
 			// send presence update
-			JabberSendPresence(jabberStatus);
+			JabberSendPresence(desiredStatus);
 			ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, jabberStatus);
 		}
 	}
@@ -681,8 +662,9 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 				return GAIR_SUCCESS;
 	}	}	}
 */
-	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline && jabberStatus != ID_STATUS_INVISIBLE && !item->newAvatarDownload) {
+	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline && jabberStatus != ID_STATUS_INVISIBLE && !item->newAvatarDownloading) {
 		/* get avatar */
+		item->newAvatarDownloading = TRUE;
 		JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_file</avatar></message>", item->jid);
 		return GAIR_WAITFOR;
 	}

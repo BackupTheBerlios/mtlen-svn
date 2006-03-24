@@ -324,7 +324,7 @@ int JabberGetPictureType(const char* buf);
 time_t JabberIsoToUnixTime(char *stamp);
 time_t TlenTimeToUTC(time_t time);
 void JabberSendPresenceTo(int status, char *to, char *extra);
-void JabberSendPresence();
+void JabberSendPresence(int status);
 void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 char *JabberGetClientJID(char *jid);
 // jabber_misc.c

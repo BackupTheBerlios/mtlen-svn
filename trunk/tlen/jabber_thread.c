@@ -724,14 +724,17 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 								free( buffer );
 							} else if (!strcmp(avatarText, "remove_avatar")) {
 								/* remove contact's avatar*/
-								if (item->newAvatarHash != NULL) free (item->newAvatarHash);
-								if (item->avatarHash != NULL) free (item->avatarHash);
-								item->newAvatarHash = NULL;
-								item->avatarHash = NULL;
-								DBDeleteContactSetting(hContact, jabberProtoName, "AvatarHash");
-								DBDeleteContactSetting(hContact, jabberProtoName, "AvatarFormat");
-								DBDeleteContactSetting(hContact, "ContactPhoto", "File");
-								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
+								if (item->newAvatarHash != NULL) {
+									if (item->newAvatarHash != NULL) free (item->newAvatarHash);
+									if (item->avatarHash != NULL) free (item->avatarHash);
+									item->newAvatarHash = NULL;
+									item->avatarHash = NULL;
+									item->newAvatarDownloading = FALSE;
+									DBDeleteContactSetting(hContact, jabberProtoName, "AvatarHash");
+									DBDeleteContactSetting(hContact, jabberProtoName, "AvatarFormat");
+									DBDeleteContactSetting(hContact, "ContactPhoto", "File");
+									ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
+								}
 							}
 						} else if (!strcmp(avatarType, "hash")) {
 							/* contact's avatar hash*/
@@ -742,7 +745,7 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 							if (refresh && item->newAvatarHash==NULL || strcmp(item->avatarHash, avatarText)) {
 								if (item->newAvatarHash != NULL) free (item->newAvatarHash);
 								item->newAvatarHash = strdup(avatarText);
-								item->newAvatarDownload = FALSE;
+								item->newAvatarDownloading = FALSE;
 								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
 								JabberLog( "Avatar was changed" );
 							}
@@ -771,6 +774,7 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 								item->avatarFormat = AI.format;
 								if (item->avatarHash != NULL) free (item->avatarHash);
 								item->avatarHash = strdup(item->newAvatarHash);
+								item->newAvatarDownloading = FALSE;
 								TlenGetAvatarFileName(item, AI.filename, sizeof AI.filename);
 								DBWriteContactSettingString( hContact, "ContactPhoto", "File", AI.filename );
 								DBWriteContactSettingString(hContact, jabberProtoName, "AvatarHash",  item->avatarHash);
