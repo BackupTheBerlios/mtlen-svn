@@ -537,6 +537,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
+#ifdef __MINGW32__
 IDI_CHAT                ICON    DISCARDABLE     "chat\\icos\\chat.ico"
 IDI_BLANK               ICON    DISCARDABLE     "chat\\icos\\blank.ico"
 IDI_ITALIC              ICON    DISCARDABLE     "chat\\icos\\italic.ico"
@@ -557,6 +558,28 @@ IDI_INVITE              ICON    DISCARDABLE     "chat\\icos\\invite.ico"
 IDI_ADMINISTRATION      ICON    DISCARDABLE     "chat\\icos\\administration.ico"
 IDI_SMILEY				ICON    DISCARDABLE     "chat\\icos\\smile.ico"
 IDI_MESSAGE				ICON    DISCARDABLE     "chat\\icos\\message.ico"
+#else
+IDI_CHAT                ICON    DISCARDABLE     "icos\\chat.ico"
+IDI_BLANK               ICON    DISCARDABLE     "icos\\blank.ico"
+IDI_ITALIC              ICON    DISCARDABLE     "icos\\italic.ico"
+IDI_BOLD                ICON    DISCARDABLE     "icos\\bold.ico"
+IDI_UNDERLINE           ICON    DISCARDABLE     "icos\\underline.ico"
+IDI_OPTIONS             ICON    DISCARDABLE     "icos\\options.ico"
+IDI_OWNER               ICON    DISCARDABLE     "icos\\owner.ico"
+IDI_GLOBALOWNER         ICON    DISCARDABLE     "icos\\glowner.ico"
+IDI_ADMIN               ICON    DISCARDABLE     "icos\\admin.ico"
+IDI_REGISTERED          ICON    DISCARDABLE     "icos\\registered.ico"
+IDI_R_MODERATED         ICON    DISCARDABLE     "icos\\r_mod.ico"
+IDI_R_MEMBERS           ICON    DISCARDABLE     "icos\\r_memb.ico"
+IDI_R_ANONYMOUS         ICON    DISCARDABLE     "icos\\r_anon.ico"
+IDI_SEARCH              ICON    DISCARDABLE     "icos\\search.ico"
+IDI_PREV                ICON    DISCARDABLE     "icos\\prev.ico"
+IDI_NEXT                ICON    DISCARDABLE     "icos\\next.ico"
+IDI_INVITE              ICON    DISCARDABLE     "icos\\invite.ico"
+IDI_ADMINISTRATION      ICON    DISCARDABLE     "icos\\administration.ico"
+IDI_SMILEY				ICON    DISCARDABLE     "icos\\smile.ico"
+IDI_MESSAGE				ICON    DISCARDABLE     "icos\\message.ico"
+#endif
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

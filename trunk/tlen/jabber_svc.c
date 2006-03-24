@@ -681,7 +681,7 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 				return GAIR_SUCCESS;
 	}	}	}
 */
-	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline && jabberStatus != ID_STATUS_INVISIBLE) {
+	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline && jabberStatus != ID_STATUS_INVISIBLE && !item->newAvatarDownload) {
 		/* get avatar */
 		JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_file</avatar></message>", item->jid);
 		return GAIR_WAITFOR;

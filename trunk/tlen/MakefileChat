@@ -16,7 +16,7 @@ CXXFLAGS = $(INCS) -DBUILDING_DLL=1 -fno-exceptions -fno-rtti -fexpensive-optimi
 # -save-temps
 LIBS =  -lversion -lwsock32 -lole32 -lcomctl32
 LFLAGS = -s -mdll -mwindows --no-export-all-symbols --add-stdcall-alias
-RCFLAGS = -I rc -O coff
+RCFLAGS = -O coff
 # --no-export-all-symbols --add-stdcall-alias
 
 .PHONY: all all-before all-after clean clean-custom

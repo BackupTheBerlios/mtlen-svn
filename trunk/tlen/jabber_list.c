@@ -82,10 +82,6 @@ static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item)
 	if (item->nick) free(item->nick);
 	if (item->statusMessage) free(item->statusMessage);
 	if (item->group) free(item->group);
-	if (item->photoFileName) {
-		DeleteFile(item->photoFileName);
-		free(item->photoFileName);
-	}
 	if (item->messageEventIdStr) free(item->messageEventIdStr);
 //	if (item->type) free(item->type);
 	//if (item->ft) JabberFileFreeFt(item->ft); // No need to free (it is always free when exit from JabberFileServerThread())
@@ -151,7 +147,6 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 	item->status = ID_STATUS_OFFLINE;
 	item->statusMessage = NULL;
 	item->group = NULL;
-	item->photoFileName = NULL;
 	item->messageEventIdStr = NULL;
 	item->wantComposingEvent = FALSE;
 	item->isTyping = FALSE;
@@ -164,6 +159,7 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 	item->avatarHash = NULL;
 	item->newAvatarHash = NULL;
 	item->avatarFormat = PA_FORMAT_UNKNOWN;
+	item->newAvatarDownload = FALSE;
 	count++;
 	LeaveCriticalSection(&csLists);
 

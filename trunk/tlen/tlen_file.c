@@ -279,16 +279,16 @@ static void __cdecl TlenFileBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
 	BYTE buf[8];
 	int status;
 
-	JabberLog("Waiting for the file to be sent via SOCKS...");
+//	JabberLog("Waiting for the file to be sent via SOCKS...");
 	status = Netlib_Recv(ft->s, buf, 8, MSG_NODUMP);
-	JabberLog("accepted connection !!!");
+//	JabberLog("accepted connection !!!");
 	if ( status == SOCKET_ERROR || status<8 || buf[1]!=90) {
 		status = 1;
 	} else {
 		status = 0;
 	}
 	if (!status) {
-		JabberLog("Entering recv loop for this file connection... (ft->s is hConnection)");
+//		JabberLog("Entering recv loop for this file connection... (ft->s is hConnection)");
 		if (TlenFileEstablishIncomingConnection(ft->s)!=NULL) {
 			while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
 				if (ft->mode == FT_SEND) {
@@ -320,7 +320,7 @@ static JABBER_SOCKET TlenFileBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	struct in_addr in;
 	NETLIBOPENCONNECTION nloc;
 	JABBER_SOCKET s;
-	JabberLog("connecting to SOCK4 proxy...%s:%d", sb->szHost, sb->wPort);
+//	JabberLog("connecting to SOCK4 proxy...%s:%d", sb->szHost, sb->wPort);
 
 	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
 	nloc.szHost = sb->szHost;
@@ -328,7 +328,7 @@ static JABBER_SOCKET TlenFileBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	nloc.flags = 0;
 	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hFileNetlibUser, (LPARAM) &nloc);
 	if (s==NULL) {
-		JabberLog("Connection failed (%d), thread ended", WSAGetLastError());
+//		JabberLog("Connection failed (%d), thread ended", WSAGetLastError());
 		return NULL;
 	}
 	buf[0] = 4;  //socks4
@@ -345,19 +345,19 @@ static JABBER_SOCKET TlenFileBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	len += 9;
 	status = Netlib_Send(s, buf, len, MSG_NODUMP);
 	if (status==SOCKET_ERROR || status<len) {
-		JabberLog("Send failed (%d), thread ended", WSAGetLastError());
+//		JabberLog("Send failed (%d), thread ended", WSAGetLastError());
 		Netlib_CloseHandle(s);
 		return NULL;
 	}
 	status = Netlib_Recv(s, buf, 8, MSG_NODUMP);
 	if (status==SOCKET_ERROR || status<8 || buf[1]!=90) {
-		JabberLog("SOCKS4 negotiation failed");
+//		JabberLog("SOCKS4 negotiation failed");
 		Netlib_CloseHandle(s);
 		return NULL;
 	}
 	status = Netlib_Recv(s, buf, sizeof(buf), MSG_NODUMP);
 	if ( status == SOCKET_ERROR || status<7 || buf[0]!=5 || buf[1]!=0) {
-		JabberLog("SOCKS5 request failed");
+//		JabberLog("SOCKS5 request failed");
 		Netlib_CloseHandle(s);
 		return NULL;
 	}
@@ -374,9 +374,9 @@ static void __cdecl TlenFileBindSocks5Thread(TLEN_FILE_TRANSFER* ft)
 	BYTE buf[256];
 	int status;
 
-	JabberLog("Waiting for the file to be sent via SOCKS...");
+//	JabberLog("Waiting for the file to be sent via SOCKS...");
 	status = Netlib_Recv(ft->s, buf, sizeof(buf), MSG_NODUMP);
-	JabberLog("accepted connection !!!");
+//	JabberLog("accepted connection !!!");
 	if ( status == SOCKET_ERROR || status<7 || buf[1]!=0) {
 		status = 1;
 	} else {
@@ -401,7 +401,7 @@ static void __cdecl TlenFileBindSocks5Thread(TLEN_FILE_TRANSFER* ft)
 		if (ft->state!=FT_SWITCH) 
 			ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	}
-	JabberLog("Closing connection for this file transfer...");
+//	JabberLog("Closing connection for this file transfer...");
 //	Netlib_CloseHandle(ft->s);
 	if (ft->hFileEvent != NULL)
 		SetEvent(ft->hFileEvent);
@@ -416,7 +416,7 @@ static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	struct in_addr in;
 	JABBER_SOCKET s;
 
-	JabberLog("connecting to SOCK5 proxy...%s:%d", sb->szHost, sb->wPort);
+//	JabberLog("connecting to SOCK5 proxy...%s:%d", sb->szHost, sb->wPort);
 
 	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
 	nloc.szHost = sb->szHost;
@@ -482,14 +482,14 @@ static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 		status = Netlib_Send(s, pInit, 6+nHostLen, MSG_NODUMP);
 		free(pInit);
 		if (status==SOCKET_ERROR || status<6+nHostLen) {
-			JabberLog("Send failed (%d), thread ended", WSAGetLastError());
+//			JabberLog("Send failed (%d), thread ended", WSAGetLastError());
 			Netlib_CloseHandle(s);
 			return NULL;
 		}
 	}
 	status = Netlib_Recv(s, buf, sizeof(buf), MSG_NODUMP);
 	if ( status == SOCKET_ERROR || status<7 || buf[0]!=5 || buf[1]!=0) {
-		JabberLog("SOCKS5 request failed");
+//		JabberLog("SOCKS5 request failed");
 		Netlib_CloseHandle(s);
 		return NULL;
 	}

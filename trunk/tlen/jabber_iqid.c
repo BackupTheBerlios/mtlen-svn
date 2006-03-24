@@ -139,7 +139,6 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 								DBFreeVariant(&dbv);
 							}
 							item->avatarFormat = DBGetContactSettingDword(hContact, jabberProtoName, "AvatarFormat", PA_FORMAT_UNKNOWN);
-							JabberLog("Adding contact to roster: %s (%s) %d", item->jid, item->group, item->subscription);
 						}
 					}
 				}

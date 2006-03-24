@@ -739,9 +739,10 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 							if (item->avatarHash != NULL && !strcmp(item->avatarHash, avatarText)) {
 								refresh = 0;
 							}
-							if (refresh) {
+							if (refresh && item->newAvatarHash==NULL || strcmp(item->avatarHash, avatarText)) {
 								if (item->newAvatarHash != NULL) free (item->newAvatarHash);
 								item->newAvatarHash = strdup(avatarText);
+								item->newAvatarDownload = FALSE;
 								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
 								JabberLog( "Avatar was changed" );
 							}
@@ -1041,7 +1042,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 						if (jabberStatus != ID_STATUS_INVISIBLE) {
 							if (JabberXmlGetChild(node, "avatar")!=NULL) {
 								TlenProcessTAvatar(node, userdata);
-							} else if (item->status == ID_STATUS_OFFLINE && tlenOptions.enableAvatars) {
+							} else if (laststatus == ID_STATUS_OFFLINE && tlenOptions.enableAvatars) {
 								JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_hash</avatar></message>", from);
 							}
 							if (laststatus == ID_STATUS_OFFLINE && tlenOptions.enableVersion) {
