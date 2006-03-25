@@ -36,8 +36,8 @@ static int PreShutdown(WPARAM wParam, LPARAM lParam);
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
 	"MUCC Plugin",
-	PLUGIN_MAKE_VERSION(1,0,7,1),
-	"Group chats GUI plugin for Miranda IM (1.0.7.1 "__DATE__")",
+	PLUGIN_MAKE_VERSION(1,0,7,2),
+	"Group chats GUI plugin for Miranda IM (1.0.7.2 "__DATE__")",
 	"Piotr Piastucki",
 	"the_leech@users.berlios.de",
 	"(c) 2004-2005 Piotr Piastucki",
