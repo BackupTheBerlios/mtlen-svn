@@ -188,8 +188,6 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			int i;
 			JABBER_LIST_ITEM *item;
 
-			JabberLog("refresh");
-
 			SetDlgItemText(hwndDlg, IDC_INFO_JID, "");
 			SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, "");
 			SetFocus(GetDlgItem(hwndDlg, IDC_STATIC));
@@ -322,7 +320,6 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			JabberStringAppend(&str, &strSize, "<g>%d</g>", IsDlgButtonChecked(hwndDlg, IDC_VOICECONVERSATIONS) ? 1 : 0);
 			JabberStringAppend(&str, &strSize, "<v>%d</v>", IsDlgButtonChecked(hwndDlg, IDC_PUBLICSTATUS) ? 1 : 0);
 			JabberStringAppend(&str, &strSize, "</query></iq>");
-			JabberLog(str);
 			JabberSend(jabberThreadInfo->s, "%s", str);
 			free(str);
 			JabberGetInfo(0, (LPARAM) &ccs);

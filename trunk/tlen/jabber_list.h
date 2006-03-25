@@ -58,6 +58,8 @@ typedef struct {
 	char *avatarHash;
 	char *newAvatarHash;
 	BOOL newAvatarDownloading;
+	BOOL avatarRequested;
+	BOOL versionRequested;
 	int idMsgAckPending;
 	char *messageEventIdStr;
 	BOOL wantComposingEvent;

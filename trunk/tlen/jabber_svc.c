@@ -645,6 +645,7 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 	if (newAvatarHash == NULL) {
 		return GAIR_NOAVATAR;
 	}
+	JabberLog("%s ?= %s", item->newAvatarHash, item->avatarHash);
 	TlenGetAvatarFileName(item, AI->filename, sizeof AI->filename);
 	AI->format = ( AI->hContact == NULL ) ? userAvatarFormat : item->avatarFormat;
 	{
@@ -742,7 +743,6 @@ int JabberFileCancel(WPARAM wParam, LPARAM lParam)
 
 	JabberLog("Invoking FileCancel()");
 	if (ft->s) {
-		JabberLog("FT canceled");
 		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 		JabberLog("Closing ft->s = %d", ft->s);
 		ft->state = FT_ERROR;

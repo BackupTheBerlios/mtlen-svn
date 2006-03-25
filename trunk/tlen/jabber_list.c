@@ -160,6 +160,8 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 	item->newAvatarHash = NULL;
 	item->avatarFormat = PA_FORMAT_UNKNOWN;
 	item->newAvatarDownloading = FALSE;
+	item->avatarRequested = FALSE;
+	item->versionRequested = FALSE;
 	count++;
 	LeaveCriticalSection(&csLists);
 

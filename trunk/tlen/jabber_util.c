@@ -992,11 +992,6 @@ void JabberSendPresence(int status)
 			break;
 	}
 	jabberStatus = status; 
-	if (tlenOptions.enableVersion && status != ID_STATUS_INVISIBLE && status != ID_STATUS_OFFLINE) {
-		if (oldStatus == ID_STATUS_INVISIBLE || oldStatus == ID_STATUS_OFFLINE) {
-
-		}
-	}
 	if (tlenOptions.enableAvatars && status != ID_STATUS_INVISIBLE && status != ID_STATUS_OFFLINE) {
 		if (userAvatarHash != NULL) {
 			char hash[256];
@@ -1005,13 +1000,30 @@ void JabberSendPresence(int status)
 		} else {
 			JabberSendPresenceTo(status, NULL, "<avatar type='request'>remove_avatar</avatar>");
 		}
-		if (oldStatus == ID_STATUS_INVISIBLE || oldStatus == ID_STATUS_OFFLINE) {
-
+		if (jabberOnline && (oldStatus == ID_STATUS_INVISIBLE || oldStatus == ID_STATUS_OFFLINE)) {
+			int i = 0;
+			while ((i=JabberListFindNext(LIST_ROSTER, i)) >= 0) {
+				JABBER_LIST_ITEM *item;
+				if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
+					if (item->status != ID_STATUS_OFFLINE && item->status != ID_STATUS_INVISIBLE) {
+						if (!item->avatarRequested) {
+							item->avatarRequested = TRUE;
+							JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_hash</avatar></message>", item->jid);
+						} else if (item->newAvatarHash != NULL && (item->avatarHash == NULL || strcmp(item->newAvatarHash, item->avatarHash))) {
+							HANDLE hContact;
+							if ((hContact=JabberHContactFromJID(item->jid)) != NULL) {
+								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
+							}
+						}
+					}
+				}
+				i++;
+			}
 		}
-		return;
+	} else {
+		JabberSendPresenceTo(status, NULL, NULL);
 	}
 
-	JabberSendPresenceTo(status, NULL, NULL);
 /*
 	if (DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE)) {
 		if (status == ID_STATUS_INVISIBLE)

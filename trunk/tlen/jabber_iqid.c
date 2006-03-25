@@ -207,7 +207,7 @@ void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
 	HANDLE hContact;
 	char *nText;
 
-	JabberLog("<iq/> iqIdGetVcard (tlen)");
+//	JabberLog("<iq/> iqIdGetVcard (tlen)");
 	if ((type=JabberXmlGetAttrValue(iqNode, "type")) == NULL) return;
 
 	if (!strcmp(type, "result")) {
@@ -363,7 +363,7 @@ void JabberIqResultSetSearch(XmlNode *iqNode, void *userdata)
 	DBVARIANT dbv;
 
 	found = 0;
-	JabberLog("<iq/> iqIdGetSearch");
+//	JabberLog("<iq/> iqIdGetSearch");
 	if ((type=JabberXmlGetAttrValue(iqNode, "type")) == NULL) return;
 	if ((str=JabberXmlGetAttrValue(iqNode, "id")) == NULL) return;
 	id = atoi(str+strlen(JABBER_IQID));

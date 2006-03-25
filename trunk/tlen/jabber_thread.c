@@ -622,12 +622,12 @@ static void TlenProcessIqVersion(XmlNode* node)
 	char mversion[128];
 	char* from, *version, *mver;
 	char* os = NULL;
+	JABBER_LIST_ITEM *item;
 
 	if (jabberStatus == ID_STATUS_INVISIBLE) return;
 	if (!tlenOptions.enableVersion) return;
-	if (( from=JabberXmlGetAttrValue( node, "from" )) == NULL )
-		return;
-
+	if (( from=JabberXmlGetAttrValue( node, "from" )) == NULL ) return;
+	if (( item=JabberListGetItemPtr( LIST_ROSTER, from )) ==NULL) return;
 	version = JabberTextEncode( TLEN_VERSION_STRING );
 	osvi.dwOSVersionInfoSize = sizeof( OSVERSIONINFO );
 	if ( GetVersionEx( &osvi )) {
@@ -657,6 +657,11 @@ static void TlenProcessIqVersion(XmlNode* node)
 	CallService( MS_SYSTEM_GETVERSIONTEXT, sizeof( mversion ) - 11, ( LPARAM )mversion + 11 );
 	mver = JabberTextEncode( mversion );
 	JabberSend( jabberThreadInfo->s, "<message to='%s' type='iq'><iq type='result'><query xmlns='jabber:iq:version'><name>%s</name><version>%s</version><os>%s</os></query></iq></message>", from, mver?mver:"", version?version:"", os?os:"" );
+	if (!item->versionRequested) {
+		item->versionRequested = TRUE;
+		JabberSend(jabberThreadInfo->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from);
+	}
+
 	if ( mver ) free( mver );
 	if ( version ) free( version );
 	if ( os ) free( os );
@@ -672,128 +677,128 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 	HANDLE hContact;
 	struct _stat statbuf;
 	/* if not enabled - return */
-	if (jabberStatus == ID_STATUS_INVISIBLE) return;
+//	if (jabberStatus == ID_STATUS_INVISIBLE) return;
 	if (!tlenOptions.enableAvatars) return;
 	if ((info=(struct ThreadData *) userdata) == NULL) return;
-	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
-		if ((item = JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
-			if ((hContact=JabberHContactFromJID(from)) != NULL) {
-				XmlNode *avatarNode;
-				int i = 1;
-				while ((avatarNode=JabberXmlGetNthChild(node, "avatar", i)) != NULL) {
-					char *avatarText = avatarNode->text;
-					char *avatarType = JabberXmlGetAttrValue(avatarNode, "type");
-					if (avatarType != NULL) {
-						if (!strcmp(avatarType, "request")) {
-							if (!strcmp(avatarText, "get_hash")) {
-								/* send avatar hash */
-								if (userAvatarHash == NULL) {
-									JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='request'>remove_avatar</avatar></message>", from);
-								} else {
-									JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='hash'>%s</avatar></message>", from, userAvatarHash);
-								}
-							} else if (!strcmp(avatarText, "get_file")) {
-								/* send avatar file */
-								FILE* in;
-								char szFileName[ MAX_PATH ];
-								char* szMimeType, * buffer, *str;
-								long bytes;
-								switch(userAvatarFormat) {
-									case PA_FORMAT_JPEG: szMimeType = "image/jpeg";   break;
-									case PA_FORMAT_GIF:	 szMimeType = "image/gif";    break;
-									case PA_FORMAT_PNG:	 szMimeType = "image/png";    break;
-									case PA_FORMAT_BMP:	 szMimeType = "image/bmp";    break;
-									default:	return;
-								}
-								TlenGetAvatarFileName( NULL, szFileName, MAX_PATH );
-								if (_stat(szFileName, &statbuf)) return;
-								if (statbuf.st_size > 6 * 1024) return;
-								in = fopen( szFileName, "rb" );
-								if ( in == NULL ) return;
-								bytes = filelength( fileno( in ));
-								buffer = ( char* )malloc( bytes*4/3 + bytes + 1000 );
-								if ( buffer == NULL ) {
-									fclose( in );
-									return;
-								}
-								fread( buffer, bytes, 1, in );
-								fclose( in );
-								str = JabberBase64Encode(buffer, bytes);
-								JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='file' mimetype='%s'>%s</avatar></message>", from, szMimeType, str);
-								free( str );
-								free( buffer );
-							} else if (!strcmp(avatarText, "remove_avatar")) {
-								/* remove contact's avatar*/
-								if (item->newAvatarHash != NULL) {
-									if (item->newAvatarHash != NULL) free (item->newAvatarHash);
-									if (item->avatarHash != NULL) free (item->avatarHash);
-									item->newAvatarHash = NULL;
-									item->avatarHash = NULL;
-									item->newAvatarDownloading = FALSE;
-									DBDeleteContactSetting(hContact, jabberProtoName, "AvatarHash");
-									DBDeleteContactSetting(hContact, jabberProtoName, "AvatarFormat");
-									DBDeleteContactSetting(hContact, "ContactPhoto", "File");
-									ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
-								}
-							}
-						} else if (!strcmp(avatarType, "hash")) {
-							/* contact's avatar hash*/
-							int refresh = 1;
-							if (item->avatarHash != NULL && !strcmp(item->avatarHash, avatarText)) {
-								refresh = 0;
-							}
-							if (refresh && item->newAvatarHash==NULL || strcmp(item->avatarHash, avatarText)) {
-								if (item->newAvatarHash != NULL) free (item->newAvatarHash);
-								item->newAvatarHash = strdup(avatarText);
-								item->newAvatarDownloading = FALSE;
-								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
-								JabberLog( "Avatar was changed" );
-							}
-						} else if (!strcmp(avatarType, "file")) {
-							if (item->newAvatarHash != NULL) {
-								/* contact's avatar*/
-								FILE* out;
-								int resultLen = 0;
-								char* data;
-								char* mimeType = JabberXmlGetAttrValue( avatarNode, "mimetype" );
-								PROTO_AVATAR_INFORMATION AI;
-								AI.cbSize = sizeof AI;
-								AI.hContact = hContact;
-								AI.format = PA_FORMAT_UNKNOWN;
-								data = JabberBase64Decode(avatarText, &resultLen);
-								if ( mimeType != NULL ) {
-									if ( !strcmp( mimeType, "image/jpeg" ))     AI.format = PA_FORMAT_JPEG;
-									else if ( !strcmp( mimeType, "image/png" )) AI.format = PA_FORMAT_PNG;
-									else if ( !strcmp( mimeType, "image/gif" )) AI.format = PA_FORMAT_GIF;
-									else if ( !strcmp( mimeType, "image/bmp" )) AI.format = PA_FORMAT_BMP;
-									else if ( !strcmp( mimeType, "image/ico" )) AI.format = PA_FORMAT_ICON;
-									else if ( !strcmp( mimeType, "image/jpg" )) AI.format = PA_FORMAT_JPEG;
-								} else if (resultLen > 4) {
-									AI.format = JabberGetPictureType(data);
-								}
-								item->avatarFormat = AI.format;
-								if (item->avatarHash != NULL) free (item->avatarHash);
-								item->avatarHash = strdup(item->newAvatarHash);
-								item->newAvatarDownloading = FALSE;
-								TlenGetAvatarFileName(item, AI.filename, sizeof AI.filename);
-								DBWriteContactSettingString( hContact, "ContactPhoto", "File", AI.filename );
-								DBWriteContactSettingString(hContact, jabberProtoName, "AvatarHash",  item->avatarHash);
-								DBWriteContactSettingDword(hContact, jabberProtoName, "AvatarFormat",  item->avatarFormat);
-								DeleteFile(AI.filename);
-								out = fopen( AI.filename, "wb" );
-								if ( out != NULL ) {
-									fwrite( data, resultLen, 1, out );
-									fclose( out );
-									ProtoBroadcastAck( jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_SUCCESS, (HANDLE) &AI , 0);
-								}
-								else ProtoBroadcastAck( jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_FAILED, (HANDLE) &AI , 0);
-								free(data);
-							}
-						} 
+	if ((from=JabberXmlGetAttrValue(node, "from")) == NULL)  return;
+	if ((item = JabberListGetItemPtr(LIST_ROSTER, from)) == NULL) return;
+	if ((hContact=JabberHContactFromJID(from)) != NULL) {
+		XmlNode *avatarNode;
+		int i = 1;
+		while ((avatarNode=JabberXmlGetNthChild(node, "avatar", i)) != NULL) {
+			char *avatarText = avatarNode->text;
+			char *avatarType = JabberXmlGetAttrValue(avatarNode, "type");
+			if (avatarType != NULL) {
+				if (!strcmp(avatarType, "request")) {
+					if (jabberStatus != ID_STATUS_INVISIBLE && !strcmp(avatarText, "get_hash")) {
+						/* send avatar hash */
+						if (userAvatarHash == NULL) {
+							JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='request'>remove_avatar</avatar></message>", from);
+						} else {
+							JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='hash'>%s</avatar></message>", from, userAvatarHash);
+						}
+					} else if (jabberStatus != ID_STATUS_INVISIBLE && !strcmp(avatarText, "get_file")) {
+						/* send avatar file */
+						FILE* in;
+						char szFileName[ MAX_PATH ];
+						char* szMimeType, * buffer, *str;
+						long bytes;
+						switch(userAvatarFormat) {
+							case PA_FORMAT_JPEG: szMimeType = "image/jpeg";   break;
+							case PA_FORMAT_GIF:	 szMimeType = "image/gif";    break;
+							case PA_FORMAT_PNG:	 szMimeType = "image/png";    break;
+							case PA_FORMAT_BMP:	 szMimeType = "image/bmp";    break;
+							default:	return;
+						}
+						TlenGetAvatarFileName( NULL, szFileName, MAX_PATH );
+						if (_stat(szFileName, &statbuf)) return;
+						if (statbuf.st_size > 6 * 1024) return;
+						in = fopen( szFileName, "rb" );
+						if ( in == NULL ) return;
+						bytes = filelength( fileno( in ));
+						buffer = ( char* )malloc( bytes*4/3 + bytes + 1000 );
+						if ( buffer == NULL ) {
+							fclose( in );
+							return;
+						}
+						fread( buffer, bytes, 1, in );
+						fclose( in );
+						str = JabberBase64Encode(buffer, bytes);
+						JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='file' mimetype='%s'>%s</avatar></message>", from, szMimeType, str);
+						free( str );
+						free( buffer );
+					} else if (!strcmp(avatarText, "remove_avatar")) {
+						/* remove contact's avatar*/
+						if (item->newAvatarHash != NULL) {
+							if (item->newAvatarHash != NULL) free (item->newAvatarHash);
+							if (item->avatarHash != NULL) free (item->avatarHash);
+							item->newAvatarHash = NULL;
+							item->avatarHash = NULL;
+							item->newAvatarDownloading = FALSE;
+							item->avatarRequested = TRUE;
+							DBDeleteContactSetting(hContact, jabberProtoName, "AvatarHash");
+							DBDeleteContactSetting(hContact, jabberProtoName, "AvatarFormat");
+							DBDeleteContactSetting(hContact, "ContactPhoto", "File");
+							ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
+						}
 					}
-					i++;
-				}
+				} else if (!strcmp(avatarType, "hash")) {
+					/* contact's avatar hash*/
+					if (item->newAvatarHash == NULL || strcmp(item->newAvatarHash, avatarText)) {
+						if (item->newAvatarHash != NULL) free (item->newAvatarHash);
+						item->newAvatarHash = strdup(avatarText);
+						item->newAvatarDownloading = FALSE;
+						item->avatarRequested = TRUE;
+						if (jabberStatus != ID_STATUS_INVISIBLE) {
+							ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
+							JabberLog( "Avatar was changed - sent ack" );
+						} else {
+							JabberLog( "Avatar was changed - no ack" );
+						}
+					}
+				} else if (!strcmp(avatarType, "file")) {
+					if (item->newAvatarHash != NULL) {
+						/* contact's avatar*/
+						FILE* out;
+						int resultLen = 0;
+						char* data;
+						char* mimeType = JabberXmlGetAttrValue( avatarNode, "mimetype" );
+						PROTO_AVATAR_INFORMATION AI;
+						AI.cbSize = sizeof AI;
+						AI.hContact = hContact;
+						AI.format = PA_FORMAT_UNKNOWN;
+						data = JabberBase64Decode(avatarText, &resultLen);
+						if ( mimeType != NULL ) {
+							if ( !strcmp( mimeType, "image/jpeg" ))     AI.format = PA_FORMAT_JPEG;
+							else if ( !strcmp( mimeType, "image/png" )) AI.format = PA_FORMAT_PNG;
+							else if ( !strcmp( mimeType, "image/gif" )) AI.format = PA_FORMAT_GIF;
+							else if ( !strcmp( mimeType, "image/bmp" )) AI.format = PA_FORMAT_BMP;
+							else if ( !strcmp( mimeType, "image/ico" )) AI.format = PA_FORMAT_ICON;
+							else if ( !strcmp( mimeType, "image/jpg" )) AI.format = PA_FORMAT_JPEG;
+						} else if (resultLen > 4) {
+							AI.format = JabberGetPictureType(data);
+						}
+						item->avatarFormat = AI.format;
+						if (item->avatarHash != NULL) free (item->avatarHash);
+						item->avatarHash = strdup(item->newAvatarHash);
+						item->newAvatarDownloading = FALSE;
+						TlenGetAvatarFileName(item, AI.filename, sizeof AI.filename);
+						DBWriteContactSettingString( hContact, "ContactPhoto", "File", AI.filename );
+						DBWriteContactSettingString(hContact, jabberProtoName, "AvatarHash",  item->avatarHash);
+						DBWriteContactSettingDword(hContact, jabberProtoName, "AvatarFormat",  item->avatarFormat);
+						DeleteFile(AI.filename);
+						out = fopen( AI.filename, "wb" );
+						if ( out != NULL ) {
+							fwrite( data, resultLen, 1, out );
+							fclose( out );
+							ProtoBroadcastAck( jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_SUCCESS, (HANDLE) &AI , 0);
+						}
+						else ProtoBroadcastAck( jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_FAILED, (HANDLE) &AI , 0);
+						free(data);
+					}
+				} 
 			}
+			i++;
 		}
 	}
 }
@@ -1043,15 +1048,17 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 					JabberLog("%s (%s) online, set contact status to %d", nick, from, status);
 					free(nick);
 					if (item != NULL) {
-						if (jabberStatus != ID_STATUS_INVISIBLE) {
+						if (tlenOptions.enableAvatars) {
 							if (JabberXmlGetChild(node, "avatar")!=NULL) {
 								TlenProcessTAvatar(node, userdata);
-							} else if (laststatus == ID_STATUS_OFFLINE && tlenOptions.enableAvatars) {
+							} else  if (!item->avatarRequested && jabberStatus != ID_STATUS_INVISIBLE) {
 								JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_hash</avatar></message>", from);
+								item->avatarRequested = TRUE;
 							}
-							if (laststatus == ID_STATUS_OFFLINE && tlenOptions.enableVersion) {
-								JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
-							}
+						}
+						if (tlenOptions.enableVersion && !item->versionRequested && jabberStatus != ID_STATUS_INVISIBLE) {
+							item->versionRequested = TRUE;
+							JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
 						}
 					}
 				}
@@ -1084,6 +1091,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
 					// Determine status to show for the contact based on the remaining resources
 					item->status = status;
+					item->avatarRequested = FALSE;
 				}
 				if ((hContact=JabberHContactFromJID(from)) != NULL) {
 					if (strchr(from, '@')!=NULL || DBGetContactSettingByte(NULL, jabberProtoName, "ShowTransport", TRUE)==TRUE) {
