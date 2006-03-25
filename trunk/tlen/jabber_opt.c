@@ -139,6 +139,8 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			CheckDlgButton(hwndDlg, IDC_IGNORE_ADVERTISEMENTS, tlenOptions.ignoreAdvertisements);
 			CheckDlgButton(hwndDlg, IDC_AVATARS, tlenOptions.enableAvatars);
 			CheckDlgButton(hwndDlg, IDC_VERSIONINFO, tlenOptions.enableVersion);
+			CheckDlgButton(hwndDlg, IDC_NUDGE_SUPPORT, tlenOptions.useNudge);
+			CheckDlgButton(hwndDlg, IDC_LOG_ALERTS, tlenOptions.logAlerts);
 			
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all alerts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore alerts from unauthorized contacts"));
@@ -195,9 +197,11 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			break;
 		case IDC_LOG_ALERTS:
 			CheckDlgButton(hwndDlg, IDC_NUDGE_SUPPORT, BST_UNCHECKED);
+			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_NUDGE_SUPPORT:
 			CheckDlgButton(hwndDlg, IDC_LOG_ALERTS, BST_UNCHECKED);
+			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_REGISTERACCOUNT:
 		    CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) TLEN_REGISTER);

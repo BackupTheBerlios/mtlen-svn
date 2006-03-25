@@ -1091,6 +1091,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
 					// Determine status to show for the contact based on the remaining resources
 					item->status = status;
+					item->versionRequested = FALSE;
 				}
 				if ((hContact=JabberHContactFromJID(from)) != NULL) {
 					if (strchr(from, '@')!=NULL || DBGetContactSettingByte(NULL, jabberProtoName, "ShowTransport", TRUE)==TRUE) {
