@@ -1329,6 +1329,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			}
 			SetWindowPos(hwndDlg, HWND_TOP, 0, 0, 540, 370, SWP_NOMOVE | SWP_SHOWWINDOW);
 			SetFocus(GetDlgItem(hwndDlg, IDC_EDIT));
+			chatWindow->clearLog();
 			SetEvent(chatWindow->getEvent());
 			return TRUE;
 		break;
