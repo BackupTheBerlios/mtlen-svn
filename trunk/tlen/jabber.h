@@ -239,6 +239,8 @@ typedef struct {
 	int voiceChatPolicy;
 	int enableAvatars;
 	int enableVersion;
+	int useNudge;
+	int logAlerts;
 } TLEN_OPTIONS;
 
 /*******************************************************************
@@ -275,6 +277,7 @@ extern HANDLE hMenuMUC;
 extern HANDLE hMenuChats;
 extern HANDLE hMenuContactMUC;
 extern HANDLE hMenuContactVoice;
+extern HANDLE hTlenNudge;
 
 extern char *userAvatarHash;
 extern int userAvatarFormat;
@@ -326,7 +329,7 @@ time_t TlenTimeToUTC(time_t time);
 void JabberSendPresenceTo(int status, char *to, char *extra);
 void JabberSendPresence(int status);
 void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
-char *JabberGetClientJID(char *jid);
+//char *JabberGetClientJID(char *jid);
 // jabber_misc.c
 void JabberDBAddAuthRequest(char *jid, char *nick);
 HANDLE JabberDBCreateContact(char *jid, char *nick, BOOL temporary);

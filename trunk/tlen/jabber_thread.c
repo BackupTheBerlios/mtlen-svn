@@ -1091,7 +1091,6 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
 					// Determine status to show for the contact based on the remaining resources
 					item->status = status;
-					item->avatarRequested = FALSE;
 				}
 				if ((hContact=JabberHContactFromJID(from)) != NULL) {
 					if (strchr(from, '@')!=NULL || DBGetContactSettingByte(NULL, jabberProtoName, "ShowTransport", TRUE)==TRUE) {
@@ -1642,28 +1641,33 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 				}
 				else if(!strcmp(tp, "a")) {//alert was received
 					int bAlert = TRUE;
-					int alertPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0);
-					if (alertPolicy == TLEN_ALERTS_IGNORE_ALL) {
+					if (tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_ALL) {
 						bAlert = FALSE;
-					} else if (alertPolicy == TLEN_ALERTS_IGNORE_NIR) {
+					} else if (tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_NIR) {
 						if (item == NULL) bAlert = FALSE;
 						else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) bAlert = FALSE;
 					}
 					if (bAlert) {
-						CCSDATA ccs;
-						PROTORECVEVENT recv;
-						char *localMessage = strdup(Translate("An alert was received."));
-						recv.flags = 0;
-						recv.timestamp = (DWORD) time(NULL);
-						recv.szMessage = localMessage;
-						recv.lParam = 0;
-						ccs.hContact = hContact;
-						ccs.wParam = 0;
-						ccs.szProtoService = PSR_MESSAGE;
-						ccs.lParam = (LPARAM) &recv;
-						CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
-						free(localMessage);
-						SkinPlaySound("TlenAlertNotify");
+						if (tlenOptions.useNudge) {
+							NotifyEventHooks(hTlenNudge,(WPARAM) hContact,0);
+						} else {
+							if (tlenOptions.logAlerts) {
+								CCSDATA ccs;
+								PROTORECVEVENT recv;
+								char *localMessage = strdup(Translate("An alert has been received."));
+								recv.flags = 0;
+								recv.timestamp = (DWORD) time(NULL);
+								recv.szMessage = localMessage;
+								recv.lParam = 0;
+								ccs.hContact = hContact;
+								ccs.wParam = 0;
+								ccs.szProtoService = PSR_MESSAGE;
+								ccs.lParam = (LPARAM) &recv;
+								CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
+								free(localMessage);
+							}
+							SkinPlaySound("TlenAlertNotify");
+						}
 					}
 				}
 			}

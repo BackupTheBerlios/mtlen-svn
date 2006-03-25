@@ -73,6 +73,7 @@ BOOL jabberSendKeepAlive;
 
 HANDLE hEventSettingChanged;
 HANDLE hEventContactDeleted;
+HANDLE hTlenNudge = NULL;
 #ifndef TLEN_PLUGIN
 // SSL-related global variable
 HANDLE hLibSSL;
@@ -128,6 +129,9 @@ int __declspec(dllexport) Unload(void)
 	JabberLog("Unloading");
 	UnhookEvent(hEventSettingChanged);
 	UnhookEvent(hEventContactDeleted);
+	if (hTlenNudge)
+		DestroyHookableEvent(hTlenNudge);
+
 	JabberWsUninit();
 	//JabberSslUninit();
 	JabberListUninit();
@@ -253,6 +257,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 {
 	PROTOCOLDESCRIPTOR pd;
 	HANDLE hContact;
+	char s[256];
 	char text[_MAX_PATH];
 	char *p, *q;
 	char *szProto;
@@ -283,6 +288,9 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	HookEvent(ME_OPT_INITIALISE, TlenOptInit);
 	HookEvent(ME_SYSTEM_MODULESLOADED, ModulesLoaded);
 	HookEvent(ME_SYSTEM_PRESHUTDOWN, PreShutdown);
+
+	sprintf(s, "%s/%s", jabberProtoName, "Nudge");
+	hTlenNudge = CreateHookableEvent(s);
 
 	// Register protocol module
 	ZeroMemory(&pd, sizeof(PROTOCOLDESCRIPTOR));

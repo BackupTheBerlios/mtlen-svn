@@ -1062,7 +1062,7 @@ void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...)
 	}
 	va_end(vararg);
 }
-
+/*
 static char clientJID[3072];
 
 char *JabberGetClientJID(char *jid)
@@ -1077,7 +1077,7 @@ char *JabberGetClientJID(char *jid)
 	}
 	return clientJID;
 }
-
+*/
 
 int JabberGetPictureType( const char* buf )
 {

@@ -48,55 +48,61 @@ STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Tlen",IDC_TLEN,5,3,288,45
-    LTEXT           "Username:",IDC_STATIC,14,16,52,8
-    EDITTEXT        IDC_EDIT_USERNAME,70,14,86,12,ES_AUTOHSCROLL
+    GROUPBOX        "Tlen",IDC_TLEN,5,0,288,42
+    LTEXT           "Username:",IDC_STATIC,14,12,52,8
+    EDITTEXT        IDC_EDIT_USERNAME,70,10,86,12,ES_AUTOHSCROLL
     CONTROL         "Create a new account",IDC_REGISTERACCOUNT,"Hyperlink",
-                    0x0,170,16,100,8
-    LTEXT           "Password:",IDC_STATIC,14,30,52,8
-    EDITTEXT        IDC_EDIT_PASSWORD,70,28,86,12,ES_PASSWORD |
+                    0x0,170,12,100,8
+    LTEXT           "Password:",IDC_STATIC,14,26,52,8
+    EDITTEXT        IDC_EDIT_PASSWORD,70,24,86,12,ES_PASSWORD |
                     ES_AUTOHSCROLL
     CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,170,30,100,10
-    GROUPBOX        "Options",IDC_SIMPLE,5,51,288,131
+                    BS_AUTOCHECKBOX | WS_TABSTOP,170,26,100,10
+    GROUPBOX        "Options",IDC_SIMPLE,5,44,288,141
     CONTROL         "Automatically reconnect after unintentional disconnection",
                     IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    62,239,10
+                    56,239,10
     CONTROL         "Leave status message after disconnection",
                     IDC_OFFLINE_MESSAGE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,14,75,168,10
-    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,74,75,140,
+                    WS_TABSTOP,14,68,168,10
+    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,67,75,140,
                     CBS_DROPDOWNLIST | WS_TABSTOP
     CONTROL         "Ignore advertisements",
                     IDC_IGNORE_ADVERTISEMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    88,250,10
+                    80,250,10
     CONTROL         "Automatically delete contacts not in my roster",
                     IDC_ROSTER_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    101,250,10
+                    92,250,10
     CONTROL         "Show offline users with status messages as invisible in contact list",
                     IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,114,250,10
+                    14,104,250,10
     CONTROL         "Enable avatars",
                     IDC_AVATARS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,127,250,10
+                    14,116,250,10
     CONTROL         "Send and receive client version information",
                     IDC_VERSIONINFO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,140,250,10
-    LTEXT           "Alert policy",IDC_STATIC,14,153,70,8
-    COMBOBOX        IDC_ALERT_POLICY,95,151,190,100,
+                    14,128,250,10
+    LTEXT           "Alert policy",IDC_STATIC,14,140,70,8
+    COMBOBOX        IDC_ALERT_POLICY,95,139,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Group chat policy",IDC_STATIC,14,166,70,8
-    COMBOBOX        IDC_MUC_POLICY,95,164,190,100,
+    CONTROL         "Use Nudge plugin",
+                    IDC_NUDGE_SUPPORT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    24,153,120,10
+    CONTROL         "Log alerts as messages",
+                    IDC_LOG_ALERTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,153,130,10
+    LTEXT           "Group chat policy",IDC_STATIC,14,168,70,8
+    COMBOBOX        IDC_MUC_POLICY,95,166,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-    GROUPBOX        "Voice Chats",IDC_STATIC,5,185,288,60
-    LTEXT           "Voice chat policy",IDC_STATIC,14,197,70,8
-    COMBOBOX        IDC_VOICE_POLICY,95,196,190,100,
+    GROUPBOX        "Voice Chats",IDC_STATIC,5,188,288,57
+    LTEXT           "Voice chat policy",IDC_STATIC,14,200,70,8
+    COMBOBOX        IDC_VOICE_POLICY,95,198,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-	LTEXT           "Recording device:",IDC_STATIC,14,213,105,8
-    COMBOBOX        IDC_VOICE_DEVICE_IN,120,211,110,100,CBS_DROPDOWNLIST |
+	LTEXT           "Recording device:",IDC_STATIC,14,214,105,8
+    COMBOBOX        IDC_VOICE_DEVICE_IN,120,212,110,100,CBS_DROPDOWNLIST |
                     WS_TABSTOP
-    LTEXT           "Playback device:",IDC_STATIC,14,227,105,8
-    COMBOBOX        IDC_VOICE_DEVICE_OUT,120,225,110,100,CBS_DROPDOWNLIST |
+    LTEXT           "Playback device:",IDC_STATIC,14,228,105,8
+    COMBOBOX        IDC_VOICE_DEVICE_OUT,120,226,110,100,CBS_DROPDOWNLIST |
                     WS_TABSTOP
 END
 

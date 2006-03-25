@@ -46,7 +46,10 @@ void TlenLoadOptions()
 	tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0);
 	tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, jabberProtoName, "EnableAvatars", FALSE);
 	tlenOptions.enableVersion = DBGetContactSettingByte(NULL, jabberProtoName, "EnableVersion", FALSE);
+	tlenOptions.useNudge = DBGetContactSettingByte(NULL, jabberProtoName, "UseNudge", FALSE);
+	tlenOptions.logAlerts = DBGetContactSettingByte(NULL, jabberProtoName, "LogAlerts", FALSE);
 }
+
 
 int TlenOptInit(WPARAM wParam, LPARAM lParam)
 {
@@ -190,6 +193,12 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		case IDC_OFFLINE_MESSAGE:
 			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
+		case IDC_LOG_ALERTS:
+			CheckDlgButton(hwndDlg, IDC_NUDGE_SUPPORT, BST_UNCHECKED);
+			break;
+		case IDC_NUDGE_SUPPORT:
+			CheckDlgButton(hwndDlg, IDC_LOG_ALERTS, BST_UNCHECKED);
+			break;
 		case IDC_REGISTERACCOUNT:
 		    CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) TLEN_REGISTER);
 		    break;
@@ -245,6 +254,8 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "EnableAvatars", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_AVATARS));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "EnableVersion", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VERSIONINFO));
+				DBWriteContactSettingByte(NULL, jabberProtoName, "UseNudge", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_NUDGE_SUPPORT));
+				DBWriteContactSettingByte(NULL, jabberProtoName, "LogAlerts", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_LOG_ALERTS));
 				if (reconnectRequired && jabberConnected)
 					MessageBox(hwndDlg, Translate("These changes will take effect the next time you connect to the Tlen network."), Translate("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
 				TlenLoadOptions();

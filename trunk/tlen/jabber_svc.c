@@ -563,6 +563,18 @@ static void __cdecl JabberSendMessageFailedThread(HANDLE hContact)
 	ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_MESSAGE, ACKRESULT_FAILED, (HANDLE) 2, 0);
 }
 
+int TlenSendAlert(WPARAM wParam, LPARAM lParam)
+{
+	HANDLE hContact = ( HANDLE )wParam;
+	DBVARIANT dbv;
+	if (jabberOnline && !DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+		JabberSend(jabberThreadInfo->s, "<m tp='a' to='%s'/>", dbv.pszVal);
+
+		DBFreeVariant(&dbv);
+	}
+	return 0;
+}
+
 
 int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 {
@@ -578,11 +590,12 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 		return 2;
 	}
 	if (!strcmp((const char *) ccs->lParam, "<alert>")) {
-		JabberSend(jabberThreadInfo->s, "<m tp='a' to='%s'/>", JabberGetClientJID(dbv.pszVal));
+		// ccs->hContact
+		JabberSend(jabberThreadInfo->s, "<m tp='a' to='%s'/>", dbv.pszVal);
 		JabberForkThread(JabberSendMessageAckThread, 0, (void *) ccs->hContact);
 	}  else if (!strcmp((const char *) ccs->lParam, "<image>")) {
 		id = JabberSerialNext();
-		JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' crc='%x' idt='%d'/>", JabberGetClientJID(dbv.pszVal), "pic", 0x757f044, id);
+		JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' crc='%x' idt='%d'/>", dbv.pszVal, "pic", 0x757f044, id);
 		JabberForkThread(JabberSendMessageAckThread, 0, (void *) ccs->hContact);
 	} else {
 		if ((msg=JabberTextEncode((char *) ccs->lParam)) != NULL) {
@@ -600,7 +613,7 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 					JabberSend(jabberThreadInfo->s, "<m to='%s'><b n='6' s='10' f='0' c='000000'>%s</b></m>", dbv.pszVal, msg);
 				} else {
 					id = JabberSerialNext();
-					JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' id='"JABBER_IQID"%d'><body>%s</body><x xmlns='jabber:x:event'><composing/></x></message>", JabberGetClientJID(dbv.pszVal), msgType, id, msg);
+					JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' id='"JABBER_IQID"%d'><body>%s</body><x xmlns='jabber:x:event'><composing/></x></message>", dbv.pszVal, msgType, id, msg);
 				}
 				JabberForkThread(JabberSendMessageAckThread, 0, (void *) ccs->hContact);
 			}
@@ -608,7 +621,7 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 				id = JabberSerialNext();
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL)
 					item->idMsgAckPending = id;
-				JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' id='"JABBER_IQID"%d'><body>%s</body><x xmlns='jabber:x:event'><offline/><delivered/><composing/></x></message>", JabberGetClientJID(dbv.pszVal), msgType, id, msg);
+				JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' id='"JABBER_IQID"%d'><body>%s</body><x xmlns='jabber:x:event'><offline/><delivered/><composing/></x></message>", dbv.pszVal, msgType, id, msg);
 			}
 		}
 		free(msg);
@@ -626,7 +639,6 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 	char *newAvatarHash = NULL;
 	JABBER_LIST_ITEM *item = NULL;
 	DBVARIANT dbv;
-	int refresh = 1;
 	PROTO_AVATAR_INFORMATION* AI = ( PROTO_AVATAR_INFORMATION* )lParam;
 	if (!tlenOptions.enableAvatars) return GAIR_NOAVATAR;
 
@@ -1065,10 +1077,10 @@ int JabberUserIsTyping(WPARAM wParam, LPARAM lParam)
 		if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal))!=NULL /*&& item->wantComposingEvent==TRUE*/) {
 			switch (lParam) {
 			case PROTOTYPE_SELFTYPING_OFF:
-				JabberSend(jabberThreadInfo->s, "<m tp='u' to='%s'/>", JabberGetClientJID(dbv.pszVal));
+				JabberSend(jabberThreadInfo->s, "<m tp='u' to='%s'/>", dbv.pszVal);
 				break;
 			case PROTOTYPE_SELFTYPING_ON:
-				JabberSend(jabberThreadInfo->s, "<m tp='t' to='%s'/>", JabberGetClientJID(dbv.pszVal));
+				JabberSend(jabberThreadInfo->s, "<m tp='t' to='%s'/>", dbv.pszVal);
 				break;
 			}
 		}
@@ -1164,6 +1176,9 @@ int JabberSvcInit(void)
 
 	sprintf(s, "%s%s", jabberProtoName, PS_GETAVATARINFO);
 	CreateServiceFunction(s, TlenGetAvatarInfo);
+
+	sprintf(s, "%s%s", jabberProtoName, "/SendNudge");
+	CreateServiceFunction(s, TlenSendAlert);
 
 	return 0;
 }

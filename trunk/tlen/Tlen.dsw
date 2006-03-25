@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "tlenchats"=.\tlenchats\tlenchats.dsp - Package Owner=<4>
+Project: "mucc"=.\chats\mucc.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
