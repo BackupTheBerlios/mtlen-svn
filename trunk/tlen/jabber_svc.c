@@ -675,10 +675,12 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 				return GAIR_SUCCESS;
 	}	}	}
 */
-	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline && jabberStatus != ID_STATUS_INVISIBLE && !item->newAvatarDownloading) {
+	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline && jabberStatus != ID_STATUS_INVISIBLE) {
 		/* get avatar */
-		item->newAvatarDownloading = TRUE;
-		JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_file</avatar></message>", item->jid);
+		if (!item->newAvatarDownloading) {
+			item->newAvatarDownloading = TRUE;
+			JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_file</avatar></message>", item->jid);
+		}
 		return GAIR_WAITFOR;
 	}
 	return GAIR_NOAVATAR;
