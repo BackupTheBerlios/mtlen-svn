@@ -1,3 +1,9 @@
+1.0.7.2
+--------
+! fixed compatibility issues with new versions of IEView (1.0.9.0 or higher)
++ support for Nudge plugin
+* improved avatar support
+* improved sending/receiving client version info
 1.0.7.1
 ---------
 * bugfix: sending/receiving client version info
