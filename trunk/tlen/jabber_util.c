@@ -748,7 +748,7 @@ time_t  TlenTimeToUTC(time_t time) {
 	if ( (timestamp->tm_mon > 2 && timestamp->tm_mon < 9) ||
 		 (timestamp->tm_mon == 2 && timestamp->tm_mday - timestamp->tm_wday >= 25) ||
 		 (timestamp->tm_mon == 9 && timestamp->tm_mday - timestamp->tm_wday < 25)) {
-		time -= 3600;
+		//time -= 3600;
 	} else {
 		//time += 3600;
 	}
@@ -921,7 +921,7 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 						break;
 				}
 			} else if (offlineMessageOption == 99) {
-				
+
 			} else if (offlineMessageOption < 7) {
 				DBVARIANT dbv;
 				const char *statusNames[] = {"OnDefault", "AwayDefault", "NaDefault", "DndDefault", "FreeChatDefault", "InvDefault"};
@@ -950,6 +950,7 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 		// Should not reach here
 		break;
 	}
+	jabberStatus = status;
 	if (presenceType) {
 		extra = NULL;
 		if (statusMsg)
@@ -991,7 +992,6 @@ void JabberSendPresence(int status)
 			status = ID_STATUS_DND;
 			break;
 	}
-	jabberStatus = status; 
 	if (tlenOptions.enableAvatars && status != ID_STATUS_INVISIBLE && status != ID_STATUS_OFFLINE) {
 		if (userAvatarHash != NULL) {
 			char hash[256];
@@ -1023,6 +1023,7 @@ void JabberSendPresence(int status)
 	} else {
 		JabberSendPresenceTo(status, NULL, NULL);
 	}
+
 
 /*
 	if (DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE)) {
