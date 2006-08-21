@@ -43,7 +43,18 @@ END
 // Dialog
 //
 
-IDD_OPTIONS DIALOGEX 0, 0, 300, 246
+IDD_OPTIONS DIALOGEX 0, 0, 310, 245
+STYLE DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	CONTROL         "Tab1",IDC_TABS,"SysTabControl32",
+                    TCS_FIXEDWIDTH | 0x8,0,0,310,245
+// TCS_FIXEDWIDTH | TCS_BUTTONS |
+END
+
+
+IDD_OPTIONS_BASIC DIALOGEX 5, 30, 300, 200
 STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
@@ -94,24 +105,46 @@ BEGIN
     LTEXT           "Group chat policy",IDC_STATIC,14,168,70,8
     COMBOBOX        IDC_MUC_POLICY,95,166,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-    GROUPBOX        "Voice Chats",IDC_STATIC,5,188,288,57
-    LTEXT           "Voice chat policy",IDC_STATIC,14,200,70,8
-    COMBOBOX        IDC_VOICE_POLICY,95,198,190,100,
-                    CBS_DROPDOWNLIST | WS_TABSTOP
-	LTEXT           "Recording device:",IDC_STATIC,14,214,105,8
-    COMBOBOX        IDC_VOICE_DEVICE_IN,120,212,110,100,CBS_DROPDOWNLIST |
-                    WS_TABSTOP
-    LTEXT           "Playback device:",IDC_STATIC,14,228,105,8
-    COMBOBOX        IDC_VOICE_DEVICE_OUT,120,226,110,100,CBS_DROPDOWNLIST |
-                    WS_TABSTOP
 END
 
-IDD_OPTIONS_EXPERT DIALOGEX 0, 0, 300, 246
+
+IDD_OPTIONS_VOICE DIALOGEX 5, 30, 300, 200
 STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "P2P Connections",IDC_STATIC,5,100,288,110
+    GROUPBOX        "Voice Chats",IDC_STATIC,5,0,288,57
+    LTEXT           "Voice chat policy",IDC_STATIC,14,12,70,8
+    COMBOBOX        IDC_VOICE_POLICY,95,10,190,100,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
+	LTEXT           "Recording device:",IDC_STATIC,14,26,105,8
+    COMBOBOX        IDC_VOICE_DEVICE_IN,120,24,110,100,CBS_DROPDOWNLIST |
+                    WS_TABSTOP
+    LTEXT           "Playback device:",IDC_STATIC,14,40,105,8
+    COMBOBOX        IDC_VOICE_DEVICE_OUT,120,38,110,100,CBS_DROPDOWNLIST |
+                    WS_TABSTOP
+END
+
+IDD_OPTIONS_ADVANCED DIALOGEX 5, 30, 300, 200
+STYLE DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg"
+BEGIN
+    GROUPBOX        "Expert Options",IDC_STATIC,5,4,288,74
+    LTEXT           "Login server:",IDC_STATIC,14,18,75,8
+    EDITTEXT        IDC_EDIT_LOGIN_SERVER,90,16,90,12,ES_AUTOHSCROLL
+    LTEXT           "Connection Host:",IDC_STATIC,14,32,75,8
+    EDITTEXT        IDC_HOST,90,30,90,12,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Port:",IDC_STATIC,194,32,35,8
+    EDITTEXT        IDC_HOSTPORT,230,30,26,12,ES_AUTOHSCROLL | ES_NUMBER |
+                    WS_DISABLED
+    CONTROL         "Keep connection alive",IDC_KEEPALIVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,47,250,10
+    CONTROL         "Enable Always Visible and Never Visible",
+                    IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE |
+                    WS_TABSTOP,14,60,250,10
+
+    GROUPBOX        "P2P Connections",IDC_STATIC,5,100,288,98
     CONTROL         "Use proxy for incoming connections",IDC_FILE_USE_PROXY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,114,271,10
     LTEXT           "Proxy type:",IDC_FILE_PROXY_TYPE_LABEL,16,130,48,8,
@@ -138,19 +171,6 @@ BEGIN
     EDITTEXT        IDC_FILE_PROXY_PASSWORD,204,175,81,12,ES_PASSWORD |
                     ES_AUTOHSCROLL | WS_DISABLED
 
-    GROUPBOX        "Expert Options",IDC_STATIC,5,4,288,74
-    LTEXT           "Login server:",IDC_STATIC,14,18,75,8
-    EDITTEXT        IDC_EDIT_LOGIN_SERVER,90,16,90,12,ES_AUTOHSCROLL
-    LTEXT           "Connection Host:",IDC_STATIC,14,32,75,8
-    EDITTEXT        IDC_HOST,90,30,90,12,ES_AUTOHSCROLL | WS_DISABLED
-    LTEXT           "Port:",IDC_STATIC,194,32,35,8
-    EDITTEXT        IDC_HOSTPORT,230,30,26,12,ES_AUTOHSCROLL | ES_NUMBER |
-                    WS_DISABLED
-    CONTROL         "Keep connection alive",IDC_KEEPALIVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,14,47,250,10
-    CONTROL         "Enable Always Visible and Never Visible",
-                    IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE |
-                    WS_TABSTOP,14,60,250,10
 
 END
 
@@ -377,8 +397,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,7,2
- PRODUCTVERSION 1,0,7,2
+ FILEVERSION 1,0,7,3
+ PRODUCTVERSION 1,0,7,3
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -396,14 +416,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Tlen Protocol Plugin for Miranda IM\0"
-            VALUE "FileVersion", "1.0.7.2\0"
+            VALUE "FileVersion", "1.0.7.3\0"
             VALUE "InternalName", "tlen\0"
             VALUE "LegalCopyright", "Copyright (c) 2002-2006 Santithorn Bunchua, Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "tlen.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Tlen Protocol Plugin\0"
-            VALUE "ProductVersion", "1.0.7.2\0"
+            VALUE "ProductVersion", "1.0.7.3\0"
             VALUE "SpecialBuild", "\0"
         END
     END

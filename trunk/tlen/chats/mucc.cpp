@@ -36,11 +36,11 @@ static int PreShutdown(WPARAM wParam, LPARAM lParam);
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
 	"MUCC Plugin",
-	PLUGIN_MAKE_VERSION(1,0,7,2),
-	"Group chats GUI plugin for Miranda IM (1.0.7.2 "__DATE__")",
+	PLUGIN_MAKE_VERSION(1,0,7,3),
+	"Group chats GUI plugin for Miranda IM (1.0.7.3 "__DATE__")",
 	"Piotr Piastucki",
 	"the_leech@users.berlios.de",
-	"(c) 2004-2005 Piotr Piastucki",
+	"(c) 2004-2006 Piotr Piastucki",
 	"http://mtlen.berlios.de",
 	0,
 	0
@@ -112,9 +112,6 @@ extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 	_strupr(muccModuleName);
 
 	pluginLink = link;
-	/*
-	**	HookEvent(ME_OPT_INITIALISE, TlenOptInit);
-	*/
 	HookEvent(ME_OPT_INITIALISE, MUCCOptInit);
 	HookEvent(ME_SYSTEM_MODULESLOADED, ModulesLoaded);
 	HookEvent(ME_SYSTEM_PRESHUTDOWN, PreShutdown);
@@ -135,11 +132,6 @@ static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 	ManagerWindow::init();
 	ChatWindow::init();
 	ChatContainer::init();
-
-	/*
-	**	HookEvent(ME_USERINFO_INITIALISE, TlenUserInfoInit);
-	**	SkinAddNewSound("TlenMailNotify", Translate("Tlen: Incoming mail"), "");
-	*/
 	return 0;
 }
 

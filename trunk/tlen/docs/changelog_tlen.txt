@@ -1,3 +1,6 @@
+1.0.7.3
+--------
+* bugfix: offline status message
 1.0.7.2
 --------
 ! fixed compatibility issues with new versions of IEView (1.0.9.0 or higher)

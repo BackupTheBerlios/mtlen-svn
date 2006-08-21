@@ -47,9 +47,12 @@ void JabberIqResultSetAuth(XmlNode *iqNode, void *userdata)
 			DBWriteContactSettingString(NULL, jabberProtoName, "Nick", info->username);
 		else
 			DBFreeVariant(&dbv);
-		iqId = JabberSerialNext();
-		JabberIqAdd(iqId, IQ_PROC_NONE, JabberIqResultGetRoster);
-		JabberSend(info->s, "<iq type='get' id='"JABBER_IQID"%d'><query xmlns='jabber:iq:roster'/></iq>", iqId);
+//		iqId = JabberSerialNext();
+//		JabberIqAdd(iqId, IQ_PROC_NONE, JabberIqResultGetRoster);
+//		JabberSend(info->s, "<iq type='get' id='"JABBER_IQID"%d'><query xmlns='jabber:iq:roster'/></iq>", iqId);
+
+		JabberSend(info->s, "<iq type='get' id='GetRoster'><query xmlns='jabber:iq:roster'/></iq>");
+		JabberSend(info->s, "<iq to='tcfg' type='get' id='TcfgGetAfterLoggedIn'></iq>");
 	}
 	// What to do if password error? etc...
 	else if (!strcmp(type, "error")) {

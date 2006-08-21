@@ -38,7 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global header files
  *******************************************************************/
-#define _WIN32_WINNT 0x500
+#define _WIN32_WINNT 0x501
 #include <windows.h>
 #include <process.h>
 #include <stdio.h>
@@ -68,8 +68,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,7,2)
-#define TLEN_VERSION_STRING  "1.0.7.2"
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,7,3)
+#define TLEN_VERSION_STRING  "1.0.7.3"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "keh_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"
@@ -270,8 +270,7 @@ extern JABBER_MODEMSGS modeMsgs;
 extern BOOL jabberSendKeepAlive;
 extern TLEN_OPTIONS tlenOptions;
 
-extern HANDLE hEventSettingChanged;
-extern HANDLE hEventContactDeleted;
+extern HANDLE hEventSettingChanged, hEventContactDeleted, hEventTlenUserInfoInit, hEventTlenOptInit, hEventTlenPrebuildContactMenu;
 
 extern HANDLE hMenuMUC;
 extern HANDLE hMenuChats;

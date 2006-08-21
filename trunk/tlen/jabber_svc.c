@@ -344,7 +344,6 @@ int JabberAuthDeny(WPARAM wParam, LPARAM lParam)
 	JabberLog("Send 'authorization denied' to %s", jid);
 	JabberSend(jabberThreadInfo->s, "<presence to='%s' type='unsubscribed'/>", jid);
 	JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item jid='%s' subscription='remove'/></query></iq>", jid);
-
 	free(dbei.pBlob);
 	return 0;
 }
@@ -815,6 +814,12 @@ int JabberSendFile(WPARAM wParam, LPARAM lParam)
 		ft->iqId = _strdup(idStr);
 		nick = JabberNickFromJID(ft->jid);
 		item->ft = ft;
+
+/*
+		JabberSend(jabberThreadInfo->s, "<iq to='%s'><query xmlns='p2p'><fs t='%s' e='1' i='%s' c='1' s='%d' v='1'/></query></iq>",
+			ft->jid, ft->jid, idStr, ft->allFileTotalSize);
+			*/
+
 		if (ft->fileCount == 1) {
 			if ((p=strrchr(files[0], '\\')) != NULL)
 				p++;
@@ -826,6 +831,7 @@ int JabberSendFile(WPARAM wParam, LPARAM lParam)
 		}
 		else
 			JabberSend(jabberThreadInfo->s, "<f t='%s' e='1' i='%s' c='%d' s='%d' v='1'/>", nick, idStr, ft->fileCount, ft->allFileTotalSize);
+		
 		free(nick);
 	}
 

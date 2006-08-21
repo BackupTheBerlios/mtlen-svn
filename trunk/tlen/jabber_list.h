@@ -29,7 +29,8 @@ typedef enum {
 	LIST_FILE,		// Current file transfer session
 	LIST_INVITATIONS,// Invitations to be sent
 	LIST_SEARCH,	 // Rooms names being searched
-	LIST_VOICE
+	LIST_VOICE,
+	LIST_PICTURE
 } JABBER_LIST;
 
 typedef enum {
@@ -42,6 +43,7 @@ typedef enum {
 typedef struct {
 	JABBER_LIST list;
 	char *jid;
+	char *id2;
 
 	// LIST_ROSTER
 	// jid = jid of the contact
@@ -58,7 +60,7 @@ typedef struct {
 	char *avatarHash;
 	char *newAvatarHash;
 	BOOL newAvatarDownloading;
-	BOOL avatarRequested;
+	BOOL avatarHashRequested;
 	BOOL versionRequested;
 	int idMsgAckPending;
 	char *messageEventIdStr;
@@ -94,6 +96,7 @@ void JabberListRemoveByIndex(int index);
 int JabberListFindNext(JABBER_LIST list, int fromOffset);
 JABBER_LIST_ITEM *JabberListGetItemPtr(JABBER_LIST list, const char *jid);
 JABBER_LIST_ITEM *JabberListGetItemPtrFromIndex(int index);
+JABBER_LIST_ITEM *JabberListFindItemPtrById2(JABBER_LIST list, const char *id);
 
 void JabberListAddResource(JABBER_LIST list, const char *jid, int status, const char *statusMessage);
 void JabberListRemoveResource(JABBER_LIST list, const char *jid);

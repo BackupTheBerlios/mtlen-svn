@@ -71,8 +71,8 @@ char *jabberVcardPhotoFileName;
 char *jabberVcardPhotoType;
 BOOL jabberSendKeepAlive;
 
-HANDLE hEventSettingChanged;
-HANDLE hEventContactDeleted;
+HANDLE hEventSettingChanged, hEventContactDeleted, hEventTlenUserInfoInit, hEventTlenOptInit, hEventTlenPrebuildContactMenu;
+
 HANDLE hTlenNudge = NULL;
 #ifndef TLEN_PLUGIN
 // SSL-related global variable
@@ -80,8 +80,7 @@ HANDLE hLibSSL;
 PVOID jabberSslCtx;
 #endif
 
-HANDLE hMenuMUC;
-HANDLE hMenuChats;
+HANDLE hMenuMUC, hMenuChats, hMenuInbox;
 HANDLE hMenuContactMUC;
 HANDLE hMenuContactVoice;
 HANDLE hMenuContactGrantAuth;
@@ -101,6 +100,7 @@ int JabberMsgUserTyping(WPARAM wParam, LPARAM lParam);
 int JabberSvcInit(void);
 int TlenContactMenuHandleRequestAuth(WPARAM wParam, LPARAM lParam);
 int TlenContactMenuHandleGrantAuth(WPARAM wParam, LPARAM lParam);
+int TlenContactMenuHandleSendPicture(WPARAM wParam, LPARAM lParam);
 
 BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvReserved)
 {
@@ -247,11 +247,35 @@ static int TlenPrebuildContactMenu(WPARAM wParam, LPARAM lParam)
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactVoice, (LPARAM) &clmi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactRequestAuth, (LPARAM) &clmi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactGrantAuth, (LPARAM) &clmi);
-//	TlenMUCPrebuildContactMenu(wParam, lParam);
-//	TlenVoicePrebuildContactMenu(wParam, lParam);
 	return 0;
 }
 
+int TlenMenuHandleInbox(WPARAM wParam, LPARAM lParam)
+{
+	char szFileName[ MAX_PATH ];
+	if (DBGetContactSettingByte(NULL, jabberProtoName, "SavePassword", TRUE) == TRUE) {
+		FILE *out;
+		int tPathLen;
+		CallService( MS_DB_GETPROFILEPATH, MAX_PATH, (LPARAM) szFileName );
+		tPathLen = strlen( szFileName );
+		tPathLen += mir_snprintf( szFileName + tPathLen, MAX_PATH - tPathLen, "\\%s\\", jabberModuleName);
+		CreateDirectoryA( szFileName, NULL );
+		mir_snprintf( szFileName + tPathLen, MAX_PATH - tPathLen, "openinbox.html" );
+		out = fopen( szFileName, "wt" );
+		if ( out != NULL ) {
+			fprintf(out, "<html><head></head><body OnLoad=\"document.forms[0].submit();\">"
+						 "<form action=\"http://poczta.o2.pl/index.php\" method=\"post\" name=\"login_form\">"
+						 "<input type=\"hidden\" name=\"username\" value=\"%s\">"
+						 "<input type=\"hidden\" name=\"password\" value=\"%s\">"
+						 "</form></body></html>", jabberThreadInfo->username, jabberThreadInfo->password);
+			fclose( out );
+		}
+	} else {
+		strcat(szFileName, "http://poczta.o2.pl/");
+	}
+	CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) szFileName);
+	return 0;
+}
 
 int __declspec(dllexport) Load(PLUGINLINK *link)
 {
@@ -321,12 +345,20 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 
 	wsprintf(text, "%s/MainMenuChats", jabberModuleName);
 	CreateServiceFunction(text, TlenMUCMenuHandleChats);
-	mi.pszName = Translate("Tlen Chats...");
+	mi.pszName = Translate("Tlen Chats");
 	mi.position = 2000050002;
 	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_TLEN));
 	mi.pszService = text;
 	hMenuChats = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChats, (LPARAM) &clmi);
+
+	wsprintf(text, "%s/MainMenuInbox", jabberModuleName);
+	CreateServiceFunction(text, TlenMenuHandleInbox);
+	mi.pszName = Translate("Tlen Inbox");
+	mi.position = 2000050003;
+	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MAIL));
+	mi.pszService = text;
+	hMenuInbox = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
 
 	// "Invite to MUC"
 	sprintf(text, "%s/ContactMenuMUC", jabberModuleName);
@@ -369,13 +401,25 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactGrantAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
-	mi.position=-2000020000;
-	mi.flags=CMIF_NOTONLINE;
-	mi.hIcon=LoadSkinnedIcon(SKINICON_EVENT_FILE);
-	mi.pszName=Translate("&File");
-	mi.pszService=MS_FILE_SENDFILE;
+	// "Send picture"
+	sprintf(text, "%s/SendPicture", jabberModuleName);
+	CreateServiceFunction(text, TlenContactMenuHandleSendPicture);
+	mi.pszName = Translate("Send picture");
+//	clmi.flags = CMIM_FLAGS | CMIF_NOTOFFLINE;// | CMIF_GRAYED;
+	mi.position = -2000001002;
+	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_GRANT));
+	mi.pszService = text;
+	mi.pszContactOwner = jabberProtoName;
+	CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi); //hMenuContactGrantAuth = (HANDLE) 
+
+	mi.position = -2000020000;
+	mi.flags = CMIF_NOTONLINE;
+	mi.hIcon = LoadSkinnedIcon(SKINICON_EVENT_FILE);
+	mi.pszName = Translate("&File");
+	mi.pszService = MS_FILE_SENDFILE;
 	mi.pszContactOwner = jabberProtoName;
 	CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+
 
 	HookEvent(ME_CLIST_PREBUILDCONTACTMENU, TlenPrebuildContactMenu);
 
@@ -447,6 +491,21 @@ int TlenContactMenuHandleGrantAuth(WPARAM wParam, LPARAM lParam)
 	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
 		if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 			JabberSend(jabberThreadInfo->s, "<presence to='%s' type='subscribed'/>", dbv.pszVal);
+			DBFreeVariant(&dbv);
+		}
+	}
+	return 0;
+}
+
+int TlenContactMenuHandleSendPicture(WPARAM wParam, LPARAM lParam)
+{
+	HANDLE hContact;
+	DBVARIANT dbv;
+
+	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
+		if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+			JabberSend(jabberThreadInfo->s, "<message type='pic' to='the_leech7@tlen.pl' crc='da4fe23' idt='2174' size='21161'/>");
+//			JabberSend(jabberThreadInfo->s, "<message type='pic' to='%s' crc='b4f7bdd' idt='6195' size='5583'/>", dbv.pszVal);
 			DBFreeVariant(&dbv);
 		}
 	}

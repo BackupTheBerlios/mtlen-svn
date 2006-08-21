@@ -160,7 +160,7 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 	item->newAvatarHash = NULL;
 	item->avatarFormat = PA_FORMAT_UNKNOWN;
 	item->newAvatarDownloading = FALSE;
-	item->avatarRequested = FALSE;
+	item->avatarHashRequested = FALSE;
 	item->versionRequested = FALSE;
 	count++;
 	LeaveCriticalSection(&csLists);
@@ -270,6 +270,28 @@ JABBER_LIST_ITEM *JabberListGetItemPtr(JABBER_LIST list, const char *jid)
 	i--;
 	LeaveCriticalSection(&csLists);
 	return &(lists[i]);
+}
+
+JABBER_LIST_ITEM *JabberListFindItemPtrById2(JABBER_LIST list, const char *id)
+{
+
+	int i, len;
+	char *p;
+
+	len = strlen(id);
+
+	EnterCriticalSection(&csLists);
+	for(i=0; i<count; i++) {
+		if (lists[i].list==list) {
+			p = lists[i].id2;
+			if (!strncmp(p, id, len)) {
+			  	LeaveCriticalSection(&csLists);
+				return &(lists[i]);
+			}
+		}
+	}
+	LeaveCriticalSection(&csLists);
+	return NULL;
 }
 
 JABBER_LIST_ITEM *JabberListGetItemPtrFromIndex(int index)

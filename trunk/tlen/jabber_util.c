@@ -1006,8 +1006,8 @@ void JabberSendPresence(int status)
 				JABBER_LIST_ITEM *item;
 				if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
 					if (item->status != ID_STATUS_OFFLINE && item->status != ID_STATUS_INVISIBLE) {
-						if (!item->avatarRequested) {
-							item->avatarRequested = TRUE;
+						if (!item->avatarHashRequested) {
+							item->avatarHashRequested = TRUE;
 							JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_hash</avatar></message>", item->jid);
 						} else if (item->newAvatarHash != NULL && (item->avatarHash == NULL || strcmp(item->newAvatarHash, item->avatarHash))) {
 							HANDLE hContact;

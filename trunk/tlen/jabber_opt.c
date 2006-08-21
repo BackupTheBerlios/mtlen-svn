@@ -23,16 +23,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber.h"
 #include "jabber_list.h"
 #include "tlen_voice.h"
+#include <uxtheme.h>
+#include <win2k.h>
 #include <commctrl.h>
 #include "resource.h"
 
 static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
+static BOOL (WINAPI *pfnEnableThemeDialogTexture)(HANDLE, DWORD) = 0;
+#define OPTIONS_PAGES 3
+static HWND hwndCurrentTab, hwndPages[OPTIONS_PAGES];
+static BOOL initialized = 0;
+
 TLEN_OPTIONS tlenOptions;
 
-void TlenLoadOptions() 
+void TlenLoadOptions()
 {
 	tlenOptions.useSSL = DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE);
 	tlenOptions.reconnect = DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE);
@@ -54,8 +63,15 @@ void TlenLoadOptions()
 int TlenOptInit(WPARAM wParam, LPARAM lParam)
 {
 	OPTIONSDIALOGPAGE odp;
-	char str[50];
-
+	if (!initialized) {
+		HMODULE	hUxTheme = 0;
+		if(IsWinVerXPPlus()) {
+			hUxTheme = GetModuleHandle(_T("uxtheme.dll"));
+			if(hUxTheme)
+				pfnEnableThemeDialogTexture = (BOOL (WINAPI *)(HANDLE, DWORD))GetProcAddress(hUxTheme, "EnableThemeDialogTexture");
+		}
+		initialized = 1;
+	}
 	ZeroMemory(&odp, sizeof(odp));
 	odp.cbSize = sizeof(odp);
 	odp.position = 0;
@@ -67,7 +83,7 @@ int TlenOptInit(WPARAM wParam, LPARAM lParam)
 	odp.pfnDlgProc = TlenOptDlgProc;
 	odp.nIDBottomSimpleControl = 0;//IDC_SIMPLE;
 	CallService(MS_OPT_ADDPAGE, wParam, (LPARAM) &odp);
-
+/*
 	odp.pszTemplate = MAKEINTRESOURCE(IDD_OPTIONS_EXPERT);
 	_snprintf(str, sizeof(str), "%s %s", jabberModuleName, Translate("Advanced"));
 	str[sizeof(str)-1] = '\0';
@@ -76,7 +92,7 @@ int TlenOptInit(WPARAM wParam, LPARAM lParam)
 	odp.flags = ODPF_BOLDGROUPS|ODPF_EXPERTONLY;
 	odp.nIDBottomSimpleControl = 0;
 	CallService(MS_OPT_ADDPAGE, wParam, (LPARAM) &odp);
-
+*/
 	if (ServiceExists(MS_POPUP_ADDPOPUP)) {
 		ZeroMemory(&odp,sizeof(odp));
 		odp.cbSize = sizeof(odp);
@@ -106,7 +122,85 @@ static LRESULT CALLBACK JabberValidateUsernameWndProc(HWND hwndEdit, UINT msg, W
 	return CallWindowProc(oldProc, hwndEdit, msg, wParam, lParam);
 }
 
+static SetOptionsDlgToType(HWND hwnd, int iExpert)
+{
+	int i;
+    HWND tc;
+	TCITEM tci;
+	tc = GetDlgItem(hwnd, IDC_TABS);
+	TabCtrl_DeleteAllItems(tc);
+	tci.mask = TCIF_TEXT;
+	tci.pszText = TranslateT("General");
+	TabCtrl_InsertItem(tc, 0, &tci);
+	tci.pszText = TranslateT("Voice Chats");
+	TabCtrl_InsertItem(tc, 1, &tci);
+	if (iExpert) {
+		tci.pszText = TranslateT("Advanced");
+		TabCtrl_InsertItem(tc, 2, &tci);
+	}
+	for (i=0; i < OPTIONS_PAGES; i++) {
+		SetWindowPos(hwndPages[i], HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_HIDEWINDOW);
+	}
+	hwndCurrentTab = hwndPages[0];
+	ShowWindow(hwndPages[0], SW_SHOW);
+}
+
 static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg) {
+		case WM_INITDIALOG:
+		{
+			hwndPages[0] = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_OPTIONS_BASIC), hwndDlg, TlenBasicOptDlgProc, (LPARAM) NULL);
+			hwndPages[1] = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_OPTIONS_VOICE), hwndDlg, TlenVoiceOptDlgProc, (LPARAM) NULL);
+			hwndPages[2] = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_OPTIONS_ADVANCED), hwndDlg, TlenAdvOptDlgProc, (LPARAM) NULL);
+			if (pfnEnableThemeDialogTexture) {
+				int i;
+				for (i=0; i < OPTIONS_PAGES; i++) {
+					pfnEnableThemeDialogTexture(hwndPages[i], ETDT_ENABLETAB);
+				}
+			}
+			SetOptionsDlgToType(hwndDlg, SendMessage(GetParent(hwndDlg), PSM_ISEXPERT, 0, 0));
+			return TRUE;
+		}
+	case WM_NOTIFY:
+		{
+			switch (((LPNMHDR) lParam)->code) {
+			case TCN_SELCHANGE:
+                switch (wParam) {
+				case IDC_TABS:
+					{
+						HWND hwnd = hwndPages[TabCtrl_GetCurSel(GetDlgItem(hwndDlg, IDC_TABS))];
+						if (hwnd!=hwndCurrentTab) {
+	                    	ShowWindow(hwnd, SW_SHOW);
+	                    	ShowWindow(hwndCurrentTab, SW_HIDE);
+	                    	hwndCurrentTab = hwnd;
+						}
+					}
+					break;
+				}
+				break;
+			case PSN_APPLY:
+				{
+					int i;
+					for (i = 0; i < OPTIONS_PAGES; i++) {
+						SendMessage(hwndPages[i], WM_NOTIFY, wParam, lParam);
+					}
+					TlenLoadOptions();
+					return TRUE;
+				}
+			case PSN_EXPERTCHANGED:
+				{
+					SetOptionsDlgToType(hwndDlg, SendMessage(GetParent(hwndDlg), PSM_ISEXPERT, 0, 0));
+					break;
+				}
+			}
+		}
+		break;
+	}
+	return FALSE;
+}
+
+static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	char text[256];
 	WNDPROC oldProc;
@@ -141,25 +235,18 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			CheckDlgButton(hwndDlg, IDC_VERSIONINFO, tlenOptions.enableVersion);
 			CheckDlgButton(hwndDlg, IDC_NUDGE_SUPPORT, tlenOptions.useNudge);
 			CheckDlgButton(hwndDlg, IDC_LOG_ALERTS, tlenOptions.logAlerts);
-			
+
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all alerts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore alerts from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all alerts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_SETCURSEL, tlenOptions.alertPolicy, 0);
-			
+
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Always ask me"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from authorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all invitations"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all invitation"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, tlenOptions.groupChatPolicy, 0);
-
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Always ask me"));
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from authorized contacts"));
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all invitations"));
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from unauthorized contacts"));
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all invitation"));
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, tlenOptions.voiceChatPolicy, 0);
 
 			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("<Last message>"));
 	        //SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)Translate("<Ask me>"));
@@ -174,8 +261,6 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			oldProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_USERDATA, (LONG) oldProc);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC, (LONG) JabberValidateUsernameWndProc);
-			TlenVoiceBuildInDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_IN));
-			TlenVoiceBuildOutDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_OUT));
 			return TRUE;
 		}
 	case WM_COMMAND:
@@ -183,7 +268,7 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		case IDC_EDIT_USERNAME:
 		case IDC_EDIT_PASSWORD:
 			if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_USE_SSL:
 			// Fall through
@@ -193,15 +278,15 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		case IDC_IGNORE_ADVERTISEMENTS:
 		case IDC_SHOW_OFFLINE:
 		case IDC_OFFLINE_MESSAGE:
-			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_LOG_ALERTS:
 			CheckDlgButton(hwndDlg, IDC_NUDGE_SUPPORT, BST_UNCHECKED);
-			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_NUDGE_SUPPORT:
 			CheckDlgButton(hwndDlg, IDC_LOG_ALERTS, BST_UNCHECKED);
-			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_REGISTERACCOUNT:
 		    CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) TLEN_REGISTER);
@@ -209,14 +294,11 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		case IDC_OFFLINE_MESSAGE_OPTION:
 		case IDC_ALERT_POLICY:
 		case IDC_MUC_POLICY:
-		case IDC_VOICE_POLICY:
-		case IDC_VOICE_DEVICE_IN:
-		case IDC_VOICE_DEVICE_OUT:
 			if (HIWORD(wParam) == CBN_SELCHANGE)
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 			break;
 		default:
-			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 			break;
 		}
 		break;
@@ -253,16 +335,52 @@ static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				DBWriteContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", (WORD) SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "AlertPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_IN, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "EnableAvatars", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_AVATARS));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "EnableVersion", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VERSIONINFO));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "UseNudge", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_NUDGE_SUPPORT));
 				DBWriteContactSettingByte(NULL, jabberProtoName, "LogAlerts", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_LOG_ALERTS));
 				if (reconnectRequired && jabberConnected)
 					MessageBox(hwndDlg, Translate("These changes will take effect the next time you connect to the Tlen network."), Translate("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
-				TlenLoadOptions();
+				return TRUE;
+			}
+		}
+		break;
+	}
+	return FALSE;
+}
+
+static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg) {
+	case WM_INITDIALOG:
+		{
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Always ask me"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept invitations from authorized contacts"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Accept all invitations"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore invitations from unauthorized contacts"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)Translate("Ignore all invitation"));
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, tlenOptions.voiceChatPolicy, 0);
+			TlenVoiceBuildInDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_IN));
+			TlenVoiceBuildOutDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_OUT));
+			return TRUE;
+		}
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDC_VOICE_POLICY:
+		case IDC_VOICE_DEVICE_IN:
+		case IDC_VOICE_DEVICE_OUT:
+			if (HIWORD(wParam) == CBN_SELCHANGE)
+				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+			break;
+		}
+		break;
+	case WM_NOTIFY:
+		switch (((LPNMHDR) lParam)->code) {
+		case PSN_APPLY:
+			{
+				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_IN, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
 				return TRUE;
 			}
 		}
@@ -352,7 +470,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			switch (LOWORD(wParam)) {
 			case IDC_FILE_PROXY_TYPE:
 				if (HIWORD(wParam) == CBN_SELCHANGE)
-					SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+					SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 				break;
 			case IDC_EDIT_LOGIN_SERVER:
 			case IDC_HOST:
@@ -362,7 +480,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			case IDC_FILE_PROXY_USER:
 			case IDC_FILE_PROXY_PASSWORD:
 				if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
-					SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+					SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 				break;
 			case IDC_FILE_USE_PROXY:
 				bChecked = IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY);
@@ -379,14 +497,11 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USER), bChecked);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD_LABEL), bChecked);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD), bChecked);
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 				break;
 			case IDC_KEEPALIVE:
 			case IDC_VISIBILITY_SUPPORT:
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
-				break;
-			default:
-//				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
 				break;
 			}
 		}
@@ -511,6 +626,7 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			case IDC_PREVIEW:
 				{
 					int delay;
+					char title[256];
 					if (IsDlgButtonChecked(hwndDlg, IDC_DELAY_POPUP)) {
 						delay=0;
 					} else if (IsDlgButtonChecked(hwndDlg, IDC_DELAY_PERMANENT)) {
@@ -518,9 +634,10 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					} else {
 						delay=GetDlgItemInt(hwndDlg, IDC_DELAY, NULL, FALSE);
 					}
+					_snprintf(title, sizeof(title), Translate("%s mail"), jabberModuleName);
 					MailPopupPreview((DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0),
 									 (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0),
-									 "New mail",
+									 title,
 									 "From: test@test.test\nSubject: test",
 									 delay);
 				}

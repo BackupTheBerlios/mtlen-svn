@@ -12,20 +12,23 @@
 #define IDI_REQUEST						106
 
 #define IDD_OPTIONS                  	150
-#define IDD_OPTIONS_EXPERT            	151
-#define IDD_OPTIONS_POPUPS              152
-#define IDD_USER_INFO					153
-#define IDD_USER_VCARD					154
-#define IDD_PASSWORD                    155
-#define IDD_ADVSEARCH              		156
-#define IDD_VOICE						157
-#define IDD_ACCEPT_VOICE				158
-#define IDD_USER_SETAVATAR				159
+#define IDD_OPTIONS_BASIC              	151
+#define IDD_OPTIONS_VOICE            	152
+#define IDD_OPTIONS_POPUPS              153
+#define IDD_OPTIONS_ADVANCED           	154
+#define IDD_USER_INFO					155
+#define IDD_USER_VCARD					156
+#define IDD_PASSWORD                    157
+#define IDD_ADVSEARCH              		158
+#define IDD_VOICE						159
+#define IDD_ACCEPT_VOICE				160
+#define IDD_USER_SETAVATAR				161
 
-#define IDC_EDIT_USERNAME               1000
-#define IDC_SAVE                        1000
-#define IDC_EDIT_PASSWORD               1001
-#define IDC_EDIT_LOGIN_SERVER           1003
+#define IDC_TABS						1000
+#define IDC_EDIT_USERNAME               1001
+#define IDC_SAVE                        1002
+#define IDC_EDIT_PASSWORD               1003
+#define IDC_EDIT_LOGIN_SERVER           1004
 #define IDC_INFO_JID                    1007
 #define IDC_INFO_RESOURCE               1008
 #define IDC_SHOW_OFFLINE                1012
