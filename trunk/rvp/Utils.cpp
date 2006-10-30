@@ -407,13 +407,18 @@ char *Utils::utf8Decode(const char *str) {
 	while (*p) {
 		if ((*p & 0x80) == 0) {
 			wszTemp[i++] = *(p++);
-		} else if ((*p & 0xe0) == 0xe0) {
-			wszTemp[i] = (*(p++) & 0x1f) << 12;
-			wszTemp[i] |= (*(p++) & 0x3f) << 6;
-			wszTemp[i++] |= (*(p++) & 0x3f);
 		} else {
-			wszTemp[i] = (*(p++) & 0x3f) << 6;
-			wszTemp[i++] |= (*(p++) & 0x3f);
+			if ((*p & 0xe0) == 0xe0) {
+				wszTemp[i] = (*(p++) & 0x1f) << 12;
+			} else {
+				wszTemp[i] = 0;
+			}
+			if (*p != '\0') {
+				wszTemp[i] |= (*(p++) & 0x3f) << 6;
+				if (*p != '\0') {
+					wszTemp[i++] |= (*(p++) & 0x3f);
+				}
+			}
 		}
 	}
 	wszTemp[i] = '\0';
@@ -442,6 +447,21 @@ char *Utils::utf8Decode2(const char *str, int len) {
 		wchar_t wszTemp = 0;
 		if ((*p & 0x80) == 0) {
 			szOut[i++] = *(p++);
+		} else {
+			if ((*p & 0xe0) == 0xe0) {
+				wszTemp = (*(p++) & 0x1f) << 12;
+			} else {
+				wszTemp = 0;
+			}
+			if (*p != '\0') {
+				wszTemp |= (*(p++) & 0x3f) << 6;
+				if (*p != '\0') {
+					wszTemp |= (*(p++) & 0x3f);
+				}
+			}
+			szOut[i++] = (unsigned char) (wszTemp & 0xFF);
+		}
+		/*
 		} else if ((*p & 0xe0) == 0xe0) {
 			wszTemp = (*(p++) & 0x1f) << 12;
 			wszTemp |= (*(p++) & 0x3f) << 6;
@@ -452,6 +472,7 @@ char *Utils::utf8Decode2(const char *str, int len) {
 			wszTemp |= (*(p++) & 0x3f);
 			szOut[i++] = (unsigned char) (wszTemp & 0xFF);
 		}
+		*/
 	}
 	szOut[i] = '\0';
 	return (char *)szOut;
