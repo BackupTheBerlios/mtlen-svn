@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "codec/gsm.h"
 #include "jabber_list.h"
 #include "tlen_voice.h"
+#include "tlen_p2p_old.h"
 
 extern char *jabberProtoName;
 extern HANDLE hNetlibUser;
@@ -65,13 +66,6 @@ typedef struct {
 	int			vuMeter;
 	int			bytesSum;
 } TLEN_VOICE_CONTROL;
-
-typedef struct {
-	unsigned int maxDataLen;
-	char *packet;
-	DWORD type;
-	DWORD len;
-} TLEN_FILE_PACKET;
 
 static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft);
 static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft);
@@ -295,106 +289,6 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
 	return 0;
 }
 
-static TLEN_FILE_PACKET *TlenVoicePacketCreate(int datalen)
-{
-	TLEN_FILE_PACKET *packet;
-
-	if ((packet=(TLEN_FILE_PACKET *) malloc(sizeof(TLEN_FILE_PACKET))) == NULL)
-		return NULL;
-	if ((packet->packet=(char *) malloc(datalen)) == NULL) {
-		free(packet);
-		return NULL;
-	}
-	packet->maxDataLen = datalen;
-	packet->type=0;
-	packet->len=0;
-	return packet;
-}
-
-static void TlenVoicePacketFree(TLEN_FILE_PACKET *packet)
-{
-	if (packet != NULL) {
-		if (packet->packet != NULL)
-			free(packet->packet);
-		free(packet);
-	}
-}
-
-static void TlenVoicePacketSetType(TLEN_FILE_PACKET *packet, DWORD type)
-{
-	if (packet!=NULL) {
-		packet->type = type;
-	}
-}
-
-static void TlenVoicePacketSetLen(TLEN_FILE_PACKET *packet, DWORD len)
-{
-	if (packet!=NULL) {
-		packet->len = len;
-	}
-}
-
-static void TlenVoicePacketPackDword(TLEN_FILE_PACKET *packet, DWORD data)
-{
-	if (packet!=NULL && packet->packet!=NULL) {
-		if (packet->len + sizeof(DWORD) <= packet->maxDataLen) {
-			(*((DWORD*)((packet->packet)+(packet->len)))) = data;
-			packet->len += sizeof(DWORD);
-		}
-		else {
-			JabberLog("TlenVoicePacketPackDword() overflow");
-		}
-	}
-}
-
-static void TlenVoicePacketPackBuffer(TLEN_FILE_PACKET *packet, char *buffer, int len)
-{
-	if (packet!=NULL && packet->packet!=NULL) {
-		if (packet->len + len <= packet->maxDataLen) {
-			memcpy((packet->packet)+(packet->len), buffer, len);
-			packet->len += len;
-		}
-		else {
-			JabberLog("TlenVoicePacketPackBuffer() overflow");
-		}
-	}
-}
-
-static int TlenVoicePacketSend(JABBER_SOCKET s, TLEN_FILE_PACKET *packet)
-{	DWORD sendResult;
-	if (packet!=NULL && packet->packet!=NULL) {
-		Netlib_Send(s, (char *)&packet->type, 4, MSG_NODUMP);
-		Netlib_Send(s, (char *)&packet->len, 4, MSG_NODUMP);
-		sendResult=Netlib_Send(s, packet->packet, packet->len, MSG_NODUMP);
-		if (sendResult==SOCKET_ERROR || sendResult!=packet->len) return 0;
-	}
-	return 1;
-}
-
-static TLEN_FILE_PACKET* TlenVoicePacketReceive(JABBER_SOCKET s)
-{
-	TLEN_FILE_PACKET *packet;
-	DWORD recvResult;
-	DWORD type, len, pos;
-	recvResult = Netlib_Recv(s, (char *)&type, 4, MSG_NODUMP);
-	if (recvResult==0 || recvResult==SOCKET_ERROR) return NULL;
-	recvResult = Netlib_Recv(s, (char *)&len, 4, MSG_NODUMP);
-	if (recvResult==0 || recvResult==SOCKET_ERROR) return NULL;
-	packet = TlenVoicePacketCreate(len);
-	TlenVoicePacketSetType(packet, type);
-	TlenVoicePacketSetLen(packet, len);
-	pos = 0;
-	while (len > 0) {
-		recvResult = Netlib_Recv(s, packet->packet+pos, len, MSG_NODUMP);
-		if (recvResult==0 || recvResult==SOCKET_ERROR) {
-			TlenVoicePacketFree(packet);
-			return NULL;
-		}
-		len -= recvResult;
-		pos += recvResult;
-	}
-	return packet;
-}
 
 static void TlenVoiceFreeFt(TLEN_FILE_TRANSFER *ft)
 {
@@ -462,17 +356,6 @@ static void TlenVoiceFreeVc(TLEN_VOICE_CONTROL *vc)
 	JabberLog("<- TlenVoiceFreeVc");
 }
 
-typedef struct {
-	char	szHost[256];
-	int		wPort;
-	int		useAuth;
-	char	szUser[256];
-	char	szPassword[256];
-}SOCKSBIND;
-
-
-#define JABBER_NETWORK_BUFFER_SIZE 2048
-
 static void TlenVoiceCrypt(char *buffer, int len)
 {
 	int i, j, k;
@@ -484,95 +367,6 @@ static void TlenVoiceCrypt(char *buffer, int len)
 		j = k + (j << 1);
 		j += 0xBB;
 		buffer[i]^=j;
-	}
-}
-
-static TLEN_FILE_TRANSFER* TlenVoiceEstablishIncomingConnection(JABBER_SOCKET *s)
-{
-	JABBER_LIST_ITEM *item = NULL;
-	TLEN_FILE_PACKET *packet;
-	int i;
-	char str[300];
-	DWORD iqId;
-	JabberLog("Establishing incoming connection.");
-	// TYPE: 0x1
-	// LEN:
-	// (DWORD) 0x1
-	// (DWORD) id
-	// (BYTE) hash[20]
-	packet = TlenVoicePacketReceive(s);
-	if (packet == NULL || packet->type!=1 || packet->len<28) {
-		if (packet!=NULL) {
-			TlenVoicePacketFree(packet);
-		}
-		JabberLog("Unable to read first packet.");
-		return NULL;
-	}
-	iqId = *((DWORD *)(packet->packet+sizeof(DWORD)));
-	i = 0;
-	while ((i=JabberListFindNext(LIST_VOICE, i)) >= 0) {
-		if ((item=JabberListGetItemPtrFromIndex(i))!=NULL) {
-			JabberLog("iter: %s", item->ft->jid);
-			_snprintf(str, sizeof(str), "%d", iqId);
-			if (!strcmp(item->ft->iqId, str)) {
-				char *hash, *nick;
-				int j;
-				nick = JabberNickFromJID(item->ft->jid);
-				_snprintf(str, sizeof(str), "%08X%s%d", iqId, nick, iqId);
-				free(nick);
-				hash = TlenSha1(str, strlen(str));
-				for (j=0;j<20;j++) {
-					if (hash[j]!=packet->packet[2*sizeof(DWORD)+j]) break;
-				}
-				free(hash);
-				if (j==20) break;
-			}
-		}
-		i++;
-	}
-	TlenVoicePacketFree(packet);
-	if (i >=0) {
-		if ((packet=TlenVoicePacketCreate(sizeof(DWORD))) != NULL) {
-			// Send connection establishment acknowledgement
-			TlenVoicePacketSetType(packet, 0x2);
-			TlenVoicePacketPackDword(packet, (DWORD) atoi(item->ft->iqId));
-			TlenVoicePacketSend(s, packet);
-			TlenVoicePacketFree(packet);
-			item->ft->state = FT_CONNECTING;
-//			ProtoBroadcastAck(jabberProtoName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, item->ft, 0);
-			return item->ft;
-		}
-	}
-	return NULL;
-}
-
-static void TlenVoiceEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft)
-{
-	char *hash;
-	char str[300];
-	TLEN_FILE_PACKET *packet;
-	JabberLog("Establishing outgoing connection.");
-	ft->state = FT_ERROR;
-	if ((packet = TlenVoicePacketCreate(2*sizeof(DWORD) + 20))!=NULL) {
-		TlenVoicePacketSetType(packet, 1);
-		TlenVoicePacketPackDword(packet, 1);
-		TlenVoicePacketPackDword(packet, (DWORD) atoi(ft->iqId));
-		_snprintf(str, sizeof(str), "%08X%s%d", atoi(ft->iqId), jabberThreadInfo->username, atoi(ft->iqId));
-		hash = TlenSha1(str, strlen(str));
-		TlenVoicePacketPackBuffer(packet, hash, 20);
-		free(hash);
-		TlenVoicePacketSend(ft->s, packet);
-		TlenVoicePacketFree(packet);
-		packet = TlenVoicePacketReceive(ft->s);
-		if (packet != NULL) {
-			if (packet->type == 2) { // acknowledge
-				if ((int)(*((DWORD*)packet->packet)) == atoi(ft->iqId)) {
-					ft->state = FT_CONNECTING;
-//					ProtoBroadcastAck(jabberProtoName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, item->ft, 0);
-				}
-			}
-			TlenVoicePacketFree(packet);
-		}
 	}
 }
 
@@ -591,7 +385,7 @@ static void __cdecl TlenVoiceBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
 	}
 	if (!status) {
 		JabberLog("Entering recv loop for this file connection... (ft->s is hConnection)");
-		if (TlenVoiceEstablishIncomingConnection(ft->s)!=NULL) {
+		if (TlenP2PEstablishIncomingConnection(ft->s, LIST_VOICE, FALSE)!=NULL) {
 			playbackControl = NULL;
 			recordingControl = TlenVoiceCreateVC(3);
 			recordingControl->ft = ft;
@@ -692,7 +486,7 @@ static void __cdecl TlenVoiceBindSocks5Thread(TLEN_FILE_TRANSFER* ft)
 	}
 	if (!status) {
 		JabberLog("Entering recv loop for this file connection... (ft->s is hConnection)");
-		if (TlenVoiceEstablishIncomingConnection(ft->s)!=NULL) {
+		if (TlenP2PEstablishIncomingConnection(ft->s, LIST_VOICE, FALSE)!=NULL) {
 			playbackControl = NULL;
 			recordingControl = TlenVoiceCreateVC(3);
 			recordingControl->ft = ft;
@@ -907,7 +701,7 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 	if (s != NULL) {
 		ft->s = s;
 		JabberLog("Entering file receive loop");
-		TlenVoiceEstablishOutgoingConnection(ft);
+		TlenP2PEstablishOutgoingConnection(ft, FALSE);
 		if (ft->state!=FT_ERROR) {
 			playbackControl = NULL;
 			recordingControl = TlenVoiceCreateVC(3);
@@ -967,7 +761,7 @@ static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemo
 	JABBER_SOCKET slisten;
 	TLEN_FILE_TRANSFER *ft;
 
-	ft = TlenVoiceEstablishIncomingConnection(hConnection);
+	ft = TlenP2PEstablishIncomingConnection(hConnection, LIST_VOICE, FALSE);
 	if (ft != NULL) {
 		slisten = ft->s;
 		ft->s = hConnection;
@@ -1006,7 +800,7 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 	char *p;
 	float val;
 	TLEN_FILE_PACKET  *packet;
-	packet = TlenVoicePacketReceive(ft->s);
+	packet = TlenP2PPacketReceive(ft->s);
 	if (packet != NULL) {
 		statusTxt = " Unknown packet ";
 		p = packet->packet;
@@ -1112,7 +906,7 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 			sprintf(ttt, "%s %d %d ", statusTxt, availPlayback, availOverrun);
 			SetDlgItemText(voiceDlgHWND, IDC_STATUS, ttt);
 		}
-		TlenVoicePacketFree(packet);
+		TlenP2PPacketFree(packet);
 	}
 	else {
 		if (playbackControl!=NULL) {
@@ -1170,7 +964,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 				SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Connecting...");
 				//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 				ft->s = s;
-				TlenVoiceEstablishOutgoingConnection(ft);
+				TlenP2PEstablishOutgoingConnection(ft, FALSE);
 				if (ft->state!=FT_ERROR) {
 					JabberLog("Entering send loop for this file connection...");
 					playbackControl = NULL;
@@ -1223,13 +1017,13 @@ static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft)
 	TLEN_FILE_PACKET *packet;
 
 	codec = recordingControl->codec;
-	if ((packet=TlenVoicePacketCreate(sizeof(DWORD)+modeFrameSize[codec]*33)) != NULL) {
+	if ((packet=TlenP2PPacketCreate(sizeof(DWORD)+modeFrameSize[codec]*33)) != NULL) {
 		short *in;
 		float val;
 		in = recordingControl->recordingData;
-		TlenVoicePacketSetType(packet, 0x96);
+		TlenP2PPacketSetType(packet, 0x96);
 		packet->packet[0] = codec;
-		TlenVoicePacketPackDword(packet, codec);
+		TlenP2PPacketPackDword(packet, codec);
 		val = 0;
 		for (i=0; i<modeFrameSize[codec] * 160; i+=modeFrameSize[codec]) {
 			val += in[i]*in[i];
@@ -1243,14 +1037,14 @@ static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft)
 		recordingControl->vuMeter = i;
 		for (i=0; i<modeFrameSize[codec]; i++) {
 			gsm_encode(recordingControl->gsmstate, in + i * 160);
-			TlenVoicePacketPackBuffer(packet, recordingControl->gsmstate->gsmFrame, 33);
+			TlenP2PPacketPackBuffer(packet, recordingControl->gsmstate->gsmFrame, 33);
 		}
 		TlenVoiceCrypt(packet->packet+4, packet->len-4);
-		if (!TlenVoicePacketSend(ft->s, packet)) {
+		if (!TlenP2PPacketSend(ft->s, packet)) {
 			ft->state = FT_ERROR;
 		}
 		recordingControl->bytesSum  += 8 + packet->len;
-		TlenVoicePacketFree(packet);
+		TlenP2PPacketFree(packet);
 	} else {
 		ft->state = FT_ERROR;
 	}

@@ -85,7 +85,7 @@ static char *getDisplayName(const char *id)
 			if (!CallService(MS_CONTACT_GETCONTACTINFO, 0, (LPARAM) & ci)) {
 				if (ci.type == CNFT_ASCIIZ) {
 					if (ci.pszVal) {
-						char * str = _strdup(ci.pszVal);
+						char * str = strdup(ci.pszVal);
 						JabberLog("NICK %s", str);
 						miranda_sys_free(ci.pszVal);
 						return str;
@@ -94,7 +94,7 @@ static char *getDisplayName(const char *id)
 			}
 		}
 	}
-	return _strdup(id);
+	return strdup(id);
 }
 
 BOOL TlenMUCInit(void)
@@ -571,7 +571,7 @@ static int TlenMUCSendPresence(const char *roomID, const char *nick, int desired
 					if (item->nick!=NULL) free(item->nick);
 					item->nick = NULL;
 					if (nick!=NULL) {
-						item->nick = _strdup(nick);
+						item->nick = strdup(nick);
 					}
 				}
 				break;
@@ -636,7 +636,7 @@ static int TlenMUCSendQuery(int type, const char *parent, int page)
 		JABBER_LIST_ITEM *item;
 		sprintf(serialId, JABBER_IQID"%d", JabberSerialNext());
 		item = JabberListAdd(LIST_SEARCH, serialId);
-		item->roomName = _strdup(parent);
+		item->roomName = strdup(parent);
 		JabberSend(jabberThreadInfo->s, "<iq to='c' type='3' n='%s' id='%s'/>", parent, serialId);
 	} else {
 		if (parent==NULL) {
@@ -672,10 +672,10 @@ int TlenMUCCreateWindow(const char *roomID, const char *roomName, int roomFlags,
 	}
 	item = JabberListAdd(LIST_CHATROOM, roomID);
 	if (roomName!=NULL) {
-		item->roomName = _strdup(roomName);
+		item->roomName = strdup(roomName);
 	}
 	if (nick!=NULL) {
-		item->nick = _strdup(nick);
+		item->nick = strdup(nick);
 	}
 	mucw.cbSize = sizeof(MUCCWINDOW);
 	mucw.iType = MUCC_WINDOW_CHATROOM;
@@ -982,8 +982,8 @@ static void __cdecl TlenMUCCSendQueryResultThread(void *vRoomId)
 			if (!DBGetContactSettingByte(hContact, jabberProtoName, "bChat", FALSE)) {
 				if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 					if (strcmp(dbv.pszVal, "b73@tlen.pl")) {
-						queryResult.pItems[queryResult.iItemsNum].pszID = _strdup(dbv.pszVal);
-						queryResult.pItems[queryResult.iItemsNum].pszName = _strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, 0));
+						queryResult.pItems[queryResult.iItemsNum].pszID = strdup(dbv.pszVal);
+						queryResult.pItems[queryResult.iItemsNum].pszName = strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, 0));
 						queryResult.iItemsNum++;
 					}
 					DBFreeVariant(&dbv);
@@ -999,7 +999,7 @@ static void __cdecl TlenMUCCSendQueryResultThread(void *vRoomId)
 
 
 static int TlenMUCQueryContacts(const char *roomId) {
-	JabberForkThread(TlenMUCCSendQueryResultThread, 0, (void *)_strdup(roomId));
+	JabberForkThread(TlenMUCCSendQueryResultThread, 0, (void *)strdup(roomId));
 	return 1;
 }
 
@@ -1053,7 +1053,7 @@ int TlenMUCContactMenuHandleMUC(WPARAM wParam, LPARAM lParam)
 			char serialId[32];
 			sprintf(serialId, JABBER_IQID"%d", JabberSerialNext());
 			item = JabberListAdd(LIST_INVITATIONS, serialId);
-			item->nick = _strdup(dbv.pszVal);
+			item->nick = strdup(dbv.pszVal);
 			JabberSend(jabberThreadInfo->s, "<p to='c' tp='c' id='%s'/>", serialId);
 			DBFreeVariant(&dbv);
 		}

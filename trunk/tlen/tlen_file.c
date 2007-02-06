@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "jabber_list.h"
+#include "tlen_p2p_old.h"
 
 extern char *jabberProtoName;
 extern HANDLE hNetlibUser;
@@ -36,124 +37,6 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft);
 static void TlenFileSendingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 static void TlenFileReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 
-
-enum {
-	TLEN_FILE_PACKET_CONNECTION_REQUEST = 0x01,
-	TLEN_FILE_PACKET_CONNECTION_REQUEST_ACK = 0x02,
-	TLEN_FILE_PACKET_FILE_LIST = 0x32,
-	TLEN_FILE_PACKET_FILE_LIST_ACK = 0x33,
-	TLEN_FILE_PACKET_FILE_REQUEST = 0x34,
-	TLEN_FILE_PACKET_FILE_DATA = 0x35,
-	TLEN_FILE_PACKET_END_OF_FILE = 0x37,
-};
-
-typedef struct {
-	unsigned int maxDataLen;
-	char *packet;
-	DWORD type;
-	DWORD len;
-} TLEN_FILE_PACKET;
-
-static TLEN_FILE_PACKET *TlenFilePacketCreate(int datalen)
-{
-	TLEN_FILE_PACKET *packet;
-
-	if ((packet=(TLEN_FILE_PACKET *) malloc(sizeof(TLEN_FILE_PACKET))) == NULL)
-		return NULL;
-	if ((packet->packet=(char *) malloc(datalen)) == NULL) {
-		free(packet);
-		return NULL;
-	}
-	packet->maxDataLen = datalen;
-	packet->type=0;
-	packet->len=0;
-	return packet;
-}
-
-static void TlenFilePacketFree(TLEN_FILE_PACKET *packet)
-{
-	if (packet != NULL) {
-		if (packet->packet != NULL)
-			free(packet->packet);
-		free(packet);
-	}
-}
-
-static void TlenFilePacketSetType(TLEN_FILE_PACKET *packet, DWORD type)
-{
-	if (packet!=NULL) {
-		packet->type = type;
-	}
-}
-
-static void TlenFilePacketSetLen(TLEN_FILE_PACKET *packet, DWORD len)
-{
-	if (packet!=NULL) {
-		packet->len = len;
-	}
-}
-
-static void TlenFilePacketPackDword(TLEN_FILE_PACKET *packet, DWORD data)
-{
-	if (packet!=NULL && packet->packet!=NULL) {
-		if (packet->len + sizeof(DWORD) <= packet->maxDataLen) {
-			(*((DWORD*)((packet->packet)+(packet->len)))) = data;
-			packet->len += sizeof(DWORD);
-		}
-		else {
-			JabberLog("TlenFilePacketPackDword() overflow");
-		}
-	}
-}
-
-static void TlenFilePacketPackBuffer(TLEN_FILE_PACKET *packet, char *buffer, int len)
-{
-	if (packet!=NULL && packet->packet!=NULL) {
-		if (packet->len + len <= packet->maxDataLen) {
-			memcpy((packet->packet)+(packet->len), buffer, len);
-			packet->len += len;
-		}
-		else {
-			JabberLog("TlenFilePacketPackBuffer() overflow");
-		}
-	}
-}
-
-static int TlenFilePacketSend(JABBER_SOCKET s, TLEN_FILE_PACKET *packet)
-{	DWORD sendResult;
-	if (packet!=NULL && packet->packet!=NULL) {
-		Netlib_Send(s, (char *)&packet->type, 4, MSG_NODUMP);
-		Netlib_Send(s, (char *)&packet->len, 4, MSG_NODUMP);
-		sendResult=Netlib_Send(s, packet->packet, packet->len, MSG_NODUMP);
-		if (sendResult==SOCKET_ERROR || sendResult!=packet->len) return 0;
-	}
-	return 1;
-}
-
-static TLEN_FILE_PACKET* TlenFilePacketReceive(JABBER_SOCKET s)
-{
-	TLEN_FILE_PACKET *packet;
-	DWORD recvResult;
-	DWORD type, len, pos;
-	recvResult = Netlib_Recv(s, (char *)&type, 4, MSG_NODUMP);
-	if (recvResult==0 || recvResult==SOCKET_ERROR) return NULL;
-	recvResult = Netlib_Recv(s, (char *)&len, 4, MSG_NODUMP);
-	if (recvResult==0 || recvResult==SOCKET_ERROR) return NULL;
-	packet = TlenFilePacketCreate(len);
-	TlenFilePacketSetType(packet, type);
-	TlenFilePacketSetLen(packet, len);
-	pos = 0;
-	while (len > 0) {
-		recvResult = Netlib_Recv(s, packet->packet+pos, len, MSG_NODUMP);
-		if (recvResult==0 || recvResult==SOCKET_ERROR) {
-			TlenFilePacketFree(packet);
-			return NULL;
-		}
-		len -= recvResult;
-		pos += recvResult;
-	}
-	return packet;
-}
 
 void TlenFileFreeFt(TLEN_FILE_TRANSFER *ft)
 {
@@ -175,105 +58,6 @@ void TlenFileFreeFt(TLEN_FILE_TRANSFER *ft)
 	free(ft);
 }
 
-typedef struct {
-	char	szHost[256];
-	int		wPort;
-	int		useAuth;
-	char	szUser[256];
-	char	szPassword[256];
-}SOCKSBIND;
-
-
-#define JABBER_NETWORK_BUFFER_SIZE 2048
-
-static TLEN_FILE_TRANSFER* TlenFileEstablishIncomingConnection(JABBER_SOCKET *s) 
-{
-	JABBER_LIST_ITEM *item = NULL;
-	TLEN_FILE_PACKET *packet;
-	int i;
-	char str[300];
-	DWORD iqId;
-	JabberLog("Establishing incoming connection.");
-	// TYPE: 0x1
-	// LEN:
-	// (DWORD) 0x1
-	// (DWORD) id
-	// (BYTE) hash[20]
-	packet = TlenFilePacketReceive(s);
-	if (packet == NULL || packet->type != TLEN_FILE_PACKET_CONNECTION_REQUEST || packet->len<28) {
-		if (packet!=NULL) {
-			TlenFilePacketFree(packet);
-		}
-		JabberLog("Unable to read first packet.");
-		return NULL;
-	}
-	iqId = *((DWORD *)(packet->packet+sizeof(DWORD)));
-	i = 0;
-	while ((i=JabberListFindNext(LIST_FILE, i)) >= 0) {
-		if ((item=JabberListGetItemPtrFromIndex(i))!=NULL) {
-			_snprintf(str, sizeof(str), "%d", iqId);
-			if (!strcmp(item->ft->iqId, str)) {
-				char *hash, *nick;
-				int j;
-				nick = JabberNickFromJID(item->ft->jid);
-				_snprintf(str, sizeof(str), "%08X%s%d", iqId, nick, iqId);
-				free(nick);
-				hash = TlenSha1(str, strlen(str));
-				for (j=0;j<20;j++) {
-					if (hash[j]!=packet->packet[2*sizeof(DWORD)+j]) break;
-				}
-				free(hash);
-				if (j==20) break;
-			}
-		}
-		i++;
-	}
-	TlenFilePacketFree(packet);
-	if (i >=0) {
-		if ((packet=TlenFilePacketCreate(sizeof(DWORD))) != NULL) {
-			// Send connection establishment acknowledgement
-			TlenFilePacketSetType(packet, TLEN_FILE_PACKET_CONNECTION_REQUEST_ACK);
-			TlenFilePacketPackDword(packet, (DWORD) atoi(item->ft->iqId));
-			TlenFilePacketSend(s, packet);
-			TlenFilePacketFree(packet);
-			item->ft->state = FT_CONNECTING;
-			ProtoBroadcastAck(jabberProtoName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, item->ft, 0);
-			return item->ft;
-		}
-	}
-	return NULL;
-}
-
-static void TlenFileEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft) 
-{
-	char *hash;
-	char str[300];
-	TLEN_FILE_PACKET *packet;
-	JabberLog("Establishing outgoing connection.");
-	ft->state = FT_ERROR;
-	if ((packet = TlenFilePacketCreate(2*sizeof(DWORD) + 20))!=NULL) {
-		TlenFilePacketSetType(packet, TLEN_FILE_PACKET_CONNECTION_REQUEST);
-		TlenFilePacketPackDword(packet, 1);
-		TlenFilePacketPackDword(packet, (DWORD) atoi(ft->iqId));
-		_snprintf(str, sizeof(str), "%08X%s%d", atoi(ft->iqId), jabberThreadInfo->username, atoi(ft->iqId));
-		hash = TlenSha1(str, strlen(str));
-		TlenFilePacketPackBuffer(packet, hash, 20);
-		free(hash);
-		TlenFilePacketSend(ft->s, packet);
-		TlenFilePacketFree(packet);
-		packet = TlenFilePacketReceive(ft->s);
-		if (packet != NULL) {
-			if (packet->type == TLEN_FILE_PACKET_CONNECTION_REQUEST_ACK) { // acknowledge
-				if ((int)(*((DWORD*)packet->packet)) == atoi(ft->iqId)) {
-					ft->state = FT_CONNECTING;
-					ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, ft, 0);
-				}
-			}
-			TlenFilePacketFree(packet);
-		}
-	} 
-}
-
 static void __cdecl TlenFileBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
 {
 	BYTE buf[8];
@@ -289,7 +73,7 @@ static void __cdecl TlenFileBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
 	}
 	if (!status) {
 //		JabberLog("Entering recv loop for this file connection... (ft->s is hConnection)");
-		if (TlenFileEstablishIncomingConnection(ft->s)!=NULL) {
+		if (TlenP2PEstablishIncomingConnection(ft->s, LIST_FILE, TRUE)!=NULL) {
 			while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
 				if (ft->mode == FT_SEND) {
 					TlenFileSendParse(ft);
@@ -384,7 +168,7 @@ static void __cdecl TlenFileBindSocks5Thread(TLEN_FILE_TRANSFER* ft)
 	}
 	if (!status) {
 		JabberLog("Entering recv loop for this file connection... (ft->s is hConnection)");
-		if (TlenFileEstablishIncomingConnection(ft->s)!=NULL) {
+		if (TlenP2PEstablishIncomingConnection(ft->s, LIST_FILE, TRUE)!=NULL) {
 			while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
 				if (ft->mode == FT_SEND) {
 					TlenFileSendParse(ft);
@@ -598,7 +382,7 @@ void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 	if (s != NULL) {
 		ft->s = s;
 		JabberLog("Entering file receive loop");
-		TlenFileEstablishOutgoingConnection(ft);
+		TlenP2PEstablishOutgoingConnection(ft, TRUE);
 		while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
 			TlenFileReceiveParse(ft);
 		}
@@ -646,7 +430,7 @@ static void TlenFileReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemot
 	JABBER_SOCKET slisten;
 	TLEN_FILE_TRANSFER *ft;
 
-	ft = TlenFileEstablishIncomingConnection(hConnection);
+	ft = TlenP2PEstablishIncomingConnection(hConnection, LIST_FILE, TRUE);
 	if (ft != NULL) {
 		slisten = ft->s;
 		ft->s = hConnection;
@@ -676,7 +460,7 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 
 	rpacket = NULL;
 	if (ft->state == FT_CONNECTING) {
-		rpacket = TlenFilePacketReceive(ft->s);
+		rpacket = TlenP2PPacketReceive(ft->s);
 		if (rpacket != NULL) {
 			p = rpacket->packet;
 			if (rpacket->type == TLEN_FILE_PACKET_FILE_LIST) { // list of files (length & name)
@@ -695,18 +479,18 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 					memcpy(ft->files[i], p, 256);
 					p += 256;
 				}
-				if ((packet=TlenFilePacketCreate(3*sizeof(DWORD))) == NULL) {
+				if ((packet=TlenP2PPacketCreate(3*sizeof(DWORD))) == NULL) {
 					ft->state = FT_ERROR;
 				} 
 				else {
-					TlenFilePacketSetType(packet, TLEN_FILE_PACKET_FILE_LIST_ACK); 
-					TlenFilePacketSend(ft->s, packet);
-					TlenFilePacketFree(packet);
+					TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_FILE_LIST_ACK); 
+					TlenP2PPacketSend(ft->s, packet);
+					TlenP2PPacketFree(packet);
 					ft->state = FT_INITIALIZING;
 					JabberLog("Change to FT_INITIALIZING");
 				}
 			}
-			TlenFilePacketFree(rpacket);
+			TlenP2PPacketFree(rpacket);
 		}
 		else {
 			ft->state = FT_ERROR;
@@ -714,13 +498,13 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 	}
 	else if (ft->state == FT_INITIALIZING) {
 		char *fullFileName;
-		if ((packet=TlenFilePacketCreate(3*sizeof(DWORD))) != NULL) {
-			TlenFilePacketSetType(packet, TLEN_FILE_PACKET_FILE_REQUEST); // file request
-			TlenFilePacketPackDword(packet, ft->currentFile);
-			TlenFilePacketPackDword(packet, 0);
-			TlenFilePacketPackDword(packet, 0);
-			TlenFilePacketSend(ft->s, packet);
-			TlenFilePacketFree(packet);
+		if ((packet=TlenP2PPacketCreate(3*sizeof(DWORD))) != NULL) {
+			TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_FILE_REQUEST); // file request
+			TlenP2PPacketPackDword(packet, ft->currentFile);
+			TlenP2PPacketPackDword(packet, 0);
+			TlenP2PPacketPackDword(packet, 0);
+			TlenP2PPacketSend(ft->s, packet);
+			TlenP2PPacketFree(packet);
 
 			fullFileName = (char *) malloc(strlen(ft->szSavePath) + strlen(ft->files[ft->currentFile]) + 2);
 			strcpy(fullFileName, ft->szSavePath);
@@ -755,7 +539,7 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 		pfts.currentFileTime = 0;
 		JabberLog("Receiving data...");
 		while (ft->state == FT_RECEIVING) {
-			rpacket = TlenFilePacketReceive(ft->s);
+			rpacket = TlenP2PPacketReceive(ft->s);
 			if (rpacket != NULL) {
 				p = rpacket->packet;
 				if (rpacket->type == TLEN_FILE_PACKET_FILE_DATA) { // file data
@@ -785,7 +569,7 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 						ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_NEXTFILE, ft, 0);
 					}
 				}
-				TlenFilePacketFree(rpacket);
+				TlenP2PPacketFree(rpacket);
 			}
 			else {
 				ft->state = FT_ERROR;
@@ -840,7 +624,7 @@ void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 			if (s != NULL) {
 				ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 				ft->s = s;
-				TlenFileEstablishOutgoingConnection(ft);
+				TlenP2PEstablishOutgoingConnection(ft, TRUE);
 				JabberLog("Entering send loop for this file connection...");
 				while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
 					TlenFileSendParse(ft);
@@ -885,7 +669,7 @@ static void TlenFileSendingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteI
 	JABBER_SOCKET slisten;
 	TLEN_FILE_TRANSFER *ft;
 
-	ft = TlenFileEstablishIncomingConnection(hConnection);
+	ft = TlenP2PEstablishIncomingConnection(hConnection, LIST_FILE, TRUE);
 	if (ft != NULL) {
 		slisten = ft->s;
 		ft->s = hConnection;
@@ -919,28 +703,28 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 
 	if (ft->state == FT_CONNECTING) {
 		char filename[256];	// Must be 256 (0x100)
-		if ((packet=TlenFilePacketCreate(sizeof(DWORD)+(ft->fileCount*(sizeof(filename)+sizeof(DWORD))))) != NULL) {
+		if ((packet=TlenP2PPacketCreate(sizeof(DWORD)+(ft->fileCount*(sizeof(filename)+sizeof(DWORD))))) != NULL) {
 			// Must pause a bit, sending these two packets back to back
 			// will break the session because the receiver cannot take it :)
 			SleepEx(1000, TRUE);
-			TlenFilePacketSetLen(packet, 0); // Reuse packet
-			TlenFilePacketSetType(packet, TLEN_FILE_PACKET_FILE_LIST);
-			TlenFilePacketPackDword(packet, (DWORD) ft->fileCount);
+			TlenP2PPacketSetLen(packet, 0); // Reuse packet
+			TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_FILE_LIST);
+			TlenP2PPacketPackDword(packet, (DWORD) ft->fileCount);
 			for (i=0; i<ft->fileCount; i++) {
 //					struct _stat statbuf;
 //					_stat(ft->files[i], &statbuf);
-//					TlenFilePacketPackDword(packet, statbuf.st_size);
-				TlenFilePacketPackDword(packet, ft->filesSize[i]);
+//					TlenP2PPacketPackDword(packet, statbuf.st_size);
+				TlenP2PPacketPackDword(packet, ft->filesSize[i]);
 				memset(filename, 0, sizeof(filename));
 				if ((t=strrchr(ft->files[i], '\\')) != NULL)
 					t++;
 				else
 					t = ft->files[i];
 				_snprintf(filename, sizeof(filename)-1, t);
-				TlenFilePacketPackBuffer(packet, filename, sizeof(filename));
+				TlenP2PPacketPackBuffer(packet, filename, sizeof(filename));
 			}
-			TlenFilePacketSend(ft->s, packet);
-			TlenFilePacketFree(packet);
+			TlenP2PPacketSend(ft->s, packet);
+			TlenP2PPacketFree(packet);
 
 			ft->allFileReceivedBytes = 0;
 			ft->state = FT_INITIALIZING;
@@ -951,7 +735,7 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 		}
 	}
 	else if (ft->state == FT_INITIALIZING) {	// FT_INITIALIZING
-		rpacket = TlenFilePacketReceive(ft->s);
+		rpacket = TlenP2PPacketReceive(ft->s);
 		if (rpacket == NULL) {
 			ft->state = FT_ERROR;
 			return;
@@ -998,19 +782,19 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 					pfts.currentFileSize = ft->filesSize[ft->currentFile]; //statbuf.st_size;
 					pfts.currentFileTime = 0;
 					ft->fileReceivedBytes = 0;
-					if ((packet = TlenFilePacketCreate(2*sizeof(DWORD)+2048)) == NULL) {
+					if ((packet = TlenP2PPacketCreate(2*sizeof(DWORD)+2048)) == NULL) {
 						ft->state = FT_ERROR;
 					}
 					else {
-						TlenFilePacketSetType(packet, TLEN_FILE_PACKET_FILE_DATA);
+						TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_FILE_DATA);
 						fileBuffer = (char *) malloc(2048);
 						JabberLog("Sending file data...");
 						while ((numRead=_read(ft->fileId, fileBuffer, 2048)) > 0) {
-							TlenFilePacketSetLen(packet, 0); // Reuse packet
-							TlenFilePacketPackDword(packet, (DWORD) ft->fileReceivedBytes);
-							TlenFilePacketPackDword(packet, 0);
-							TlenFilePacketPackBuffer(packet, fileBuffer, numRead);
-							if (TlenFilePacketSend(ft->s, packet)) {
+							TlenP2PPacketSetLen(packet, 0); // Reuse packet
+							TlenP2PPacketPackDword(packet, (DWORD) ft->fileReceivedBytes);
+							TlenP2PPacketPackDword(packet, 0);
+							TlenP2PPacketPackBuffer(packet, fileBuffer, numRead);
+							if (TlenP2PPacketSend(ft->s, packet)) {
 								ft->fileReceivedBytes += numRead;
 								ft->allFileReceivedBytes += numRead;
 								pfts.totalProgress = ft->allFileReceivedBytes;
@@ -1035,15 +819,15 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 							}
 						}
 						JabberLog("Finishing this file...");
-						TlenFilePacketSetLen(packet, 0); // Reuse packet
-						TlenFilePacketSetType(packet, TLEN_FILE_PACKET_END_OF_FILE);
-						TlenFilePacketPackDword(packet, currentFile);
-						TlenFilePacketSend(ft->s, packet);
-						TlenFilePacketFree(packet);
+						TlenP2PPacketSetLen(packet, 0); // Reuse packet
+						TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_END_OF_FILE);
+						TlenP2PPacketPackDword(packet, currentFile);
+						TlenP2PPacketSend(ft->s, packet);
+						TlenP2PPacketFree(packet);
 					}
 				}
 			}
-			TlenFilePacketFree(rpacket);
+			TlenP2PPacketFree(rpacket);
 		}
 		else {
 			ft->state = FT_ERROR;

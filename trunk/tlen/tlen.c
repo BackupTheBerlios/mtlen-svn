@@ -34,6 +34,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 HINSTANCE hInst;
 PLUGINLINK *pluginLink;
 
+struct MM_INTERFACE memoryManagerInterface;
+
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
 	"Tlen Protocol",
@@ -85,6 +87,7 @@ HANDLE hMenuContactMUC;
 HANDLE hMenuContactVoice;
 HANDLE hMenuContactGrantAuth;
 HANDLE hMenuContactRequestAuth;
+HANDLE hMenuContactFile;
 
 HWND hwndJabberVcard;
 #ifndef TLEN_PLUGIN
@@ -189,7 +192,7 @@ static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-static void TlenIconInit()
+static void TlenRegisterIcons()
 {
 	int i;
 	static int iconList[] = {
@@ -287,6 +290,11 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	char *szProto;
 	CLISTMENUITEM mi, clmi;
 	DBVARIANT dbv;
+
+	pluginLink = link;
+	memoryManagerInterface.cbSize = sizeof(struct MM_INTERFACE);
+	CallService(MS_SYSTEM_GET_MMI,0,(LPARAM)&memoryManagerInterface);
+
 	GetModuleFileName(hInst, text, sizeof(text));
 	p = strrchr(text, '\\');
 	p++;
@@ -301,12 +309,13 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 
 	JabberLog("Setting protocol/module name to '%s/%s'", jabberProtoName, jabberModuleName);
 
-	pluginLink = link;
+	
 	DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &hMainThread, THREAD_SET_CONTEXT, FALSE, 0);
 	jabberMainThreadId = GetCurrentThreadId();
 	//hLibSSL = NULL;
 //	hWndListGcLog = (HANDLE) CallService(MS_UTILS_ALLOCWINDOWLIST, 0, 0);
 
+	TlenRegisterIcons();
 	TlenLoadOptions();
 
 	HookEvent(ME_OPT_INITIALISE, TlenOptInit);
@@ -347,7 +356,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(text, TlenMUCMenuHandleChats);
 	mi.pszName = Translate("Tlen Chats");
 	mi.position = 2000050002;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_TLEN));
+	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MUC));
 	mi.pszService = text;
 	hMenuChats = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChats, (LPARAM) &clmi);
@@ -380,7 +389,6 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactVoice = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
-
 	// "Request authorization"
 	sprintf(text, "%s/RequestAuth", jabberModuleName);
 	CreateServiceFunction(text, TlenContactMenuHandleRequestAuth);
@@ -410,7 +418,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_GRANT));
 	mi.pszService = text;
 	mi.pszContactOwner = jabberProtoName;
-	CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi); //hMenuContactGrantAuth = (HANDLE) 
+	//CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi); //hMenuContactGrantAuth = (HANDLE) 
 
 	mi.position = -2000020000;
 	mi.flags = CMIF_NOTONLINE;
@@ -418,7 +426,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszName = Translate("&File");
 	mi.pszService = MS_FILE_SENDFILE;
 	mi.pszContactOwner = jabberProtoName;
-	CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+	hMenuContactFile = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
 
 	HookEvent(ME_CLIST_PREBUILDCONTACTMENU, TlenPrebuildContactMenu);
@@ -459,7 +467,6 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	InitializeCriticalSection(&mutex);
 	InitializeCriticalSection(&modeMsgMutex);
 
-	TlenIconInit();
 	srand((unsigned) time(NULL));
 	JabberSerialInit();
 	JabberIqInit();
