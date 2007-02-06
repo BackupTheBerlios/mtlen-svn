@@ -71,10 +71,10 @@ int JabberBasicSearch(WPARAM wParam, LPARAM lParam)
 
 	if ((jid=JabberTextEncode((char *) lParam)) != NULL) {
 		iqId = JabberSerialNext();
-		searchJID = _strdup((char *)lParam);
+		searchJID = mir_strdup((char *)lParam);
 		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSetSearch);
 		JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'><i>%s</i></query></iq>", iqId, jid);
-		free(jid);
+		mir_free(jid);
 		return iqId;
 	}
 	return 0;
@@ -92,7 +92,7 @@ int JabberSearchByEmail(WPARAM wParam, LPARAM lParam)
 		iqId = JabberSerialNext();
 		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSetSearch);
 		JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'><email>%s</email></query></iq>", iqId, email);
-		free(email);
+		mir_free(email);
 		return iqId;
 	}
 
@@ -119,7 +119,7 @@ int JabberSearchByName(WPARAM wParam, LPARAM lParam)
 				strcat(text, "</nick>");
 				size = sizeof(text)-strlen(text)-1;
 			}
-			free(p);
+			mir_free(p);
 		}
 	}
 	if (psbn->pszFirstName[0] != '\0') {
@@ -130,7 +130,7 @@ int JabberSearchByName(WPARAM wParam, LPARAM lParam)
 				strcat(text, "</first>");
 				size = sizeof(text)-strlen(text)-1;
 			}
-			free(p);
+			mir_free(p);
 		}
 	}
 	if (psbn->pszLastName[0] != '\0') {
@@ -141,7 +141,7 @@ int JabberSearchByName(WPARAM wParam, LPARAM lParam)
 				strcat(text, "</last>");
 				size = sizeof(text)-strlen(text)-1;
 			}
-			free(p);
+			mir_free(p);
 		}
 	}
 
@@ -161,16 +161,16 @@ static HANDLE AddToListByJID(const char *newJid, DWORD flags)
 
 	if ((hContact=JabberHContactFromJID(newJid)) == NULL) {
 		// not already there: add
-		jid = _strdup(newJid); _strlwr(jid);
+		jid = mir_strdup(newJid); _strlwr(jid);
 		JabberLog("Add new jid to contact jid=%s", jid);
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_ADD, 0, 0);
 		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) jabberProtoName);
 		DBWriteContactSettingString(hContact, jabberProtoName, "jid", jid);
 		if ((nick=JabberNickFromJID(newJid)) == NULL)
-			nick = _strdup(newJid);
+			nick = mir_strdup(newJid);
 		DBWriteContactSettingString(hContact, "CList", "MyHandle", nick);
-		free(nick);
-		free(jid);
+		mir_free(nick);
+		mir_free(jid);
 
 		// Note that by removing or disable the "NotOnList" will trigger
 		// the plugin to add a particular contact to the roster list.
@@ -205,7 +205,7 @@ int JabberAddToList(WPARAM wParam, LPARAM lParam)
 	if ((jid=JabberUtf8Encode(jsr->jid)) == NULL)
 		return (int) NULL;
 	hContact = AddToListByJID(jid, wParam);	// wParam is flag e.g. PALF_TEMPORARY
-	free(jid);
+	mir_free(jid);
 	return (int) hContact;
 }
 
@@ -220,14 +220,14 @@ int JabberAddToListByEvent(WPARAM wParam, LPARAM lParam)
 	dbei.cbSize = sizeof(dbei);
 	if ((dbei.cbBlob=CallService(MS_DB_EVENT_GETBLOBSIZE, lParam, 0)) == (DWORD)(-1))
 		return (int)(HANDLE) NULL;
-	if ((dbei.pBlob=(PBYTE) malloc(dbei.cbBlob)) == NULL)
+	if ((dbei.pBlob=(PBYTE) mir_alloc(dbei.cbBlob)) == NULL)
 		return (int)(HANDLE) NULL;
 	if (CallService(MS_DB_EVENT_GET, lParam, (LPARAM) &dbei)) {
-		free(dbei.pBlob);
+		mir_free(dbei.pBlob);
 		return (int)(HANDLE) NULL;
 	}
 	if (strcmp(dbei.szModule, jabberProtoName)) {
-		free(dbei.pBlob);
+		mir_free(dbei.pBlob);
 		return (int)(HANDLE) NULL;
 	}
 
@@ -239,7 +239,7 @@ int JabberAddToListByEvent(WPARAM wParam, LPARAM lParam)
 */
 
 	if (dbei.eventType != EVENTTYPE_AUTHREQUEST) {
-		free(dbei.pBlob);
+		mir_free(dbei.pBlob);
 		return (int)(HANDLE) NULL;
 	}
 
@@ -249,7 +249,7 @@ int JabberAddToListByEvent(WPARAM wParam, LPARAM lParam)
 	jid = lastName + strlen(lastName) + 1;
 
 	hContact = (HANDLE) AddToListByJID(jid, wParam);
-	free(dbei.pBlob);
+	mir_free(dbei.pBlob);
 
 	return (int) hContact;
 }
@@ -266,18 +266,18 @@ int JabberAuthAllow(WPARAM wParam, LPARAM lParam)
 	dbei.cbSize = sizeof(dbei);
 	if ((dbei.cbBlob=CallService(MS_DB_EVENT_GETBLOBSIZE, wParam, 0)) == (DWORD)(-1))
 		return 1;
-	if ((dbei.pBlob=(PBYTE) malloc(dbei.cbBlob)) == NULL)
+	if ((dbei.pBlob=(PBYTE) mir_alloc(dbei.cbBlob)) == NULL)
 		return 1;
 	if (CallService(MS_DB_EVENT_GET, wParam, (LPARAM) &dbei)) {
-		free(dbei.pBlob);
+		mir_free(dbei.pBlob);
 		return 1;
 	}
 	if (dbei.eventType != EVENTTYPE_AUTHREQUEST) {
-		free(dbei.pBlob);
+		mir_free(dbei.pBlob);
 		return 1;
 	}
 	if (strcmp(dbei.szModule, jabberProtoName)) {
-		free(dbei.pBlob);
+		mir_free(dbei.pBlob);
 		return 1;
 	}
 
@@ -304,7 +304,7 @@ int JabberAuthAllow(WPARAM wParam, LPARAM lParam)
 		}
 	}
 
-	free(dbei.pBlob);
+	mir_free(dbei.pBlob);
 	return 0;
 }
 
@@ -321,18 +321,18 @@ int JabberAuthDeny(WPARAM wParam, LPARAM lParam)
 	dbei.cbSize = sizeof(dbei);
 	if ((dbei.cbBlob=CallService(MS_DB_EVENT_GETBLOBSIZE, wParam, 0)) == (DWORD)(-1))
 		return 1;
-	if ((dbei.pBlob=(PBYTE) malloc(dbei.cbBlob)) == NULL)
+	if ((dbei.pBlob=(PBYTE) mir_alloc(dbei.cbBlob)) == NULL)
 		return 1;
 	if (CallService(MS_DB_EVENT_GET, wParam, (LPARAM) &dbei)) {
-		free(dbei.pBlob);
+		mir_free(dbei.pBlob);
 		return 1;
 	}
 	if (dbei.eventType != EVENTTYPE_AUTHREQUEST) {
-		free(dbei.pBlob);
+		mir_free(dbei.pBlob);
 		return 1;
 	}
 	if (strcmp(dbei.szModule, jabberProtoName)) {
-		free(dbei.pBlob);
+		mir_free(dbei.pBlob);
 		return 1;
 	}
 
@@ -344,7 +344,7 @@ int JabberAuthDeny(WPARAM wParam, LPARAM lParam)
 	JabberLog("Send 'authorization denied' to %s", jid);
 	JabberSend(jabberThreadInfo->s, "<presence to='%s' type='unsubscribed'/>", jid);
 	JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item jid='%s' subscription='remove'/></query></iq>", jid);
-	free(dbei.pBlob);
+	mir_free(dbei.pBlob);
 	return 0;
 }
 
@@ -354,7 +354,7 @@ static void JabberConnect(int initialStatus)
 		struct ThreadData *thread;
 		int oldStatus;
 
-		thread = (struct ThreadData *) malloc(sizeof(struct ThreadData));
+		thread = (struct ThreadData *) mir_alloc(sizeof(struct ThreadData));
 		memset(thread, 0, sizeof(struct ThreadData));
 		thread->type = JABBER_SESSION_NORMAL;
 
@@ -465,11 +465,11 @@ int JabberSetAwayMsg(WPARAM wParam, LPARAM lParam)
 	if ((*szMsg==NULL && newModeMsg==NULL) ||
 		(*szMsg!=NULL && newModeMsg!=NULL && !strcmp(*szMsg, newModeMsg))) {
 		// Message is the same, no update needed
-		if (newModeMsg != NULL) free(newModeMsg);
+		if (newModeMsg != NULL) mir_free(newModeMsg);
 	}
 	else {
 		// Update with the new mode message
-		if (*szMsg != NULL) free(*szMsg);
+		if (*szMsg != NULL) mir_free(*szMsg);
 		*szMsg = newModeMsg;
 		// Send a presence update if needed
 		if (desiredStatus == jabberStatus) {
@@ -500,9 +500,9 @@ int JabberGetInfo(WPARAM wParam, LPARAM lParam)
 				iqId = JabberSerialNext();
 				JabberIqAdd(iqId, IQ_PROC_NONE, TlenIqResultGetVcard);
 				JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'><i>%s</i></query></iq>", iqId, pNick);
-				free(pNick);
+				mir_free(pNick);
 			}
-			free(nick);
+			mir_free(nick);
 		}
 		DBFreeVariant(&dbv);
 	}
@@ -623,7 +623,7 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 				JabberSend(jabberThreadInfo->s, "<message to='%s' type='%s' id='"JABBER_IQID"%d'><body>%s</body><x xmlns='jabber:x:event'><offline/><delivered/><composing/></x></message>", dbv.pszVal, msgType, id, msg);
 			}
 		}
-		free(msg);
+		mir_free(msg);
 	}
 	DBFreeVariant(&dbv);
 	return 1;
@@ -722,13 +722,13 @@ int JabberFileAllow(WPARAM wParam, LPARAM lParam)
 	if (!jabberOnline) return 0;
 
 	ft = (TLEN_FILE_TRANSFER *) ccs->wParam;
-	ft->szSavePath = _strdup((char *) ccs->lParam);
+	ft->szSavePath = mir_strdup((char *) ccs->lParam);
 	if ((item=JabberListAdd(LIST_FILE, ft->iqId)) != NULL) {
 		item->ft = ft;
 	}
 	nick = JabberNickFromJID(ft->jid);
 	JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='5' v='1'/>", nick, ft->iqId);
-	free(nick);
+	mir_free(nick);
 	return ccs->wParam;
 }
 
@@ -743,7 +743,7 @@ int JabberFileDeny(WPARAM wParam, LPARAM lParam)
 	ft = (TLEN_FILE_TRANSFER *) ccs->wParam;
 	nick = JabberNickFromJID(ft->jid);
 	JabberSend(jabberThreadInfo->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, nick);\
-	free(nick);
+	mir_free(nick);
 	TlenFileFreeFt(ft);
 	return 0;
 }
@@ -786,32 +786,32 @@ int JabberSendFile(WPARAM wParam, LPARAM lParam)
 	if (!jabberOnline) return 0;
 //	if (DBGetContactSettingWord(ccs->hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) == ID_STATUS_OFFLINE) return 0;
 	if (DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) return 0;
-	ft = (TLEN_FILE_TRANSFER *) malloc(sizeof(TLEN_FILE_TRANSFER));
+	ft = (TLEN_FILE_TRANSFER *) mir_alloc(sizeof(TLEN_FILE_TRANSFER));
 	memset(ft, 0, sizeof(TLEN_FILE_TRANSFER));
 	for(ft->fileCount=0; files[ft->fileCount]; ft->fileCount++);
-	ft->files = (char **) malloc(sizeof(char *) * ft->fileCount);
-	ft->filesSize = (long *) malloc(sizeof(long) * ft->fileCount);
+	ft->files = (char **) mir_alloc(sizeof(char *) * ft->fileCount);
+	ft->filesSize = (long *) mir_alloc(sizeof(long) * ft->fileCount);
 	ft->allFileTotalSize = 0;
 	for(i=j=0; i<ft->fileCount; i++) {
 		if (_stat(files[i], &statbuf))
 			JabberLog("'%s' is an invalid filename", files[i]);
 		else {
 			ft->filesSize[j] = statbuf.st_size;
-			ft->files[j++] = _strdup(files[i]);
+			ft->files[j++] = mir_strdup(files[i]);
 			ft->allFileTotalSize += statbuf.st_size;
 		}
 	}
 	ft->fileCount = j;
-	ft->szDescription = _strdup((char *) ccs->wParam);
+	ft->szDescription = mir_strdup((char *) ccs->wParam);
 	ft->hContact = ccs->hContact;
 	ft->currentFile = 0;
-	ft->jid = _strdup(dbv.pszVal);
+	ft->jid = mir_strdup(dbv.pszVal);
 	DBFreeVariant(&dbv);
 
 	id = JabberSerialNext();
 	_snprintf(idStr, sizeof(idStr), "%d", id);
 	if ((item=JabberListAdd(LIST_FILE, idStr)) != NULL) {
-		ft->iqId = _strdup(idStr);
+		ft->iqId = mir_strdup(idStr);
 		nick = JabberNickFromJID(ft->jid);
 		item->ft = ft;
 
@@ -827,12 +827,12 @@ int JabberSendFile(WPARAM wParam, LPARAM lParam)
 				p = files[0];
 			p = JabberTextEncode(p);
 			JabberSend(jabberThreadInfo->s, "<f t='%s' n='%s' e='1' i='%s' c='1' s='%d' v='1'/>", nick, p, idStr, ft->allFileTotalSize);
-			free(p);
+			mir_free(p);
 		}
 		else
 			JabberSend(jabberThreadInfo->s, "<f t='%s' e='1' i='%s' c='%d' s='%d' v='1'/>", nick, idStr, ft->fileCount, ft->allFileTotalSize);
-		
-		free(nick);
+
+		mir_free(nick);
 	}
 
 	return (int)(HANDLE) ft;
@@ -922,18 +922,18 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 							if (cws->value.type==DBVT_UTF8) {
 								newGroup = JabberUtf8Decode(cws->value.pszVal);
 							} else {
-								newGroup = strdup(cws->value.pszVal);
+								newGroup = mir_strdup(cws->value.pszVal);
 							}
 							if (item->group==NULL || strcmp(newGroup, item->group)) {
 								JabberLog("Group set to %s", newGroup);
 								if ((group=TlenGroupEncode(newGroup)) != NULL) {
 									JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, item->jid, group);
-									free(group);
+									mir_free(group);
 								}
 							}
-							if (newGroup != NULL) free (newGroup);
+							if (newGroup != NULL) mir_free(newGroup);
 						}
-						free(nick);
+						mir_free(nick);
 					}
 				}
 				else {
@@ -953,12 +953,12 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 				jid = dbv.pszVal;
 				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
 					if (cws->value.type == DBVT_DELETED) {
-						newNick = strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, GCDNF_NOMYHANDLE));
+						newNick = mir_strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, GCDNF_NOMYHANDLE));
 					} else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL) {
 						if (cws->value.type==DBVT_UTF8) {
 							newNick = JabberUtf8Decode(cws->value.pszVal);
 						} else {
-							newNick = strdup(cws->value.pszVal);
+							newNick = mir_strdup(cws->value.pszVal);
 						}
 					} else {
 						newNick = NULL;
@@ -969,14 +969,14 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 							JabberLog("Nick set to %s", newNick);
 							if (item->group!=NULL && (group=TlenGroupEncode(item->group))!=NULL) {
 								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, jid, group);
-								free(group);
+								mir_free(group);
 							} else {
 								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'></item></query></iq>", nick, jid);
 							}
-							free(nick);
+							mir_free(nick);
 						}
 					}
-					if (newNick != NULL) free(newNick);
+					if (newNick != NULL) mir_free(newNick);
 				}
 				DBFreeVariant(&dbv);
 			}
@@ -987,7 +987,7 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 
 			if (cws->value.type==DBVT_DELETED || (cws->value.type==DBVT_BYTE && cws->value.bVal==0)) {
 				if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
-					jid = _strdup(dbv.pszVal);
+					jid = mir_strdup(dbv.pszVal);
 					DBFreeVariant(&dbv);
 					JabberLog("Add %s permanently to list", jid);
 					if (!DBGetContactSetting(hContact, "CList", "MyHandle", &dbv)) {
@@ -1003,7 +1003,7 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 							if ((pGroup=TlenGroupEncode(dbv.pszVal)) != NULL) {
 								JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'><group>%s</group></item></query></iq>", nick, jid, pGroup);
 								JabberSend(jabberThreadInfo->s, "<presence to='%s' type='subscribe'/>", jid);
-								free(pGroup);
+								mir_free(pGroup);
 							}
 							DBFreeVariant(&dbv);
 						}
@@ -1011,10 +1011,10 @@ int JabberDbSettingChanged(WPARAM wParam, LPARAM lParam)
 							JabberSend(jabberThreadInfo->s, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'/></query></iq>", nick, jid);
 							JabberSend(jabberThreadInfo->s, "<presence to='%s' type='subscribe'/>", jid);
 						}
-						free(nick);
+						mir_free(nick);
 						DBDeleteContactSetting(hContact, "CList", "Hidden");
 					}
-					free(jid);
+					mir_free(jid);
 				}
 			}
 		}
@@ -1067,7 +1067,7 @@ int JabberSearchByAdvanced(WPARAM wParam, LPARAM lParam)
 	if ((queryStr=TlenAdvSearchCreateQuery((HWND) lParam, iqId)) != NULL) {
 		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSetSearch);
 		JabberSend(jabberThreadInfo->s, "%s", queryStr);
-		free(queryStr);
+		mir_free(queryStr);
 		return iqId;
 	}
 

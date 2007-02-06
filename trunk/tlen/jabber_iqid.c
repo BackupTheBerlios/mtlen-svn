@@ -108,7 +108,7 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 						}
 						if (nick != NULL) {
 							item = JabberListAdd(LIST_ROSTER, jid);
-							if (item->nick) free(item->nick);
+							if (item->nick) mir_free(item->nick);
 							item->nick = nick;
 							item->subscription = sub;
 							if ((hContact=JabberHContactFromJID(jid)) == NULL) {
@@ -117,7 +117,7 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 								hContact = JabberDBCreateContact(jid, nick, FALSE);
 							}
 							DBWriteContactSettingString(hContact, "CList", "MyHandle", nick);
-							if (item->group) free(item->group);
+							if (item->group) mir_free(item->group);
 							if ((groupNode=JabberXmlGetChild(itemNode, "group"))!=NULL && groupNode->text!=NULL) {
 								item->group = TlenGroupDecode(groupNode->text);
 								JabberContactListCreateGroup(item->group);
@@ -135,10 +135,10 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 								DBDeleteContactSetting(hContact, "CList", "Group");
 							}
 							if (!DBGetContactSetting(hContact, jabberProtoName, "AvatarHash", &dbv)) {
-								if (item->newAvatarHash) free(item->newAvatarHash);
-								if (item->avatarHash) free(item->avatarHash);
-								item->avatarHash = strdup(dbv.pszVal);
-								item->newAvatarHash = strdup(dbv.pszVal);
+								if (item->newAvatarHash) mir_free(item->newAvatarHash);
+								if (item->avatarHash) mir_free(item->avatarHash);
+								item->avatarHash = mir_strdup(dbv.pszVal);
+								item->newAvatarHash = mir_strdup(dbv.pszVal);
 								DBFreeVariant(&dbv);
 							}
 							item->avatarFormat = DBGetContactSettingDword(hContact, jabberProtoName, "AvatarFormat", PA_FORMAT_UNKNOWN);
@@ -162,7 +162,7 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 								JabberLog("Syncing roster: preparing to delete %s (hContact=0x%x)", dbv.pszVal, hContact);
 								if (listSize >= listAllocSize) {
 									listAllocSize = listSize + 100;
-									if ((list=(HANDLE *) realloc(list, listAllocSize)) == NULL) {
+									if ((list=(HANDLE *) mir_realloc(list, listAllocSize)) == NULL) {
 										listSize = 0;
 										break;
 									}
@@ -179,7 +179,7 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 					CallService(MS_DB_CONTACT_DELETE, (WPARAM) list[i], 0);
 				}
 				if (list != NULL)
-					free(list);
+					mir_free(list);
 			}
 			///////////////////////////////////////
 			{
@@ -244,7 +244,7 @@ void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
 					hasFirst = TRUE;
 					nText = JabberTextDecode(n->text);
 					DBWriteContactSettingString(hContact, jabberProtoName, "FirstName", nText);
-					free(nText);
+					mir_free(nText);
 				}
 			}
 			else if (!strcmp(n->name, "last")) {
@@ -252,7 +252,7 @@ void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
 					hasLast = TRUE;
 					nText = JabberTextDecode(n->text);
 					DBWriteContactSettingString(hContact, jabberProtoName, "LastName", nText);
-					free(nText);
+					mir_free(nText);
 				}
 			}
 			else if (!strcmp(n->name, "nick")) {
@@ -260,7 +260,7 @@ void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
 					hasNick = TRUE;
 					nText = JabberTextDecode(n->text);
 					DBWriteContactSettingString(hContact, jabberProtoName, "Nick", nText);
-					free(nText);
+					mir_free(nText);
 				}
 			}
 			else if (!strcmp(n->name, "email")) {
@@ -268,7 +268,7 @@ void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
 					hasEmail = TRUE;
 					nText = JabberTextDecode(n->text);
 					DBWriteContactSettingString(hContact, jabberProtoName, "e-mail", nText);
-					free(nText);
+					mir_free(nText);
 				}
 			}
 			else if (!strcmp(n->name, "c")) {
@@ -276,7 +276,7 @@ void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
 					hasCity = TRUE;
 					nText = JabberTextDecode(n->text);
 					DBWriteContactSettingString(hContact, jabberProtoName, "City", nText);
-					free(nText);
+					mir_free(nText);
 				}
 			}
 			else if (!strcmp(n->name, "b")) {
@@ -298,7 +298,7 @@ void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
 					hasSchool = TRUE;
 					nText = JabberTextDecode(n->text);
 					DBWriteContactSettingString(hContact, jabberProtoName, "School", nText);
-					free(nText);
+					mir_free(nText);
 				}
 			}
 			else if (!strcmp(n->name, "j")) {
@@ -384,25 +384,25 @@ void JabberIqResultSetSearch(XmlNode *iqNode, void *userdata)
 						if ((n=JabberXmlGetChild(itemNode, "nick"))!=NULL && n->text!=NULL)
 							jsr.hdr.nick = JabberTextDecode(n->text);
 						else
-							jsr.hdr.nick = _strdup("");
+							jsr.hdr.nick = mir_strdup("");
 						if ((n=JabberXmlGetChild(itemNode, "first"))!=NULL && n->text!=NULL)
 							jsr.hdr.firstName = JabberTextDecode(n->text);
 						else
-							jsr.hdr.firstName = _strdup("");
+							jsr.hdr.firstName = mir_strdup("");
 						if ((n=JabberXmlGetChild(itemNode, "last"))!=NULL && n->text!=NULL)
 							jsr.hdr.lastName = JabberTextDecode(n->text);
 						else
-							jsr.hdr.lastName = _strdup("");
+							jsr.hdr.lastName = mir_strdup("");
 						if ((n=JabberXmlGetChild(itemNode, "email"))!=NULL && n->text!=NULL)
 							jsr.hdr.email = JabberTextDecode(n->text);
 						else
-							jsr.hdr.email = _strdup("");
+							jsr.hdr.email = mir_strdup("");
 						ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_SEARCH, ACKRESULT_DATA, (HANDLE) id, (LPARAM) &jsr);
 						found = 1;
-						free(jsr.hdr.nick);
-						free(jsr.hdr.firstName);
-						free(jsr.hdr.lastName);
-						free(jsr.hdr.email);
+						mir_free(jsr.hdr.nick);
+						mir_free(jsr.hdr.firstName);
+						mir_free(jsr.hdr.lastName);
+						mir_free(jsr.hdr.email);
 					}
 				}
 			}
@@ -410,17 +410,17 @@ void JabberIqResultSetSearch(XmlNode *iqNode, void *userdata)
 				if (!found) {
 					_snprintf(jsr.jid, sizeof(jsr.jid), "%s@%s", searchJID, dbv.pszVal);
 					jsr.jid[sizeof(jsr.jid)-1] = '\0';
-					jsr.hdr.nick = _strdup("");
-					jsr.hdr.firstName = _strdup("");
-					jsr.hdr.lastName = _strdup("");
-					jsr.hdr.email = _strdup("");
+					jsr.hdr.nick = mir_strdup("");
+					jsr.hdr.firstName = mir_strdup("");
+					jsr.hdr.lastName = mir_strdup("");
+					jsr.hdr.email = mir_strdup("");
 					ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_SEARCH, ACKRESULT_DATA, (HANDLE) id, (LPARAM) &jsr);
-					free(jsr.hdr.nick);
-					free(jsr.hdr.firstName);
-					free(jsr.hdr.lastName);
-					free(jsr.hdr.email);
+					mir_free(jsr.hdr.nick);
+					mir_free(jsr.hdr.firstName);
+					mir_free(jsr.hdr.lastName);
+					mir_free(jsr.hdr.email);
 				}
-				free(searchJID);
+				mir_free(searchJID);
 				searchJID = NULL;
 			}
 			DBFreeVariant(&dbv);

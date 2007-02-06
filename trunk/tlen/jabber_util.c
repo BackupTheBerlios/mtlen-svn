@@ -65,16 +65,16 @@ void JabberLog(const char *fmt, ...)
 	int extra;
 
 	va_start(vararg, fmt);
-	str = (char *) malloc(strsize=2048);
+	str = (char *) mir_alloc(strsize=2048);
 	while (_vsnprintf(str, strsize, fmt, vararg) == -1)
-		str = (char *) realloc(str, strsize+=2048);
+		str = (char *) mir_realloc(str, strsize+=2048);
 	va_end(vararg);
 
 	extra = 0;
 	for (p=str; *p!='\0'; p++)
 		if (*p=='\n' || *p=='\r')
 			extra++;
-	text = (char *) malloc(strlen(jabberProtoName)+2+strlen(str)+2+extra);
+	text = (char *) mir_alloc(strlen(jabberProtoName)+2+strlen(str)+2+extra);
 	wsprintf(text, "[%s]", jabberProtoName);
 	for (p=str,q=text+strlen(text); *p!='\0'; p++,q++) {
 		if (*p == '\r') {
@@ -96,8 +96,8 @@ void JabberLog(const char *fmt, ...)
 		CallService(MS_NETLIB_LOG, (WPARAM) hNetlibUser, (LPARAM) text);
 	}
 	//OutputDebugString(text);
-	free(text);
-	free(str);
+	mir_free(text);
+	mir_free(str);
 #endif
 }
 
@@ -117,10 +117,10 @@ int JabberSend(HANDLE hConn, const char *fmt, ...)
 
 	va_start(vararg,fmt);
 	size = 512;
-	str = (char *) malloc(size);
+	str = (char *) mir_alloc(size);
 	while (_vsnprintf(str, size, fmt, vararg) == -1) {
 		size += 512;
-		str = (char *) realloc(str, size);
+		str = (char *) mir_realloc(str, size);
 	}
 	va_end(vararg);
 
@@ -129,11 +129,11 @@ int JabberSend(HANDLE hConn, const char *fmt, ...)
 #ifndef TLEN_PLUGIN
 	if ((ssl=JabberSslHandleToSsl(hConn)) != NULL) {
 		if (DBGetContactSettingByte(NULL, "Netlib", "DumpSent", TRUE) == TRUE) {
-			if ((szLogBuffer=(char *)malloc(size+32)) != NULL) {
+			if ((szLogBuffer=(char *)mir_alloc(size+32)) != NULL) {
 				strcpy(szLogBuffer, "(SSL) Data sent\n");
 				memcpy(szLogBuffer+strlen(szLogBuffer), str, size+1 /* also copy \0 */);
 				Netlib_Logf(hNetlibUser, "%s", szLogBuffer);	// %s to protect against when fmt tokens are in szLogBuffer causing crash
-				free(szLogBuffer);
+				mir_free(szLogBuffer);
 			}
 		}
 		result = pfn_SSL_write(ssl, str, size);
@@ -145,7 +145,7 @@ int JabberSend(HANDLE hConn, const char *fmt, ...)
 #endif
 	LeaveCriticalSection(&mutex);
 
-	free(str);
+	mir_free(str);
 	return result;
 }
 
@@ -158,13 +158,13 @@ char *JabberResourceFromJID(const char *jid)
 	p=strchr(jid, '/');
 	if (p != NULL && p[1]!='\0') {
 		p++;
-		if ((nick=(char *) malloc(1+strlen(jid)-(p-jid))) != NULL) {
+		if ((nick=(char *) mir_alloc(1+strlen(jid)-(p-jid))) != NULL) {
 			strncpy(nick, p, strlen(jid)-(p-jid));
 			nick[strlen(jid)-(p-jid)] = '\0';
 		}
 	}
 	else {
-		nick = _strdup(jid);
+		nick = mir_strdup(jid);
 	}
 
 	return nick;
@@ -178,13 +178,13 @@ char *JabberNickFromJID(const char *jid)
 	if ((p=strchr(jid, '@')) == NULL)
 		p = strchr(jid, '/');
 	if (p != NULL) {
-		if ((nick=(char *) malloc((p-jid)+1)) != NULL) {
+		if ((nick=(char *) mir_alloc((p-jid)+1)) != NULL) {
 			strncpy(nick, jid, p-jid);
 			nick[p-jid] = '\0';
 		}
 	}
 	else {
-		nick = _strdup(jid);
+		nick = mir_strdup(jid);
 	}
 
 	return nick;
@@ -197,13 +197,13 @@ char *JabberLoginFromJID(const char *jid)
 
 	p = strchr(jid, '/');
 	if (p != NULL) {
-		if ((nick=(char *) malloc((p-jid)+1)) != NULL) {
+		if ((nick=(char *) mir_alloc((p-jid)+1)) != NULL) {
 			strncpy(nick, jid, p-jid);
 			nick[p-jid] = '\0';
 		}
 	}
 	else {
-		nick = _strdup(jid);
+		nick = mir_strdup(jid);
 	}
 	return nick;
 }
@@ -215,7 +215,7 @@ char *JabberLocalNickFromJID(const char *jid)
 
 	p = JabberNickFromJID(jid);
 	localNick = JabberTextDecode(p);
-	free(p);
+	mir_free(p);
 	return localNick;
 }
 
@@ -231,7 +231,7 @@ char *JabberUtf8Decode(const char *str)
 	len = strlen(str);
 
 	// Convert utf8 to unicode
-	if ((wszTemp=(WCHAR *) malloc(sizeof(WCHAR) * (len + 1))) == NULL)
+	if ((wszTemp=(WCHAR *) mir_alloc(sizeof(WCHAR) * (len + 1))) == NULL)
 		return NULL;
 	p = (char *) str;
 	i = 0;
@@ -253,10 +253,10 @@ char *JabberUtf8Decode(const char *str)
 	// Convert unicode to local codepage
 	if ((len=WideCharToMultiByte(jabberCodePage, 0, wszTemp, -1, NULL, 0, NULL, NULL)) == 0)
 		return NULL;
-	if ((szOut=(char *) malloc(len)) == NULL)
+	if ((szOut=(char *) mir_alloc(len)) == NULL)
 		return NULL;
 	WideCharToMultiByte(jabberCodePage, 0, wszTemp, -1, szOut, len, NULL, NULL);
-	free(wszTemp);
+	mir_free(wszTemp);
 
 	return szOut;
 }
@@ -272,7 +272,7 @@ char *JabberUtf8Encode(const char *str)
 	len = strlen(str);
 
 	// Convert local codepage to unicode
-	if ((wszTemp=(WCHAR *) malloc(sizeof(WCHAR) * (len + 1))) == NULL) return NULL;
+	if ((wszTemp=(WCHAR *) mir_alloc(sizeof(WCHAR) * (len + 1))) == NULL) return NULL;
 	MultiByteToWideChar(jabberCodePage, 0, str, -1, wszTemp, len + 1);
 
 	// Convert unicode to utf8
@@ -283,7 +283,7 @@ char *JabberUtf8Encode(const char *str)
 		else len += 3;
 	}
 
-	if ((szOut=(unsigned char *) malloc(len + 1)) == NULL)
+	if ((szOut=(unsigned char *) mir_alloc(len + 1)) == NULL)
 		return NULL;
 
 	i = 0;
@@ -302,7 +302,7 @@ char *JabberUtf8Encode(const char *str)
 	}
 	szOut[i] = '\0';
 
-	free(wszTemp);
+	mir_free(wszTemp);
 
 	return (char *) szOut;
 
@@ -323,7 +323,7 @@ char *JabberSha1(char *str)
 		return NULL;
 	if (SHA1Result(&sha, digest))
 		return NULL;
-	if ((result=(char *)malloc(41)) == NULL)
+	if ((result=(char *)mir_alloc(41)) == NULL)
 		return NULL;
 	for (i=0; i<20; i++)
 		sprintf(result+(i<<1), "%02x", digest[i]);
@@ -345,7 +345,7 @@ char *TlenSha1(char *str, int len)
 		return NULL;
 	if (SHA1Result(&sha, digest))
 		return NULL;
-	if ((result=(char *)malloc(20)) == NULL)
+	if ((result=(char *)mir_alloc(20)) == NULL)
 		return NULL;
 	for (i=0; i<20; i++)
 		result[i]=digest[4*(i>>2)+(3-(i&0x3))];
@@ -365,7 +365,7 @@ char *JabberUnixToDos(const char *str)
 		if (*p == '\n')
 			extra++;
 	}
-	if ((res=(char *)malloc(strlen(str)+extra+1)) != NULL) {
+	if ((res=(char *)mir_alloc(strlen(str)+extra+1)) != NULL) {
 		for (p=(char *) str,q=res; *p!='\0'; p++,q++) {
 			if (*p == '\n') {
 				*q = '\r';
@@ -399,7 +399,7 @@ char *JabberHttpUrlEncode(const char *str)
 	unsigned char *p, *q, *res;
 
 	if (str == NULL) return NULL;
-	res = (char *) malloc(3*strlen(str) + 1);
+	res = (char *) mir_alloc(3*strlen(str) + 1);
 	for (p=(char *)str,q=res; *p!='\0'; p++,q++) {
 		if ((*p>='A' && *p<='Z') || (*p>='a' && *p<='z') || (*p>='0' && *p<='9') || strchr("$-_.+!*(),", *p)!=NULL) {
 			*q = *p;
@@ -468,7 +468,7 @@ char *JabberErrorMsg(XmlNode *errorNode)
 	char *errorStr, *str;
 	int errorCode;
 
-	errorStr = (char *) malloc(256);
+	errorStr = (char *) mir_alloc(256);
 	if (errorNode == NULL) {
 		_snprintf(errorStr, 256, "%s -1: %s", Translate("Error"), Translate("Unknown error message"));
 		return errorStr;
@@ -499,7 +499,7 @@ char *TlenPasswordHash(const char *str)
 	}
 	magic1 &= 0x7fffffff;
 	magic2 &= 0x7fffffff;
-	res = (char *) malloc(17);
+	res = (char *) mir_alloc(17);
 	sprintf(res, "%08x%08x", magic1, magic2);
 	return res;
 }
@@ -510,7 +510,7 @@ char *TlenUrlEncode(const char *str)
 	unsigned char c;
 
 	if (str == NULL) return NULL;
-	res = (char *) malloc(3*strlen(str) + 1);
+	res = (char *) mir_alloc(3*strlen(str) + 1);
 	for (p=(char *)str,q=res; *p!='\0'; p++,q++) {
 		if (*p == ' ') {
 			*q = '+';
@@ -585,14 +585,14 @@ char * TlenGroupEncode(const char *str)
 {
 	char *p, *q;
 	if (str == NULL) return NULL;
-	p = q = strdup(str);
+	p = q = mir_strdup(str);
 	for (; *p!='\0'; p++) {
 		if (*p == '\\') {
 			*p = '/';
 		}
 	}
 	p = JabberTextEncode(q);
-	free (q);
+	mir_free(q);
 	return p;
 }
 
@@ -611,7 +611,7 @@ char *JabberTextDecode(const char *str)
 	char *s1;
 
 	if (str == NULL) return NULL;
-	s1 = strdup(str);
+	s1 = mir_strdup(str);
 	TlenUrlDecode(s1);
 	return s1;
 }
@@ -626,7 +626,7 @@ char *JabberBase64Encode(const char *buffer, int bufferLen)
 	char *res, *r;
 
 	if (buffer==NULL || bufferLen<=0) return NULL;
-	if ((res=(char *) malloc((((bufferLen+2)/3)*4) + 1)) == NULL) return NULL;
+	if ((res=(char *) mir_alloc((((bufferLen+2)/3)*4) + 1)) == NULL) return NULL;
 
 	for (p=(char*)buffer,peob=p+bufferLen,r=res; p<peob;) {
 		igroup[0] = igroup[1] = igroup[2] = 0;
@@ -662,7 +662,7 @@ char *JabberBase64Decode(const char *str, int *resultLen)
 	int n, num, count;
 
 	if (str==NULL || resultLen==NULL) return NULL;
-	if ((res=(char *) malloc(((strlen(str)+3)/4)*3)) == NULL) return NULL;
+	if ((res=(char *) mir_alloc(((strlen(str)+3)/4)*3)) == NULL) return NULL;
 
 	for (n=0; n<256; n++)
 		b64rtable[n] = (unsigned char) 0x80;
@@ -686,12 +686,12 @@ char *JabberBase64Decode(const char *str, int *resultLen)
 			if ( *p=='\0' ) {
 				if ( n == 0 )
 					goto LBL_Exit;
-				free( res );
+				mir_free( res );
 				return NULL;
 			}
 
 			if ( b64rtable[*p]==0x80 ) {
-				free( res );
+				mir_free( res );
 				return NULL;
 			}
 
@@ -722,17 +722,17 @@ char *JabberGetVersionText()
 
 	GetModuleFileName(hInst, filename, sizeof(filename));
 	verInfoSize = GetFileVersionInfoSize(filename, &unused);
-	if ((pVerInfo=malloc(verInfoSize)) != NULL) {
+	if ((pVerInfo=mir_alloc(verInfoSize)) != NULL) {
 		GetFileVersionInfo(filename, 0, verInfoSize, pVerInfo);
 		VerQueryValue(pVerInfo, "\\StringFileInfo\\041504e3\\FileVersion", (PVOID *)&fileVersion, (UINT *)&blockSize);
 		if (strstr(fileVersion, "cvs")) {
-			res = (char *) malloc(strlen(fileVersion) + strlen(__DATE__) + 2);
+			res = (char *) mir_alloc(strlen(fileVersion) + strlen(__DATE__) + 2);
 			sprintf(res, "%s %s", fileVersion, __DATE__);
 		}
 		else {
-			res = _strdup(fileVersion);
+			res = mir_strdup(fileVersion);
 		}
-		free(pVerInfo);
+		mir_free(pVerInfo);
 		return res;
 	}
 	return NULL;
@@ -899,25 +899,25 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 			if (offlineMessageOption == 0) {
 				switch (jabberStatus) {
 					case ID_STATUS_ONLINE:
-						ptr = _strdup(modeMsgs.szOnline);
+						ptr = mir_strdup(modeMsgs.szOnline);
 						break;
 					case ID_STATUS_AWAY:
 					case ID_STATUS_ONTHEPHONE:
 					case ID_STATUS_OUTTOLUNCH:
-						ptr = _strdup(modeMsgs.szAway);
+						ptr = mir_strdup(modeMsgs.szAway);
 						break;
 					case ID_STATUS_NA:
-						ptr = _strdup(modeMsgs.szNa);
+						ptr = mir_strdup(modeMsgs.szNa);
 						break;
 					case ID_STATUS_DND:
 					case ID_STATUS_OCCUPIED:
-						ptr = _strdup(modeMsgs.szDnd);
+						ptr = mir_strdup(modeMsgs.szDnd);
 						break;
 					case ID_STATUS_FREECHAT:
-						ptr = _strdup(modeMsgs.szFreechat);
+						ptr = mir_strdup(modeMsgs.szFreechat);
 						break;
 					case ID_STATUS_INVISIBLE:
-						ptr = _strdup(modeMsgs.szInvisible);
+						ptr = mir_strdup(modeMsgs.szInvisible);
 						break;
 				}
 			} else if (offlineMessageOption == 99) {
@@ -928,7 +928,7 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 				if (!DBGetContactSetting(NULL, "SRAway", statusNames[offlineMessageOption-1], &dbv)) {
 					int i;
 					char substituteStr[128];
-					ptr = _strdup(dbv.pszVal);
+					ptr = mir_strdup(dbv.pszVal);
 					DBFreeVariant(&dbv);
 					for(i=0;ptr[i];i++) {
 						if(ptr[i]!='%') continue;
@@ -937,7 +937,7 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 						else if(!_strnicmp(ptr+i,"%date%",6))
 							GetDateFormat(LOCALE_USER_DEFAULT,DATE_SHORTDATE,NULL,NULL,substituteStr,sizeof(substituteStr));
 						else continue;
-						if(lstrlen(substituteStr)>6) ptr=(char*)realloc(ptr,lstrlen(ptr)+1+lstrlen(substituteStr)-6);
+						if(lstrlen(substituteStr)>6) ptr=(char*)mir_realloc(ptr,lstrlen(ptr)+1+lstrlen(substituteStr)-6);
 						MoveMemory(ptr+i+lstrlen(substituteStr),ptr+i+6,lstrlen(ptr)-i-5);
 						CopyMemory(ptr+i,substituteStr,lstrlen(substituteStr));
 					}
@@ -964,7 +964,7 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 			JabberSend(jabberThreadInfo->s, "<presence%s><show>%s</show>%s%s</presence>", toStr, showBody, priorityStr, (extra!=NULL)?extra:"");
 	}
 	if (ptr) {
-		free(ptr);
+		mir_free(ptr);
 	}
 	LeaveCriticalSection(&modeMsgMutex);
 }
@@ -1045,7 +1045,7 @@ void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...)
 
 	if (*str==NULL || *sizeAlloced<=0) {
 		*sizeAlloced = size = 2048;
-		*str = (char *) malloc(size);
+		*str = (char *) mir_alloc(size);
 		len = 0;
 	}
 	else {
@@ -1058,7 +1058,7 @@ void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...)
 	while (_vsnprintf(p, size, fmt, vararg) == -1) {
 		size += 2048;
 		(*sizeAlloced) += 2048;
-		*str = (char *) realloc(*str, *sizeAlloced);
+		*str = (char *) mir_realloc(*str, *sizeAlloced);
 		p = *str + len;
 	}
 	va_end(vararg);

@@ -103,9 +103,9 @@ static void FetchField(HWND hwndDlg, UINT idCtrl, char *fieldName, char **str, i
 		if ((localFieldName=JabberTextEncode(fieldName)) != NULL) {
 			if ((localText=JabberTextEncode(text)) != NULL) {
 				JabberStringAppend(str, strSize, "<%s>%s</%s>", localFieldName, localText, localFieldName);
-				free(localText);
+				mir_free(localText);
 			}
-			free(localFieldName);
+			mir_free(localFieldName);
 		}
 	}
 }
@@ -121,7 +121,7 @@ static void FetchCombo(HWND hwndDlg, UINT idCtrl, char *fieldName, char **str, i
 	if (value > 0) {
 		if ((localFieldName=JabberTextEncode(fieldName)) != NULL) {
 			JabberStringAppend(str, strSize, "<%s>%d</%s>", localFieldName, value, localFieldName);
-			free(localFieldName);
+			mir_free(localFieldName);
 		}
 	}
 }
@@ -191,7 +191,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			SetDlgItemText(hwndDlg, IDC_INFO_JID, "");
 			SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, "");
 			SetFocus(GetDlgItem(hwndDlg, IDC_STATIC));
-			
+
 			hContact = (HANDLE) GetWindowLong(hwndDlg, GWL_USERDATA);
 			if (!DBGetContactSetting(hContact, jabberProtoName, "FirstName", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_FIRSTNAME, dbv.pszVal);
@@ -234,7 +234,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 0, 0);
 					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, "");
 					break;
-			} 
+			}
 			i = DBGetContactSettingWord(hContact, jabberProtoName, "Occupation", 0);
 			if (i>0 && i<13) {
 				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, Translate(tlenFieldOccupation[i-1].name));
@@ -258,7 +258,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 				jid = JabberTextDecode(dbv.pszVal);
 				SetDlgItemText(hwndDlg, IDC_INFO_JID, jid);
-				free(jid);
+				mir_free(jid);
 				jid = dbv.pszVal;
 				if (jabberOnline) {
 					if ((item=JabberListGetItemPtr(LIST_ROSTER, jid)) != NULL) {
@@ -321,7 +321,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			JabberStringAppend(&str, &strSize, "<v>%d</v>", IsDlgButtonChecked(hwndDlg, IDC_PUBLICSTATUS) ? 1 : 0);
 			JabberStringAppend(&str, &strSize, "</query></iq>");
 			JabberSend(jabberThreadInfo->s, "%s", str);
-			free(str);
+			mir_free(str);
 			JabberGetInfo(0, (LPARAM) &ccs);
 		}
 		break;
@@ -347,7 +347,7 @@ static int sttSaveAvatar()
 
 	if (_stat(szFileName, &statbuf)) return 1;
 	if (statbuf.st_size > 6 * 1024) return 1;
-	
+
 	TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName );
 	if ( CopyFileA( szFileName, tFileName, FALSE ) == FALSE ) {
 		JabberLog( "Copy failed with error %d", GetLastError() );
@@ -380,10 +380,10 @@ static int sttSaveAvatar()
 	DBWriteContactSettingString(NULL, jabberProtoName, "AvatarHash", buf);
 	DBWriteContactSettingDword(NULL, jabberProtoName, "AvatarFormat", pictureType);
 	if (userAvatarHash != NULL) {
-		free (userAvatarHash);
+		mir_free(userAvatarHash);
 		userAvatarHash = NULL;
 	}
-	userAvatarHash = strdup(buf);
+	userAvatarHash = mir_strdup(buf);
 	userAvatarFormat = pictureType;
 	TlenGetAvatarFileName(NULL, szFileName, MAX_PATH);
 	if ( strcmp( szFileName, tFileName ))
@@ -424,7 +424,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 
 		BOOL tValue = JGetByte( "EnableAvatars", 1 );
 		CheckDlgButton( hwndDlg, IDC_ENABLE_AVATARS,	tValue );
-		if ( tValue )*/ 
+		if ( tValue )*/
 		{
 			char szAvatar[ MAX_PATH ];
 			TlenGetAvatarFileName( NULL, szAvatar, sizeof szAvatar );
@@ -448,7 +448,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 							RedrawWindow(GetDlgItem(hwndDlg, IDC_AVATAR), NULL, NULL, RDW_INVALIDATE);
 						}
 						avatarChanged = 1;
-					}	
+					}
 
 				}
 				break;
@@ -459,7 +459,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 					TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName );
 					DeleteFileA( tFileName );
 					if (userAvatarHash != NULL) {
-						free (userAvatarHash);
+						mir_free(userAvatarHash);
 						userAvatarHash = NULL;
 					}
 					DBDeleteContactSetting(NULL, jabberProtoName, "AvatarHash");

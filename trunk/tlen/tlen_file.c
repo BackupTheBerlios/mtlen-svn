@@ -42,20 +42,20 @@ void TlenFileFreeFt(TLEN_FILE_TRANSFER *ft)
 {
 	int i;
 
-	if (ft->jid) free(ft->jid);
-	if (ft->iqId) free(ft->iqId);
-	if (ft->httpHostName) free(ft->httpHostName);
-	if (ft->httpPath) free(ft->httpPath);
-	if (ft->szSavePath) free(ft->szSavePath);
-	if (ft->szDescription) free(ft->szDescription);
-	if (ft->filesSize) free(ft->filesSize);
+	if (ft->jid) mir_free(ft->jid);
+	if (ft->iqId) mir_free(ft->iqId);
+	if (ft->httpHostName) mir_free(ft->httpHostName);
+	if (ft->httpPath) mir_free(ft->httpPath);
+	if (ft->szSavePath) mir_free(ft->szSavePath);
+	if (ft->szDescription) mir_free(ft->szDescription);
+	if (ft->filesSize) mir_free(ft->filesSize);
 	if (ft->files) {
 		for (i=0; i<ft->fileCount; i++) {
-			if (ft->files[i]) free(ft->files[i]);
+			if (ft->files[i]) mir_free(ft->files[i]);
 		}
-		free(ft->files);
+		mir_free(ft->files);
 	}
-	free(ft);
+	mir_free(ft);
 }
 
 static void __cdecl TlenFileBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
@@ -87,7 +87,7 @@ static void __cdecl TlenFileBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
 		else
 			ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	} else {
-		if (ft->state!=FT_SWITCH) 
+		if (ft->state!=FT_SWITCH)
 			ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	}
 	JabberLog("Closing connection for this file transfer...");
@@ -117,7 +117,7 @@ static JABBER_SOCKET TlenFileBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	}
 	buf[0] = 4;  //socks4
 	buf[1] = 2;  //2-bind, 1-connect
-	*(PWORD)(buf+2) = htons(0); // port 
+	*(PWORD)(buf+2) = htons(0); // port
 	*(PDWORD)(buf+4) = INADDR_ANY;
 	if (sb->useAuth) {
 		lstrcpy(buf+8, sb->szUser);
@@ -182,7 +182,7 @@ static void __cdecl TlenFileBindSocks5Thread(TLEN_FILE_TRANSFER* ft)
 		else
 			ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	} else {
-		if (ft->state!=FT_SWITCH) 
+		if (ft->state!=FT_SWITCH)
 			ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	}
 //	JabberLog("Closing connection for this file transfer...");
@@ -213,7 +213,7 @@ static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	}
 	buf[0] = 5;  //yep, socks5
 	buf[1] = 1;  //one auth method
-	buf[2] = sb->useAuth?2:0; // authorization 
+	buf[2] = sb->useAuth?2:0; // authorization
 	status = Netlib_Send(s, buf, 3, MSG_NODUMP);
 	if (status==SOCKET_ERROR || status<3) {
 		JabberLog("Send failed (%d), thread ended", WSAGetLastError());
@@ -232,14 +232,14 @@ static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 
 		nUserLen = lstrlen(sb->szUser);
 		nPassLen = lstrlen(sb->szPassword);
-		pAuthBuf = (PBYTE)malloc(3+nUserLen+nPassLen);
+		pAuthBuf = (PBYTE)mir_alloc(3+nUserLen+nPassLen);
 		pAuthBuf[0] = 1;		//auth version
 		pAuthBuf[1] = nUserLen;
 		memcpy(pAuthBuf+2, sb->szUser, nUserLen);
 		pAuthBuf[2+nUserLen]=nPassLen;
 		memcpy(pAuthBuf+3+nUserLen,sb->szPassword,nPassLen);
 		status = Netlib_Send(s, pAuthBuf, 3+nUserLen+nPassLen, MSG_NODUMP);
-		free(pAuthBuf);
+		mir_free(pAuthBuf);
 		if (status==SOCKET_ERROR || status<3+nUserLen+nPassLen) {
 			JabberLog("Send failed (%d), thread ended", WSAGetLastError());
 			Netlib_CloseHandle(s);
@@ -256,7 +256,7 @@ static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	{	PBYTE pInit;
 		int nHostLen=4;
 		DWORD hostIP=INADDR_ANY;
-		pInit=(PBYTE)malloc(6+nHostLen);
+		pInit=(PBYTE)mir_alloc(6+nHostLen);
 		pInit[0]=5;   //SOCKS5
 		pInit[1]=2;   //bind
 		pInit[2]=0;   //reserved
@@ -264,7 +264,7 @@ static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 		*(PDWORD)(pInit+4)=hostIP;
 		*(PWORD)(pInit+4+nHostLen)=htons(0);
 		status = Netlib_Send(s, pInit, 6+nHostLen, MSG_NODUMP);
-		free(pInit);
+		mir_free(pInit);
 		if (status==SOCKET_ERROR || status<6+nHostLen) {
 //			JabberLog("Send failed (%d), thread ended", WSAGetLastError());
 			Netlib_CloseHandle(s);
@@ -282,7 +282,7 @@ static JABBER_SOCKET TlenFileBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 		memcpy(sb->szHost, buf+5, len);
 		sb->szHost[len]=0;
 		len += 4;
-	} else { // ip address 
+	} else { // ip address
 		in.S_un.S_addr = *(PDWORD)(buf+4);
 		strcpy(sb->szHost, inet_ntoa(in));
 		len = 8;
@@ -305,7 +305,7 @@ static JABBER_SOCKET TlenFileListen(TLEN_FILE_TRANSFER *ft)
 	JabberLog("TlenFileListen");
 
 	useProxy=0;
-	if (ft->httpHostName != NULL) free (ft->httpHostName);
+	if (ft->httpHostName != NULL) mir_free(ft->httpHostName);
 	ft->httpHostName = NULL;
 	ft->httpPort = 0;
 	if (DBGetContactSettingByte(NULL, jabberProtoName, "UseFileProxy", FALSE)) {
@@ -341,10 +341,10 @@ static JABBER_SOCKET TlenFileListen(TLEN_FILE_TRANSFER *ft)
 					useProxy = 2;
 					break;
 			}
-			ft->httpHostName = _strdup(sb.szHost);
+			ft->httpHostName = mir_strdup(sb.szHost);
 			ft->httpPort = sb.wPort;
 		}
-	} 
+	}
 	if (useProxy<2) {
 		nlb.cbSize = sizeof(NETLIBBIND);
 		if (ft->mode == FT_SEND) {
@@ -360,7 +360,7 @@ static JABBER_SOCKET TlenFileListen(TLEN_FILE_TRANSFER *ft)
 	}
 	if (useProxy==0) {
 		in.S_un.S_addr = jabberLocalIP;
-		ft->httpHostName = _strdup(inet_ntoa(in));
+		ft->httpHostName = mir_strdup(inet_ntoa(in));
 		ft->httpPort = nlb.wPort;
 	}
 	return s;
@@ -403,7 +403,7 @@ void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 			ft->state = FT_CONNECTING;
 			nick = JabberNickFromJID(ft->jid);
 			JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->httpHostName, ft->httpPort);
-			free(nick);
+			mir_free(nick);
 			JabberLog("Waiting for the file to be received...");
 			WaitForSingleObject(hEvent, INFINITE);
 			ft->hFileEvent = NULL;
@@ -465,8 +465,8 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 			p = rpacket->packet;
 			if (rpacket->type == TLEN_FILE_PACKET_FILE_LIST) { // list of files (length & name)
 				ft->fileCount = (int)(*((DWORD*)p));
-				ft->files = (char **) malloc(sizeof(char *) * ft->fileCount);
-				ft->filesSize = (long *) malloc(sizeof(long) * ft->fileCount);
+				ft->files = (char **) mir_alloc(sizeof(char *) * ft->fileCount);
+				ft->filesSize = (long *) mir_alloc(sizeof(long) * ft->fileCount);
 				ft->currentFile = 0;
 				ft->allFileTotalSize = 0;
 				ft->allFileReceivedBytes = 0;
@@ -475,15 +475,15 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 					ft->filesSize[i] = (long)(*((DWORD*)p));
 					ft->allFileTotalSize += ft->filesSize[i];
 					p += sizeof(DWORD);
-					ft->files[i] = (char *)malloc(256);
+					ft->files[i] = (char *)mir_alloc(256);
 					memcpy(ft->files[i], p, 256);
 					p += 256;
 				}
 				if ((packet=TlenP2PPacketCreate(3*sizeof(DWORD))) == NULL) {
 					ft->state = FT_ERROR;
-				} 
+				}
 				else {
-					TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_FILE_LIST_ACK); 
+					TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_FILE_LIST_ACK);
 					TlenP2PPacketSend(ft->s, packet);
 					TlenP2PPacketFree(packet);
 					ft->state = FT_INITIALIZING;
@@ -506,7 +506,7 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 			TlenP2PPacketSend(ft->s, packet);
 			TlenP2PPacketFree(packet);
 
-			fullFileName = (char *) malloc(strlen(ft->szSavePath) + strlen(ft->files[ft->currentFile]) + 2);
+			fullFileName = (char *) mir_alloc(strlen(ft->szSavePath) + strlen(ft->files[ft->currentFile]) + 2);
 			strcpy(fullFileName, ft->szSavePath);
 			if (fullFileName[strlen(fullFileName)-1] != '\\')
 				strcat(fullFileName, "\\");
@@ -515,14 +515,14 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 			ft->fileReceivedBytes = 0;
 			ft->fileTotalSize = ft->filesSize[ft->currentFile];
 			JabberLog("Saving to [%s] [%d]", fullFileName, ft->filesSize[ft->currentFile]);
-			free(fullFileName);
+			mir_free(fullFileName);
 			ft->state = FT_RECEIVING;
 			JabberLog("Change to FT_RECEIVING");
 		}
 		else {
 			ft->state = FT_ERROR;
 		}
-	} 
+	}
 	else if (ft->state == FT_RECEIVING) {
 		PROTOFILETRANSFERSTATUS pfts;
 		memset(&pfts, 0, sizeof(PROTOFILETRANSFERSTATUS));
@@ -601,7 +601,7 @@ void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 
 		nick = JabberNickFromJID(ft->jid);
 		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->httpHostName, ft->httpPort);
-		free(nick);
+		mir_free(nick);
 		JabberLog("Waiting for the file to be sent...");
 		WaitForSingleObject(hEvent, INFINITE);
 		ft->hFileEvent = NULL;
@@ -639,7 +639,7 @@ void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 				ft->state = FT_ERROR;
 				nick = JabberNickFromJID(ft->jid);
 				JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
-				free(nick);
+				mir_free(nick);
 			}
 		}
 	} else {
@@ -767,7 +767,7 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 				if ((ft->fileId=_open(ft->files[currentFile], _O_BINARY|_O_RDONLY)) < 0) {
 					JabberLog("File cannot be opened");
 					ft->state = FT_ERROR;
-				} 
+				}
 				else  {
 					memset(&pfts, 0, sizeof(PROTOFILETRANSFERSTATUS));
 					pfts.cbSize = sizeof(PROTOFILETRANSFERSTATUS);
@@ -787,7 +787,7 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 					}
 					else {
 						TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_FILE_DATA);
-						fileBuffer = (char *) malloc(2048);
+						fileBuffer = (char *) mir_alloc(2048);
 						JabberLog("Sending file data...");
 						while ((numRead=_read(ft->fileId, fileBuffer, 2048)) > 0) {
 							TlenP2PPacketSetLen(packet, 0); // Reuse packet
@@ -806,7 +806,7 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 								break;
 							}
 						}
-						free(fileBuffer);
+						mir_free(fileBuffer);
 						_close(ft->fileId);
 						if (ft->state != FT_ERROR) {
 							if (ft->currentFile >= ft->fileCount-1)

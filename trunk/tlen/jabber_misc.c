@@ -24,13 +24,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 
 #define __try
-#define __except(x) if (0) 
+#define __except(x) if (0)
 #define __finally
 
 #define _try __try
 #define _except __except
 #define _finally __finally
-#include <excpt.h> 
+#include <excpt.h>
 
 void JabberDBAddAuthRequest(char *jid, char *nick)
 {
@@ -40,7 +40,7 @@ void JabberDBAddAuthRequest(char *jid, char *nick)
 	HANDLE hContact;
 
 	// strip resource if present
-	s = _strdup(jid);
+	s = mir_strdup(jid);
 	if ((p=strchr(s, '@')) != NULL) {
 		if ((q=strchr(p, '/')) != NULL)
 			*q = '\0';
@@ -65,7 +65,7 @@ void JabberDBAddAuthRequest(char *jid, char *nick)
 	dbei.flags = 0;
 	dbei.eventType = EVENTTYPE_AUTHREQUEST;
 	dbei.cbBlob = sizeof(DWORD) + sizeof(HANDLE) + strlen(nick) + strlen(jid) + 5;
-	pCurBlob = dbei.pBlob = (PBYTE) malloc(dbei.cbBlob);
+	pCurBlob = dbei.pBlob = (PBYTE) mir_alloc(dbei.cbBlob);
 	*((PDWORD) pCurBlob) = 0; pCurBlob += sizeof(DWORD);
 	*((PHANDLE) pCurBlob) = hContact; pCurBlob += sizeof(HANDLE);
 	strcpy((char *) pCurBlob, nick); pCurBlob += strlen(nick)+1;
@@ -201,7 +201,7 @@ void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen)
 		char* hash;
 		hash = JabberSha1(item->jid);
 		mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s.%s", hash, szFileType );
-		free( hash );
+		mir_free( hash );
 	}
 	else mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s avatar.%s", jabberProtoName, szFileType );
 }
@@ -215,7 +215,7 @@ struct FORK_ARG {
 };
 
 static void __cdecl forkthread_r(struct FORK_ARG *fa)
-{	
+{
 	void (*callercode)(void*) = fa->threadcode;
 	void *arg = fa->arg;
 	CallService(MS_SYSTEM_THREAD_PUSH, 0, 0);
@@ -224,7 +224,7 @@ static void __cdecl forkthread_r(struct FORK_ARG *fa)
 		callercode(arg);
 	} __finally {
 		CallService(MS_SYSTEM_THREAD_POP, 0, 0);
-	} 
+	}
 	return;
 }
 
@@ -236,7 +236,7 @@ unsigned long JabberForkThread(
 {
 	unsigned long rc;
 	struct FORK_ARG fa;
-	
+
 	fa.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	fa.threadcode = threadcode;
 	fa.arg = arg;

@@ -65,9 +65,9 @@ static void FetchField(HWND hwndDlg, UINT idCtrl, char *fieldName, char **str, i
 		if ((localFieldName=JabberTextEncode(fieldName)) != NULL) {
 			if ((localText=JabberTextEncode(text)) != NULL) {
 				JabberStringAppend(str, strSize, "<%s>%s</%s>", localFieldName, localText, localFieldName);
-				free(localText);
+				mir_free(localText);
 			}
-			free(localFieldName);
+			mir_free(localFieldName);
 		}
 	}
 }
@@ -83,7 +83,7 @@ static void FetchCombo(HWND hwndDlg, UINT idCtrl, char *fieldName, char **str, i
 	if (value > 0) {
 		if ((localFieldName=JabberTextEncode(fieldName)) != NULL) {
 			JabberStringAppend(str, strSize, "<%s>%d</%s>", localFieldName, value, localFieldName);
-			free(localFieldName);
+			mir_free(localFieldName);
 		}
 	}
 }

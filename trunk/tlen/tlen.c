@@ -142,19 +142,19 @@ int __declspec(dllexport) Unload(void)
 	JabberSerialUninit();
 	DeleteCriticalSection(&modeMsgMutex);
 	DeleteCriticalSection(&mutex);
-	free(modeMsgs.szOnline);
-	free(modeMsgs.szAway);
-	free(modeMsgs.szNa);
-	free(modeMsgs.szDnd);
-	free(modeMsgs.szFreechat);
-	free(modeMsgs.szInvisible);
-	//free(jabberModeMsg);
-	free(jabberModuleName);
-	free(jabberProtoName);
+	mir_free(modeMsgs.szOnline);
+	mir_free(modeMsgs.szAway);
+	mir_free(modeMsgs.szNa);
+	mir_free(modeMsgs.szDnd);
+	mir_free(modeMsgs.szFreechat);
+	mir_free(modeMsgs.szInvisible);
+	//mir_free(jabberModeMsg);
+	mir_free(jabberModuleName);
+	mir_free(jabberProtoName);
 	if (userAvatarHash) {
-		free(userAvatarHash);
+		mir_free(userAvatarHash);
 	}
-	if (streamId) free(streamId);
+	if (streamId) mir_free(streamId);
 
 #ifdef _DEBUG
 	OutputDebugString("Finishing Unload, returning to Miranda");
@@ -300,16 +300,16 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	p++;
 	q = strrchr(p, '.');
 	*q = '\0';
-	jabberProtoName = _strdup(p);
+	jabberProtoName = mir_strdup(p);
 	_strupr(jabberProtoName);
 
-	jabberModuleName = _strdup(jabberProtoName);
+	jabberModuleName = mir_strdup(jabberProtoName);
 	_strlwr(jabberModuleName);
 	jabberModuleName[0] = toupper(jabberModuleName[0]);
 
 	JabberLog("Setting protocol/module name to '%s/%s'", jabberProtoName, jabberModuleName);
 
-	
+
 	DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &hMainThread, THREAD_SET_CONTEXT, FALSE, 0);
 	jabberMainThreadId = GetCurrentThreadId();
 	//hLibSSL = NULL;
@@ -418,7 +418,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_GRANT));
 	mi.pszService = text;
 	mi.pszContactOwner = jabberProtoName;
-	//CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi); //hMenuContactGrantAuth = (HANDLE) 
+	//CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi); //hMenuContactGrantAuth = (HANDLE)
 
 	mi.position = -2000020000;
 	mi.flags = CMIF_NOTONLINE;

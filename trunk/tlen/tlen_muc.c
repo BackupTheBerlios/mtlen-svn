@@ -85,7 +85,7 @@ static char *getDisplayName(const char *id)
 			if (!CallService(MS_CONTACT_GETCONTACTINFO, 0, (LPARAM) & ci)) {
 				if (ci.type == CNFT_ASCIIZ) {
 					if (ci.pszVal) {
-						char * str = strdup(ci.pszVal);
+						char * str = mir_strdup(ci.pszVal);
 						JabberLog("NICK %s", str);
 						miranda_sys_free(ci.pszVal);
 						return str;
@@ -94,7 +94,7 @@ static char *getDisplayName(const char *id)
 			}
 		}
 	}
-	return strdup(id);
+	return mir_strdup(id);
 }
 
 BOOL TlenMUCInit(void)
@@ -184,9 +184,9 @@ static int TlenMUCHandleEvent(WPARAM wParam, LPARAM lParam)
 					if (!isSelf(mucce->pszID, nick)) {
 						char *reason = JabberTextEncode(mucce->pszText);
 						JabberSend(jabberThreadInfo->s, "<p to='%s'><x><i i='%s' a='4' ex='%d' rs='%s'/></x></p>", mucce->pszID, nick, mucce->dwData, reason);
-						free (reason);
+						mir_free(reason);
 					}
-					free(nick);
+					mir_free(nick);
 				}
 				break;
 			case MUCC_EVENT_UNBAN:
@@ -196,7 +196,7 @@ static int TlenMUCHandleEvent(WPARAM wParam, LPARAM lParam)
 					if (!isSelf(mucce->pszID, nick)) {
 						JabberSend(jabberThreadInfo->s, "<p to='%s'><x><i i='%s' a='0'/></x></p>", mucce->pszID, nick);
 					}
-					free(nick);
+					mir_free(nick);
 				}
 				break;
 			case MUCC_EVENT_SET_USER_ROLE:
@@ -213,7 +213,7 @@ static int TlenMUCHandleEvent(WPARAM wParam, LPARAM lParam)
 						}
 						JabberSend(jabberThreadInfo->s, "<p to='%s'><x><i i='%s' a='%d' /></x></p>", mucce->pszID, nick, id);
 					}
-					free(nick);
+					mir_free(nick);
 				}
 				break;
 			case MUCC_EVENT_QUERY_USER_NICKS:
@@ -266,7 +266,7 @@ static int TlenMUCHandleEvent(WPARAM wParam, LPARAM lParam)
 								}
 							}
 						}
-						free(nick);
+						mir_free(nick);
 					}
 				}
 				break;
@@ -335,7 +335,7 @@ int TlenMUCRecvInvitation(const char *roomId, const char *roomName, const char *
 			mucce.pszNick = nick;
 			mucce.pszText = reason;
 			CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
-			free(nick);
+			mir_free(nick);
 		} else {
 			if (!TlenMUCCreateWindow(roomId, roomName, 0, NULL, NULL)) {
 				TlenMUCSendPresence(roomId, NULL, ID_STATUS_ONLINE);
@@ -374,9 +374,9 @@ int TlenMUCRecvPresence(const char *from, int status, int flags, const char *kic
 			mucce.pszText = str;
 		}
 		CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
-		free(roomId);
-		free(userId);
-		free(nick);
+		mir_free(roomId);
+		mir_free(userId);
+		mir_free(nick);
 //	}
 	return 0;
 }
@@ -432,10 +432,10 @@ int TlenMUCRecvMessage(const char *from, long timestamp, XmlNode *bodyNode)
 		}
 		mucce.iFont = iStyle;
 		CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
-		free(roomId);
-		free(userId);
-		free(nick);
-		free(localMessage);
+		mir_free(roomId);
+		mir_free(userId);
+		mir_free(nick);
+		mir_free(localMessage);
 //	}
 	return 0;
 }
@@ -568,10 +568,10 @@ static int TlenMUCSendPresence(const char *roomID, const char *nick, int desired
 				JabberSend(jabberThreadInfo->s, "<p to='%s'/>", jid);
 				item = JabberListGetItemPtr(LIST_CHATROOM, roomID);
 				if (item!=NULL) {
-					if (item->nick!=NULL) free(item->nick);
+					if (item->nick!=NULL) mir_free(item->nick);
 					item->nick = NULL;
 					if (nick!=NULL) {
-						item->nick = strdup(nick);
+						item->nick = mir_strdup(nick);
 					}
 				}
 				break;
@@ -583,7 +583,7 @@ static int TlenMUCSendPresence(const char *roomID, const char *nick, int desired
 				}
 				break;
 		}
-		free(jid);
+		mir_free(jid);
 	}
 	return 0;
 }
@@ -603,9 +603,9 @@ static int TlenMUCSendMessage(MUCCEVENT *event)
 			if (event->dwFlags & MUCC_EF_FONT_ITALIC) style |=2;
 			if (event->dwFlags & MUCC_EF_FONT_UNDERLINE) style |=4;
 			JabberSend(jabberThreadInfo->s, "<m to='%s'><b n='%d' s='%d' f='%d' c='%06X'>%s</b></m>", jid, event->iFont+1, event->iFontSize, style, event->color, msg);
-			free(jid);
+			mir_free(jid);
 		}
-		free(msg);
+		mir_free(msg);
 	}
 	return 0;
 }
@@ -619,9 +619,9 @@ static int TlenMUCSendTopic(MUCCEVENT *event)
 	if ((msg = JabberTextEncode(event->pszText))!=NULL) {
 		if ((jid = JabberTextEncode(event->pszID))!=NULL) {
 			JabberSend(jabberThreadInfo->s, "<m to='%s'><subject>%s</subject></m>", jid, msg);
-			free(jid);
+			mir_free(jid);
 		}
-		free(msg);
+		mir_free(msg);
 	}
 	return 0;
 }
@@ -636,7 +636,7 @@ static int TlenMUCSendQuery(int type, const char *parent, int page)
 		JABBER_LIST_ITEM *item;
 		sprintf(serialId, JABBER_IQID"%d", JabberSerialNext());
 		item = JabberListAdd(LIST_SEARCH, serialId);
-		item->roomName = strdup(parent);
+		item->roomName = mir_strdup(parent);
 		JabberSend(jabberThreadInfo->s, "<iq to='c' type='3' n='%s' id='%s'/>", parent, serialId);
 	} else {
 		if (parent==NULL) {
@@ -672,10 +672,10 @@ int TlenMUCCreateWindow(const char *roomID, const char *roomName, int roomFlags,
 	}
 	item = JabberListAdd(LIST_CHATROOM, roomID);
 	if (roomName!=NULL) {
-		item->roomName = strdup(roomName);
+		item->roomName = mir_strdup(roomName);
 	}
 	if (nick!=NULL) {
-		item->nick = strdup(nick);
+		item->nick = mir_strdup(nick);
 	}
 	mucw.cbSize = sizeof(MUCCWINDOW);
 	mucw.iType = MUCC_WINDOW_CHATROOM;
@@ -701,19 +701,19 @@ static void TlenMUCFreeQueryResult(MUCCQUERYRESULT *result)
 {	int i;
 	for (i=0; i<result->iItemsNum; i++) {
 		if (result->pItems[i].pszID != NULL) {
-			free ((char *) result->pItems[i].pszID);
+			mir_free((char *) result->pItems[i].pszID);
 		}
 		if (result->pItems[i].pszName != NULL) {
-			free ((char *) result->pItems[i].pszName);
+			mir_free((char *) result->pItems[i].pszName);
 		}
 		if (result->pItems[i].pszNick != NULL) {
-			free ((char *) result->pItems[i].pszNick);
+			mir_free((char *) result->pItems[i].pszNick);
 		}
 		if (result->pItems[i].pszText != NULL) {
-			free ((char *) result->pItems[i].pszText);
+			mir_free((char *) result->pItems[i].pszText);
 		}
 	}
-	free((MUCCQUERYITEM *)result->pItems);
+	mir_free((MUCCQUERYITEM *)result->pItems);
 }
 
 void TlenIqResultChatGroups(XmlNode *iqNode, void *userdata)
@@ -733,7 +733,7 @@ void TlenIqResultChatGroups(XmlNode *iqNode, void *userdata)
 	queryResult.iType = MUCC_EVENT_QUERY_GROUPS;
 	queryResult.pszModule = jabberProtoName;
 	queryResult.pszParent = p;
-	queryResult.pItems = malloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
+	queryResult.pItems = mir_alloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
 	memset(queryResult.pItems, 0, sizeof(MUCCQUERYITEM) * lNode->numChild);
 	for (i=j=0; i<lNode->numChild; i++) {
 		itemNode = lNode->child[i];
@@ -754,7 +754,7 @@ void TlenIqResultChatGroups(XmlNode *iqNode, void *userdata)
 	queryResult.iItemsNum = j;
 	CallService(MS_MUCC_QUERY_RESULT, 0, (LPARAM) &queryResult);
 	TlenMUCFreeQueryResult(&queryResult);
-	free(p);
+	mir_free(p);
 }
 
 void TlenIqResultChatRooms(XmlNode *iqNode, void *userdata)
@@ -775,7 +775,7 @@ void TlenIqResultChatRooms(XmlNode *iqNode, void *userdata)
 	queryResult.iType = MUCC_EVENT_QUERY_ROOMS;
 	queryResult.pszModule = jabberProtoName;
 	queryResult.pszParent = p;
-	queryResult.pItems = malloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
+	queryResult.pItems = mir_alloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
 	memset(queryResult.pItems, 0, sizeof(MUCCQUERYITEM) * lNode->numChild);
 	queryResult.iPage = atoi(pn);
 	queryResult.iLastPage = atoi(px)&2?1:0;
@@ -797,7 +797,7 @@ void TlenIqResultChatRooms(XmlNode *iqNode, void *userdata)
 	queryResult.iItemsNum = j;
 	CallService(MS_MUCC_QUERY_RESULT, 0, (LPARAM) &queryResult);
 	TlenMUCFreeQueryResult(&queryResult);
-	free(p);
+	mir_free(p);
 }
 void TlenIqResultUserRooms(XmlNode *iqNode, void *userdata)
 {
@@ -809,7 +809,7 @@ void TlenIqResultUserRooms(XmlNode *iqNode, void *userdata)
 	queryResult.cbSize = sizeof (MUCCQUERYRESULT);
 	queryResult.iType = MUCC_EVENT_QUERY_USER_ROOMS;
 	queryResult.pszModule = jabberProtoName;
-	queryResult.pItems = malloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
+	queryResult.pItems = mir_alloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
 	memset(queryResult.pItems, 0, sizeof(MUCCQUERYITEM) * lNode->numChild);
 	for (i=j=0; i<lNode->numChild; i++) {
 		itemNode = lNode->child[i];
@@ -836,7 +836,7 @@ void TlenIqResultUserNicks(XmlNode *iqNode, void *userdata) {
 	queryResult.cbSize = sizeof (MUCCQUERYRESULT);
 	queryResult.iType = MUCC_EVENT_QUERY_USER_NICKS;
 	queryResult.pszModule = jabberProtoName;
-	queryResult.pItems = malloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
+	queryResult.pItems = mir_alloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
 	memset(queryResult.pItems, 0, sizeof(MUCCQUERYITEM) * lNode->numChild);
 	for (i=j=0; i<lNode->numChild; i++) {
 		itemNode = lNode->child[i];
@@ -863,7 +863,7 @@ void TlenIqResultChatRoomUsers(XmlNode *iqNode, void *userdata)
 	queryResult.iType = MUCC_EVENT_QUERY_USERS;
 	queryResult.pszModule = jabberProtoName;
 	queryResult.pszParent = id;
-	queryResult.pItems = malloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
+	queryResult.pItems = mir_alloc(sizeof(MUCCQUERYITEM) * lNode->numChild);
 	memset(queryResult.pItems, 0, sizeof(MUCCQUERYITEM) * lNode->numChild);
 	for (i=j=0; i<lNode->numChild; i++) {
 		itemNode = lNode->child[i];
@@ -919,7 +919,7 @@ void TlenIqResultRoomSearch(XmlNode *iqNode, void *userdata) {
 		mucce.pszNick = NULL;
 		mucce.dwFlags = MUCC_EF_ROOM_NICKNAMES;
 		CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
-		free(id);
+		mir_free(id);
 	}
 	JabberListRemove(LIST_SEARCH, iqId);
 }
@@ -940,8 +940,8 @@ void TlenIqResultRoomInfo(XmlNode *iqNode, void *userdata) {
 			mucce.pszName = name;
 			mucce.dwFlags = atoi(flags);
 			CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
-			free(id);
-			free(name);
+			mir_free(id);
+			mir_free(name);
 		}
 	}
 }
@@ -972,7 +972,7 @@ static void __cdecl TlenMUCCSendQueryResultThread(void *vRoomId)
 		}
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDNEXT, (WPARAM) hContact, 0);
 	}
-	queryResult.pItems = malloc(sizeof(MUCCQUERYITEM) * queryResult.iItemsNum);
+	queryResult.pItems = mir_alloc(sizeof(MUCCQUERYITEM) * queryResult.iItemsNum);
 	memset(queryResult.pItems, 0, sizeof(MUCCQUERYITEM) * queryResult.iItemsNum);
 	queryResult.iItemsNum = 0;
 	hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDFIRST, 0, 0);
@@ -982,8 +982,8 @@ static void __cdecl TlenMUCCSendQueryResultThread(void *vRoomId)
 			if (!DBGetContactSettingByte(hContact, jabberProtoName, "bChat", FALSE)) {
 				if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
 					if (strcmp(dbv.pszVal, "b73@tlen.pl")) {
-						queryResult.pItems[queryResult.iItemsNum].pszID = strdup(dbv.pszVal);
-						queryResult.pItems[queryResult.iItemsNum].pszName = strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, 0));
+						queryResult.pItems[queryResult.iItemsNum].pszID = mir_strdup(dbv.pszVal);
+						queryResult.pItems[queryResult.iItemsNum].pszName = mir_strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, 0));
 						queryResult.iItemsNum++;
 					}
 					DBFreeVariant(&dbv);
@@ -994,12 +994,12 @@ static void __cdecl TlenMUCCSendQueryResultThread(void *vRoomId)
 	}
 	CallService(MS_MUCC_QUERY_RESULT, 0, (LPARAM) &queryResult);
 	TlenMUCFreeQueryResult(&queryResult);
-	free(roomId);
+	mir_free(roomId);
 }
 
 
 static int TlenMUCQueryContacts(const char *roomId) {
-	JabberForkThread(TlenMUCCSendQueryResultThread, 0, (void *)strdup(roomId));
+	JabberForkThread(TlenMUCCSendQueryResultThread, 0, (void *)mir_strdup(roomId));
 	return 1;
 }
 
@@ -1012,7 +1012,7 @@ int TlenMUCMenuHandleMUC(WPARAM wParam, LPARAM lParam)
 	JabberSend(jabberThreadInfo->s, "<p to='c' tp='c' id='"JABBER_IQID"%d'/>", JabberSerialNext());
 	/*
 	MUCCEVENT *mucce;
-	mucce = (MUCCEVENT *) malloc (sizeof(MUCCEVENT));
+	mucce = (MUCCEVENT *) mir_alloc (sizeof(MUCCEVENT));
 	mucce->cbSize = sizeof(MUCCEVENT);
 	mucce->iType = MUCC_EVENT_JOIN;
 	mucce->dwFlags = 0;
@@ -1021,7 +1021,7 @@ int TlenMUCMenuHandleMUC(WPARAM wParam, LPARAM lParam)
 	mucce->pszName = NULL;
 	mucce->pszNick = NULL;
 	CallService(MS_MUCC_EVENT, 0, (LPARAM) mucce);
-	free(mucce);
+	mir_free(mucce);
 	*/
 	return 0;
 }
@@ -1053,7 +1053,7 @@ int TlenMUCContactMenuHandleMUC(WPARAM wParam, LPARAM lParam)
 			char serialId[32];
 			sprintf(serialId, JABBER_IQID"%d", JabberSerialNext());
 			item = JabberListAdd(LIST_INVITATIONS, serialId);
-			item->nick = strdup(dbv.pszVal);
+			item->nick = mir_strdup(dbv.pszVal);
 			JabberSend(jabberThreadInfo->s, "<p to='c' tp='c' id='%s'/>", serialId);
 			DBFreeVariant(&dbv);
 		}

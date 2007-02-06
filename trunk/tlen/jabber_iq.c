@@ -45,7 +45,7 @@ void JabberIqInit()
 
 void JabberIqUninit()
 {
-	if (iqList) free(iqList);
+	if (iqList) mir_free(iqList);
 	iqList = NULL;
 	iqCount = 0;
 	iqAlloced = 0;
@@ -115,7 +115,7 @@ void JabberIqAdd(unsigned int iqId, JABBER_IQ_PROCID procId, JABBER_IQ_PFUNC fun
 
 	if (i>=iqCount && iqCount>=iqAlloced) {
 		iqAlloced = iqCount + 8;
-		iqList = realloc(iqList, sizeof(JABBER_IQ_FUNC)*iqAlloced);
+		iqList = mir_realloc(iqList, sizeof(JABBER_IQ_FUNC)*iqAlloced);
 	}
 
 	if (iqList != NULL) {

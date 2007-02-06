@@ -50,7 +50,7 @@ void JabberListWipe(void)
 	for(i=0; i<count; i++)
 		JabberListFreeItemInternal(&(lists[i]));
 	if (lists != NULL) {
-		free(lists);
+		mir_free(lists);
 		lists = NULL;
 	}
 	count=0;
@@ -69,7 +69,7 @@ void JabberListWipeSpecial(void)
 			i--;
 		}
 	}
-	lists = (JABBER_LIST_ITEM *) realloc(lists, sizeof(JABBER_LIST_ITEM)*count);
+	lists = (JABBER_LIST_ITEM *) mir_realloc(lists, sizeof(JABBER_LIST_ITEM)*count);
 	LeaveCriticalSection(&csLists);
 }
 
@@ -78,19 +78,19 @@ static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item)
 	if (item == NULL)
 		return;
 
-	if (item->jid) free(item->jid);
-	if (item->nick) free(item->nick);
-	if (item->statusMessage) free(item->statusMessage);
-	if (item->group) free(item->group);
-	if (item->messageEventIdStr) free(item->messageEventIdStr);
-//	if (item->type) free(item->type);
+	if (item->jid) mir_free(item->jid);
+	if (item->nick) mir_free(item->nick);
+	if (item->statusMessage) mir_free(item->statusMessage);
+	if (item->group) mir_free(item->group);
+	if (item->messageEventIdStr) mir_free(item->messageEventIdStr);
+//	if (item->type) mir_free(item->type);
 	//if (item->ft) JabberFileFreeFt(item->ft); // No need to free (it is always free when exit from JabberFileServerThread())
-	if (item->roomName) free(item->roomName);
-	if (item->version) free(item->version);
-	if (item->software) free(item->software);
-	if (item->system) free(item->system);
-	if (item->avatarHash) free(item->avatarHash);
-	if (item->newAvatarHash) free(item->newAvatarHash);
+	if (item->roomName) mir_free(item->roomName);
+	if (item->version) mir_free(item->version);
+	if (item->software) mir_free(item->software);
+	if (item->system) mir_free(item->system);
+	if (item->avatarHash) mir_free(item->avatarHash);
+	if (item->newAvatarHash) mir_free(item->newAvatarHash);
 }
 
 int JabberListExist(JABBER_LIST list, const char *jid)
@@ -98,7 +98,7 @@ int JabberListExist(JABBER_LIST list, const char *jid)
 	int i, len;
 	char *s, *p, *q;
 
-	s = _strdup(jid); _strlwr(s);
+	s = mir_strdup(jid); _strlwr(s);
 	// strip resouce name if any
 	if ((p=strchr(s, '@')) != NULL) {
 		if ((q=strchr(p, '/')) != NULL)
@@ -112,12 +112,12 @@ int JabberListExist(JABBER_LIST list, const char *jid)
 			p = lists[i].jid;
 			if (p && (int)strlen(p)>=len && (p[len]=='\0'||p[len]=='/') && !strncmp(p, s, len)) {
 			  	LeaveCriticalSection(&csLists);
-				free(s);
+				mir_free(s);
 				return i+1;
 			}
 		}
 	LeaveCriticalSection(&csLists);
-	free(s);
+	mir_free(s);
 	return 0;
 }
 
@@ -132,14 +132,14 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 		return item;
 	}
 
-	s = _strdup(jid); _strlwr(s);
+	s = mir_strdup(jid); _strlwr(s);
 	// strip resource name if any
 	if ((p=strchr(s, '@')) != NULL) {
 		if ((q=strchr(p, '/')) != NULL)
 			*q = '\0';
 	}
 
-	lists = (JABBER_LIST_ITEM *) realloc(lists, sizeof(JABBER_LIST_ITEM)*(count+1));
+	lists = (JABBER_LIST_ITEM *) mir_realloc(lists, sizeof(JABBER_LIST_ITEM)*(count+1));
 	item = &(lists[count]);
 	item->list = list;
 	item->jid = s;
@@ -182,7 +182,7 @@ void JabberListRemove(JABBER_LIST list, const char *jid)
 	JabberListFreeItemInternal(&(lists[i]));
 	count--;
 	memmove(lists+i, lists+i+1, sizeof(JABBER_LIST_ITEM)*(count-i));
-	lists = (JABBER_LIST_ITEM *) realloc(lists, sizeof(JABBER_LIST_ITEM)*count);
+	lists = (JABBER_LIST_ITEM *) mir_realloc(lists, sizeof(JABBER_LIST_ITEM)*count);
 	LeaveCriticalSection(&csLists);
 }
 
@@ -203,7 +203,7 @@ void JabberListRemoveByIndex(int index)
 		JabberListFreeItemInternal(&(lists[index]));
 		count--;
 		memmove(lists+index, lists+index+1, sizeof(JABBER_LIST_ITEM)*(count-index));
-		lists = (JABBER_LIST_ITEM *) realloc(lists, sizeof(JABBER_LIST_ITEM)*count);
+		lists = (JABBER_LIST_ITEM *) mir_realloc(lists, sizeof(JABBER_LIST_ITEM)*count);
 	}
 	LeaveCriticalSection(&csLists);
 }
@@ -221,9 +221,9 @@ void JabberListAddResource(JABBER_LIST list, const char *jid, int status, const 
 	i--;
 
 	if (lists[i].statusMessage != NULL)
-		free(lists[i].statusMessage);
+		mir_free(lists[i].statusMessage);
 	if (statusMessage)
-		lists[i].statusMessage = _strdup(statusMessage);
+		lists[i].statusMessage = mir_strdup(statusMessage);
 	else
 		lists[i].statusMessage = NULL;
 	LeaveCriticalSection(&csLists);
