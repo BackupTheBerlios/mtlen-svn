@@ -3,13 +3,15 @@
 // Used by Tlen.rc
 //
 
-#define IDI_TLEN                        100
-#define IDI_MAIL                        101
-#define IDI_MUC							102
-#define IDI_MICROPHONE					103
-#define IDI_SPEAKER						104
-#define IDI_GRANT						105
-#define IDI_REQUEST						106
+#define IDI_TLEN                        	100
+#define IDI_MAIL                        	101
+#define IDI_MUC				102
+#define IDI_CHATS			103
+#define IDI_GRANT			104
+#define IDI_REQUEST			105
+#define IDI_VOICE			106
+#define IDI_MICROPHONE		107
+#define IDI_SPEAKER			108
 
 #define IDD_OPTIONS                  	150
 #define IDD_OPTIONS_BASIC              	151

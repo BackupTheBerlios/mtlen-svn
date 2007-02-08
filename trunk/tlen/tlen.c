@@ -197,9 +197,14 @@ static void TlenRegisterIcons()
 	int i;
 	static int iconList[] = {
 		IDI_TLEN,
+		IDI_MAIL,
 		IDI_MUC,
+		IDI_CHATS,
+		IDI_GRANT,
+		IDI_REQUEST,
+		IDI_VOICE,
 		IDI_MICROPHONE,
-		IDI_SPEAKER
+		IDI_SPEAKER,
 	};
 	for (i=0; i<TLEN_ICON_TOTAL; i++)
 		tlenIcons[i] = LoadImage(hInst, MAKEINTRESOURCE(iconList[i]), IMAGE_ICON, 0, 0, 0);
@@ -347,7 +352,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(text, TlenMUCMenuHandleMUC);
 	mi.pszName = Translate("Multi-User Conference");
 	mi.position = 2000050001;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_TLEN));
+	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
 	mi.pszService = text;
 	hMenuMUC = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuMUC, (LPARAM) &clmi);
@@ -356,7 +361,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(text, TlenMUCMenuHandleChats);
 	mi.pszName = Translate("Tlen Chats");
 	mi.position = 2000050002;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MUC));
+	mi.hIcon = tlenIcons[TLEN_IDI_CHATS];
 	mi.pszService = text;
 	hMenuChats = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChats, (LPARAM) &clmi);
@@ -365,7 +370,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(text, TlenMenuHandleInbox);
 	mi.pszName = Translate("Tlen Inbox");
 	mi.position = 2000050003;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MAIL));
+	mi.hIcon = tlenIcons[TLEN_IDI_MAIL];
 	mi.pszService = text;
 	hMenuInbox = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
 
@@ -374,7 +379,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(text, TlenMUCContactMenuHandleMUC);
 	mi.pszName = Translate("Multi-User Conference");
 	mi.position = -2000020000;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MUC));
+	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
 	mi.pszService = text;
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactMUC = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
@@ -384,7 +389,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(text, TlenVoiceContactMenuHandleVoice);
 	mi.pszName = Translate("Voice Chat");
 	mi.position = -2000018000;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MICROPHONE));
+	mi.hIcon = tlenIcons[TLEN_IDI_VOICE];
 	mi.pszService = text;
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactVoice = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
@@ -394,7 +399,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(text, TlenContactMenuHandleRequestAuth);
 	mi.pszName = Translate("Request authorization");
 	mi.position = -2000001001;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_REQUEST));
+	mi.hIcon = tlenIcons[TLEN_IDI_REQUEST];
 	mi.pszService = text;
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactRequestAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
@@ -404,7 +409,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(text, TlenContactMenuHandleGrantAuth);
 	mi.pszName = Translate("Grant authorization");
 	mi.position = -2000001000;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_GRANT));
+	mi.hIcon = tlenIcons[TLEN_IDI_GRANT];
 	mi.pszService = text;
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactGrantAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
