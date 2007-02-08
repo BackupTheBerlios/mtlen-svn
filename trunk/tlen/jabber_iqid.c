@@ -59,8 +59,8 @@ void JabberIqResultSetAuth(XmlNode *iqNode, void *userdata)
 		char text[128];
 
 		JabberSend(info->s, "</s>");
-		_snprintf(text, sizeof(text), "%s %s@%s.", Translate("Authentication failed for"), info->username, info->server);
-		MessageBox(NULL, text, Translate("Tlen Authentication"), MB_OK|MB_ICONSTOP|MB_SETFOREGROUND);
+		_snprintf(text, sizeof(text), "%s %s@%s.", TranslateT("Authentication failed for"), info->username, info->server);
+		MessageBox(NULL, text, TranslateT("Tlen Authentication"), MB_OK|MB_ICONSTOP|MB_SETFOREGROUND);
 		ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_LOGIN, ACKRESULT_FAILED, NULL, LOGINERR_WRONGPASSWORD);
 		jabberThreadInfo = NULL;	// To disallow auto reconnect
 	}

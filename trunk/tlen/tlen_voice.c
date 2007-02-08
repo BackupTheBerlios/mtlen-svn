@@ -1191,10 +1191,10 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 	case WM_INITDIALOG:
 		voiceDlgHWND = hwndDlg;
 		TranslateDialogDefault(hwndDlg);
-		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) Translate("8000 Hz / 13.8 kbps"));
-		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) Translate("11025 Hz / 19.1 kbps"));
-		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) Translate("22050 Hz / 36.8 kbps"));
-		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) Translate("44100 Hz / 72 kbps"));
+		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) TranslateT("8000 Hz / 13.8 kbps"));
+		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) TranslateT("11025 Hz / 19.1 kbps"));
+		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) TranslateT("22050 Hz / 36.8 kbps"));
+		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) TranslateT("44100 Hz / 72 kbps"));
 		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_SETCURSEL, 1, 0);
 		SendDlgItemMessage(hwndDlg, IDC_MICROPHONE, BUTTONSETASFLATBTN, 0, 0);
 		SendDlgItemMessage(hwndDlg, IDC_SPEAKER, BUTTONSETASFLATBTN, 0, 0);
@@ -1462,7 +1462,7 @@ int TlenVoiceBuildInDeviceList(HWND hWnd)
 {	int i, j, iNumDevs;
 	WAVEINCAPS     wic;
 	iNumDevs = waveInGetNumDevs();
-	SendMessage(hWnd, CB_ADDSTRING, 0, (LPARAM)Translate("Default"));
+	SendMessage(hWnd, CB_ADDSTRING, 0, (LPARAM)TranslateT("Default"));
 	for (i = j = 0; i < iNumDevs; i++) {
 		if (!waveInGetDevCaps(i, &wic, sizeof(WAVEINCAPS))) {
 			if (wic.dwFormats != 0) {
@@ -1481,7 +1481,7 @@ int TlenVoiceBuildOutDeviceList(HWND hWnd)
 {	int i, j, iNumDevs;
 	WAVEOUTCAPS  woc;
 	iNumDevs = waveInGetNumDevs();
-	SendMessage(hWnd, CB_ADDSTRING, 0, (LPARAM)Translate("Default"));
+	SendMessage(hWnd, CB_ADDSTRING, 0, (LPARAM)TranslateT("Default"));
 	for (i = j = 0; i < iNumDevs; i++) {
 		if (!waveOutGetDevCaps(i, &woc, sizeof(WAVEOUTCAPS))) {
 			if (woc.dwFormats != 0) {

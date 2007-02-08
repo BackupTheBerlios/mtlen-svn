@@ -66,7 +66,7 @@ static BOOL CALLBACK JabberPasswordDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam
 	switch (msg) {
 	case WM_INITDIALOG:
 		TranslateDialogDefault(hwndDlg);
-		wsprintf(text, "%s %s", Translate("Enter password for"), (char *) lParam);
+		wsprintf(text, "%s %s", TranslateT("Enter password for"), (char *) lParam);
 		SetDlgItemText(hwndDlg, IDC_JID, text);
 		return TRUE;
 	case WM_COMMAND:
@@ -259,7 +259,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 			jabberThreadInfo = NULL;
 		}
 		else if (info->type == JABBER_SESSION_REGISTER) {
-			SendMessage(info->reg_hwndDlg, WM_JABBER_REGDLG_UPDATE, 100, (LPARAM) Translate("Error: Not enough memory"));
+			SendMessage(info->reg_hwndDlg, WM_JABBER_REGDLG_UPDATE, 100, (LPARAM) TranslateT("Error: Not enough memory"));
 		}
 		mir_free(info);
 		JabberLog("Thread ended, network buffer cannot be allocated");
@@ -306,7 +306,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 				}
 			}
 			else if (info->type == JABBER_SESSION_REGISTER) {
-				SendMessage(info->reg_hwndDlg, WM_JABBER_REGDLG_UPDATE, 100, (LPARAM) Translate("Error: Cannot connect to the server"));
+				SendMessage(info->reg_hwndDlg, WM_JABBER_REGDLG_UPDATE, 100, (LPARAM) TranslateT("Error: Cannot connect to the server"));
 			}
 			JabberLog("Thread ended, connection failed");
 			mir_free(buffer);
@@ -363,12 +363,12 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 						jabberThreadInfo = NULL;
 				}
 				else if (info->type == JABBER_SESSION_REGISTER) {
-					SendMessage(info->reg_hwndDlg, WM_JABBER_REGDLG_UPDATE, 100, (LPARAM) Translate("Error: Cannot connect to the server"));
+					SendMessage(info->reg_hwndDlg, WM_JABBER_REGDLG_UPDATE, 100, (LPARAM) TranslateT("Error: Cannot connect to the server"));
 				}
 				mir_free(buffer);
 				mir_free(info);
 				if (!hLibSSL)
-					MessageBox(NULL, Translate("The connection requires an OpenSSL library, which is not installed."), Translate("Jabber Connection Error"), MB_OK|MB_ICONSTOP|MB_SETFOREGROUND);
+					MessageBox(NULL, TranslateT("The connection requires an OpenSSL library, which is not installed."), TranslateT("Jabber Connection Error"), MB_OK|MB_ICONSTOP|MB_SETFOREGROUND);
 				JabberLog("Thread ended, SSL connection failed");
 				return;
 			}
@@ -579,7 +579,7 @@ static void JabberProcessStreamClosing(XmlNode *node, void *userdata)
 
 	Netlib_CloseHandle(info->s);
 	if (node->name && !strcmp(node->name, "stream:error") && node->text)
-		MessageBox(NULL, Translate(node->text), Translate("Jabber Connection Error"), MB_OK|MB_ICONERROR|MB_SETFOREGROUND);
+		MessageBox(NULL, TranslateT(node->text), TranslateT("Jabber Connection Error"), MB_OK|MB_ICONERROR|MB_SETFOREGROUND);
 }
 
 static void JabberProcessProtocol(XmlNode *node, void *userdata)
@@ -633,24 +633,24 @@ static void TlenProcessIqVersion(XmlNode* node)
 		switch ( osvi.dwPlatformId ) {
 		case VER_PLATFORM_WIN32_NT:
 			if ( osvi.dwMajorVersion == 5 ) {
-				if ( osvi.dwMinorVersion == 2 ) os = JabberTextEncode( Translate( "Windows Server 2003" ));
-				else if ( osvi.dwMinorVersion == 1 ) os = JabberTextEncode( Translate( "Windows XP" ));
-				else if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( Translate( "Windows 2000" ));
+				if ( osvi.dwMinorVersion == 2 ) os = JabberTextEncode( TranslateT( "Windows Server 2003" ));
+				else if ( osvi.dwMinorVersion == 1 ) os = JabberTextEncode( TranslateT( "Windows XP" ));
+				else if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( TranslateT( "Windows 2000" ));
 			}
 			else if ( osvi.dwMajorVersion <= 4 ) {
-				os = JabberTextEncode( Translate( "Windows NT" ));
+				os = JabberTextEncode( TranslateT( "Windows NT" ));
 			}
 			break;
 		case VER_PLATFORM_WIN32_WINDOWS:
 			if ( osvi.dwMajorVersion == 4 ) {
-				if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( Translate( "Windows 95" ));
-				if ( osvi.dwMinorVersion == 10 ) os = JabberTextEncode( Translate( "Windows 98" ));
-				if ( osvi.dwMinorVersion == 90 ) os = JabberTextEncode( Translate( "Windows ME" ));
+				if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( TranslateT( "Windows 95" ));
+				if ( osvi.dwMinorVersion == 10 ) os = JabberTextEncode( TranslateT( "Windows 98" ));
+				if ( osvi.dwMinorVersion == 90 ) os = JabberTextEncode( TranslateT( "Windows ME" ));
 			}
 			break;
 	}	}
 
-	if ( os == NULL ) os = JabberTextEncode( Translate( "Windows" ));
+	if ( os == NULL ) os = JabberTextEncode( TranslateT( "Windows" ));
 
 	strcpy(mversion, "Miranda IM ");
 	CallService( MS_SYSTEM_GETVERSIONTEXT, sizeof( mversion ) - 11, ( LPARAM )mversion + 11 );
@@ -1535,11 +1535,11 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 							strncpy(szFilename, p, sizeof(szFilename));
 							mir_free(p);
 						} else {
-							strcpy(szFilename, Translate("1 File"));
+							strcpy(szFilename, TranslateT("1 File"));
 						}
 					}
 					else if (numFiles > 1) {
-						_snprintf(szFilename, sizeof(szFilename), Translate("%d Files"), numFiles);
+						_snprintf(szFilename, sizeof(szFilename), TranslateT("%d Files"), numFiles);
 					}
 				}
 
@@ -1676,7 +1676,7 @@ static void TlenProcessW(XmlNode *node, void *userdata)
 	if ((f=JabberXmlGetAttrValue(node, "f")) != NULL) {
 
 		char webContactName[128];
-		sprintf(webContactName, Translate("%s Web Messages"), jabberModuleName);
+		sprintf(webContactName, TranslateT("%s Web Messages"), jabberModuleName);
 		if ((hContact=JabberHContactFromJID(webContactName)) == NULL) {
 			hContact = JabberDBCreateContact(webContactName, webContactName, TRUE);
 		}
@@ -1686,11 +1686,11 @@ static void TlenProcessW(XmlNode *node, void *userdata)
 
 		str = NULL;
 		strSize = 0;
-		JabberStringAppend(&str, &strSize, "%s\r\n%s: ", Translate("Web message"), Translate("From"));
+		JabberStringAppend(&str, &strSize, "%s\r\n%s: ", TranslateT("Web message"), TranslateT("From"));
 
 		if (f != NULL)
 			JabberStringAppend(&str, &strSize, "%s", f);
-		JabberStringAppend(&str, &strSize, "\r\n%s: ", Translate("E-mail"));
+		JabberStringAppend(&str, &strSize, "\r\n%s: ", TranslateT("E-mail"));
 		if (e != NULL)
 			JabberStringAppend(&str, &strSize, "%s", e);
 		JabberStringAppend(&str, &strSize, "\r\n\r\n%s", body);
@@ -1761,7 +1761,7 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 							if (tlenOptions.logAlerts) {
 								CCSDATA ccs;
 								PROTORECVEVENT recv;
-								char *localMessage = mir_strdup(Translate("An alert has been received."));
+								char *localMessage = mir_strdup(TranslateT("An alert has been received."));
 								recv.flags = 0;
 								recv.timestamp = (DWORD) time(NULL);
 								recv.szMessage = localMessage;
@@ -1844,7 +1844,7 @@ static void TlenProcessM(XmlNode *node, void *userdata)
 				if (n!=NULL && strstr(r, n)!=r) {
 					n = JabberTextDecode(n);
 				} else {
-					n = mir_strdup(Translate("Private conference"));
+					n = mir_strdup(TranslateT("Private conference"));
 					//n = JabberNickFromJID(r);
 				}
 				TlenMUCRecvInvitation(r, n, f, "");
@@ -1914,15 +1914,15 @@ static void TlenProcessN(XmlNode *node, void *userdata)
 		str = NULL;
 		strSize = 0;
 
-		JabberStringAppend(&str, &strSize, Translate("%s mail"), jabberModuleName);
+		JabberStringAppend(&str, &strSize, TranslateT("%s mail"), jabberModuleName);
 		popupTitle = JabberTextDecode(str);
 		mir_free(str);
 
 		str = NULL;
 		strSize = 0;
 
-		JabberStringAppend(&str, &strSize, "%s: %s\n", Translate("From"), f);
-		JabberStringAppend(&str, &strSize, "%s: %s", Translate("Subject"), s);
+		JabberStringAppend(&str, &strSize, "%s: %s\n", TranslateT("From"), f);
+		JabberStringAppend(&str, &strSize, "%s: %s", TranslateT("Subject"), s);
 		popupText = JabberTextDecode(str);
 		TlenMailPopup(popupTitle, popupText);
 		SkinPlaySound("TlenMailNotify");
@@ -2014,7 +2014,7 @@ static void TlenProcessP(XmlNode *node, void *userdata)
 			if (n!=NULL) {
 				n = JabberTextDecode(n);
 			} else {
-				n = mir_strdup(Translate("Private conference"));// JabberNickFromJID(f);
+				n = mir_strdup(TranslateT("Private conference"));// JabberNickFromJID(f);
 			}
 			sprintf(jid, "%s/%s", f, info->username);
 //			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {

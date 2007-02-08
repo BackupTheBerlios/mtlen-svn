@@ -86,7 +86,7 @@ static void InitComboBox(HWND hwndCombo, JABBER_FIELD_MAP *fieldMap)
 	for(i=0;;i++) {
 		if (fieldMap[i].name == NULL)
 			break;
-		n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM) Translate(fieldMap[i].name));
+		n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM) TranslateT(fieldMap[i].name));
 		SendMessage(hwndCombo, CB_SETITEMDATA, n, fieldMap[i].id);
 	}
 }
@@ -224,11 +224,11 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			switch (DBGetContactSettingByte(hContact, jabberProtoName, "Gender", '?')) {
 				case 'M':
 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 1, 0);
-					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, Translate(tlenFieldGender[0].name));
+					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, TranslateT(tlenFieldGender[0].name));
 					break;
 				case 'F':
 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 2, 0);
-					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, Translate(tlenFieldGender[1].name));
+					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, TranslateT(tlenFieldGender[1].name));
 					break;
 				default:
 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 0, 0);
@@ -237,7 +237,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			}
 			i = DBGetContactSettingWord(hContact, jabberProtoName, "Occupation", 0);
 			if (i>0 && i<13) {
-				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, Translate(tlenFieldOccupation[i-1].name));
+				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, TranslateT(tlenFieldOccupation[i-1].name));
 				SendDlgItemMessage(hwndDlg, IDC_OCCUPATION, CB_SETCURSEL, i, 0);
 			} else {
 				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, "");
@@ -245,7 +245,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			}
 			i = DBGetContactSettingWord(hContact, jabberProtoName, "LookingFor", 0);
 			if (i>0 && i<6) {
-				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, Translate(tlenFieldLookfor[i-1].name));
+				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, TranslateT(tlenFieldLookfor[i-1].name));
 				SendDlgItemMessage(hwndDlg, IDC_LOOKFOR, CB_SETCURSEL, i, 0);
 			} else {
 				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, "");
@@ -264,23 +264,23 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 					if ((item=JabberListGetItemPtr(LIST_ROSTER, jid)) != NULL) {
 						switch (item->subscription) {
 						case SUB_BOTH:
-							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, Translate("both"));
+							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("both"));
 							break;
 						case SUB_TO:
-							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, Translate("to"));
+							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("to"));
 							break;
 						case SUB_FROM:
-							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, Translate("from"));
+							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("from"));
 							break;
 						default:
-							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, Translate("none"));
+							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("none"));
 							break;
 						}
 						SetDlgItemTextA(hwndDlg, IDC_SOFTWARE, item->software);
 						SetDlgItemTextA(hwndDlg, IDC_VERSION, item->version);
 						SetDlgItemTextA(hwndDlg, IDC_SYSTEM, item->system);
 					} else {
-						SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, Translate("not on roster"));
+						SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("not on roster"));
 					}
 				}
 				DBFreeVariant(&dbv);

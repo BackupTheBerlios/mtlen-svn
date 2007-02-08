@@ -30,11 +30,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <m_file.h>
 #include <richedit.h>
 #include <ctype.h>
+#include <m_icolib.h>
 
 HINSTANCE hInst;
 PLUGINLINK *pluginLink;
 
 struct MM_INTERFACE memoryManagerInterface;
+HANDLE hEventSkin2IconsChanged;
 
 PLUGININFO pluginInfo = {
 	sizeof(PLUGININFO),
@@ -183,18 +185,53 @@ static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 	//JabberSslInit();
 	TlenMUCInit();
 	HookEvent(ME_USERINFO_INITIALISE, TlenUserInfoInit);
-	sprintf(str, "%s", Translate("Incoming mail"));
+	sprintf(str, "%s", TranslateT("Incoming mail"));
 	SkinAddNewSoundEx("TlenMailNotify", jabberModuleName, str);
-	sprintf(str, "%s", Translate("Alert"));
+	sprintf(str, "%s", TranslateT("Alert"));
 	SkinAddNewSoundEx("TlenAlertNotify", jabberModuleName, str);
-	sprintf(str, "%s", Translate("Voice chat"));
+	sprintf(str, "%s", TranslateT("Voice chat"));
 	SkinAddNewSoundEx("TlenVoiceNotify", jabberModuleName, str);
 	return 0;
 }
 
-static void TlenRegisterIcons()
-{
+static void GetIconName(char *buffer, int bufferSize, int icon) {
+	const char *sufixes[]= {
+		"PROTO", "MAIL", "MUC", "CHATS", "GRANT", "REQUEST", "VOICE", "MICROPHONE", "SPEAKER"
+	};
+	mir_snprintf(buffer, bufferSize, "%s_%s", jabberProtoName, sufixes[icon]);
+}
+
+static TCHAR *GetIconDescription(int icon) {
+	const char *keys[]= {
+		_T("Protocol icon"),
+		_T("Mail"),
+		_T("Group chats"),
+		_T("CHATS"),
+		_T("GRANT"),
+		_T("REQUEST"),
+		_T("VOICE"),
+		_T("MICROPHONE"),
+		_T("SPEAKER")
+	};
+	return TranslateT(keys[icon]);
+}
+
+static void TlenReleaseIcons() {
 	int i;
+	char iconName[256];
+	for (i=0; i<TLEN_ICON_TOTAL; i++) {
+		if (hEventSkin2IconsChanged) {
+			GetIconName(iconName, sizeof(iconName), i);
+			CallService(MS_SKIN2_RELEASEICON, 0, (LPARAM)iconName);
+		} else {
+			DestroyIcon(tlenIcons[i]);
+		}
+	}
+}
+
+static void TlenLoadIcons() {
+	int i;
+	char iconName[256];
 	static int iconList[] = {
 		IDI_TLEN,
 		IDI_MAIL,
@@ -206,8 +243,99 @@ static void TlenRegisterIcons()
 		IDI_MICROPHONE,
 		IDI_SPEAKER,
 	};
-	for (i=0; i<TLEN_ICON_TOTAL; i++)
-		tlenIcons[i] = LoadImage(hInst, MAKEINTRESOURCE(iconList[i]), IMAGE_ICON, 0, 0, 0);
+	for (i=0; i<TLEN_ICON_TOTAL; i++) {
+		if (hEventSkin2IconsChanged) {
+			GetIconName(iconName, sizeof(iconName), i);
+			tlenIcons[i] = (HICON) CallService(MS_SKIN2_GETICON, 0, (LPARAM)iconName);
+		} else {
+			tlenIcons[i] = LoadImage(hInst, MAKEINTRESOURCE(iconList[i]), IMAGE_ICON, 0, 0, 0);
+		}
+	}
+}
+
+static int IcoLibIconsChanged(WPARAM wParam, LPARAM lParam)
+{
+	CLISTMENUITEM mi;
+	mi.cbSize = sizeof(mi);
+	mi.flags = CMIM_ICON;
+	TlenReleaseIcons();
+	TlenLoadIcons();
+	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuMUC, (LPARAM) &mi);
+	mi.hIcon = tlenIcons[TLEN_IDI_CHATS];
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChats, (LPARAM) &mi);
+	mi.hIcon = tlenIcons[TLEN_IDI_MAIL];
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuInbox, (LPARAM) &mi);
+	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactMUC, (LPARAM) &mi);
+	mi.hIcon = tlenIcons[TLEN_IDI_VOICE];
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactVoice, (LPARAM) &mi);
+	mi.hIcon = tlenIcons[TLEN_IDI_GRANT];
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactGrantAuth, (LPARAM) &mi);
+	mi.hIcon = tlenIcons[TLEN_IDI_REQUEST];
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactRequestAuth, (LPARAM) &mi);
+	return 0;
+}
+
+static void TlenRegisterIcons()
+{
+	hEventSkin2IconsChanged = HookEvent(ME_SKIN2_ICONSCHANGED, IcoLibIconsChanged);
+	if (hEventSkin2IconsChanged) {
+		char iconName[256];
+		char path[MAX_PATH];
+		SKINICONDESC sid = { 0 };
+		GetModuleFileNameA(hInst, path, MAX_PATH);
+		sid.cbSize = sizeof(SKINICONDESC);
+		sid.cx = sid.cy = 16;
+		sid.pszSection = jabberModuleName;
+		sid.pszDefaultFile = path;
+		GetIconName(iconName, sizeof(iconName), TLEN_IDI_TLEN);
+		sid.pszName = (char *) iconName;
+		sid.iDefaultIndex = -IDI_TLEN;
+		sid.pszDescription = TranslateT("Protocol icon");
+		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+		GetIconName(iconName, sizeof(iconName), TLEN_IDI_MAIL);
+		sid.pszName = (char *) iconName;
+		sid.iDefaultIndex = -IDI_MAIL;
+		sid.pszDescription = TranslateT("Mail");
+		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+		GetIconName(iconName, sizeof(iconName), TLEN_IDI_MUC);
+		sid.pszName = (char *) iconName;
+		sid.iDefaultIndex = -IDI_MUC;
+		sid.pszDescription = TranslateT("Group chats");
+		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+		GetIconName(iconName, sizeof(iconName), TLEN_IDI_CHATS);
+		sid.pszName = (char *) iconName;
+		sid.iDefaultIndex = -IDI_CHATS;
+		sid.pszDescription = TranslateT("Tlen chats");
+		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+		GetIconName(iconName, sizeof(iconName), TLEN_IDI_GRANT);
+		sid.pszName = (char *) iconName;
+		sid.iDefaultIndex = -IDI_GRANT;
+		sid.pszDescription = TranslateT("Grant authorization");
+		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+		GetIconName(iconName, sizeof(iconName), TLEN_IDI_REQUEST);
+		sid.pszName = (char *) iconName;
+		sid.iDefaultIndex = -IDI_REQUEST;
+		sid.pszDescription = TranslateT("Request authorization");
+		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+		GetIconName(iconName, sizeof(iconName), TLEN_IDI_VOICE);
+		sid.pszName = (char *) iconName;
+		sid.iDefaultIndex = -IDI_VOICE;
+		sid.pszDescription = TranslateT("Voice chat");
+		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+		GetIconName(iconName, sizeof(iconName), TLEN_IDI_MICROPHONE);
+		sid.pszName = (char *) iconName;
+		sid.iDefaultIndex = -IDI_MICROPHONE;
+		sid.pszDescription = TranslateT("Microphone");
+		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+		GetIconName(iconName, sizeof(iconName), TLEN_IDI_SPEAKER);
+		sid.pszName = (char *) iconName;
+		sid.iDefaultIndex = -IDI_SPEAKER;
+		sid.pszDescription = TranslateT("Speaker");
+		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+	}
+	TlenLoadIcons();
 }
 
 static int TlenPrebuildContactMenu(WPARAM wParam, LPARAM lParam)
@@ -350,7 +478,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	// "Multi-User Conference"
 	wsprintf(text, "%s/MainMenuMUC", jabberModuleName);
 	CreateServiceFunction(text, TlenMUCMenuHandleMUC);
-	mi.pszName = Translate("Multi-User Conference");
+	mi.pszName = TranslateT("Multi-User Conference");
 	mi.position = 2000050001;
 	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
 	mi.pszService = text;
@@ -359,7 +487,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 
 	wsprintf(text, "%s/MainMenuChats", jabberModuleName);
 	CreateServiceFunction(text, TlenMUCMenuHandleChats);
-	mi.pszName = Translate("Tlen Chats");
+	mi.pszName = TranslateT("Tlen Chats");
 	mi.position = 2000050002;
 	mi.hIcon = tlenIcons[TLEN_IDI_CHATS];
 	mi.pszService = text;
@@ -368,7 +496,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 
 	wsprintf(text, "%s/MainMenuInbox", jabberModuleName);
 	CreateServiceFunction(text, TlenMenuHandleInbox);
-	mi.pszName = Translate("Tlen Inbox");
+	mi.pszName = TranslateT("Tlen Inbox");
 	mi.position = 2000050003;
 	mi.hIcon = tlenIcons[TLEN_IDI_MAIL];
 	mi.pszService = text;
@@ -377,7 +505,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	// "Invite to MUC"
 	sprintf(text, "%s/ContactMenuMUC", jabberModuleName);
 	CreateServiceFunction(text, TlenMUCContactMenuHandleMUC);
-	mi.pszName = Translate("Multi-User Conference");
+	mi.pszName = TranslateT("Multi-User Conference");
 	mi.position = -2000020000;
 	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
 	mi.pszService = text;
@@ -387,7 +515,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	// "Invite to voice chat"
 	sprintf(text, "%s/ContactMenuVoice", jabberModuleName);
 	CreateServiceFunction(text, TlenVoiceContactMenuHandleVoice);
-	mi.pszName = Translate("Voice Chat");
+	mi.pszName = TranslateT("Voice Chat");
 	mi.position = -2000018000;
 	mi.hIcon = tlenIcons[TLEN_IDI_VOICE];
 	mi.pszService = text;
@@ -397,7 +525,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	// "Request authorization"
 	sprintf(text, "%s/RequestAuth", jabberModuleName);
 	CreateServiceFunction(text, TlenContactMenuHandleRequestAuth);
-	mi.pszName = Translate("Request authorization");
+	mi.pszName = TranslateT("Request authorization");
 	mi.position = -2000001001;
 	mi.hIcon = tlenIcons[TLEN_IDI_REQUEST];
 	mi.pszService = text;
@@ -407,7 +535,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	// "Grant authorization"
 	sprintf(text, "%s/GrantAuth", jabberModuleName);
 	CreateServiceFunction(text, TlenContactMenuHandleGrantAuth);
-	mi.pszName = Translate("Grant authorization");
+	mi.pszName = TranslateT("Grant authorization");
 	mi.position = -2000001000;
 	mi.hIcon = tlenIcons[TLEN_IDI_GRANT];
 	mi.pszService = text;
@@ -417,7 +545,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	// "Send picture"
 	sprintf(text, "%s/SendPicture", jabberModuleName);
 	CreateServiceFunction(text, TlenContactMenuHandleSendPicture);
-	mi.pszName = Translate("Send picture");
+	mi.pszName = TranslateT("Send picture");
 //	clmi.flags = CMIM_FLAGS | CMIF_NOTOFFLINE;// | CMIF_GRAYED;
 	mi.position = -2000001002;
 	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_GRANT));
@@ -428,7 +556,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.position = -2000020000;
 	mi.flags = CMIF_NOTONLINE;
 	mi.hIcon = LoadSkinnedIcon(SKINICON_EVENT_FILE);
-	mi.pszName = Translate("&File");
+	mi.pszName = TranslateT("&File");
 	mi.pszService = MS_FILE_SENDFILE;
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactFile = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);

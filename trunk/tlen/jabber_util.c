@@ -470,7 +470,7 @@ char *JabberErrorMsg(XmlNode *errorNode)
 
 	errorStr = (char *) mir_alloc(256);
 	if (errorNode == NULL) {
-		_snprintf(errorStr, 256, "%s -1: %s", Translate("Error"), Translate("Unknown error message"));
+		_snprintf(errorStr, 256, "%s -1: %s", TranslateT("Error"), TranslateT("Unknown error message"));
 		return errorStr;
 	}
 
@@ -478,9 +478,9 @@ char *JabberErrorMsg(XmlNode *errorNode)
 	if ((str=JabberXmlGetAttrValue(errorNode, "code")) != NULL)
 		errorCode = atoi(str);
 	if ((str=errorNode->text) != NULL)
-		_snprintf(errorStr, 256, "%s %d: %s\r\n%s", Translate("Error"), errorCode, Translate(JabberErrorStr(errorCode)), str);
+		_snprintf(errorStr, 256, "%s %d: %s\r\n%s", TranslateT("Error"), errorCode, TranslateT(JabberErrorStr(errorCode)), str);
 	else
-		_snprintf(errorStr, 256, "%s %d: %s", Translate("Error"), errorCode, Translate(JabberErrorStr(errorCode)));
+		_snprintf(errorStr, 256, "%s %d: %s", TranslateT("Error"), errorCode, TranslateT(JabberErrorStr(errorCode)));
 	return errorStr;
 }
 

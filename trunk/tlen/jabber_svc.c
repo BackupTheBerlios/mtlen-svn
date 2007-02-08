@@ -41,7 +41,7 @@ int JabberGetCaps(WPARAM wParam, LPARAM lParam)
 	if (wParam == PFLAGNUM_4)
 		return PF4_FORCEAUTH|PF4_NOCUSTOMAUTH|PF4_SUPPORTTYPING|PF4_AVATARS;
 	if (wParam == PFLAG_UNIQUEIDTEXT)
-		return (int) Translate("Tlen login");
+		return (int) TranslateT("Tlen login");
 	if (wParam == PFLAG_UNIQUEIDSETTING)
 		return (int) "jid";
 	return 0;

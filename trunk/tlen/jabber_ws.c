@@ -28,7 +28,7 @@ BOOL JabberWsInit(void)
 	NETLIBUSERSETTINGS nlus = {0};
 	char name[128];
 
-	sprintf(name, "%s %s", jabberModuleName, Translate("connection"));
+	sprintf(name, "%s %s", jabberModuleName, TranslateT("connection"));
 
 	nlu.cbSize = sizeof(nlu);
 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_HTTPCONNS;	// | NUF_HTTPGATEWAY;

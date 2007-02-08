@@ -370,7 +370,7 @@ int TlenMUCRecvPresence(const char *from, int status, int flags, const char *kic
 		if (flags & USER_FLAGS_REGISTERED) mucce.dwFlags |= MUCC_EF_USER_REGISTERED;
 		if (status == ID_STATUS_OFFLINE && mucce.bIsMe && kick!=NULL) {
 			mucce.iType = MUCC_EVENT_ERROR;
-			sprintf(str, Translate("You have been kicked. Reason: %s "), kick);
+			sprintf(str, TranslateT("You have been kicked. Reason: %s "), kick);
 			mucce.pszText = str;
 		}
 		CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
@@ -467,45 +467,45 @@ int TlenMUCRecvError(const char *from, XmlNode *errorNode)
 	errCode = atoi(JabberXmlGetAttrValue(errorNode, "code"));
 	switch (errCode) {
 		case 403:
-			sprintf(str, Translate("You cannot join this chat room, because you are banned."));
+			sprintf(str, TranslateT("You cannot join this chat room, because you are banned."));
 			break;
 		case 404:
-			sprintf(str, Translate("Chat room not found."));
+			sprintf(str, TranslateT("Chat room not found."));
 			break;
 		case 407:
-			sprintf(str, Translate("This is a private chat room and you are not one of the members."));
+			sprintf(str, TranslateT("This is a private chat room and you are not one of the members."));
 			break;
 		case 408:
-			sprintf(str, Translate("You cannot send any message unless you join this chat room."));
+			sprintf(str, TranslateT("You cannot send any message unless you join this chat room."));
 			break;
 		case 410:
-			sprintf(str, Translate("Chat room with already created."));
+			sprintf(str, TranslateT("Chat room with already created."));
 			break;
 		case 411:
-			sprintf(str, Translate("Nickname '%s' is already registered."),
+			sprintf(str, TranslateT("Nickname '%s' is already registered."),
 				JabberXmlGetAttrValue(errorNode, "n"));
 			break;
 		case 412:
-			sprintf(str, Translate("Nickname already in use, please try another one. Hint: '%s' is free."),
+			sprintf(str, TranslateT("Nickname already in use, please try another one. Hint: '%s' is free."),
 				JabberXmlGetAttrValue(errorNode, "free"));
 			break;
 		case 413:
-			sprintf(str, Translate("You cannot register more than %s nicknames."),
+			sprintf(str, TranslateT("You cannot register more than %s nicknames."),
 				JabberXmlGetAttrValue(errorNode, "num"));
 			break;
 		case 414:
-			sprintf(str, Translate("You cannot create more than %s chat rooms."),
+			sprintf(str, TranslateT("You cannot create more than %s chat rooms."),
 				JabberXmlGetAttrValue(errorNode, "num"));
 			break;
 		case 415:
-			sprintf(str, Translate("You cannot join more than %s chat rooms."),
+			sprintf(str, TranslateT("You cannot join more than %s chat rooms."),
 				JabberXmlGetAttrValue(errorNode, "num"));
 			break;
 		case 601:
-			sprintf(str, Translate("Anonymous nicknames are not allowed in this chat room."));
+			sprintf(str, TranslateT("Anonymous nicknames are not allowed in this chat room."));
 			break;
 		default:
-			sprintf(str, Translate("Unknown error code : %d"), errCode);
+			sprintf(str, TranslateT("Unknown error code : %d"), errCode);
 			break;
 	}
 	mucce.pszText = str;
