@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "jabber_list.h"
 #include "jabber_iq.h"
-#include "tlen_file.h"
+#include "tlen_p2p_old.h"
 
 char *searchJID = NULL;
 
@@ -56,7 +56,7 @@ int JabberGetName(WPARAM wParam, LPARAM lParam)
 int JabberLoadIcon(WPARAM wParam, LPARAM lParam)
 {
 	if ((wParam&0xffff) == PLI_PROTOCOL)
-		return (int) LoadImage(hInst, MAKEINTRESOURCE(IDI_TLEN), IMAGE_ICON, GetSystemMetrics(wParam&PLIF_SMALL?SM_CXSMICON:SM_CXICON), GetSystemMetrics(wParam&PLIF_SMALL?SM_CYSMICON:SM_CYICON), 0);
+		return (int) CopyIcon(tlenIcons[TLEN_IDI_TLEN]);
 	else
 		return (int) (HICON) NULL;
 }
@@ -744,7 +744,7 @@ int JabberFileDeny(WPARAM wParam, LPARAM lParam)
 	nick = JabberNickFromJID(ft->jid);
 	JabberSend(jabberThreadInfo->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, nick);\
 	mir_free(nick);
-	TlenFileFreeFt(ft);
+	TlenP2PFreeFileTransfer(ft);
 	return 0;
 }
 
@@ -1097,6 +1097,9 @@ int JabberUserIsTyping(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+static HANDLE hServices[64];
+static int serviceNum;
+
 int JabberSvcInit(void)
 {
 	char s[128];
@@ -1104,90 +1107,99 @@ int JabberSvcInit(void)
 	hEventSettingChanged = HookEvent(ME_DB_CONTACT_SETTINGCHANGED, JabberDbSettingChanged);
 	hEventContactDeleted = HookEvent(ME_DB_CONTACT_DELETED, JabberContactDeleted);
 
+	serviceNum = 0;
 	sprintf(s, "%s%s", jabberProtoName, PS_GETCAPS);
-	CreateServiceFunction(s, JabberGetCaps);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberGetCaps);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_GETNAME);
-	CreateServiceFunction(s, JabberGetName);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberGetName);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_LOADICON);
-	CreateServiceFunction(s, JabberLoadIcon);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberLoadIcon);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_BASICSEARCH);
-	CreateServiceFunction(s, JabberBasicSearch);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberBasicSearch);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_SEARCHBYEMAIL);
-	CreateServiceFunction(s, JabberSearchByEmail);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberSearchByEmail);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_SEARCHBYNAME);
-	CreateServiceFunction(s, JabberSearchByName);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberSearchByName);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_CREATEADVSEARCHUI);
-	CreateServiceFunction(s, JabberCreateAdvSearchUI);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberCreateAdvSearchUI);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_SEARCHBYADVANCED);
-	CreateServiceFunction(s, JabberSearchByAdvanced);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberSearchByAdvanced);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_ADDTOLIST);
-	CreateServiceFunction(s, JabberAddToList);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberAddToList);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_ADDTOLISTBYEVENT);
-	CreateServiceFunction(s, JabberAddToListByEvent);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberAddToListByEvent);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_AUTHALLOW);
-	CreateServiceFunction(s, JabberAuthAllow);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberAuthAllow);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_AUTHDENY);
-	CreateServiceFunction(s, JabberAuthDeny);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberAuthDeny);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_SETSTATUS);
-	CreateServiceFunction(s, JabberSetStatus);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberSetStatus);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_GETSTATUS);
-	CreateServiceFunction(s, JabberGetStatus);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberGetStatus);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_SETAWAYMSG);
-	CreateServiceFunction(s, JabberSetAwayMsg);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberSetAwayMsg);
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_GETINFO);
-	CreateServiceFunction(s, JabberGetInfo);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberGetInfo);
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_SETAPPARENTMODE);
-	CreateServiceFunction(s, JabberSetApparentMode);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberSetApparentMode);
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_MESSAGE);
-	CreateServiceFunction(s, JabberSendMessage);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberSendMessage);
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_GETAWAYMSG);
-	CreateServiceFunction(s, JabberGetAwayMsg);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberGetAwayMsg);
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_FILEALLOW);
-	CreateServiceFunction(s, JabberFileAllow);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberFileAllow);
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_FILEDENY);
-	CreateServiceFunction(s, JabberFileDeny);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberFileDeny);
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_FILECANCEL);
-	CreateServiceFunction(s, JabberFileCancel);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberFileCancel);
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_FILE);
-	CreateServiceFunction(s, JabberSendFile);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberSendFile);
 
 	sprintf(s, "%s%s", jabberProtoName, PSR_MESSAGE);
-	CreateServiceFunction(s, JabberRecvMessage);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberRecvMessage);
 
 	sprintf(s, "%s%s", jabberProtoName, PSR_FILE);
-	CreateServiceFunction(s, JabberRecvFile);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberRecvFile);
 
 	sprintf(s, "%s%s", jabberProtoName, PSS_USERISTYPING);
-	CreateServiceFunction(s, JabberUserIsTyping);
+	hServices[serviceNum++] = CreateServiceFunction(s, JabberUserIsTyping);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_GETAVATARINFO);
-	CreateServiceFunction(s, TlenGetAvatarInfo);
+	hServices[serviceNum++] = CreateServiceFunction(s, TlenGetAvatarInfo);
 
 	sprintf(s, "%s%s", jabberProtoName, "/SendNudge");
-	CreateServiceFunction(s, TlenSendAlert);
+	hServices[serviceNum++] = CreateServiceFunction(s, TlenSendAlert);
 
 	return 0;
 }
 
+int JabberSvcUninit(void)
+{
+	int i;
+	for (i=0; i< serviceNum; i++) {
+		DestroyServiceFunction(hServices[i]);
+	}
+	return 0;
+}

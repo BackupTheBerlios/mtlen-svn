@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _JABBER_H_
 #define _JABBER_H_
 
+#define MIRANDA_VER 0x0600
+
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -187,6 +189,7 @@ typedef enum { FT_RECV, FT_SEND} JABBER_FILE_MODE;
 typedef struct {
 	HANDLE hContact;
 	JABBER_SOCKET s;
+	NETLIBNEWCONNECTIONPROC_V2 pfnNewConnectionV2;
 	JABBER_FILE_STATE state;
 	char *jid;
 	int fileId;
@@ -195,8 +198,8 @@ typedef struct {
 
 	// Used by file receiving only
 	char *httpHostName;
-	WORD httpPort;
-	char *httpPath;
+	WORD wPort;
+	WORD wExPort;
 	char *szSavePath;
 	long fileReceivedBytes;
 	long fileTotalSize;
@@ -206,7 +209,6 @@ typedef struct {
 	int fileCount;
 	char **files;
 	long *filesSize;
-	//char *httpPath;			// Name of the requested file
 	//long fileTotalSize;		// Size of the current file (file being sent)
 	long allFileTotalSize;
 	long allFileReceivedBytes;

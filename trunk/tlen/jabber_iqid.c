@@ -33,7 +33,6 @@ void JabberIqResultSetAuth(XmlNode *iqNode, void *userdata)
 {
 	struct ThreadData *info = (struct ThreadData *) userdata;
 	char *type;
-	int iqId;
 
 	// RECVED: authentication result
 	// ACTION: if successfully logged in, continue by requesting roster list and set my initial status

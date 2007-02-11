@@ -102,7 +102,8 @@ void TlenLoadOptions();
 int TlenOptInit(WPARAM wParam, LPARAM lParam);
 int TlenUserInfoInit(WPARAM wParam, LPARAM lParam);
 int JabberMsgUserTyping(WPARAM wParam, LPARAM lParam);
-int JabberSvcInit(void);
+extern int JabberSvcInit(void);
+extern JabberSvcUninit();
 int TlenContactMenuHandleRequestAuth(WPARAM wParam, LPARAM lParam);
 int TlenContactMenuHandleGrantAuth(WPARAM wParam, LPARAM lParam);
 int TlenContactMenuHandleSendPicture(WPARAM wParam, LPARAM lParam);
@@ -119,8 +120,8 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvReserved)
 
 __declspec(dllexport) PLUGININFO *MirandaPluginInfo(DWORD mirandaVersion)
 {
-	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,3,1,0)) {
-		MessageBox(NULL, "The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.3.1 or later.", "Tlen Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
+	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,6,0,0)) {
+		MessageBox(NULL, "The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.6.0 or later.", "Tlen Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
 		return NULL;
 	}
 	return &pluginInfo;
@@ -134,9 +135,12 @@ int __declspec(dllexport) Unload(void)
 	JabberLog("Unloading");
 	UnhookEvent(hEventSettingChanged);
 	UnhookEvent(hEventContactDeleted);
+	UnhookEvent(hEventTlenUserInfoInit);
+	UnhookEvent(hEventTlenOptInit);
+	UnhookEvent(hEventTlenPrebuildContactMenu);
 	if (hTlenNudge)
 		DestroyHookableEvent(hTlenNudge);
-
+	JabberSvcUninit();
 	JabberWsUninit();
 	//JabberSslUninit();
 	JabberListUninit();
@@ -184,7 +188,7 @@ static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 	JabberWsInit();
 	//JabberSslInit();
 	TlenMUCInit();
-	HookEvent(ME_USERINFO_INITIALISE, TlenUserInfoInit);
+	hEventTlenUserInfoInit = HookEvent(ME_USERINFO_INITIALISE, TlenUserInfoInit);
 	sprintf(str, "%s", TranslateT("Incoming mail"));
 	SkinAddNewSoundEx("TlenMailNotify", jabberModuleName, str);
 	sprintf(str, "%s", TranslateT("Alert"));
@@ -206,12 +210,12 @@ static TCHAR *GetIconDescription(int icon) {
 		_T("Protocol icon"),
 		_T("Mail"),
 		_T("Group chats"),
-		_T("CHATS"),
-		_T("GRANT"),
-		_T("REQUEST"),
-		_T("VOICE"),
-		_T("MICROPHONE"),
-		_T("SPEAKER")
+		_T("Tlen chats"),
+		_T("Grant authorization"),
+		_T("Request authorization"),
+		_T("Voice chat"),
+		_T("Microphone"),
+		_T("Speaker")
 	};
 	return TranslateT(keys[icon]);
 }
@@ -442,7 +446,6 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 
 	JabberLog("Setting protocol/module name to '%s/%s'", jabberProtoName, jabberModuleName);
 
-
 	DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &hMainThread, THREAD_SET_CONTEXT, FALSE, 0);
 	jabberMainThreadId = GetCurrentThreadId();
 	//hLibSSL = NULL;
@@ -451,7 +454,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	TlenRegisterIcons();
 	TlenLoadOptions();
 
-	HookEvent(ME_OPT_INITIALISE, TlenOptInit);
+	hEventTlenOptInit = HookEvent(ME_OPT_INITIALISE, TlenOptInit);
 	HookEvent(ME_SYSTEM_MODULESLOADED, ModulesLoaded);
 	HookEvent(ME_SYSTEM_PRESHUTDOWN, PreShutdown);
 
@@ -548,7 +551,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszName = TranslateT("Send picture");
 //	clmi.flags = CMIM_FLAGS | CMIF_NOTOFFLINE;// | CMIF_GRAYED;
 	mi.position = -2000001002;
-	mi.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_GRANT));
+	mi.hIcon = tlenIcons[TLEN_IDI_GRANT];
 	mi.pszService = text;
 	mi.pszContactOwner = jabberProtoName;
 	//CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi); //hMenuContactGrantAuth = (HANDLE)
@@ -561,8 +564,7 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszContactOwner = jabberProtoName;
 	hMenuContactFile = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
-
-	HookEvent(ME_CLIST_PREBUILDCONTACTMENU, TlenPrebuildContactMenu);
+	hEventTlenPrebuildContactMenu = HookEvent(ME_CLIST_PREBUILDCONTACTMENU, TlenPrebuildContactMenu);
 
 	if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
 		DBFreeVariant(&dbv);

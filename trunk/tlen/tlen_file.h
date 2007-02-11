@@ -27,7 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft);
 extern void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft);
-extern void TlenFileFreeFt(TLEN_FILE_TRANSFER *ft);
 extern int TlenFileCancelAll();
 
 #endif

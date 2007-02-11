@@ -49,6 +49,7 @@ typedef struct {
 	char	szPassword[256];
 }SOCKSBIND;
 
+extern void TlenP2PFreeFileTransfer(TLEN_FILE_TRANSFER *ft);
 extern TLEN_FILE_PACKET *TlenP2PPacketCreate(int datalen);
 extern void TlenP2PPacketFree(TLEN_FILE_PACKET *packet);
 extern void TlenP2PPacketSetType(TLEN_FILE_PACKET *packet, DWORD type);
@@ -59,5 +60,5 @@ extern int TlenP2PPacketSend(JABBER_SOCKET s, TLEN_FILE_PACKET *packet);
 extern TLEN_FILE_PACKET* TlenP2PPacketReceive(JABBER_SOCKET s);
 extern void TlenP2PEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft, BOOL sendAck);
 extern TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET *s, int list, BOOL sendAck);
-
+extern JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft);
 #endif

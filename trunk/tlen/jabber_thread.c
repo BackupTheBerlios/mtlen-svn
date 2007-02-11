@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "jabber_iq.h"
 #include "resource.h"
+#include "tlen_p2p_old.h"
 #include "tlen_file.h"
 #include "tlen_muc.h"
 #include "tlen_voice.h"
@@ -1567,7 +1568,7 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 						JabberSend(info->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, from);
 					else
 						JabberSend(info->s, "<f e='4' t='%s'/>", from);
-					TlenFileFreeFt(ft);
+					TlenP2PFreeFileTransfer(ft);
 				}
 			}
 			else if (!strcmp(e, "3")) {
@@ -1620,7 +1621,7 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
 							item->ft->httpHostName = mir_strdup(p);
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
-								item->ft->httpPort = atoi(p);
+								item->ft->wPort = atoi(p);
 								JabberForkThread((void (__cdecl *)(void*))TlenFileReceiveThread, 0, item->ft);
 							}
 						}
@@ -1636,7 +1637,7 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 							if (item->ft->httpHostName!=NULL) mir_free(item->ft->httpHostName);
 							item->ft->httpHostName = mir_strdup(p);
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
-								item->ft->httpPort = atoi(p);
+								item->ft->wPort = atoi(p);
 								item->ft->state = FT_SWITCH;
 								SetEvent(item->ft->hFileEvent);
 							}
@@ -2100,7 +2101,7 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
 							item->ft->httpHostName = mir_strdup(p);
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
-								item->ft->httpPort = atoi(p);
+								item->ft->wPort = atoi(p);
 								TlenVoiceStart(item->ft, 0);
 								//JabberForkThread((void (__cdecl *)(void*))TlenVoiceReceiveThread, 0, item->ft);
 							}
@@ -2117,7 +2118,7 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 							if (item->ft->httpHostName!=NULL) mir_free(item->ft->httpHostName);
 							item->ft->httpHostName = mir_strdup(p);
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
-								item->ft->httpPort = atoi(p);
+								item->ft->wPort = atoi(p);
 								item->ft->state = FT_SWITCH;
 								SetEvent(item->ft->hFileEvent);
 							}

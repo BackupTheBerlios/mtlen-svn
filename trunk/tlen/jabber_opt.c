@@ -23,21 +23,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber.h"
 #include "jabber_list.h"
 #include "tlen_voice.h"
-#include <uxtheme.h>
 #include <win2k.h>
 #include <commctrl.h>
 #include "resource.h"
 
-static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
-static BOOL (WINAPI *pfnEnableThemeDialogTexture)(HANDLE, DWORD) = 0;
-#define OPTIONS_PAGES 3
-static HWND hwndCurrentTab, hwndPages[OPTIONS_PAGES];
-static BOOL initialized = 0;
+typedef struct TabDefStruct {
+	DLGPROC dlgProc;
+	DWORD dlgId;
+	TCHAR *tabName;
+} TabDef;
+
+static TabDef tabPages[] = {
+						 {TlenBasicOptDlgProc, IDD_OPTIONS_BASIC, _T("General")},
+						 {TlenVoiceOptDlgProc, IDD_OPTIONS_VOICE, _T("Voice Chats")},
+						 {TlenAdvOptDlgProc, IDD_OPTIONS_ADVANCED, _T("Advanced")}
+						 };
 
 TLEN_OPTIONS tlenOptions;
 
@@ -62,37 +67,22 @@ void TlenLoadOptions()
 
 int TlenOptInit(WPARAM wParam, LPARAM lParam)
 {
-	OPTIONSDIALOGPAGE odp;
-	if (!initialized) {
-		HMODULE	hUxTheme = 0;
-		if(IsWinVerXPPlus()) {
-			hUxTheme = GetModuleHandle(_T("uxtheme.dll"));
-			if(hUxTheme)
-				pfnEnableThemeDialogTexture = (BOOL (WINAPI *)(HANDLE, DWORD))GetProcAddress(hUxTheme, "EnableThemeDialogTexture");
-		}
-		initialized = 1;
-	}
-	ZeroMemory(&odp, sizeof(odp));
+	int i;
+	OPTIONSDIALOGPAGE odp = { 0 };
 	odp.cbSize = sizeof(odp);
 	odp.position = 0;
 	odp.hInstance = hInst;
 	odp.pszGroup = TranslateT("Network");
-	odp.pszTemplate = MAKEINTRESOURCE(IDD_OPTIONS);
 	odp.pszTitle = jabberModuleName;
-	odp.flags = ODPF_BOLDGROUPS;
-	odp.pfnDlgProc = TlenOptDlgProc;
+	odp.flags = ODPF_BOLDGROUPS | ODPF_TCHAR;
 	odp.nIDBottomSimpleControl = 0;//IDC_SIMPLE;
-	CallService(MS_OPT_ADDPAGE, wParam, (LPARAM) &odp);
-/*
-	odp.pszTemplate = MAKEINTRESOURCE(IDD_OPTIONS_EXPERT);
-	_snprintf(str, sizeof(str), "%s %s", jabberModuleName, TranslateT("Advanced"));
-	str[sizeof(str)-1] = '\0';
-	odp.pszTitle = str;
-	odp.pfnDlgProc = TlenAdvOptDlgProc;
-	odp.flags = ODPF_BOLDGROUPS|ODPF_EXPERTONLY;
-	odp.nIDBottomSimpleControl = 0;
-	CallService(MS_OPT_ADDPAGE, wParam, (LPARAM) &odp);
-*/
+	for (i = 0; i < SIZEOF(tabPages); i++) {
+		odp.pszTemplate = MAKEINTRESOURCEA(tabPages[i].dlgId);
+		odp.pfnDlgProc = tabPages[i].dlgProc;
+		odp.ptszTab = tabPages[i].tabName;
+		CallService(MS_OPT_ADDPAGE, wParam, (LPARAM) & odp);
+	}
+
 	if (ServiceExists(MS_POPUP_ADDPOPUP)) {
 		ZeroMemory(&odp,sizeof(odp));
 		odp.cbSize = sizeof(odp);
@@ -122,83 +112,6 @@ static LRESULT CALLBACK JabberValidateUsernameWndProc(HWND hwndEdit, UINT msg, W
 	return CallWindowProc(oldProc, hwndEdit, msg, wParam, lParam);
 }
 
-static SetOptionsDlgToType(HWND hwnd, int iExpert)
-{
-	int i;
-    HWND tc;
-	TCITEM tci;
-	tc = GetDlgItem(hwnd, IDC_TABS);
-	TabCtrl_DeleteAllItems(tc);
-	tci.mask = TCIF_TEXT;
-	tci.pszText = TranslateT("General");
-	TabCtrl_InsertItem(tc, 0, &tci);
-	tci.pszText = TranslateT("Voice Chats");
-	TabCtrl_InsertItem(tc, 1, &tci);
-	if (iExpert) {
-		tci.pszText = TranslateT("Advanced");
-		TabCtrl_InsertItem(tc, 2, &tci);
-	}
-	for (i=0; i < OPTIONS_PAGES; i++) {
-		SetWindowPos(hwndPages[i], HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_HIDEWINDOW);
-	}
-	hwndCurrentTab = hwndPages[0];
-	ShowWindow(hwndPages[0], SW_SHOW);
-}
-
-static BOOL CALLBACK TlenOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch (msg) {
-		case WM_INITDIALOG:
-		{
-			hwndPages[0] = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_OPTIONS_BASIC), hwndDlg, TlenBasicOptDlgProc, (LPARAM) NULL);
-			hwndPages[1] = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_OPTIONS_VOICE), hwndDlg, TlenVoiceOptDlgProc, (LPARAM) NULL);
-			hwndPages[2] = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_OPTIONS_ADVANCED), hwndDlg, TlenAdvOptDlgProc, (LPARAM) NULL);
-			if (pfnEnableThemeDialogTexture) {
-				int i;
-				for (i=0; i < OPTIONS_PAGES; i++) {
-					pfnEnableThemeDialogTexture(hwndPages[i], ETDT_ENABLETAB);
-				}
-			}
-			SetOptionsDlgToType(hwndDlg, SendMessage(GetParent(hwndDlg), PSM_ISEXPERT, 0, 0));
-			return TRUE;
-		}
-	case WM_NOTIFY:
-		{
-			switch (((LPNMHDR) lParam)->code) {
-			case TCN_SELCHANGE:
-                switch (wParam) {
-				case IDC_TABS:
-					{
-						HWND hwnd = hwndPages[TabCtrl_GetCurSel(GetDlgItem(hwndDlg, IDC_TABS))];
-						if (hwnd!=hwndCurrentTab) {
-	                    	ShowWindow(hwnd, SW_SHOW);
-	                    	ShowWindow(hwndCurrentTab, SW_HIDE);
-	                    	hwndCurrentTab = hwnd;
-						}
-					}
-					break;
-				}
-				break;
-			case PSN_APPLY:
-				{
-					int i;
-					for (i = 0; i < OPTIONS_PAGES; i++) {
-						SendMessage(hwndPages[i], WM_NOTIFY, wParam, lParam);
-					}
-					TlenLoadOptions();
-					return TRUE;
-				}
-			case PSN_EXPERTCHANGED:
-				{
-					SetOptionsDlgToType(hwndDlg, SendMessage(GetParent(hwndDlg), PSM_ISEXPERT, 0, 0));
-					break;
-				}
-			}
-		}
-		break;
-	}
-	return FALSE;
-}
 
 static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -268,7 +181,7 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		case IDC_EDIT_USERNAME:
 		case IDC_EDIT_PASSWORD:
 			if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
-				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_USE_SSL:
 			// Fall through
@@ -278,15 +191,15 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		case IDC_IGNORE_ADVERTISEMENTS:
 		case IDC_SHOW_OFFLINE:
 		case IDC_OFFLINE_MESSAGE:
-			SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_LOG_ALERTS:
 			CheckDlgButton(hwndDlg, IDC_NUDGE_SUPPORT, BST_UNCHECKED);
-			SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_NUDGE_SUPPORT:
 			CheckDlgButton(hwndDlg, IDC_LOG_ALERTS, BST_UNCHECKED);
-			SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		case IDC_REGISTERACCOUNT:
 		    CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) TLEN_REGISTER);
@@ -295,10 +208,10 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		case IDC_ALERT_POLICY:
 		case IDC_MUC_POLICY:
 			if (HIWORD(wParam) == CBN_SELCHANGE)
-				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		default:
-				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		}
 		break;
@@ -370,7 +283,7 @@ static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		case IDC_VOICE_DEVICE_IN:
 		case IDC_VOICE_DEVICE_OUT:
 			if (HIWORD(wParam) == CBN_SELCHANGE)
-				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
 		}
 		break;
@@ -470,7 +383,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			switch (LOWORD(wParam)) {
 			case IDC_FILE_PROXY_TYPE:
 				if (HIWORD(wParam) == CBN_SELCHANGE)
-					SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+					SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 				break;
 			case IDC_EDIT_LOGIN_SERVER:
 			case IDC_HOST:
@@ -480,7 +393,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			case IDC_FILE_PROXY_USER:
 			case IDC_FILE_PROXY_PASSWORD:
 				if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
-					SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+					SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 				break;
 			case IDC_FILE_USE_PROXY:
 				bChecked = IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY);
@@ -497,11 +410,11 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USER), bChecked);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD_LABEL), bChecked);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD), bChecked);
-				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 				break;
 			case IDC_KEEPALIVE:
 			case IDC_VISIBILITY_SUPPORT:
-				SendMessage(GetParent(GetParent(hwndDlg)), PSM_CHANGED, 0, 0);
+				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 				break;
 			}
 		}
@@ -574,7 +487,7 @@ static void MailPopupPreview(DWORD colorBack, DWORD colorText, char *title, char
 	lpzText = emailInfo;
 	ZeroMemory(&ppd, sizeof(ppd));
 	ppd.lchContact = NULL;
-	ppd.lchIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MAIL));
+	ppd.lchIcon = CopyIcon(tlenIcons[TLEN_IDI_MAIL]);
 	lstrcpy(ppd.lpzContactName, lpzContactName);
 	lstrcpy(ppd.lpzText, lpzText);
 	ppd.colorBack = colorBack;
