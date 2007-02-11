@@ -302,7 +302,6 @@ static JABBER_SOCKET TlenP2PBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	struct in_addr in;
 	NETLIBOPENCONNECTION nloc;
 	JABBER_SOCKET s;
-//	JabberLog("connecting to SOCK4 proxy...%s:%d", sb->szHost, sb->wPort);
 
 	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
 	nloc.szHost = sb->szHost;
@@ -358,8 +357,6 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	NETLIBOPENCONNECTION nloc;
 	struct in_addr in;
 	JABBER_SOCKET s;
-
-//	JabberLog("connecting to SOCK5 proxy...%s:%d", sb->szHost, sb->wPort);
 
 	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
 	nloc.szHost = sb->szHost;
@@ -502,7 +499,7 @@ JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft)
 			}
 			ft->hostName = mir_strdup(sb.szHost);
 			ft->wPort = sb.wPort;
-			ft->wExPort = nlb.wExPort;
+			ft->wExPort = sb.wPort;
 		}
 	}
 	if (useProxy<2) {

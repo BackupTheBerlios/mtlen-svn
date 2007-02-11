@@ -396,7 +396,7 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 			ft->currentFile = 0;
 			ft->state = FT_CONNECTING;
 			nick = JabberNickFromJID(ft->jid);
-			JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wPort);
+			JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wExPort);
 			mir_free(nick);
 			JabberLog("Waiting for the file to be received...");
 			WaitForSingleObject(hEvent, INFINITE);
@@ -609,7 +609,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 		ft->state = FT_CONNECTING;
 
 		nick = JabberNickFromJID(ft->jid);
-		JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wPort);
+		JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wExPort);
 		mir_free(nick);
 		JabberLog("Waiting for the voice data to be sent...");
 		WaitForSingleObject(hEvent, INFINITE);
