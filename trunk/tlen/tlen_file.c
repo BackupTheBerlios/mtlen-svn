@@ -30,7 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern char *jabberProtoName;
 extern HANDLE hNetlibUser;
 extern struct ThreadData *jabberThreadInfo;
-extern DWORD jabberLocalIP;
 
 static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft);
 static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft);
@@ -43,10 +42,10 @@ void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 	NETLIBOPENCONNECTION nloc;
 	JABBER_SOCKET s;
 
-	JabberLog("Thread started: type=file_receive server='%s' port='%d'", ft->httpHostName, ft->wPort);
+	JabberLog("Thread started: type=file_receive server='%s' port='%d'", ft->hostName, ft->wPort);
 	ft->mode = FT_RECV;
 	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
-	nloc.szHost = ft->httpHostName;
+	nloc.szHost = ft->hostName;
 	nloc.wPort = ft->wPort;
 	nloc.flags = 0;
 	ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
@@ -75,7 +74,7 @@ void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 			ft->currentFile = 0;
 			ft->state = FT_CONNECTING;
 			nick = JabberNickFromJID(ft->jid);
-			JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->httpHostName, ft->wPort);
+			JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wPort);
 			mir_free(nick);
 			JabberLog("Waiting for the file to be received...");
 			WaitForSingleObject(hEvent, INFINITE);
@@ -90,10 +89,15 @@ void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 	JabberListRemove(LIST_FILE, ft->iqId);
 	if (ft->state==FT_DONE)
 		ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
-	else
+	else {
+		char *nick;
+		nick = JabberNickFromJID(ft->jid);
+		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
+		mir_free(nick);
 		ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+	}
 
-	JabberLog("Thread ended: type=file_receive server='%s'", ft->httpHostName);
+	JabberLog("Thread ended: type=file_receive server='%s'", ft->hostName);
 
 	TlenP2PFreeFileTransfer(ft);
 }
@@ -278,7 +282,7 @@ void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 		ft->state = FT_CONNECTING;
 
 		nick = JabberNickFromJID(ft->jid);
-		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->httpHostName, ft->wPort);
+		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wPort);
 		mir_free(nick);
 		JabberLog("Waiting for the file to be sent...");
 		WaitForSingleObject(hEvent, INFINITE);
@@ -295,7 +299,7 @@ void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 			JabberLog("Sending as client...");
 			ft->state = FT_CONNECTING;
 			nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
-			nloc.szHost = ft->httpHostName;
+			nloc.szHost = ft->hostName;
 			nloc.wPort = ft->wPort;
 			nloc.flags = 0;
 			s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hNetlibUser, (LPARAM) &nloc);
@@ -315,9 +319,6 @@ void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 				Netlib_CloseHandle(s);
 			} else {
 				ft->state = FT_ERROR;
-				nick = JabberNickFromJID(ft->jid);
-				JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
-				mir_free(nick);
 			}
 		}
 	} else {
@@ -334,6 +335,9 @@ void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 		ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, ft, 0);
 		break;
 	default: // FT_ERROR:
+		nick = JabberNickFromJID(ft->jid);
+		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
+		mir_free(nick);
 		JabberLog("Finish with errors");
 		ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 		break;

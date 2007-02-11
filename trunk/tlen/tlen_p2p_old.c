@@ -34,7 +34,7 @@ void TlenP2PFreeFileTransfer(TLEN_FILE_TRANSFER *ft)
 
 	if (ft->jid) mir_free(ft->jid);
 	if (ft->iqId) mir_free(ft->iqId);
-	if (ft->httpHostName) mir_free(ft->httpHostName);
+	if (ft->hostName) mir_free(ft->hostName);
 	if (ft->szSavePath) mir_free(ft->szSavePath);
 	if (ft->szDescription) mir_free(ft->szDescription);
 	if (ft->filesSize) mir_free(ft->filesSize);
@@ -464,8 +464,8 @@ JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft)
 	struct in_addr in;
 
 	useProxy=0;
-	if (ft->httpHostName != NULL) mir_free(ft->httpHostName);
-	ft->httpHostName = NULL;
+	if (ft->hostName != NULL) mir_free(ft->hostName);
+	ft->hostName = NULL;
 	ft->wPort = 0;
 	if (DBGetContactSettingByte(NULL, jabberProtoName, "UseFileProxy", FALSE)) {
 		if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyHost", &dbv)) {
@@ -500,8 +500,9 @@ JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft)
 					useProxy = 2;
 					break;
 			}
-			ft->httpHostName = mir_strdup(sb.szHost);
+			ft->hostName = mir_strdup(sb.szHost);
 			ft->wPort = sb.wPort;
+			ft->wExPort = nlb.wExPort;
 		}
 	}
 	if (useProxy<2) {
@@ -514,9 +515,10 @@ JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft)
 		JabberLog("listening on %d",s);
 	}
 	if (useProxy==0) {
-		in.S_un.S_addr = jabberLocalIP;
-		ft->httpHostName = mir_strdup(inet_ntoa(in));
+		in.S_un.S_addr = htonl(nlb.dwExternalIP);
+		ft->hostName = mir_strdup(inet_ntoa(in));
 		ft->wPort = nlb.wPort;
+		ft->wExPort = nlb.wExPort;
 	}
 	return s;
 }

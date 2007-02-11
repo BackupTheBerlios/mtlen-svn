@@ -37,7 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern char *jabberProtoName;
 extern HANDLE hNetlibUser;
 extern struct ThreadData *jabberThreadInfo;
-extern DWORD jabberLocalIP;
 
 static int modeFrequency[]= {0, 0, 8000, 11025, 22050, 44100};
 static int modeFrameSize[]= {0, 0, 5, 5, 10, 25};
@@ -355,9 +354,9 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 	NETLIBOPENCONNECTION nloc;
 	JABBER_SOCKET s;
 
-	JabberLog("Thread started: type=file_receive server='%s' port='%d'", ft->httpHostName, ft->wPort);
+	JabberLog("Thread started: type=file_receive server='%s' port='%d'", ft->hostName, ft->wPort);
 	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
-	nloc.szHost = ft->httpHostName;
+	nloc.szHost = ft->hostName;
 	nloc.wPort = ft->wPort;
 	nloc.flags = 0;
 	SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Connecting...");
@@ -397,7 +396,7 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 			ft->currentFile = 0;
 			ft->state = FT_CONNECTING;
 			nick = JabberNickFromJID(ft->jid);
-			JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->httpHostName, ft->wPort);
+			JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wPort);
 			mir_free(nick);
 			JabberLog("Waiting for the file to be received...");
 			WaitForSingleObject(hEvent, INFINITE);
@@ -414,10 +413,14 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Finished...");
 		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 	} else {
+		char *nick;
+		nick = JabberNickFromJID(ft->jid);
+		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
+		mir_free(nick);
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Error...");
 		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	}
-	JabberLog("Thread ended: type=file_receive server='%s'", ft->httpHostName);
+	JabberLog("Thread ended: type=file_receive server='%s'", ft->hostName);
 
 	TlenP2PFreeFileTransfer(ft);
 }
@@ -470,7 +473,7 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 	if (packet != NULL) {
 		statusTxt = " Unknown packet ";
 		p = packet->packet;
-		if (packet->type == 0x96) {
+		if (packet->type == TLEN_VOICE_PACKET) {
 			short *out;
 			int codec, chunkNum;
 			statusTxt = " OK ";
@@ -531,14 +534,14 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 					}
 					playbackControl->vuMeter = j;
 					playbackControl->bytesSum  += 8 + packet->len;
-
+					/* Simple logic to avoid huge delays. If a delay is detected a frame is not played */
 					j = availOverrun > 0 ? -1 : 0;
 					while (availPlayback > availLimitMin) {
 						j = 1;
 						SleepEx(5, FALSE);
 					}
 					availOverrun += j;
-
+					/* 40 frames - 800ms/8kHz */
 					if (availOverrun < 40) {
 						availPlayback++;
 						waveOutPrepareHeader(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
@@ -606,7 +609,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 		ft->state = FT_CONNECTING;
 
 		nick = JabberNickFromJID(ft->jid);
-		JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->httpHostName, ft->wPort);
+		JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wPort);
 		mir_free(nick);
 		JabberLog("Waiting for the voice data to be sent...");
 		WaitForSingleObject(hEvent, INFINITE);
@@ -623,7 +626,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 			JabberLog("Sending as client...");
 			ft->state = FT_CONNECTING;
 			nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
-			nloc.szHost = ft->httpHostName;
+			nloc.szHost = ft->hostName;
 			nloc.wPort = ft->wPort;
 			nloc.flags = 0;
 			s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hNetlibUser, (LPARAM) &nloc);
@@ -641,11 +644,6 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 					while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
 						TlenVoiceReceiveParse(ft);
 					}
-				}
-				if (ft->state==FT_DONE) {
-				//	ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
-				} else {
-				//	ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 				}
 				JabberLog("Closing connection for this file transfer... ");
 				Netlib_CloseHandle(s);
@@ -669,6 +667,9 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, ft, 0);
 		break;
 	default: // FT_ERROR:
+		nick = JabberNickFromJID(ft->jid);
+		JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='8'/>", nick, ft->iqId);
+		mir_free(nick);
 		JabberLog("Finish with errors");
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Error...");
 		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);

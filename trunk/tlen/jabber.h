@@ -197,7 +197,7 @@ typedef struct {
 	int	mode;
 
 	// Used by file receiving only
-	char *httpHostName;
+	char *hostName;
 	WORD wPort;
 	WORD wExPort;
 	char *szSavePath;
@@ -266,7 +266,6 @@ extern PVOID jabberSslCtx;
 extern struct ThreadData *jabberThreadInfo;
 extern char *jabberJID;
 extern char *streamId;
-extern DWORD jabberLocalIP;
 extern BOOL jabberConnected;
 extern BOOL jabberOnline;
 extern int jabberStatus;

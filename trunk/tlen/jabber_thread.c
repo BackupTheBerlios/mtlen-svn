@@ -316,6 +316,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 		}
 
 		// Determine local IP
+		/*
 		socket = CallService(MS_NETLIB_GETSOCKET, (WPARAM) info->s, 0);
 		if (info->type==JABBER_SESSION_NORMAL && socket!=INVALID_SOCKET) {
 			struct sockaddr_in saddr;
@@ -326,6 +327,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 			jabberLocalIP = saddr.sin_addr.S_un.S_addr;
 			JabberLog("Local IP = %s", inet_ntoa(saddr.sin_addr));
 		}
+		*/
 
 #ifndef TLEN_PLUGIN
 		sslMode = FALSE;
@@ -1619,7 +1621,7 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
 						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
-							item->ft->httpHostName = mir_strdup(p);
+							item->ft->hostName = mir_strdup(p);
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
 								item->ft->wPort = atoi(p);
 								JabberForkThread((void (__cdecl *)(void*))TlenFileReceiveThread, 0, item->ft);
@@ -1634,8 +1636,8 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
 						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
-							if (item->ft->httpHostName!=NULL) mir_free(item->ft->httpHostName);
-							item->ft->httpHostName = mir_strdup(p);
+							if (item->ft->hostName!=NULL) mir_free(item->ft->hostName);
+							item->ft->hostName = mir_strdup(p);
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
 								item->ft->wPort = atoi(p);
 								item->ft->state = FT_SWITCH;
@@ -1650,7 +1652,11 @@ static void TlenProcessF(XmlNode *node, void *userdata)
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
 						item->ft->state = FT_ERROR;
-						SetEvent(item->ft->hFileEvent);
+						if (item->ft->hFileEvent != NULL) {
+							SetEvent(item->ft->hFileEvent);
+						} else {
+							ProtoBroadcastAck(jabberProtoName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, item->ft, 0);
+						}
 					}
 				}
 			}
@@ -2099,7 +2105,7 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(LIST_VOICE, p)) != NULL) {
 						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
-							item->ft->httpHostName = mir_strdup(p);
+							item->ft->hostName = mir_strdup(p);
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
 								item->ft->wPort = atoi(p);
 								TlenVoiceStart(item->ft, 0);
@@ -2115,8 +2121,8 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(LIST_VOICE, p)) != NULL) {
 						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
-							if (item->ft->httpHostName!=NULL) mir_free(item->ft->httpHostName);
-							item->ft->httpHostName = mir_strdup(p);
+							if (item->ft->hostName!=NULL) mir_free(item->ft->hostName);
+							item->ft->hostName = mir_strdup(p);
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
 								item->ft->wPort = atoi(p);
 								item->ft->state = FT_SWITCH;

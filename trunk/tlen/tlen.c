@@ -66,7 +66,6 @@ int jabberStatus;
 int jabberDesiredStatus;
 char *jabberJID = NULL;
 char *streamId;
-DWORD jabberLocalIP;
 UINT jabberCodePage;
 JABBER_MODEMSGS modeMsgs;
 //char *jabberModeMsg;
@@ -76,6 +75,7 @@ char *jabberVcardPhotoType;
 BOOL jabberSendKeepAlive;
 
 HANDLE hEventSettingChanged, hEventContactDeleted, hEventTlenUserInfoInit, hEventTlenOptInit, hEventTlenPrebuildContactMenu;
+HANDLE hEventModulesLoaded, hEventPreshutdown;
 
 HANDLE hTlenNudge = NULL;
 #ifndef TLEN_PLUGIN
@@ -138,6 +138,8 @@ int __declspec(dllexport) Unload(void)
 	UnhookEvent(hEventTlenUserInfoInit);
 	UnhookEvent(hEventTlenOptInit);
 	UnhookEvent(hEventTlenPrebuildContactMenu);
+	UnhookEvent(hEventModulesLoaded);
+	UnhookEvent(hEventPreshutdown);
 	if (hTlenNudge)
 		DestroyHookableEvent(hTlenNudge);
 	JabberSvcUninit();
@@ -455,8 +457,8 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	TlenLoadOptions();
 
 	hEventTlenOptInit = HookEvent(ME_OPT_INITIALISE, TlenOptInit);
-	HookEvent(ME_SYSTEM_MODULESLOADED, ModulesLoaded);
-	HookEvent(ME_SYSTEM_PRESHUTDOWN, PreShutdown);
+	hEventModulesLoaded = HookEvent(ME_SYSTEM_MODULESLOADED, ModulesLoaded);
+	hEventPreshutdown = HookEvent(ME_SYSTEM_PRESHUTDOWN, PreShutdown);
 
 	sprintf(s, "%s/%s", jabberProtoName, "Nudge");
 	hTlenNudge = CreateHookableEvent(s);
