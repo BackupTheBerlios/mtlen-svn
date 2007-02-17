@@ -25,12 +25,56 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "sha1.h"
 #include <ctype.h>
+#include <win2k.h>
 
 extern CRITICAL_SECTION mutex;
 extern UINT jabberCodePage;
 
 static CRITICAL_SECTION serialMutex;
 static unsigned int serial;
+
+static unsigned hookNum = 0;
+static unsigned serviceNum = 0;
+static HANDLE* hHooks = NULL;
+static HANDLE* hServices = NULL;
+
+HANDLE HookEvent_Ex(const char *name, MIRANDAHOOK hook) {
+	hookNum ++;
+	hHooks = (HANDLE *) mir_realloc(hHooks, sizeof(HANDLE) * (hookNum));
+	hHooks[hookNum - 1] = HookEvent(name, hook);
+	return hHooks[hookNum - 1] ;
+} 
+	  
+HANDLE CreateServiceFunction_Ex(const char *name, MIRANDASERVICE service) {
+	serviceNum++;
+	hServices = (HANDLE *) mir_realloc(hServices, sizeof(HANDLE) * (serviceNum));
+	hServices[serviceNum - 1] = CreateServiceFunction(name, service);
+	return hServices[serviceNum - 1] ;
+} 
+
+void UnhookEvents_Ex() {
+	int i;
+	for (i=0; i<hookNum; ++i) {
+		if (hHooks[i] != NULL) {
+			UnhookEvent(hHooks[i]);	
+		}
+	}
+	mir_free(hHooks);
+	hookNum = 0;
+	hHooks = NULL;
+}
+
+void DestroyServices_Ex() {
+	int i;
+	for (i=0; i<serviceNum; ++i) {
+		if (hServices[i] != NULL) {
+			DestroyServiceFunction(hServices[i]);
+		}
+	}
+	mir_free(hServices);
+	serviceNum = 0;
+	hServices = NULL;
+}
 
 void JabberSerialInit(void)
 {

@@ -99,7 +99,7 @@ static char *getDisplayName(const char *id)
 
 BOOL TlenMUCInit(void)
 {
-	HookEvent(ME_MUCC_EVENT, TlenMUCHandleEvent);
+	HookEvent_Ex(ME_MUCC_EVENT, TlenMUCHandleEvent);
 	return 0;
 }
 static int TlenMUCHandleEvent(WPARAM wParam, LPARAM lParam)

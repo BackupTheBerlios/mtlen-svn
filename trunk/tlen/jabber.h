@@ -298,6 +298,10 @@ JABBER_SOCKET JabberWsConnect(char *host, WORD port);
 int JabberWsSend(JABBER_SOCKET s, char *data, int datalen);
 int JabberWsRecv(JABBER_SOCKET s, char *data, long datalen);
 // jabber_util.c
+HANDLE HookEvent_Ex(const char *name, MIRANDAHOOK hook);
+HANDLE CreateServiceFunction_Ex(const char *name, MIRANDASERVICE service);
+void UnhookEvents_Ex();
+void DestroyServices_Ex();
 void JabberSerialInit(void);
 void JabberSerialUninit(void);
 unsigned int JabberSerialNext(void);
