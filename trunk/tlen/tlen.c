@@ -471,24 +471,24 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	mi.pszPopupName = jabberModuleName;
 	mi.popupPosition = 500090000;
 
-	// "Multi-User Conference"
-	wsprintf(text, "%s/MainMenuMUC", jabberModuleName);
-	CreateServiceFunction_Ex(text, TlenMUCMenuHandleMUC);
-	mi.pszName = TranslateT("Multi-User Conference");
-	mi.position = 2000050001;
-	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
-	mi.pszService = text;
-	hMenuMUC = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuMUC, (LPARAM) &clmi);
-
 	wsprintf(text, "%s/MainMenuChats", jabberModuleName);
 	CreateServiceFunction_Ex(text, TlenMUCMenuHandleChats);
 	mi.pszName = TranslateT("Tlen Chats");
-	mi.position = 2000050002;
+	mi.position = 2000050001;
 	mi.hIcon = tlenIcons[TLEN_IDI_CHATS];
 	mi.pszService = text;
 	hMenuChats = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChats, (LPARAM) &clmi);
+
+	// "Multi-User Conference"
+	wsprintf(text, "%s/MainMenuMUC", jabberModuleName);
+	CreateServiceFunction_Ex(text, TlenMUCMenuHandleMUC);
+	mi.pszName = TranslateT("Multi-User Conference");
+	mi.position = 2000050002;
+	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
+	mi.pszService = text;
+	hMenuMUC = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuMUC, (LPARAM) &clmi);
 
 	wsprintf(text, "%s/MainMenuInbox", jabberModuleName);
 	CreateServiceFunction_Ex(text, TlenMenuHandleInbox);

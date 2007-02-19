@@ -446,7 +446,7 @@ END
 IDI_TLEN                ICON    DISCARDABLE     "icos\\tlensmall.ico"
 IDI_MAIL                ICON    DISCARDABLE     "icos\\sendmail.ico"
 IDI_MUC                 ICON    DISCARDABLE     "icos\\group.ico"
-IDI_CHATS              ICON    DISCARDABLE     "icos\\group.ico"
+IDI_CHATS              ICON    DISCARDABLE     "icos\\tlensmall.ico"
 IDI_GRANT               ICON    DISCARDABLE     "icos\\grant.ico"
 IDI_REQUEST            ICON    DISCARDABLE     "icos\\request.ico"
 IDI_VOICE			ICON    DISCARDABLE     "icos\\microphone.ico"
