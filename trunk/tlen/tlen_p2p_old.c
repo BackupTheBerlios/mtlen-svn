@@ -181,7 +181,7 @@ void TlenP2PEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft, BOOL sendAck)
 	}
 }
 
-TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET *s, int list, BOOL sendAck)
+TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET s, int list, BOOL sendAck)
 {
 	JABBER_LIST_ITEM *item = NULL;
 	TLEN_FILE_PACKET *packet;

@@ -245,7 +245,7 @@ static void TlenLoadIcons() {
 			GetIconName(iconName, sizeof(iconName), i);
 			tlenIcons[i] = (HICON) CallService(MS_SKIN2_GETICON, 0, (LPARAM)iconName);
 		} else {
-			tlenIcons[i] = LoadImage(hInst, MAKEINTRESOURCE(iconList[i]), IMAGE_ICON, 0, 0, 0);
+			tlenIcons[i] = (HICON) LoadImage(hInst, MAKEINTRESOURCE(iconList[i]), IMAGE_ICON, 0, 0, 0);
 		}
 	}
 }

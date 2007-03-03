@@ -143,7 +143,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 		if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
 			strncpy(info->username, dbv.pszVal, sizeof(info->username));
 			info->username[sizeof(info->username)-1] = '\0';
-			strlwr(info->username);
+			_strlwr(info->username);
 			DBWriteContactSettingString(NULL, jabberProtoName, "LoginName", info->username);
 			DBFreeVariant(&dbv);
 		}
@@ -161,7 +161,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 		if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
 			strncpy(info->server, dbv.pszVal, sizeof(info->server));
 			info->server[sizeof(info->server)-1] = '\0';
-			strlwr(info->server);
+			_strlwr(info->server);
 			DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", info->server);
 			DBFreeVariant(&dbv);
 		}
@@ -717,7 +717,7 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 						if (statbuf.st_size > 6 * 1024) return;
 						in = fopen( szFileName, "rb" );
 						if ( in == NULL ) return;
-						bytes = filelength( fileno( in ));
+						bytes = _filelength( fileno( in ));
 						buffer = ( char* )mir_alloc( bytes*4/3 + bytes + 1000 );
 						if ( buffer == NULL ) {
 							fclose( in );

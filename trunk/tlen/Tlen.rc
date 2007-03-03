@@ -2,14 +2,10 @@
 #ifdef __MINGW32__
 	#define WINVER 0x500
 	#define _WIN32_IE 0x500
-	#include <windows.h>
-	#ifndef IDC_STATIC
-	#define IDC_STATIC (-1)
 #endif
-#else
-	#define APSTUDIO_READONLY_SYMBOLS
-	#include "winres.h"
-	#undef APSTUDIO_READONLY_SYMBOLS
+#include <windows.h>
+#ifndef IDC_STATIC
+#define IDC_STATIC (-1)
 #endif
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -43,23 +39,12 @@ END
 // Dialog
 //
 
-IDD_OPTIONS DIALOGEX 0, 0, 310, 245
-STYLE DS_FIXEDSYS | WS_CHILD
-EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "MS Shell Dlg", 0, 0, 0x1
-BEGIN
-	CONTROL         "Tab1",IDC_TABS,"SysTabControl32",
-                    TCS_FIXEDWIDTH | 0x8,0,0,310,245
-// TCS_FIXEDWIDTH | TCS_BUTTONS |
-END
-
-
-IDD_OPTIONS_BASIC DIALOGEX 5, 30, 300, 200
+IDD_OPTIONS_BASIC DIALOGEX 0, 0, 304, 200
 STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Tlen",IDC_TLEN,5,0,288,42
+    GROUPBOX        "Tlen",IDC_TLEN,0,0,304,42
     LTEXT           "Username:",IDC_STATIC,14,12,52,8
     EDITTEXT        IDC_EDIT_USERNAME,70,10,86,12,ES_AUTOHSCROLL
     CONTROL         "Create a new account",IDC_REGISTERACCOUNT,"Hyperlink",
@@ -69,7 +54,7 @@ BEGIN
                     ES_AUTOHSCROLL
     CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,170,26,100,10
-    GROUPBOX        "Options",IDC_SIMPLE,5,44,288,141
+    GROUPBOX        "Options",IDC_SIMPLE,0,44,304,141
     CONTROL         "Automatically reconnect after unintentional disconnection",
                     IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
                     56,239,10
@@ -108,12 +93,12 @@ BEGIN
 END
 
 
-IDD_OPTIONS_VOICE DIALOGEX 5, 30, 300, 200
+IDD_OPTIONS_VOICE DIALOGEX 0, 0, 304, 200
 STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Voice Chats",IDC_STATIC,5,0,288,57
+    GROUPBOX        "Voice Chats",IDC_STATIC,0,0,304,57
     LTEXT           "Voice chat policy",IDC_STATIC,14,12,70,8
     COMBOBOX        IDC_VOICE_POLICY,95,10,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
@@ -125,12 +110,12 @@ BEGIN
                     WS_TABSTOP
 END
 
-IDD_OPTIONS_ADVANCED DIALOGEX 5, 30, 300, 200
+IDD_OPTIONS_ADVANCED DIALOGEX 0, 0, 304, 200
 STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Expert Options",IDC_STATIC,5,4,288,74
+    GROUPBOX        "Expert Options",IDC_STATIC,0,0,304,74
     LTEXT           "Login server:",IDC_STATIC,14,18,75,8
     EDITTEXT        IDC_EDIT_LOGIN_SERVER,90,16,90,12,ES_AUTOHSCROLL
     LTEXT           "Connection Host:",IDC_STATIC,14,32,75,8
@@ -144,7 +129,7 @@ BEGIN
                     IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE |
                     WS_TABSTOP,14,60,250,10
 
-    GROUPBOX        "P2P Connections",IDC_STATIC,5,100,288,98
+    GROUPBOX        "P2P Connections",IDC_STATIC,0,100,304,98
     CONTROL         "Use proxy for incoming connections",IDC_FILE_USE_PROXY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,114,271,10
     LTEXT           "Proxy type:",IDC_FILE_PROXY_TYPE_LABEL,16,130,48,8,
@@ -174,10 +159,13 @@ BEGIN
 
 END
 
-IDD_OPTIONS_POPUPS DIALOG DISCARDABLE  0, 0, 317, 141
+IDD_OPTIONS_POPUPS DIALOG DISCARDABLE  0, 0, 304, 143
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
+    GROUPBOX        "Mail Notification",IDC_STATIC,0,10,304,120
+    CONTROL         "Enable incoming mail notification",IDC_ENABLEPOPUP,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,23,26,267,10
     GROUPBOX        "Delay",IDC_STATIC,160,46,137,55
     CONTROL         "&From PopUp plugin",IDC_DELAY_POPUP,"Button",
                     BS_AUTORADIOBUTTON,167,60,125,10
@@ -190,11 +178,8 @@ BEGIN
     LTEXT           "Background",IDC_STATIC,53,63,95,8
     LTEXT           "Text",IDC_STATIC,53,82,96,8
     CONTROL         "",IDC_COLORBKG,"ColourPicker",WS_TABSTOP,23,61,24,12
-    GROUPBOX        "General Options",IDC_STATIC,15,15,282,26
     CONTROL         "",IDC_COLORTXT,"ColourPicker",WS_TABSTOP,23,79,24,12
     PUSHBUTTON      "Preview",IDC_PREVIEW,132,112,50,14
-    CONTROL         "Enable incoming mail notification",IDC_ENABLEPOPUP,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,23,26,267,10
 END
 
 IDD_PASSWORD DIALOG DISCARDABLE  0, 0, 151, 63
@@ -456,14 +441,4 @@ IDI_SPEAKER            ICON    DISCARDABLE     "icos\\speaker.ico"
 /////////////////////////////////////////////////////////////////////////////
 
 
-
-#ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 3 resource.
-//
-
-
-/////////////////////////////////////////////////////////////////////////////
-#endif    // not APSTUDIO_INVOKED
 
