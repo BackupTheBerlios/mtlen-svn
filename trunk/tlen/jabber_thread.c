@@ -1042,7 +1042,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 							else if (!strcmp(show, "chat")) status = ID_STATUS_FREECHAT;
 							else if (!strcmp(show, "unavailable")) {
 								// Always show invisible (on old Tlen client) as invisible (not offline)
-								status = ID_STATUS_INVISIBLE;
+								status = ID_STATUS_OFFLINE;
 							}
 						}
 					}

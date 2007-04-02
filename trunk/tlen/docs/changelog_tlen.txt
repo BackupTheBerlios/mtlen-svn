@@ -1,3 +1,10 @@
+1.0.7.4
+* p2p connections refactoring
+* UPnP support
+* managed services/hooks
+* support for IcoLib
+* new icons
+* support for Miranda Memory Manager
 1.0.7.3
 --------
 * bugfix: offline status message
