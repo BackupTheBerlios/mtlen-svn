@@ -1,0 +1,444 @@
+#include "resource.h"
+#ifdef __MINGW32__
+	#define WINVER 0x500
+	#define _WIN32_IE 0x500
+#endif
+#include <windows.h>
+#ifndef IDC_STATIC
+#define IDC_STATIC (-1)
+#endif
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif
+#ifdef APSTUDIO_INVOKED
+
+1 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_OPTIONS_BASIC DIALOGEX 0, 0, 304, 200
+STYLE DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg"
+BEGIN
+    GROUPBOX        "Tlen",IDC_TLEN,0,0,304,42
+    LTEXT           "Username:",IDC_STATIC,14,12,52,8
+    EDITTEXT        IDC_EDIT_USERNAME,70,10,86,12,ES_AUTOHSCROLL
+    CONTROL         "Create a new account",IDC_REGISTERACCOUNT,"Hyperlink",
+                    0x0,170,12,100,8
+    LTEXT           "Password:",IDC_STATIC,14,26,52,8
+    EDITTEXT        IDC_EDIT_PASSWORD,70,24,86,12,ES_PASSWORD |
+                    ES_AUTOHSCROLL
+    CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,170,26,100,10
+    GROUPBOX        "Options",IDC_SIMPLE,0,44,304,141
+    CONTROL         "Automatically reconnect after unintentional disconnection",
+                    IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
+                    56,239,10
+    CONTROL         "Leave status message after disconnection",
+                    IDC_OFFLINE_MESSAGE,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,14,68,168,10
+    COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,67,75,140,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
+    CONTROL         "Ignore advertisements",
+                    IDC_IGNORE_ADVERTISEMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
+                    80,250,10
+    CONTROL         "Automatically delete contacts not in my roster",
+                    IDC_ROSTER_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
+                    92,250,10
+    CONTROL         "Show offline users with status messages as invisible in contact list",
+                    IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,104,250,10
+    CONTROL         "Enable avatars",
+                    IDC_AVATARS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,116,250,10
+    CONTROL         "Send and receive client version information",
+                    IDC_VERSIONINFO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,128,250,10
+    LTEXT           "Alert policy",IDC_STATIC,14,140,70,8
+    COMBOBOX        IDC_ALERT_POLICY,95,139,190,100,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
+    CONTROL         "Use Nudge plugin",
+                    IDC_NUDGE_SUPPORT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    24,153,120,10
+    CONTROL         "Log alerts as messages",
+                    IDC_LOG_ALERTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,153,130,10
+    LTEXT           "Group chat policy",IDC_STATIC,14,168,70,8
+    COMBOBOX        IDC_MUC_POLICY,95,166,190,100,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
+END
+
+
+IDD_OPTIONS_VOICE DIALOGEX 0, 0, 304, 200
+STYLE DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg"
+BEGIN
+    GROUPBOX        "Voice Chats",IDC_STATIC,0,0,304,57
+    LTEXT           "Voice chat policy",IDC_STATIC,14,12,70,8
+    COMBOBOX        IDC_VOICE_POLICY,95,10,190,100,
+                    CBS_DROPDOWNLIST | WS_TABSTOP
+	LTEXT           "Recording device:",IDC_STATIC,14,26,105,8
+    COMBOBOX        IDC_VOICE_DEVICE_IN,120,24,110,100,CBS_DROPDOWNLIST |
+                    WS_TABSTOP
+    LTEXT           "Playback device:",IDC_STATIC,14,40,105,8
+    COMBOBOX        IDC_VOICE_DEVICE_OUT,120,38,110,100,CBS_DROPDOWNLIST |
+                    WS_TABSTOP
+END
+
+IDD_OPTIONS_ADVANCED DIALOGEX 0, 0, 304, 200
+STYLE DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg"
+BEGIN
+    GROUPBOX        "Expert Options",IDC_STATIC,0,0,304,74
+    LTEXT           "Login server:",IDC_STATIC,14,18,75,8
+    EDITTEXT        IDC_EDIT_LOGIN_SERVER,90,16,90,12,ES_AUTOHSCROLL
+    LTEXT           "Connection Host:",IDC_STATIC,14,32,75,8
+    EDITTEXT        IDC_HOST,90,30,90,12,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Port:",IDC_STATIC,194,32,35,8
+    EDITTEXT        IDC_HOSTPORT,230,30,26,12,ES_AUTOHSCROLL | ES_NUMBER |
+                    WS_DISABLED
+    CONTROL         "Keep connection alive",IDC_KEEPALIVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,47,250,10
+    CONTROL         "Enable Always Visible and Never Visible",
+                    IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE |
+                    WS_TABSTOP,14,60,250,10
+
+    GROUPBOX        "P2P Connections",IDC_STATIC,0,100,304,98
+    CONTROL         "Use proxy for incoming connections",IDC_FILE_USE_PROXY,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,114,271,10
+    LTEXT           "Proxy type:",IDC_FILE_PROXY_TYPE_LABEL,16,130,48,8,
+                    WS_DISABLED
+    COMBOBOX        IDC_FILE_PROXY_TYPE,68,128,80,48,CBS_DROPDOWNLIST |
+                    WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Proxy server:",IDC_FILE_PROXY_HOST_LABEL,16,145,48,8,
+                    WS_DISABLED
+    EDITTEXT        IDC_FILE_PROXY_HOST,68,143,80,12,ES_AUTOHSCROLL |
+                    WS_DISABLED | WS_GROUP
+    LTEXT           "Port:",IDC_FILE_PROXY_PORT_LABEL,174,145,25,8,
+                    WS_DISABLED
+    EDITTEXT        IDC_FILE_PROXY_PORT,204,143,30,12,ES_AUTOHSCROLL |
+                    ES_NUMBER | WS_DISABLED
+    CONTROL         "Proxy requires authorization",IDC_FILE_PROXY_USE_AUTH,
+                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,14,
+                    160,271,10
+    LTEXT           "Username:",IDC_FILE_PROXY_USER_LABEL,16,176,47,8,
+                    WS_DISABLED
+    EDITTEXT        IDC_FILE_PROXY_USER,68,175,80,12,ES_AUTOHSCROLL |
+                    WS_DISABLED
+    LTEXT           "Password:",IDC_FILE_PROXY_PASSWORD_LABEL,153,176,45,8,
+                    WS_DISABLED
+    EDITTEXT        IDC_FILE_PROXY_PASSWORD,204,175,81,12,ES_PASSWORD |
+                    ES_AUTOHSCROLL | WS_DISABLED
+
+
+END
+
+IDD_OPTIONS_POPUPS DIALOG DISCARDABLE  0, 0, 304, 143
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Mail Notification",IDC_STATIC,0,10,304,120
+    CONTROL         "Enable incoming mail notification",IDC_ENABLEPOPUP,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,23,26,267,10
+    GROUPBOX        "Delay",IDC_STATIC,160,46,137,55
+    CONTROL         "&From PopUp plugin",IDC_DELAY_POPUP,"Button",
+                    BS_AUTORADIOBUTTON,167,60,125,10
+    CONTROL         "&Custom",IDC_DELAY_CUSTOM,"Button",BS_AUTORADIOBUTTON,
+                    167,73,98,10
+    CONTROL         "P&ermanent",IDC_DELAY_PERMANENT,"Button",
+                    BS_AUTORADIOBUTTON,167,87,123,10
+    EDITTEXT        IDC_DELAY,270,71,21,14,ES_AUTOHSCROLL | ES_NUMBER
+    GROUPBOX        "Colours",IDC_STATIC,15,46,137,55
+    LTEXT           "Background",IDC_STATIC,53,63,95,8
+    LTEXT           "Text",IDC_STATIC,53,82,96,8
+    CONTROL         "",IDC_COLORBKG,"ColourPicker",WS_TABSTOP,23,61,24,12
+    CONTROL         "",IDC_COLORTXT,"ColourPicker",WS_TABSTOP,23,79,24,12
+    PUSHBUTTON      "Preview",IDC_PREVIEW,132,112,50,14
+END
+
+IDD_PASSWORD DIALOG DISCARDABLE  0, 0, 151, 63
+STYLE DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | WS_POPUP |
+    WS_VISIBLE | WS_CAPTION
+CAPTION "Jabber Password"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    EDITTEXT        IDC_JID,7,7,137,12,ES_READONLY | NOT WS_BORDER | NOT
+                    WS_TABSTOP
+    EDITTEXT        IDC_PASSWORD,7,22,137,12,ES_PASSWORD | ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,23,42,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,77,42,50,14
+END
+
+IDD_USER_VCARD DIALOGEX 0, 0, 222, 140
+STYLE DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "Nick name:",IDC_STATIC,5,8,51,8
+    EDITTEXT        IDC_NICKNAME,58,6,102,12,ES_AUTOHSCROLL
+    LTEXT           "First name:",IDC_STATIC,5,21,51,8
+    EDITTEXT        IDC_FIRSTNAME,58,19,102,12,ES_AUTOHSCROLL
+    LTEXT           "Last name:",IDC_STATIC,5,34,51,8
+    EDITTEXT        IDC_LASTNAME,58,32,102,12,ES_AUTOHSCROLL
+    LTEXT           "E-mail:",IDC_STATIC,5,47,51,8
+    EDITTEXT        IDC_EMAIL,58,45,102,12,ES_AUTOHSCROLL
+    LTEXT           "Gender:",IDC_STATIC,5,61,51,8
+    COMBOBOX        IDC_GENDER,58,59,55,52,CBS_DROPDOWN | WS_VSCROLL |
+                    WS_TABSTOP
+    LTEXT           "Year of birth:",IDC_STATIC,120,61,53,8
+    EDITTEXT        IDC_AGE,176,59,27,12,ES_AUTOHSCROLL
+    LTEXT           "City:",IDC_STATIC,6,75,51,8
+    EDITTEXT        IDC_CITY,58,73,102,12,ES_AUTOHSCROLL
+    LTEXT           "School:",IDC_STATIC,5,88,51,8
+    EDITTEXT        IDC_SCHOOL,58,86,102,12,ES_AUTOHSCROLL
+    LTEXT           "Occupation:",IDC_STATIC,5,102,51,8
+    COMBOBOX        IDC_OCCUPATION,57,100,102,96,CBS_DROPDOWNLIST |
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Looking for:",IDC_STATIC,5,116,51,8
+    COMBOBOX        IDC_LOOKFOR,57,114,102,96,CBS_DROPDOWNLIST | WS_VSCROLL |
+                    WS_TABSTOP
+    CONTROL         "Voice chats",IDC_VOICECONVERSATIONS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,130,107,10
+    CONTROL         "Publicly visible status",IDC_PUBLICSTATUS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,112,130,107,10
+    PUSHBUTTON      "Save changes",IDC_SAVE,164,111,53,16
+END
+
+IDD_USER_SETAVATAR DIALOGEX 0, 0, 222, 131
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_AVATAR,"Static",SS_BITMAP | SS_CENTERIMAGE |
+                    SS_SUNKEN,9,11,96,96
+    LTEXT           "Note: File size max 6kB",
+                    IDC_STATIC,112,54,106,34
+    PUSHBUTTON      "Set",IDC_SETAVATAR,9,112,45,13
+    PUSHBUTTON      "Delete",IDC_DELETEAVATAR,61,112,41,13
+END
+
+IDD_USER_INFO DIALOG DISCARDABLE  0, 0, 222, 146
+STYLE DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "Tlen login:",IDC_STATIC,5,2,48,8
+    EDITTEXT        IDC_INFO_JID,53,2,73,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "Subscription:",IDC_STATIC,128,2,45,8,NOT WS_GROUP
+    EDITTEXT        IDC_SUBSCRIPTION,181,2,36,12,ES_READONLY | NOT WS_BORDER |
+                    NOT WS_TABSTOP
+    LTEXT           "Nick name:",IDC_STATIC,5,14,48,8
+    EDITTEXT        IDC_NICKNAME,53,14,77,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "First name:",IDC_STATIC,5,26,48,8
+    EDITTEXT        IDC_FIRSTNAME,53,26,73,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "Gender:",IDC_STATIC,128,26,47,8
+    EDITTEXT        IDC_GENDER_TEXT,178,26,26,12,ES_AUTOHSCROLL |
+                    ES_READONLY | NOT WS_BORDER
+    LTEXT           "Last name:",IDC_STATIC,5,38,48,8
+    EDITTEXT        IDC_LASTNAME,53,38,73,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "Age:",IDC_STATIC,128,38,47,8
+    EDITTEXT        IDC_AGE,178,38,22,12,ES_AUTOHSCROLL | ES_READONLY | NOT
+                    WS_BORDER
+    LTEXT           "E-mail:",IDC_STATIC,5,50,48,8
+    EDITTEXT        IDC_EMAIL,54,50,120,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "City:",IDC_STATIC,5,62,48,8
+    EDITTEXT        IDC_CITY,53,62,125,12,ES_AUTOHSCROLL | ES_READONLY | NOT
+                    WS_BORDER
+    LTEXT           "School:",IDC_STATIC,5,74,48,8
+    EDITTEXT        IDC_SCHOOL,53,74,131,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER
+    LTEXT           "Occupation:",IDC_STATIC,5,86,48,8
+    EDITTEXT        IDC_OCCUPATION_TEXT,53,86,135,12,ES_AUTOHSCROLL |
+                    ES_READONLY | NOT WS_BORDER
+    LTEXT           "Looking for:",IDC_STATIC,5,98,48,8
+    EDITTEXT        IDC_LOOKFOR_TEXT,53,98,136,12,ES_AUTOHSCROLL |
+                    ES_READONLY | NOT WS_BORDER
+    LTEXT           "Software:",IDC_STATIC,5,110,48,8
+    LTEXT           "Version:",IDC_STATIC,5,122,48,8
+    LTEXT           "System:",IDC_STATIC,5,134,48,8
+    EDITTEXT        IDC_SOFTWARE,54,110,140,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER | NOT WS_TABSTOP
+    EDITTEXT        IDC_VERSION,54,122,140,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER | NOT WS_TABSTOP
+    EDITTEXT        IDC_SYSTEM,54,134,140,12,ES_AUTOHSCROLL | ES_READONLY |
+                    NOT WS_BORDER | NOT WS_TABSTOP
+END
+
+IDD_ADVSEARCH DIALOGEX 0, 0, 334, 178
+STYLE DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_BORDER
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Personal Information",IDC_PERSONALGROUP,7,7,156,164
+    LTEXT           "First name:",IDC_STATIC,15,22,50,8
+    EDITTEXT        IDC_FIRSTNAME,65,20,91,12,ES_AUTOHSCROLL
+    LTEXT           "Last name:",IDC_STATIC,15,37,50,8
+    EDITTEXT        IDC_LASTNAME,65,35,91,12,ES_AUTOHSCROLL
+    LTEXT           "Nickname:",IDC_STATIC,15,52,50,8
+    EDITTEXT        IDC_NICK,65,50,91,12,ES_AUTOHSCROLL
+    LTEXT           "E-mail:",IDC_STATIC,15,67,50,8
+    EDITTEXT        IDC_EMAIL,65,65,91,12,ES_AUTOHSCROLL
+    LTEXT           "Gender:",IDC_STATIC,15,85,50,8
+    COMBOBOX        IDC_GENDER,65,83,91,51,CBS_DROPDOWNLIST | WS_VSCROLL |
+                    WS_TABSTOP
+    LTEXT           "Age:",IDC_STATIC,15,100,50,8
+    EDITTEXT        IDC_AGEFROM,65,98,27,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "to",IDC_STATIC,98,100,21,8
+    EDITTEXT        IDC_AGETO,123,98,27,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "City:",IDC_STATIC,15,118,50,8
+    EDITTEXT        IDC_CITY,65,116,91,12,ES_AUTOHSCROLL
+    LTEXT           "Occupation:",IDC_STATIC,15,135,50,8
+    COMBOBOX        IDC_OCCUPATION,65,133,91,93,CBS_DROPDOWNLIST |
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "School:",IDC_STATIC,15,150,50,8
+    EDITTEXT        IDC_SCHOOL,65,148,91,12,ES_AUTOHSCROLL
+    GROUPBOX        "Extra Search Criterias",IDC_EXTRAGROUP,171,7,156,67
+    LTEXT           "Status:",IDC_STATIC,177,22,50,8
+    COMBOBOX        IDC_STATUS,227,20,91,113,CBS_DROPDOWNLIST | WS_VSCROLL |
+                    WS_TABSTOP
+    LTEXT           "Looking for:",IDC_STATIC,177,37,50,8
+    COMBOBOX        IDC_LOOKFOR,227,35,91,172,CBS_DROPDOWNLIST | WS_VSCROLL |
+                    WS_TABSTOP
+    LTEXT           "Plan:",IDC_STATIC,177,52,50,8,WS_DISABLED
+    COMBOBOX        IDC_PLAN,227,50,91,113,CBS_DROPDOWNLIST | WS_DISABLED |
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_VOICE DIALOG DISCARDABLE  0, 0, 151, 122
+STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER |
+    WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Tlen Voice Chat"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    CONTROL         "",IDC_MICROPHONE,"MButtonClass",0x0,12,7,16,16,
+                    0x18000000L
+    CONTROL         "",IDC_VUMETERIN,"Static",SS_OWNERDRAW,47,10,120,8
+    CONTROL         "",IDC_SPEAKER,"MButtonClass",0x0,12,29,16,16,
+                    0x18000000L
+    CONTROL         "",IDC_VUMETEROUT,"Static",SS_OWNERDRAW,47,31,120,8
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,53,140,4
+    LTEXT           "Quality",IDC_STATIC,10,64,45,8
+    COMBOBOX        IDC_VCQUALITY,55,62,88,100,CBS_DROPDOWNLIST | WS_VSCROLL
+    LTEXT           "In",IDC_STATIC,10,80,25,8
+    LTEXT           "",IDC_BYTESIN,35,80,30,8
+    LTEXT           "Out",IDC_STATIC,90,80,25,8
+    LTEXT           "",IDC_BYTESOUT,115,80,30,8
+    EDITTEXT        IDC_STATUS,10,91,131,8,ES_CENTER | ES_AUTOHSCROLL |
+                    WS_DISABLED | NOT WS_BORDER
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,100,140,4
+    PUSHBUTTON      "Finish",IDCANCEL,50,106,50,14
+END
+
+IDD_ACCEPT_VOICE DIALOG DISCARDABLE  0, 0, 210, 70
+STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_FIXEDSYS | DS_CENTER | WS_POPUP |
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Tlen Voice Chat Invitation"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON   "&Accept",IDC_ACCEPT,98,50,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,155,50,50,14
+    LTEXT           "From:",IDC_STATIC,25,24,60,8
+    LTEXT           "The following invitation to join a voice chat is received.",
+                    IDC_STATIC,3,4,204,8
+    EDITTEXT        IDC_FROM,85,20,100,12,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,3,40,203,4
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,7,5
+ PRODUCTVERSION 1,0,7,5
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041504e3"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "http://mtlen.berlios.de\0"
+            VALUE "FileDescription", "Tlen Protocol Plugin for Miranda IM\0"
+            VALUE "FileVersion", "1.0.7.5\0"
+            VALUE "InternalName", "tlen\0"
+            VALUE "LegalCopyright", "Copyright (c) 2002-2007 Santithorn Bunchua, Piotr Piastucki\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "tlen.dll\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "Tlen Protocol Plugin\0"
+            VALUE "ProductVersion", "1.0.7.5\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x415, 1251
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_TLEN                ICON    DISCARDABLE     "icos\\tlensmall.ico"
+IDI_MAIL                ICON    DISCARDABLE     "icos\\sendmail.ico"
+IDI_MUC                 ICON    DISCARDABLE     "icos\\group.ico"
+IDI_CHATS              ICON    DISCARDABLE     "icos\\tlensmall.ico"
+IDI_GRANT               ICON    DISCARDABLE     "icos\\grant.ico"
+IDI_REQUEST            ICON    DISCARDABLE     "icos\\request.ico"
+IDI_VOICE			ICON    DISCARDABLE     "icos\\microphone.ico"
+IDI_MICROPHONE      ICON    DISCARDABLE     "icos\\microphone.ico"
+IDI_SPEAKER            ICON    DISCARDABLE     "icos\\speaker.ico"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
