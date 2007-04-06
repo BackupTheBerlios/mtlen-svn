@@ -64,6 +64,20 @@ void TlenLoadOptions()
 	tlenOptions.logAlerts = DBGetContactSettingByte(NULL, jabberProtoName, "LogAlerts", FALSE);
 }
 
+static int changed = 0;
+
+static void ApplyChanges(int i) {
+	changed &= ~i;
+	if (changed == 0) {
+		TlenLoadOptions();
+	}
+}
+
+static void MarkChanges(int i, HWND hWnd) {
+	SendMessage(GetParent(hWnd), PSM_CHANGED, 0, 0);
+	changed |= i;
+}
+
 
 int TlenOptInit(WPARAM wParam, LPARAM lParam)
 {
@@ -191,15 +205,15 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		case IDC_IGNORE_ADVERTISEMENTS:
 		case IDC_SHOW_OFFLINE:
 		case IDC_OFFLINE_MESSAGE:
-			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			MarkChanges(1, hwndDlg);
 			break;
 		case IDC_LOG_ALERTS:
 			CheckDlgButton(hwndDlg, IDC_NUDGE_SUPPORT, BST_UNCHECKED);
-			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			MarkChanges(1, hwndDlg);
 			break;
 		case IDC_NUDGE_SUPPORT:
 			CheckDlgButton(hwndDlg, IDC_LOG_ALERTS, BST_UNCHECKED);
-			SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			MarkChanges(1, hwndDlg);
 			break;
 		case IDC_REGISTERACCOUNT:
 		    CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) TLEN_REGISTER);
@@ -208,10 +222,10 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		case IDC_ALERT_POLICY:
 		case IDC_MUC_POLICY:
 			if (HIWORD(wParam) == CBN_SELCHANGE)
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				MarkChanges(1, hwndDlg);
 			break;
 		default:
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			MarkChanges(1, hwndDlg);
 			break;
 		}
 		break;
@@ -254,6 +268,7 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				DBWriteContactSettingByte(NULL, jabberProtoName, "LogAlerts", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_LOG_ALERTS));
 				if (reconnectRequired && jabberConnected)
 					MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
+				ApplyChanges(1);
 				return TRUE;
 			}
 		}
@@ -283,7 +298,7 @@ static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		case IDC_VOICE_DEVICE_IN:
 		case IDC_VOICE_DEVICE_OUT:
 			if (HIWORD(wParam) == CBN_SELCHANGE)
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				MarkChanges(2, hwndDlg);
 			break;
 		}
 		break;
@@ -294,6 +309,7 @@ static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_IN, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
+				ApplyChanges(2);
 				return TRUE;
 			}
 		}
@@ -383,7 +399,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			switch (LOWORD(wParam)) {
 			case IDC_FILE_PROXY_TYPE:
 				if (HIWORD(wParam) == CBN_SELCHANGE)
-					SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+					MarkChanges(4, hwndDlg);
 				break;
 			case IDC_EDIT_LOGIN_SERVER:
 			case IDC_HOST:
@@ -393,7 +409,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			case IDC_FILE_PROXY_USER:
 			case IDC_FILE_PROXY_PASSWORD:
 				if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
-					SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+					MarkChanges(4, hwndDlg);
 				break;
 			case IDC_FILE_USE_PROXY:
 				bChecked = IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY);
@@ -410,11 +426,11 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USER), bChecked);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD_LABEL), bChecked);
 				EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PASSWORD), bChecked);
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				MarkChanges(4, hwndDlg);
 				break;
 			case IDC_KEEPALIVE:
 			case IDC_VISIBILITY_SUPPORT:
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+				MarkChanges(4, hwndDlg);
 				break;
 			}
 		}
@@ -462,6 +478,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyPassword", text);
 					if (reconnectRequired && jabberConnected)
 						MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
+					ApplyChanges(4);
 					return TRUE;
 				}
 			}

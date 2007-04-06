@@ -1,4 +1,8 @@
+1.0.7.5
+-------
+* bugfix: settings changes were not loaded properly
 1.0.7.4
+-------
 * p2p connections refactoring
 * UPnP support
 * managed services/hooks

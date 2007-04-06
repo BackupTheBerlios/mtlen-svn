@@ -45,7 +45,7 @@ PLUGININFO pluginInfo = {
 	"Tlen protocol plugin for Miranda IM ("TLEN_VERSION_STRING" "__DATE__")",
 	"Santithorn Bunchua, Adam Strzelecki, Piotr Piastucki",
 	"the_leech@users.berlios.de",
-	"(c) 2002-2006 Santithorn Bunchua, Piotr Piastucki",
+	"(c) 2002-2007 Santithorn Bunchua, Piotr Piastucki",
 	"http://mtlen.berlios.de",
 	0,
 	0

@@ -105,7 +105,6 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 	XmlState xmlState;
 	HANDLE hContact;
 	int jabberNetworkBufferSize;
-	int socket;
 	int oldStatus = ID_STATUS_OFFLINE;
 	int reconnectMaxTime;
 	int numRetry;
