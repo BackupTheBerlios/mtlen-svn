@@ -70,8 +70,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,7,5)
-#define TLEN_VERSION_STRING  "1.0.7.5"
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,7,6)
+#define TLEN_VERSION_STRING  "1.0.7.6"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "mim_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"
@@ -149,6 +149,24 @@ typedef enum {
 	JABBER_SESSION_REGISTER
 } JABBER_SESSION_TYPE;
 
+typedef struct {
+	char mailBase[256];
+	char mailMsg[256];
+	int  mailMsgMthd;
+	char mailIndex[256];
+	int  mailIndexMthd;
+	char mailLogin[256];
+	int  mailLoginMthd;
+	char mailCompose[256];
+	int  mailComposeMthd;
+	char avatarGet[256];
+	int  avatarGetMthd;
+	char avatarUpload[256];
+	int  avatarUploadMthd;
+	char avatarRemove[256];
+	int  avatarRemoveMthd;
+} TlenConfiguration;
+
 struct ThreadData {
 	HANDLE hThread;
 	JABBER_SESSION_TYPE type;
@@ -157,6 +175,7 @@ struct ThreadData {
 	char password[128];
 	char server[128];
 	char manualHost[128];
+	char avatarToken[128];
 	WORD port;
 	JABBER_SOCKET s;
 	BOOL useSSL;
@@ -164,7 +183,9 @@ struct ThreadData {
 	char newPassword[128];
 
 	HWND reg_hwndDlg;
+	TlenConfiguration tlenConfig;
 };
+
 
 typedef struct {
 	char *szOnline;

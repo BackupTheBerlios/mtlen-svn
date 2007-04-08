@@ -48,6 +48,7 @@ static void TlenProcessM(XmlNode *node, void *userdata);
 static void TlenProcessN(XmlNode *node, void *userdata);
 static void TlenProcessP(XmlNode *node, void *userdata);
 static void TlenProcessV(XmlNode *node, void *userdata);
+static void TlenProcessAvatar(XmlNode* node, void *userdata);
 
 static VOID CALLBACK JabberDummyApcFunc(DWORD param)
 {
@@ -611,6 +612,8 @@ static void JabberProcessProtocol(XmlNode *node, void *userdata)
 			TlenProcessP(node, userdata);
 		else if (!strcmp(node->name, "v"))
 			TlenProcessV(node, userdata);
+		else if (!strcmp(node->name, "avatar"))
+			TlenProcessAvatar(node, userdata);
 		else
 			JabberLog("Invalid top-level tag (only <message/> <presence/> <iq/> <f/> <w/> <m/> <n/> <p/> and <v/> allowed)");
 	}
@@ -666,6 +669,19 @@ static void TlenProcessIqVersion(XmlNode* node)
 	if ( mver ) mir_free( mver );
 	if ( version ) mir_free( version );
 	if ( os ) mir_free( os );
+}
+
+// Support for Tlen avatars
+static void TlenProcessAvatar(XmlNode* node, void *userdata)
+{
+	struct ThreadData *info;
+	XmlNode *tokenNode;
+	if ((info=(struct ThreadData *) userdata) == NULL) return;
+	tokenNode = JabberXmlGetChild(node, "token");
+	if (tokenNode != NULL) {
+		char *token = tokenNode->text;
+		strcpy(info->avatarToken, token);
+	}
 }
 
 
@@ -1359,39 +1375,48 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 //			JabberProcessIqAvatar( idStr, node );
 	}
 	// RECVED: <iq type='result'><query ...
-	else if ( !strcmp( type, "result" ) && queryNode!=NULL && xmlns!=NULL ) {
-		if ( !strcmp(xmlns, "jabber:iq:roster" )) {
-			JabberIqResultGetRoster(node, userdata);
-		} else if ( !strcmp( xmlns, "jabber:iq:version" )) {
-		// RECVED: software version result
-		// ACTION: update version information for the specified jid/resource
-			char* from;
-			XmlNode *n;
-			JABBER_LIST_ITEM *item;
-			if (( from=JabberXmlGetAttrValue( node, "from" )) != NULL ) {
-				if (( item=JabberListGetItemPtr( LIST_ROSTER, from ))!=NULL) {
-					if ( item->software ) mir_free( item->software );
-					if ( item->version ) mir_free( item->version );
-					if ( item->system ) mir_free( item->system );
-					if (( n=JabberXmlGetChild( queryNode, "name" ))!=NULL && n->text ) {
-						item->software = JabberTextDecode( n->text );
-					} else
-						item->software = NULL;
-					if (( n=JabberXmlGetChild( queryNode, "version" ))!=NULL && n->text )
-						item->version = JabberTextDecode( n->text );
-					else
-						item->version = NULL;
-					if (( n=JabberXmlGetChild( queryNode, "os" ))!=NULL && n->text )
-						item->system = JabberTextDecode( n->text );
-					else
-						item->system = NULL;
-					if (( hContact=JabberHContactFromJID( item->jid )) != NULL ) {
-						if (item->software != NULL) {
-							DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", item->software);
-						} else {
-							DBDeleteContactSetting(hContact, jabberProtoName, "MirVer");
+	else if ( !strcmp( type, "result") && queryNode!=NULL) {
+		if (xmlns!=NULL ) {
+			if ( !strcmp(xmlns, "jabber:iq:roster" )) {
+				JabberIqResultGetRoster(node, userdata);
+			} else if ( !strcmp( xmlns, "jabber:iq:version" )) {
+			// RECVED: software version result
+			// ACTION: update version information for the specified jid/resource
+				char* from;
+				XmlNode *n;
+				JABBER_LIST_ITEM *item;
+				if (( from=JabberXmlGetAttrValue( node, "from" )) != NULL ) {
+					if (( item=JabberListGetItemPtr( LIST_ROSTER, from ))!=NULL) {
+						if ( item->software ) mir_free( item->software );
+						if ( item->version ) mir_free( item->version );
+						if ( item->system ) mir_free( item->system );
+						if (( n=JabberXmlGetChild( queryNode, "name" ))!=NULL && n->text ) {
+							item->software = JabberTextDecode( n->text );
+						} else
+							item->software = NULL;
+						if (( n=JabberXmlGetChild( queryNode, "version" ))!=NULL && n->text )
+							item->version = JabberTextDecode( n->text );
+						else
+							item->version = NULL;
+						if (( n=JabberXmlGetChild( queryNode, "os" ))!=NULL && n->text )
+							item->system = JabberTextDecode( n->text );
+						else
+							item->system = NULL;
+						if (( hContact=JabberHContactFromJID( item->jid )) != NULL ) {
+							if (item->software != NULL) {
+								DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", item->software);
+							} else {
+								DBDeleteContactSetting(hContact, jabberProtoName, "MirVer");
+							}
 						}
 					}
+				}
+			}
+		} else {
+			char *from;
+			if (( from=JabberXmlGetAttrValue( node, "from" )) != NULL ) {
+				if ( !strcmp(from, "tcfg" )) {
+					TlenIqResultTcfg(node, info);
 				}
 			}
 		}
@@ -1481,21 +1506,6 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 	}
 }
 
-static void __cdecl JabberKeepAliveThread(JABBER_SOCKET s)
-{
-	NETLIBSELECT nls = {0};
-
-	nls.cbSize = sizeof(NETLIBSELECT);
-	nls.dwTimeout = 60000;	// 60000 millisecond (1 minute)
-	nls.hExceptConns[0] = s;
-	for (;;) {
-		if (CallService(MS_NETLIB_SELECT, 0, (LPARAM) &nls) != 0)
-			break;
-		if (jabberSendKeepAlive)
-			JabberSend(s, " \t ");
-	}
-	JabberLog("Exiting KeepAliveThread");
-}
 /*
  * File transfer
  */
@@ -2143,4 +2153,20 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 
 		}
 	}
+}
+
+static void __cdecl JabberKeepAliveThread(JABBER_SOCKET s)
+{
+	NETLIBSELECT nls = {0};
+
+	nls.cbSize = sizeof(NETLIBSELECT);
+	nls.dwTimeout = 60000;	// 60000 millisecond (1 minute)
+	nls.hExceptConns[0] = s;
+	for (;;) {
+		if (CallService(MS_NETLIB_SELECT, 0, (LPARAM) &nls) != 0)
+			break;
+		if (jabberSendKeepAlive)
+			JabberSend(s, " \t ");
+	}
+	JabberLog("Exiting KeepAliveThread");
 }

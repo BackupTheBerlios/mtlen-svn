@@ -434,3 +434,52 @@ void JabberIqResultSetSearch(XmlNode *iqNode, void *userdata)
 	}
 }
 
+
+void GetConfigItem(XmlNode *node, char *dest, BOOL bMethod, int *methodDest) {
+	strcpy(dest, node->text);
+	TlenUrlDecode(dest);
+	if (bMethod) {
+		char *method = JabberXmlGetAttrValue(node, "method");
+		if (method != NULL && !strcmpi(method, "POST")) {
+		} else {
+		}
+	}
+}
+
+void TlenIqResultTcfg(XmlNode *iqNode, void *userdata)
+{
+	XmlNode *queryNode, *miniMailNode, *node;
+	char *type;
+
+	struct ThreadData *info = (struct ThreadData *) userdata;
+	if ((type=JabberXmlGetAttrValue(iqNode, "type")) == NULL) return;
+	if (!strcmp(type, "result")) {
+		if ((queryNode=JabberXmlGetChild(iqNode, "query")) == NULL) return;
+		if ((miniMailNode=JabberXmlGetChild(queryNode, "mini-mail")) == NULL) return;
+		if ((node=JabberXmlGetChild(miniMailNode, "base")) != NULL) {
+			GetConfigItem(node, info->tlenConfig.mailBase, FALSE, NULL);
+		}
+		if ((node=JabberXmlGetChild(miniMailNode, "msg")) != NULL) {
+			GetConfigItem(node, info->tlenConfig.mailMsg, TRUE, &info->tlenConfig.mailMsgMthd);
+		}
+		if ((node=JabberXmlGetChild(miniMailNode, "index")) != NULL) {
+			GetConfigItem(node, info->tlenConfig.mailIndex, TRUE, &info->tlenConfig.mailIndexMthd);
+		}
+		if ((node=JabberXmlGetChild(miniMailNode, "login")) != NULL) {
+			GetConfigItem(node, info->tlenConfig.mailLogin, TRUE, &info->tlenConfig.mailLoginMthd);
+		}
+		if ((node=JabberXmlGetChild(miniMailNode, "compose")) != NULL) {
+			GetConfigItem(node, info->tlenConfig.mailCompose, TRUE, &info->tlenConfig.mailComposeMthd);
+		}
+		if ((node=JabberXmlGetChild(miniMailNode, "avatar-get")) != NULL) {
+			GetConfigItem(node, info->tlenConfig.avatarGet, TRUE, &info->tlenConfig.avatarGetMthd);
+		}
+		if ((node=JabberXmlGetChild(miniMailNode, "avatar-upload")) != NULL) {
+			GetConfigItem(node, info->tlenConfig.avatarUpload, TRUE, &info->tlenConfig.avatarUploadMthd);
+		}
+		if ((node=JabberXmlGetChild(miniMailNode, "avatar-remove")) != NULL) {
+			GetConfigItem(node, info->tlenConfig.avatarRemove, TRUE, &info->tlenConfig.avatarRemoveMthd);
+		}
+	}
+}
+

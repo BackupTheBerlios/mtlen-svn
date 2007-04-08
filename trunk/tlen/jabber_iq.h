@@ -27,13 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 typedef enum {
 	IQ_PROC_NONE,
-	IQ_PROC_GETREGISTER,
-	IQ_PROC_SETREGISTER,
-	IQ_PROC_GETVCARD,
-	IQ_PROC_SETVCARD,
-	IQ_PROC_GETSEARCH,
-	IQ_PROC_GETGROUPS,
-	IQ_PROC_GETROOMS
+	IQ_PROC_GETSEARCH
 } JABBER_IQ_PROCID;
 
 typedef void (*JABBER_IQ_PFUNC)(XmlNode *iqNode, void *usedata);
@@ -54,6 +48,7 @@ void TlenIqResultUserNicks(XmlNode *iqNode, void *userdata);
 void TlenIqResultRoomSearch(XmlNode *iqNode, void *userdata);
 void TlenIqResultRoomInfo(XmlNode *iqNode, void *userdata);
 void TlenIqResultChatRoomUsers(XmlNode *iqNode, void *userdata);
+void TlenIqResultTcfg(XmlNode *iqNode, void *userdata);
 //void JabberIqResultSetPassword(XmlNode *iqNode, void *userdata);
 
 #endif
