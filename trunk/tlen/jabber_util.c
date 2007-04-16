@@ -43,20 +43,20 @@ HANDLE HookEvent_Ex(const char *name, MIRANDAHOOK hook) {
 	hHooks = (HANDLE *) mir_realloc(hHooks, sizeof(HANDLE) * (hookNum));
 	hHooks[hookNum - 1] = HookEvent(name, hook);
 	return hHooks[hookNum - 1] ;
-} 
-	  
+}
+
 HANDLE CreateServiceFunction_Ex(const char *name, MIRANDASERVICE service) {
 	serviceNum++;
 	hServices = (HANDLE *) mir_realloc(hServices, sizeof(HANDLE) * (serviceNum));
 	hServices[serviceNum - 1] = CreateServiceFunction(name, service);
 	return hServices[serviceNum - 1] ;
-} 
+}
 
 void UnhookEvents_Ex() {
 	int i;
 	for (i=0; i<hookNum; ++i) {
 		if (hHooks[i] != NULL) {
-			UnhookEvent(hHooks[i]);	
+			UnhookEvent(hHooks[i]);
 		}
 	}
 	mir_free(hHooks);
@@ -1015,8 +1015,6 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 
 void JabberSendPresence(int status)
 {
-//	if ( JGetByte( "EnableAvatars", TRUE ))
-	int oldStatus = jabberStatus;
 	switch (status) {
 		case ID_STATUS_ONLINE:
 		case ID_STATUS_OFFLINE:
@@ -1036,39 +1034,7 @@ void JabberSendPresence(int status)
 			status = ID_STATUS_DND;
 			break;
 	}
-	if (tlenOptions.enableAvatars && status != ID_STATUS_INVISIBLE && status != ID_STATUS_OFFLINE) {
-		if (userAvatarHash != NULL) {
-			char hash[256];
-			mir_snprintf(hash, sizeof hash, "<avatar type='hash'>%s</avatar>", userAvatarHash);
-			JabberSendPresenceTo(status, NULL, hash);
-		} else {
-			JabberSendPresenceTo(status, NULL, "<avatar type='request'>remove_avatar</avatar>");
-		}
-		if (jabberOnline && (oldStatus == ID_STATUS_INVISIBLE || oldStatus == ID_STATUS_OFFLINE)) {
-			int i = 0;
-			while ((i=JabberListFindNext(LIST_ROSTER, i)) >= 0) {
-				JABBER_LIST_ITEM *item;
-				if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
-					if (item->status != ID_STATUS_OFFLINE && item->status != ID_STATUS_INVISIBLE) {
-						if (!item->avatarHashRequested) {
-							item->avatarHashRequested = TRUE;
-							JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_hash</avatar></message>", item->jid);
-						} else if (item->newAvatarHash != NULL && (item->avatarHash == NULL || strcmp(item->newAvatarHash, item->avatarHash))) {
-							HANDLE hContact;
-							if ((hContact=JabberHContactFromJID(item->jid)) != NULL) {
-								ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
-							}
-						}
-					}
-				}
-				i++;
-			}
-		}
-	} else {
-		JabberSendPresenceTo(status, NULL, NULL);
-	}
-
-
+	JabberSendPresenceTo(status, NULL, NULL);
 /*
 	if (DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE)) {
 		if (status == ID_STATUS_INVISIBLE)
@@ -1127,10 +1093,9 @@ char *JabberGetClientJID(char *jid)
 int JabberGetPictureType( const char* buf )
 {
 	if ( buf != NULL ) {
-		if ( memcmp( buf, "GIF89", 5 ) == 0 )   return PA_FORMAT_GIF;
-		if ( memcmp( buf, "\x89PNG", 4 ) == 0 ) return PA_FORMAT_PNG;
-		if ( memcmp( buf, "BM", 2 ) == 0 )      return PA_FORMAT_BMP;
-		if ( memcmp( buf+6, "JFIF", 4 ) == 0 )  return PA_FORMAT_JPEG;
-	}
+		if ( memcmp( buf, "GIF89", 5 ) == 0 )    return PA_FORMAT_GIF;
+		if ( memcmp( buf, "\x89PNG", 4 ) == 0 )  return PA_FORMAT_PNG;
+		if ( memcmp( buf, "BM", 2 ) == 0 )       return PA_FORMAT_BMP;
+		if ( memcmp( buf, "\xFF\xD8", 2 ) == 0 ) return PA_FORMAT_JPEG;	}
 	return PA_FORMAT_UNKNOWN;
 }

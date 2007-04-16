@@ -176,6 +176,8 @@ struct ThreadData {
 	char server[128];
 	char manualHost[128];
 	char avatarToken[128];
+	char avatarHash[64];
+	int  avatarFormat;
 	WORD port;
 	JABBER_SOCKET s;
 	BOOL useSSL;
@@ -305,9 +307,8 @@ extern HANDLE hMenuContactMUC;
 extern HANDLE hMenuContactVoice;
 extern HANDLE hTlenNudge;
 
-extern char *userAvatarHash;
-extern int userAvatarFormat;
-
+//extern char *userAvatarHash;
+//extern int userAvatarFormat;
 /*******************************************************************
  * Function declarations
  *******************************************************************/
@@ -328,6 +329,7 @@ void JabberSerialUninit(void);
 unsigned int JabberSerialNext(void);
 int JabberSend(JABBER_SOCKET s, const char *fmt, ...);
 HANDLE JabberHContactFromJID(const char *jid);
+char *JabberJIDFromHContact(HANDLE hContact);
 char *JabberLoginFromJID(const char *jid);
 char *JabberResourceFromJID(const char *jid);
 char *JabberNickFromJID(const char *jid);

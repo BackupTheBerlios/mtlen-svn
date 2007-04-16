@@ -134,10 +134,8 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 								DBDeleteContactSetting(hContact, "CList", "Group");
 							}
 							if (!DBGetContactSetting(hContact, jabberProtoName, "AvatarHash", &dbv)) {
-								if (item->newAvatarHash) mir_free(item->newAvatarHash);
 								if (item->avatarHash) mir_free(item->avatarHash);
 								item->avatarHash = mir_strdup(dbv.pszVal);
-								item->newAvatarHash = mir_strdup(dbv.pszVal);
 								DBFreeVariant(&dbv);
 							}
 							item->avatarFormat = DBGetContactSettingDword(hContact, jabberProtoName, "AvatarFormat", PA_FORMAT_UNKNOWN);
@@ -441,7 +439,9 @@ void GetConfigItem(XmlNode *node, char *dest, BOOL bMethod, int *methodDest) {
 	if (bMethod) {
 		char *method = JabberXmlGetAttrValue(node, "method");
 		if (method != NULL && !strcmpi(method, "POST")) {
+			*methodDest = REQUEST_POST;
 		} else {
+			*methodDest = REQUEST_GET;
 		}
 	}
 }

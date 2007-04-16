@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_file.h"
 #include "tlen_muc.h"
 #include "tlen_voice.h"
+#include "tlen_avatar.h"
 #include <io.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -57,9 +58,6 @@ static VOID CALLBACK JabberDummyApcFunc(DWORD param)
 
 static char onlinePassword[128];
 static HANDLE hEventPasswdDlg;
-
-char *userAvatarHash = NULL;
-int userAvatarFormat;
 
 static BOOL CALLBACK JabberPasswordDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -175,15 +173,11 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 			JabberLog("Thread ended, login server is not configured");
 			return;
 		}
-		if (userAvatarHash != NULL) {
-			mir_free(userAvatarHash);
-			userAvatarHash = NULL;
-		}
 		if (!DBGetContactSetting(NULL, jabberProtoName, "AvatarHash", &dbv)) {
-			userAvatarHash = mir_strdup(dbv.pszVal);
+			strcpy(jabberThreadInfo->avatarHash, dbv.pszVal);
 			DBFreeVariant(&dbv);
 		}
-		userAvatarFormat = DBGetContactSettingDword(NULL, jabberProtoName, "AvatarFormat", PA_FORMAT_UNKNOWN);
+		info->avatarFormat = DBGetContactSettingDword(NULL, jabberProtoName, "AvatarFormat", PA_FORMAT_UNKNOWN);
 
 		_snprintf(jidStr, sizeof(jidStr), "%s@%s", info->username, info->server);
 		DBWriteContactSettingString(NULL, jabberProtoName, "jid", jidStr);
@@ -695,7 +689,6 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 	struct _stat statbuf;
 	/* if not enabled - return */
 //	if (jabberStatus == ID_STATUS_INVISIBLE) return;
-	if (!tlenOptions.enableAvatars) return;
 	if ((info=(struct ThreadData *) userdata) == NULL) return;
 	if ((from=JabberXmlGetAttrValue(node, "from")) == NULL)  return;
 	if ((item = JabberListGetItemPtr(LIST_ROSTER, from)) == NULL) return;
@@ -709,18 +702,13 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 				if (!strcmp(avatarType, "request")) {
 					if (jabberStatus != ID_STATUS_INVISIBLE && !strcmp(avatarText, "get_hash")) {
 						/* send avatar hash */
-						if (userAvatarHash == NULL) {
-							JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='request'>remove_avatar</avatar></message>", from);
-						} else {
-							JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='hash'>%s</avatar></message>", from, userAvatarHash);
-						}
 					} else if (jabberStatus != ID_STATUS_INVISIBLE && !strcmp(avatarText, "get_file")) {
 						/* send avatar file */
 						FILE* in;
 						char szFileName[ MAX_PATH ];
 						char* szMimeType, * buffer, *str;
 						long bytes;
-						switch(userAvatarFormat) {
+						switch(info->avatarFormat) {
 							case PA_FORMAT_JPEG: szMimeType = "image/jpeg";   break;
 							case PA_FORMAT_GIF:	 szMimeType = "image/gif";    break;
 							case PA_FORMAT_PNG:	 szMimeType = "image/png";    break;
@@ -744,74 +732,6 @@ static void TlenProcessTAvatar(XmlNode* node, void *userdata)
 						JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='file' mimetype='%s'>%s</avatar></message>", from, szMimeType, str);
 						mir_free( str );
 						mir_free( buffer );
-					} else if (!strcmp(avatarText, "remove_avatar")) {
-						/* remove contact's avatar*/
-						if (item->newAvatarHash != NULL) {
-							if (item->newAvatarHash != NULL) mir_free(item->newAvatarHash);
-							if (item->avatarHash != NULL) mir_free(item->avatarHash);
-							item->newAvatarHash = NULL;
-							item->avatarHash = NULL;
-							item->newAvatarDownloading = FALSE;
-							item->avatarHashRequested = TRUE;
-							DBDeleteContactSetting(hContact, jabberProtoName, "AvatarHash");
-							DBDeleteContactSetting(hContact, jabberProtoName, "AvatarFormat");
-							DBDeleteContactSetting(hContact, "ContactPhoto", "File");
-							ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
-						}
-					}
-				} else if (!strcmp(avatarType, "hash")) {
-					/* contact's avatar hash*/
-					if (item->newAvatarHash == NULL || strcmp(item->newAvatarHash, avatarText)) {
-						if (item->newAvatarHash != NULL) mir_free(item->newAvatarHash);
-						item->newAvatarHash = mir_strdup(avatarText);
-						item->newAvatarDownloading = FALSE;
-						item->avatarHashRequested = TRUE;
-						if (jabberStatus != ID_STATUS_INVISIBLE) {
-							ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
-							JabberLog( "Avatar was changed - sent ack" );
-						} else {
-							JabberLog( "Avatar was changed - no ack" );
-						}
-					}
-				} else if (!strcmp(avatarType, "file")) {
-					if (item->newAvatarHash != NULL) {
-						/* contact's avatar*/
-						FILE* out;
-						int resultLen = 0;
-						char* data;
-						char* mimeType = JabberXmlGetAttrValue( avatarNode, "mimetype" );
-						PROTO_AVATAR_INFORMATION AI;
-						AI.cbSize = sizeof AI;
-						AI.hContact = hContact;
-						AI.format = PA_FORMAT_UNKNOWN;
-						data = JabberBase64Decode(avatarText, &resultLen);
-						if ( mimeType != NULL ) {
-							if ( !strcmp( mimeType, "image/jpeg" ))     AI.format = PA_FORMAT_JPEG;
-							else if ( !strcmp( mimeType, "image/png" )) AI.format = PA_FORMAT_PNG;
-							else if ( !strcmp( mimeType, "image/gif" )) AI.format = PA_FORMAT_GIF;
-							else if ( !strcmp( mimeType, "image/bmp" )) AI.format = PA_FORMAT_BMP;
-							else if ( !strcmp( mimeType, "image/ico" )) AI.format = PA_FORMAT_ICON;
-							else if ( !strcmp( mimeType, "image/jpg" )) AI.format = PA_FORMAT_JPEG;
-						} else if (resultLen > 4) {
-							AI.format = JabberGetPictureType(data);
-						}
-						item->avatarFormat = AI.format;
-						if (item->avatarHash != NULL) mir_free(item->avatarHash);
-						item->avatarHash = mir_strdup(item->newAvatarHash);
-						item->newAvatarDownloading = FALSE;
-						TlenGetAvatarFileName(item, AI.filename, sizeof AI.filename);
-						DBWriteContactSettingString( hContact, "ContactPhoto", "File", AI.filename );
-						DBWriteContactSettingString(hContact, jabberProtoName, "AvatarHash",  item->avatarHash);
-						DBWriteContactSettingDword(hContact, jabberProtoName, "AvatarFormat",  item->avatarFormat);
-						DeleteFile(AI.filename);
-						out = fopen( AI.filename, "wb" );
-						if ( out != NULL ) {
-							fwrite( data, resultLen, 1, out );
-							fclose( out );
-							ProtoBroadcastAck( jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_SUCCESS, (HANDLE) &AI , 0);
-						}
-						else ProtoBroadcastAck( jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_FAILED, (HANDLE) &AI , 0);
-						mir_free(data);
 					}
 				}
 			}
@@ -881,10 +801,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 					JabberXmlAddAttr(iqNode, "from", from);
 					JabberProcessIq(iqNode, userdata);
 				}
-			} else if (type!=NULL && !strcmp(type, "tAvatar")) {
-				TlenProcessTAvatar(node, userdata);
 			} else {
-
 				if ((bodyNode=JabberXmlGetChild(node, "body")) != NULL) {
 					if (bodyNode->text != NULL) {
 						if ((subjectNode=JabberXmlGetChild(node, "subject"))!=NULL && subjectNode->text!=NULL && subjectNode->text[0]!='\0') {
@@ -1039,7 +956,12 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 
 		else {
 			type = JabberXmlGetAttrValue(node, "type");
-
+			item = JabberListGetItemPtr(LIST_ROSTER, from);
+			if (item != NULL) {
+				if (tlenOptions.enableAvatars) {
+					TlenProcessPresenceAvatar(node, item);
+				}
+			}
 			if (type==NULL || (!strcmp(type, "available"))) {
 				if ((nick=JabberLocalNickFromJID(from)) != NULL) {
 					if ((hContact=JabberHContactFromJID(from)) == NULL)
@@ -1075,7 +997,7 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 						DBDeleteContactSetting(hContact, "CList", "StatusMsg");
 					}
 					// Determine status to show for the contact and request version information
-					if ((item=JabberListGetItemPtr(LIST_ROSTER, from)) != NULL) {
+					if (item != NULL) {
 						laststatus = item->status;
 						item->status = status;
 					}
@@ -1083,22 +1005,14 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 						if (DBGetContactSettingWord(hContact, jabberProtoName, "Status", ID_STATUS_OFFLINE) != status)
 							DBWriteContactSettingWord(hContact, jabberProtoName, "Status", (WORD) status);
 					}
-					JabberLog("%s (%s) online, set contact status to %d", nick, from, status);
-					mir_free(nick);
 					if (item != NULL) {
-						if (tlenOptions.enableAvatars) {
-							if (JabberXmlGetChild(node, "avatar")!=NULL) {
-								TlenProcessTAvatar(node, userdata);
-							} else  if (!item->avatarHashRequested && jabberStatus != ID_STATUS_INVISIBLE) {
-								JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_hash</avatar></message>", from);
-								item->avatarHashRequested = TRUE;
-							}
-						}
 						if (tlenOptions.enableVersion && !item->versionRequested && jabberStatus != ID_STATUS_INVISIBLE) {
 							item->versionRequested = TRUE;
 							JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
 						}
 					}
+					JabberLog("%s (%s) online, set contact status to %d", nick, from, status);
+					mir_free(nick);
 				}
 			}
 			else if (!strcmp(type, "unavailable")) {
@@ -1256,7 +1170,7 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 								from, id);
 							item->id2 = mir_strdup(id);
 						} else {
-							MessageBoxA(NULL, "ASS", "DUPA1", MB_OK);
+							MessageBoxA(NULL, "p2p", p2p1", MB_OK);
 						}
 					} else if (!strcmp(s, "2")) {
 						if ((item=JabberListFindItemPtrById2(LIST_FILE, id)) != NULL) {
@@ -1265,14 +1179,14 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 							JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dcng la='83.175.179.227' lp='4942' pa='83.175.179.227' pp='4942' i='%s' k='5' s='4'/></query></iq>",
 								from, id);
 						} else {
-							MessageBoxA(NULL, "ASS", "DUPA2", MB_OK);
+							MessageBoxA(NULL, "p2p", "p2p2", MB_OK);
 						}
 					} else if (!strcmp(s, "4")) {
 						if ((item=JabberListFindItemPtrById2(LIST_FILE, id)) != NULL) {
 							JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dc n='file_send' v='1' s='1' i='%s' mi='%s'/></query></iq>",
 								from, id, item->ft->iqId);
 						} else {
-							MessageBoxA(NULL, "ASS", "DUPA3", MB_OK);
+							MessageBoxA(NULL, "p2p", "p2p3", MB_OK);
 						}
 					}
 				} else if (dc != NULL) {

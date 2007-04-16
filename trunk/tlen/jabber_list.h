@@ -58,9 +58,7 @@ typedef struct {
 	char *group;
 	int	 avatarFormat;
 	char *avatarHash;
-	char *newAvatarHash;
 	BOOL newAvatarDownloading;
-	BOOL avatarHashRequested;
 	BOOL versionRequested;
 	int idMsgAckPending;
 	char *messageEventIdStr;

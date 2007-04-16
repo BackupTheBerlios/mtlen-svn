@@ -31,6 +31,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <richedit.h>
 #include <ctype.h>
 #include <m_icolib.h>
+#include <m_avatars.h>
+
+extern int OnSaveMyAvatar( WPARAM wParam, LPARAM lParam );
 
 HINSTANCE hInst;
 PLUGINLINK *pluginLink;
@@ -150,9 +153,6 @@ int __declspec(dllexport) Unload(void)
 	//mir_free(jabberModeMsg);
 	mir_free(jabberModuleName);
 	mir_free(jabberProtoName);
-	if (userAvatarHash) {
-		mir_free(userAvatarHash);
-	}
 	if (streamId) mir_free(streamId);
 
 #ifdef _DEBUG
@@ -182,6 +182,7 @@ static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 	//JabberSslInit();
 	TlenMUCInit();
 	HookEvent_Ex(ME_USERINFO_INITIALISE, TlenUserInfoInit);
+	HookEvent_Ex(ME_AV_MYAVATARCHANGED, OnSaveMyAvatar);
 	sprintf(str, "%s", TranslateT("Incoming mail"));
 	SkinAddNewSoundEx("TlenMailNotify", jabberModuleName, str);
 	sprintf(str, "%s", TranslateT("Alert"));
@@ -587,7 +588,6 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	jabberConnected = FALSE;
 	jabberOnline = FALSE;
 	jabberStatus = ID_STATUS_OFFLINE;
-	userAvatarHash = NULL;
 	memset((char *) &modeMsgs, 0, sizeof(JABBER_MODEMSGS));
 	//jabberModeMsg = NULL;
 	jabberCodePage = CP_ACP;

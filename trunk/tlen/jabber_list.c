@@ -90,7 +90,6 @@ static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item)
 	if (item->software) mir_free(item->software);
 	if (item->system) mir_free(item->system);
 	if (item->avatarHash) mir_free(item->avatarHash);
-	if (item->newAvatarHash) mir_free(item->newAvatarHash);
 }
 
 int JabberListExist(JABBER_LIST list, const char *jid)
@@ -157,10 +156,8 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 	item->software = NULL;
 	item->system = NULL;
 	item->avatarHash = NULL;
-	item->newAvatarHash = NULL;
 	item->avatarFormat = PA_FORMAT_UNKNOWN;
 	item->newAvatarDownloading = FALSE;
-	item->avatarHashRequested = FALSE;
 	item->versionRequested = FALSE;
 	count++;
 	LeaveCriticalSection(&csLists);

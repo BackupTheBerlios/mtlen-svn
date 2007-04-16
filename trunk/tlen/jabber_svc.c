@@ -21,12 +21,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "jabber.h"
+#include <io.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "resource.h"
 #include "jabber_list.h"
 #include "jabber_iq.h"
 #include "tlen_p2p_old.h"
+#include "tlen_avatar.h"
+
+#define SVC_ISAVATARFORMATSUPPORTED "/IsAvatarFormatSupported"
+#define SVC_GETMYAVATARMAXSIZE      "/GetMyAvatarMaxSize"
+#define SVC_SETMYAVATAR             "/SetMyAvatar"
+#define SVC_GETMYAVATAR             "/GetMyAvatar"
 
 char *searchJID = NULL;
 
@@ -634,8 +642,8 @@ int JabberSendMessage(WPARAM wParam, LPARAM lParam)
 
 static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 {
+	BOOL downloadingAvatar = FALSE;
 	char *avatarHash = NULL;
-	char *newAvatarHash = NULL;
 	JABBER_LIST_ITEM *item = NULL;
 	DBVARIANT dbv;
 	PROTO_AVATAR_INFORMATION* AI = ( PROTO_AVATAR_INFORMATION* )lParam;
@@ -646,39 +654,28 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 			item = JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal);
 			DBFreeVariant(&dbv);
 			if (item != NULL) {
-				newAvatarHash = item->newAvatarHash;
+				downloadingAvatar = item->newAvatarDownloading;
 				avatarHash = item->avatarHash;
 			}
 		}
 	} else {
-		newAvatarHash = avatarHash = userAvatarHash;
-	}
-	if (newAvatarHash == NULL) {
-		return GAIR_NOAVATAR;
-	}
-	JabberLog("%s ?= %s", item->newAvatarHash, item->avatarHash);
-	TlenGetAvatarFileName(item, AI->filename, sizeof AI->filename);
-	AI->format = ( AI->hContact == NULL ) ? userAvatarFormat : item->avatarFormat;
-	{
-		if (avatarHash != NULL && !strcmp(avatarHash, newAvatarHash)) {
-			return GAIR_SUCCESS;
+		if (jabberThreadInfo != NULL) {
+			avatarHash = jabberThreadInfo->avatarHash;
 		}
 	}
-	/*
-
-	if ( ::access( AI->filename, 0 ) == 0 ) {
-		char szSavedHash[ 256 ];
-		if ( !JGetStaticString( "AvatarSaved", AI->hContact, szSavedHash, sizeof szSavedHash )) {
-			if ( !strcmp( szSavedHash, szHashValue )) {
-				JabberLog( "Avatar is Ok: %s == %s", szSavedHash, szHashValue );
-				return GAIR_SUCCESS;
-	}	}	}
-*/
-	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline && jabberStatus != ID_STATUS_INVISIBLE) {
+	if (avatarHash == NULL && !avatarHash[0] == '\0' && !downloadingAvatar) {
+		return GAIR_NOAVATAR;
+	}
+	if (avatarHash != NULL && !downloadingAvatar) {
+		TlenGetAvatarFileName(item, AI->filename, sizeof AI->filename);
+		AI->format = ( AI->hContact == NULL ) ? jabberThreadInfo->avatarFormat : item->avatarFormat;
+		return GAIR_SUCCESS;
+	}
+	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline) {
 		/* get avatar */
-		if (!item->newAvatarDownloading) {
-			item->newAvatarDownloading = TRUE;
-			JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_file</avatar></message>", item->jid);
+		if (!downloadingAvatar) {
+//			item->newAvatarDownloading = TRUE;
+//			JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_file</avatar></message>", item->jid);
 		}
 		return GAIR_WAITFOR;
 	}
@@ -1097,6 +1094,47 @@ int JabberUserIsTyping(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+int TlenGetAvatarFormatSupported(WPARAM wParam, LPARAM lParam)
+{
+	return (lParam == PA_FORMAT_PNG) ? 1 : 0;
+}
+
+int TlenGetMyAvatar(WPARAM wParam, LPARAM lParam)
+{
+	char* buf = ( char* )wParam;
+	int  size = ( int )lParam;
+
+	if ( buf == NULL || size <= 0 )
+		return -1;
+
+	TlenGetAvatarFileName( NULL, buf, size );
+	return 0;
+}
+
+int TlenSetMyAvatar(WPARAM wParam, LPARAM lParam)
+{
+	char* szFileName = ( char* )lParam;
+	int fileIn = open( szFileName, O_RDWR | O_BINARY, S_IREAD | S_IWRITE );
+	if ( fileIn != -1 ) {
+		long  dwPngSize = filelength(fileIn);
+		BYTE* pResult = (BYTE *)mir_alloc(dwPngSize);
+		if (pResult != NULL) {
+			read( fileIn, pResult, dwPngSize );
+			close( fileIn );
+			TlenUploadAvatar(pResult, dwPngSize, 0);
+			mir_free(pResult);
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int TlenGetAvatarMaxSize(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam != 0) *((int*) wParam) = 64;
+	if (lParam != 0) *((int*) lParam) = 64;
+	return 0;
+}
 
 int JabberSvcInit(void)
 {
@@ -1188,6 +1226,18 @@ int JabberSvcInit(void)
 
 	sprintf(s, "%s%s", jabberProtoName, "/SendNudge");
 	CreateServiceFunction_Ex(s, TlenSendAlert);
+
+	sprintf(s, "%s%s", jabberProtoName, SVC_ISAVATARFORMATSUPPORTED);
+	CreateServiceFunction_Ex(s, TlenGetAvatarFormatSupported);
+
+	sprintf(s, "%s%s", jabberProtoName, SVC_GETMYAVATARMAXSIZE);
+	CreateServiceFunction_Ex(s, TlenGetAvatarMaxSize);
+
+	sprintf(s, "%s%s", jabberProtoName, SVC_SETMYAVATAR);
+	CreateServiceFunction_Ex(s, TlenSetMyAvatar);
+
+	sprintf(s, "%s%s", jabberProtoName, SVC_GETMYAVATAR);
+	CreateServiceFunction_Ex(s, TlenGetMyAvatar);
 
 	return 0;
 }
