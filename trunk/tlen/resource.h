@@ -124,6 +124,9 @@
 #define IDC_SETAVATAR					1211
 #define IDC_DELETEAVATAR				1212
 #define IDC_AVATAR_LIST					1213
+#define IDC_OLD_AVATAR					1214
+#define IDC_BROWSEAVATAR				1215
+#define IDC_PUBLICAVATAR				1216
 
 #define IDC_STATUS                      1414
 #define IDC_PLAN                        1415

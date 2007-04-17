@@ -53,7 +53,7 @@ HANDLE CreateServiceFunction_Ex(const char *name, MIRANDASERVICE service) {
 }
 
 void UnhookEvents_Ex() {
-	int i;
+	unsigned int i;
 	for (i=0; i<hookNum; ++i) {
 		if (hHooks[i] != NULL) {
 			UnhookEvent(hHooks[i]);
@@ -65,7 +65,7 @@ void UnhookEvents_Ex() {
 }
 
 void DestroyServices_Ex() {
-	int i;
+	unsigned int i;
 	for (i=0; i<serviceNum; ++i) {
 		if (hServices[i] != NULL) {
 			DestroyServiceFunction(hServices[i]);

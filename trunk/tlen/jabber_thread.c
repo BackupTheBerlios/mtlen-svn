@@ -678,68 +678,6 @@ static void TlenProcessAvatar(XmlNode* node, void *userdata)
 	}
 }
 
-
-// Support for tAvatar-compatible avatars
-static void TlenProcessTAvatar(XmlNode* node, void *userdata)
-{
-	struct ThreadData *info;
-	JABBER_LIST_ITEM *item;
-	char *from;
-	HANDLE hContact;
-	struct _stat statbuf;
-	/* if not enabled - return */
-//	if (jabberStatus == ID_STATUS_INVISIBLE) return;
-	if ((info=(struct ThreadData *) userdata) == NULL) return;
-	if ((from=JabberXmlGetAttrValue(node, "from")) == NULL)  return;
-	if ((item = JabberListGetItemPtr(LIST_ROSTER, from)) == NULL) return;
-	if ((hContact=JabberHContactFromJID(from)) != NULL) {
-		XmlNode *avatarNode;
-		int i = 1;
-		while ((avatarNode=JabberXmlGetNthChild(node, "avatar", i)) != NULL) {
-			char *avatarText = avatarNode->text;
-			char *avatarType = JabberXmlGetAttrValue(avatarNode, "type");
-			if (avatarType != NULL) {
-				if (!strcmp(avatarType, "request")) {
-					if (jabberStatus != ID_STATUS_INVISIBLE && !strcmp(avatarText, "get_hash")) {
-						/* send avatar hash */
-					} else if (jabberStatus != ID_STATUS_INVISIBLE && !strcmp(avatarText, "get_file")) {
-						/* send avatar file */
-						FILE* in;
-						char szFileName[ MAX_PATH ];
-						char* szMimeType, * buffer, *str;
-						long bytes;
-						switch(info->avatarFormat) {
-							case PA_FORMAT_JPEG: szMimeType = "image/jpeg";   break;
-							case PA_FORMAT_GIF:	 szMimeType = "image/gif";    break;
-							case PA_FORMAT_PNG:	 szMimeType = "image/png";    break;
-							case PA_FORMAT_BMP:	 szMimeType = "image/bmp";    break;
-							default:	return;
-						}
-						TlenGetAvatarFileName( NULL, szFileName, MAX_PATH );
-						if (_stat(szFileName, &statbuf)) return;
-						if (statbuf.st_size > 6 * 1024) return;
-						in = fopen( szFileName, "rb" );
-						if ( in == NULL ) return;
-						bytes = _filelength( fileno( in ));
-						buffer = ( char* )mir_alloc( bytes*4/3 + bytes + 1000 );
-						if ( buffer == NULL ) {
-							fclose( in );
-							return;
-						}
-						fread( buffer, bytes, 1, in );
-						fclose( in );
-						str = JabberBase64Encode(buffer, bytes);
-						JabberSend(info->s, "<message to='%s' type='tAvatar'><avatar type='file' mimetype='%s'>%s</avatar></message>", from, szMimeType, str);
-						mir_free( str );
-						mir_free( buffer );
-					}
-				}
-			}
-			i++;
-		}
-	}
-}
-
 static void JabberProcessMessage(XmlNode *node, void *userdata)
 {
 	struct ThreadData *info;

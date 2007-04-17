@@ -307,8 +307,6 @@ extern HANDLE hMenuContactMUC;
 extern HANDLE hMenuContactVoice;
 extern HANDLE hTlenNudge;
 
-//extern char *userAvatarHash;
-//extern int userAvatarFormat;
 /*******************************************************************
  * Function declarations
  *******************************************************************/

@@ -23,12 +23,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber.h"
 #include <m_avatars.h>
 #include <commctrl.h>
+#include <io.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "jabber_list.h"
 #include "resource.h"
-//#include "md5.h"
-#include "sha1.h"
 #include "tlen_avatar.h"
 
 JABBER_FIELD_MAP tlenFieldGender[] = {
@@ -338,9 +338,11 @@ int OnSaveMyAvatar( WPARAM wParam, LPARAM lParam )
 	if ( !lstrcmpA(( char* )wParam, jabberProtoName ) && hAvatarDlg ) {
 		AVATARCACHEENTRY* ace = ( AVATARCACHEENTRY* )lParam;
 		if (ace != NULL) {
+			/*
 			HBITMAP hAvatar = ( HBITMAP )SendDlgItemMessage( hAvatarDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)ace->hbmPic );
 			if ( hAvatar != NULL )
 				DeleteObject( hAvatar );
+			*/
 		}
 	}
 	return 0;
@@ -354,24 +356,26 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 		hAvatarDlg = hwndDlg;
 		{
 			HBITMAP hAvatar;
-			char szAvatar[ MAX_PATH ];
-			TlenGetAvatarFileName( NULL, szAvatar, sizeof szAvatar );
-			hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)szAvatar );
+			char tFileName[ MAX_PATH ];
+			TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName, TRUE);
+			DeleteFileA(tFileName);
+			TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName, FALSE);
+			hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)tFileName );
 			if (hAvatar) {
-				SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
+				SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
 			}
 		}
 		return TRUE;
 	case WM_COMMAND:
 		if ( HIWORD( wParam ) == BN_CLICKED )
 			switch( LOWORD( wParam )) {
-			case IDC_SETAVATAR:
+			case IDC_BROWSEAVATAR:
 				CallService(MS_AV_SETMYAVATAR, ( WPARAM )jabberProtoName, 0);
 				{
 					HBITMAP hAvatar;
-					char szAvatar[ MAX_PATH ];
-					TlenGetAvatarFileName( NULL, szAvatar, sizeof szAvatar );
-					hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)szAvatar );
+					char tFileName[ MAX_PATH ];
+					TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, TRUE);
+					hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)tFileName );
 					if (hAvatar) {
 						hAvatar = (HBITMAP) SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
 						if ( hAvatar != NULL )
@@ -379,14 +383,43 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 					}
 				}
 				break;
+			case IDC_SETAVATAR:
+				{
+					char tFileName[ MAX_PATH ];
+					int fileIn;
+					TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, TRUE);
+					fileIn = open( tFileName, O_RDWR | O_BINARY, S_IREAD | S_IWRITE );
+					if ( fileIn != -1 ) {
+						long  dwPngSize = filelength(fileIn);
+						BYTE* pResult = (BYTE *)mir_alloc(dwPngSize);
+						if (pResult != NULL) {
+							int result;
+							read( fileIn, pResult, dwPngSize );
+							close( fileIn );
+							result = TlenUploadAvatar(pResult, dwPngSize, IsDlgButtonChecked(hwndDlg, IDC_PUBLICAVATAR));
+							mir_free(pResult);
+							if (result == 0) {
+								HBITMAP hAvatar;
+								TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, FALSE);
+								hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)tFileName );
+								if (hAvatar) {
+									hAvatar = (HBITMAP) SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
+									if ( hAvatar != NULL )
+										DeleteObject( hAvatar );
+								}
+							}
+						}
+					}
+				}
+				break;
 			case IDC_DELETEAVATAR:
 				{
-					HBITMAP hBitmap;
-					hBitmap = (HBITMAP)SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)NULL );
-					if ( hBitmap )
-						DeleteObject( hBitmap );
-					TlenRemoveAvatar();
-					InvalidateRect( hwndDlg, NULL, TRUE );
+					if (TlenRemoveAvatar() == 0) {
+						HBITMAP hBitmap = (HBITMAP)SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)NULL );
+						if ( hBitmap )
+							DeleteObject( hBitmap );
+						InvalidateRect( hwndDlg, NULL, TRUE );
+					}
 					break;
 				}
 
@@ -395,6 +428,9 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 	case WM_DESTROY:
 		{
 			HBITMAP hAvatar = ( HBITMAP )SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, 0 );
+			if ( hAvatar != NULL )
+				DeleteObject( hAvatar );
+			hAvatar = ( HBITMAP )SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, 0 );
 			if ( hAvatar != NULL )
 				DeleteObject( hAvatar );
 		}

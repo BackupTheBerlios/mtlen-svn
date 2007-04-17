@@ -69,8 +69,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _SHA1_H_
 #define _SHA1_H_
 
-//#include <stdint.h>
 #ifdef __MINGW32__
+//#include <stdint.h>
 typedef unsigned int uint32_t;
 typedef unsigned char uint8_t;
 typedef int int_least16_t;
@@ -79,6 +79,7 @@ typedef unsigned __int32 uint32_t;
 typedef unsigned __int8 uint8_t;
 typedef __int32 int_least16_t;
 #endif
+
 /*
  * If you do not have the ISO standard stdint.h header file, then you
  * must typdef the following:

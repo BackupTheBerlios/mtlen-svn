@@ -668,11 +668,11 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 			avatarHash = jabberThreadInfo->avatarHash;
 		}
 	}
-	if (avatarHash == NULL && !avatarHash[0] == '\0' && !downloadingAvatar) {
+	if ((avatarHash == NULL || avatarHash[0] == '\0') && !downloadingAvatar) {
 		return GAIR_NOAVATAR;
 	}
 	if (avatarHash != NULL && !downloadingAvatar) {
-		TlenGetAvatarFileName(item, AI->filename, sizeof AI->filename);
+		TlenGetAvatarFileName(item, AI->filename, sizeof AI->filename, FALSE);
 		AI->format = ( AI->hContact == NULL ) ? jabberThreadInfo->avatarFormat : item->avatarFormat;
 		return GAIR_SUCCESS;
 	}
@@ -1112,26 +1112,19 @@ int TlenGetMyAvatar(WPARAM wParam, LPARAM lParam)
 	if ( buf == NULL || size <= 0 )
 		return -1;
 
-	TlenGetAvatarFileName( NULL, buf, size );
+	TlenGetAvatarFileName( NULL, buf, size, FALSE);
 	return 0;
 }
 
 int TlenSetMyAvatar(WPARAM wParam, LPARAM lParam)
 {
 	char* szFileName = ( char* )lParam;
-	int fileIn = open( szFileName, O_RDWR | O_BINARY, S_IREAD | S_IWRITE );
-	if ( fileIn != -1 ) {
-		long  dwPngSize = filelength(fileIn);
-		BYTE* pResult = (BYTE *)mir_alloc(dwPngSize);
-		if (pResult != NULL) {
-			read( fileIn, pResult, dwPngSize );
-			close( fileIn );
-			TlenUploadAvatar(pResult, dwPngSize, 0);
-			mir_free(pResult);
-			return 0;
-		}
+   	char tFileName[ MAX_PATH ];
+   	TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, TRUE);
+	if ( CopyFileA( szFileName, tFileName, FALSE ) == FALSE ) {
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int TlenGetAvatarMaxSize(WPARAM wParam, LPARAM lParam)

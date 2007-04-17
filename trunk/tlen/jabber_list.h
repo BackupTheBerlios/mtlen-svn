@@ -99,7 +99,5 @@ JABBER_LIST_ITEM *JabberListFindItemPtrById2(JABBER_LIST list, const char *id);
 void JabberListAddResource(JABBER_LIST list, const char *jid, int status, const char *statusMessage);
 void JabberListRemoveResource(JABBER_LIST list, const char *jid);
 
-void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen );
-
 #endif
 

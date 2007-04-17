@@ -136,6 +136,7 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 							if (!DBGetContactSetting(hContact, jabberProtoName, "AvatarHash", &dbv)) {
 								if (item->avatarHash) mir_free(item->avatarHash);
 								item->avatarHash = mir_strdup(dbv.pszVal);
+								JabberLog("Setting hash [%s] = %s", nick, item->avatarHash);
 								DBFreeVariant(&dbv);
 							}
 							item->avatarFormat = DBGetContactSettingDword(hContact, jabberProtoName, "AvatarFormat", PA_FORMAT_UNKNOWN);

@@ -2,7 +2,7 @@
 #define _TLEN_AVATAR_H_
 
 void TlenProcessPresenceAvatar(XmlNode *node, JABBER_LIST_ITEM *item);
-void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen);
+void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen, BOOL isTemp);
 void TlenGetAvatar(HANDLE hContact);
 int TlenUploadAvatar();
 int TlenRemoveAvatar();

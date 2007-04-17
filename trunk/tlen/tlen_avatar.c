@@ -31,7 +31,7 @@ extern struct ThreadData *jabberThreadInfo;
 
 /* TlenGetAvatarFileName() - gets a file name for the avatar image */
 
-void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen)
+void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen, BOOL isTemp)
 {
 	if (jabberThreadInfo != NULL) {
 		int tPathLen;
@@ -43,7 +43,7 @@ void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen)
 		tPathLen += mir_snprintf( pszDest + tPathLen, cbLen - tPathLen, "\\%s\\", jabberModuleName  );
 		CreateDirectoryA( pszDest, NULL );
 		format = item == NULL ? jabberThreadInfo->avatarFormat : item->avatarFormat;
-		szFileType = "bmp";
+		szFileType = "png";
 		switch(format) {
 			case PA_FORMAT_JPEG: szFileType = "jpg";   break;
 			case PA_FORMAT_ICON: szFileType = "ico";   break;
@@ -57,20 +57,26 @@ void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen)
 			mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s.%s", hash, szFileType );
 			mir_free( hash );
 		}
-		else mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s avatar.%s", jabberProtoName, szFileType );
+		else {
+			if (isTemp) {
+				mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s_avatar_temp.%s", jabberProtoName, szFileType );
+			} else {
+				mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s_avatar.%s", jabberProtoName, szFileType );
+			}
+		}
 	}
 }
 
 static void RemoveAvatar(HANDLE hContact) {
 	char tFileName[ MAX_PATH ];
-	DBDeleteContactSetting(hContact, jabberProtoName, "AvatarHash");
-	DBDeleteContactSetting(hContact, jabberProtoName, "AvatarFormat");
 	if (hContact != NULL) {
 		DBDeleteContactSetting(hContact, "ContactPhoto", "File");
 	} else {
 		jabberThreadInfo->avatarHash[0] = '\0';
 	}
-	TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName );
+	DBDeleteContactSetting(hContact, jabberProtoName, "AvatarHash");
+	DBDeleteContactSetting(hContact, jabberProtoName, "AvatarFormat");
+	TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName, FALSE );
 	DeleteFileA(tFileName);
 }
 
@@ -91,19 +97,18 @@ void TlenProcessPresenceAvatar(XmlNode *node, JABBER_LIST_ITEM *item) {
 		if (item->avatarHash == NULL || strcmp(item->avatarHash, md5)) {
 			item->newAvatarDownloading = TRUE;
 			//ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
-			JabberLog( "Avatar has been changed [%s   -  %s] - sent ack", item->jid);
 			TlenGetAvatar(hContact);
 		}
 	} else {
 		/* remove avatar */
 		if (item->avatarHash != NULL) {
-			mir_free(item->avatarHash);
+			char *p = item->avatarHash;
 			item->avatarHash = NULL;
+			mir_free(p);
 			item->newAvatarDownloading = FALSE;
 			RemoveAvatar(hContact);
 			ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
 		}
-		JabberLog( "Avatar has been removed [%s] - sent ack", item->jid );
 	}
 
 }
@@ -191,7 +196,6 @@ static int TlenGetAvatarThread(HANDLE hContact) {
 		req.headers = NULL;
 		req.dataLength = 0;
 		req.szUrl = request;
-		JabberLog("Request to get avatar: %s", request);
 		resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)&req);
 		if (resp != NULL) {
 			if (resp->resultCode/100==2) {
@@ -213,18 +217,15 @@ static int TlenGetAvatarThread(HANDLE hContact) {
 							} else if (strcmpi(resp->headers[i].szValue, "image/bmp")==0) {
 								AI.format = PA_FORMAT_BMP;
 							}
-							JabberLog("Image format: %s  [%d]", resp->headers[i].szValue, AI.format);
 							break;
 						}
 					}
 					if (AI.format == PA_FORMAT_UNKNOWN && resp->dataLength > 4) {
 						AI.format = JabberGetPictureType(resp->pData);
-						JabberLog("Image format: [%d]", AI.format);
 					}
 					md5_init(&context);
 					md5_update(&context, resp->pData, resp->dataLength);
 					md5_finalize(&context);
-					md5[0] = 0;
 					for (i=0;i<16;i++) {
 						char lo, hi;
 						unsigned int j=context.state[i>>2];
@@ -232,24 +233,23 @@ static int TlenGetAvatarThread(HANDLE hContact) {
 						j&=0xFF;
 						lo = j & 0x0F;
 						hi = j >> 4;
-						hi = hi + ((hi > 9) ? 'A' - 10 : '0');
-						lo = lo + ((lo > 9) ? 'A' - 10 : '0');
+						hi = hi + ((hi > 9) ? 'a' - 10 : '0');
+						lo = lo + ((lo > 9) ? 'a' - 10 : '0');
 						md5[i*2] = hi;
 						md5[i*2+1] = lo;
 					}
-					JabberLog("MD5: %s", md5);
+					md5[33] = 0;
 					if (item != NULL) {
+						char *hash = item->avatarHash;
 						item->avatarFormat = AI.format;
-						if (item->avatarHash != NULL) {
-							char * hash = item->avatarHash;
-							item->avatarHash = mir_strdup(md5);
-							mir_free(hash);
-						}
+						item->avatarHash = mir_strdup(md5);
+						mir_free(hash);
 					} else {
 						jabberThreadInfo->avatarFormat = AI.format;
+						strcpy(jabberThreadInfo->avatarHash, md5);
 					}
-					TlenGetAvatarFileName(item, AI.filename, sizeof AI.filename);
-					DeleteFile(AI.filename);
+					TlenGetAvatarFileName(item, AI.filename, sizeof AI.filename, FALSE );
+					DeleteFileA(AI.filename);
 					out = fopen( AI.filename, "wb" );
 					if ( out != NULL ) {
 						fwrite( resp->pData, resp->dataLength, 1, out );
@@ -299,7 +299,6 @@ int TlenRemoveAvatar() {
 		req.headers = NULL;
 		req.dataLength = 0;
 		req.szUrl = request;
-		JabberLog("Request to remove avatar: %s", request);
 		resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)&req);
 		if (resp != NULL) {
 			if (resp->resultCode/100==2) {
@@ -323,7 +322,7 @@ int TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
     	int size, sizeHead, sizeTail;
     	char tFileName[ MAX_PATH ];
 		FILE* out;
-    	TlenGetAvatarFileName( NULL, tFileName, MAX_PATH );
+    	TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, FALSE );
 		out = fopen( tFileName, "wb" );
 		if ( out != NULL ) {
 			fwrite( data, dataLen, 1, out );
@@ -348,7 +347,6 @@ int TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 		strcpy(buffer + sizeHead + dataLen, "\r\n--AaB03x--");
 		req.dataLength = size;
 		req.pData = buffer;
-		JabberLog("Request to upload avatar: %s", request);
 		resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)&req);
 		if (resp != NULL) {
 			if (resp->resultCode/100==2) {
