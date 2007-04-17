@@ -169,6 +169,10 @@ SOURCE=.\jabber_xml.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\md5.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\sha1.c
 # End Source File
 # Begin Source File
@@ -182,6 +186,10 @@ SOURCE=.\tlen.rc
 # Begin Source File
 
 SOURCE=.\tlen_advsearch.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tlen_avatar.c
 # End Source File
 # Begin Source File
 
@@ -229,11 +237,19 @@ SOURCE=.\jabber_xml.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\md5.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\resource.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\sha1.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tlen_avatar.h
 # End Source File
 # Begin Source File
 

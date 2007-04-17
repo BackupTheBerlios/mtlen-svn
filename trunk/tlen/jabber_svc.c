@@ -30,11 +30,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_iq.h"
 #include "tlen_p2p_old.h"
 #include "tlen_avatar.h"
+#include "m_avatars.h"
 
-#define SVC_ISAVATARFORMATSUPPORTED "/IsAvatarFormatSupported"
-#define SVC_GETMYAVATARMAXSIZE      "/GetMyAvatarMaxSize"
-#define SVC_SETMYAVATAR             "/SetMyAvatar"
-#define SVC_GETMYAVATAR             "/GetMyAvatar"
+// Functions to set avatar for a protocol
+#define PS_SETMYAVATAR "/SetMyAvatar"
+#define PS_GETMYAVATAR "/GetMyAvatar"
+#define PS_GETMYAVATARMAXSIZE "/GetMyAvatarMaxSize"
+#define PIP_FREEPROPORTIONS	0
+#define PIP_SQUARE			1
+#define PS_GETMYAVATARIMAGEPROPORTION "/GetMyAvatarImageProportion"
+#define PS_ISAVATARFORMATSUPPORTED "/IsAvatarFormatSupported"
 
 char *searchJID = NULL;
 
@@ -1136,6 +1141,12 @@ int TlenGetAvatarMaxSize(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+int TlenGetAvatarProportion(WPARAM wParam, LPARAM lParam)
+{
+	return PIP_SQUARE;
+}
+
+
 int JabberSvcInit(void)
 {
 	char s[128];
@@ -1227,16 +1238,19 @@ int JabberSvcInit(void)
 	sprintf(s, "%s%s", jabberProtoName, "/SendNudge");
 	CreateServiceFunction_Ex(s, TlenSendAlert);
 
-	sprintf(s, "%s%s", jabberProtoName, SVC_ISAVATARFORMATSUPPORTED);
+	sprintf(s, "%s%s", jabberProtoName, PS_ISAVATARFORMATSUPPORTED);
 	CreateServiceFunction_Ex(s, TlenGetAvatarFormatSupported);
 
-	sprintf(s, "%s%s", jabberProtoName, SVC_GETMYAVATARMAXSIZE);
+	sprintf(s, "%s%s", jabberProtoName, PS_GETMYAVATARMAXSIZE);
 	CreateServiceFunction_Ex(s, TlenGetAvatarMaxSize);
 
-	sprintf(s, "%s%s", jabberProtoName, SVC_SETMYAVATAR);
+	sprintf(s, "%s%s", jabberProtoName, PS_GETMYAVATARIMAGEPROPORTION);
+	CreateServiceFunction_Ex(s, TlenGetAvatarProportion);
+
+	sprintf(s, "%s%s", jabberProtoName, PS_SETMYAVATAR);
 	CreateServiceFunction_Ex(s, TlenSetMyAvatar);
 
-	sprintf(s, "%s%s", jabberProtoName, SVC_GETMYAVATAR);
+	sprintf(s, "%s%s", jabberProtoName, PS_GETMYAVATAR);
 	CreateServiceFunction_Ex(s, TlenGetMyAvatar);
 
 	return 0;

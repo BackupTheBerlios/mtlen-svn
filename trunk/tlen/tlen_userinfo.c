@@ -373,7 +373,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 					TlenGetAvatarFileName( NULL, szAvatar, sizeof szAvatar );
 					hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)szAvatar );
 					if (hAvatar) {
-						hAvatar = SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
+						hAvatar = (HBITMAP) SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
 						if ( hAvatar != NULL )
 							DeleteObject( hAvatar );
 					}
