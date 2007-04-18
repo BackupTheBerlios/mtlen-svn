@@ -1,3 +1,6 @@
+1.0.7.6
+-------
++ support for Tlen avatars
 1.0.7.5
 -------
 * bugfix: settings changes were not loaded properly

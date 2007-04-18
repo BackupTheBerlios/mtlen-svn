@@ -24,6 +24,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "tlen_avatar.h"
 #include "md5.h"
+#include <io.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 extern char *jabberProtoName;
 extern HANDLE hNetlibUser;
@@ -33,36 +37,39 @@ extern struct ThreadData *jabberThreadInfo;
 
 void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen, BOOL isTemp)
 {
-	if (jabberThreadInfo != NULL) {
-		int tPathLen;
-		int format;
-		char* szFileType;
-		CallService( MS_DB_GETPROFILEPATH, cbLen, (LPARAM) pszDest );
-
-		tPathLen = strlen( pszDest );
-		tPathLen += mir_snprintf( pszDest + tPathLen, cbLen - tPathLen, "\\%s\\", jabberModuleName  );
-		CreateDirectoryA( pszDest, NULL );
-		format = item == NULL ? jabberThreadInfo->avatarFormat : item->avatarFormat;
-		szFileType = "png";
-		switch(format) {
-			case PA_FORMAT_JPEG: szFileType = "jpg";   break;
-			case PA_FORMAT_ICON: szFileType = "ico";   break;
-			case PA_FORMAT_PNG:  szFileType = "png";   break;
-			case PA_FORMAT_GIF:  szFileType = "gif";   break;
-			case PA_FORMAT_BMP:  szFileType = "bmp";   break;
-		}
-		if ( item != NULL ) {
-			char* hash;
-			hash = JabberSha1(item->jid);
-			mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s.%s", hash, szFileType );
-			mir_free( hash );
-		}
-		else {
-			if (isTemp) {
-				mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s_avatar_temp.%s", jabberProtoName, szFileType );
-			} else {
-				mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s_avatar.%s", jabberProtoName, szFileType );
-			}
+	int tPathLen;
+	int format = PA_FORMAT_PNG;
+	char* szFileType;
+	if (item != NULL) {
+		format = item->avatarFormat;
+	} else if (jabberThreadInfo != NULL) {
+		format = jabberThreadInfo->avatarFormat;
+	} else {
+		format = DBGetContactSettingDword(NULL, jabberProtoName, "AvatarFormat", PA_FORMAT_UNKNOWN);
+	}
+	CallService( MS_DB_GETPROFILEPATH, cbLen, (LPARAM) pszDest );
+	tPathLen = strlen( pszDest );
+	tPathLen += mir_snprintf( pszDest + tPathLen, cbLen - tPathLen, "\\%s\\", jabberModuleName  );
+	CreateDirectoryA( pszDest, NULL );
+	szFileType = "png";
+	switch(format) {
+		case PA_FORMAT_JPEG: szFileType = "jpg";   break;
+		case PA_FORMAT_ICON: szFileType = "ico";   break;
+		case PA_FORMAT_PNG:  szFileType = "png";   break;
+		case PA_FORMAT_GIF:  szFileType = "gif";   break;
+		case PA_FORMAT_BMP:  szFileType = "bmp";   break;
+	}
+	if ( item != NULL ) {
+		char* hash;
+		hash = JabberSha1(item->jid);
+		mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s.%s", hash, szFileType );
+		mir_free( hash );
+	}
+	else {
+		if (isTemp) {
+			mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s_avatar_temp.%s", jabberProtoName, szFileType );
+		} else {
+			mir_snprintf( pszDest + tPathLen, MAX_PATH - tPathLen, "%s_avatar.%s", jabberProtoName, szFileType );
 		}
 	}
 }
@@ -238,7 +245,7 @@ static int TlenGetAvatarThread(HANDLE hContact) {
 						md5[i*2] = hi;
 						md5[i*2+1] = lo;
 					}
-					md5[33] = 0;
+					md5[i*2] = 0;
 					if (item != NULL) {
 						char *hash = item->avatarHash;
 						item->avatarFormat = AI.format;
@@ -359,3 +366,4 @@ int TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
     }
 	return !success;
 }
+
