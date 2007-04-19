@@ -386,27 +386,45 @@ static int TlenPrebuildContactMenu(WPARAM wParam, LPARAM lParam)
 
 int TlenMenuHandleInbox(WPARAM wParam, LPARAM lParam)
 {
+	DBVARIANT dbv;
+	char *login = NULL, *password = NULL;
 	char szFileName[ MAX_PATH ];
 	if (DBGetContactSettingByte(NULL, jabberProtoName, "SavePassword", TRUE) == TRUE) {
-		FILE *out;
 		int tPathLen;
 		CallService( MS_DB_GETPROFILEPATH, MAX_PATH, (LPARAM) szFileName );
 		tPathLen = strlen( szFileName );
 		tPathLen += mir_snprintf( szFileName + tPathLen, MAX_PATH - tPathLen, "\\%s\\", jabberModuleName);
 		CreateDirectoryA( szFileName, NULL );
 		mir_snprintf( szFileName + tPathLen, MAX_PATH - tPathLen, "openinbox.html" );
+		if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
+			login = mir_strdup(dbv.pszVal);
+			DBFreeVariant(&dbv);
+
+		}
+		if (!DBGetContactSetting(NULL, jabberProtoName, "Password", &dbv)) {
+			CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
+			password = mir_strdup(dbv.pszVal);
+			DBFreeVariant(&dbv);
+		}
+	} 
+	if (login != NULL && password != NULL) {
+		FILE *out;
 		out = fopen( szFileName, "wt" );
 		if ( out != NULL ) {
 			fprintf(out, "<html><head></head><body OnLoad=\"document.forms[0].submit();\">"
 						 "<form action=\"http://poczta.o2.pl/index.php\" method=\"post\" name=\"login_form\">"
 						 "<input type=\"hidden\" name=\"username\" value=\"%s\">"
 						 "<input type=\"hidden\" name=\"password\" value=\"%s\">"
-						 "</form></body></html>", jabberThreadInfo->username, jabberThreadInfo->password);
+						 "</form></body></html>", login, password);
 			fclose( out );
+		} else {
+			strcat(szFileName, "http://poczta.o2.pl/");
 		}
 	} else {
 		strcat(szFileName, "http://poczta.o2.pl/");
 	}
+	mir_free(login);
+	mir_free(password);
 	CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) szFileName);
 	return 0;
 }
