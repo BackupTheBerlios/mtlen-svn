@@ -70,10 +70,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _SHA1_H_
 
 #ifdef __MINGW32__
-//#include <stdint.h>
-typedef unsigned int uint32_t;
-typedef unsigned char uint8_t;
-typedef int int_least16_t;
+#include <stdint.h>
 #else 
 typedef unsigned __int32 uint32_t;
 typedef unsigned __int8 uint8_t;
