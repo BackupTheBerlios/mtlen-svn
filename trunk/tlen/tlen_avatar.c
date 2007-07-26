@@ -346,12 +346,12 @@ int TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 		req.headers = headers;
 		req.szUrl = request;
 		sizeHead = strlen("--AaB03x\r\nContent-Disposition: form-data; name=\"filename\"; filename=\"plik.png\"\r\nContent-Type: image/png\r\n\r\n");
-		sizeTail = strlen("\r\n--AaB03x--");
+		sizeTail = strlen("\r\n--AaB03x--\r\n");
 		size = dataLen + sizeHead + sizeTail;
 		buffer = mir_alloc(size);
 		strcpy(buffer, "--AaB03x\r\nContent-Disposition: form-data; name=\"filename\"; filename=\"plik.png\"\r\nContent-Type: image/png\r\n\r\n");
 		memcpy(buffer + sizeHead, data, dataLen);
-		strcpy(buffer + sizeHead + dataLen, "\r\n--AaB03x--");
+		strcpy(buffer + sizeHead + dataLen, "\r\n--AaB03x--\r\n");
 		req.dataLength = size;
 		req.pData = buffer;
 		resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)&req);

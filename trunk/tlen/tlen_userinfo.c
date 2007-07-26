@@ -396,7 +396,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 							int result;
 							read( fileIn, pResult, dwPngSize );
 							close( fileIn );
-							result = TlenUploadAvatar(pResult, dwPngSize, access);
+							result = TlenUploadAvatar(pResult, dwPngSize, IsDlgButtonChecked(hwndDlg, IDC_PUBLICAVATAR));
 							mir_free(pResult);
 							if (result == 0) {
 								char tFileName[ MAX_PATH ];
