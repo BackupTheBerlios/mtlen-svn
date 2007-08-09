@@ -66,6 +66,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <m_popup.h>
 
 #include "jabber_xml.h"
+#include "crypto/aes.h"
+#include "crypto/bignum.h"
 
 /*******************************************************************
  * Global constants
@@ -144,11 +146,6 @@ void JabberLog(const char *fmt, ...);
  *******************************************************************/
 typedef HANDLE JABBER_SOCKET;
 
-typedef enum {
-	JABBER_SESSION_NORMAL,
-	JABBER_SESSION_REGISTER
-} JABBER_SESSION_TYPE;
-
 typedef struct {
 	char mailBase[256];
 	char mailMsg[256];
@@ -169,7 +166,6 @@ typedef struct {
 
 struct ThreadData {
 	HANDLE hThread;
-	JABBER_SESSION_TYPE type;
 
 	char username[128];
 	char password[128];
@@ -181,6 +177,14 @@ struct ThreadData {
 	WORD port;
 	JABBER_SOCKET s;
 	BOOL useSSL;
+
+	aes_context aes_in_context;
+	aes_context aes_out_context;
+	unsigned char aes_in_iv[16];
+	unsigned char aes_out_iv[16];
+
+	BOOL useAES;
+
 
 	char newPassword[128];
 
@@ -317,6 +321,8 @@ void JabberWsUninit(void);
 JABBER_SOCKET JabberWsConnect(char *host, WORD port);
 int JabberWsSend(JABBER_SOCKET s, char *data, int datalen);
 int JabberWsRecv(JABBER_SOCKET s, char *data, long datalen);
+int JabberWsSendAES(JABBER_SOCKET hConn, char *data, int datalen, aes_context *aes_ctx, unsigned char *aes_iv);
+int JabberWsRecvAES(JABBER_SOCKET s, char *data, long datalen, aes_context *aes_ctx, unsigned char *aes_iv);
 // jabber_util.c
 HANDLE HookEvent_Ex(const char *name, MIRANDAHOOK hook);
 HANDLE CreateServiceFunction_Ex(const char *name, MIRANDASERVICE service);
@@ -342,8 +348,6 @@ char *JabberUnixToDos(const char *str);
 void JabberDosToUnix(char *str);
 void JabberHttpUrlDecode(char *str);
 char *JabberHttpUrlEncode(const char *str);
-char *JabberErrorStr(int errorCode);
-char *JabberErrorMsg(XmlNode *errorNode);
 void JabberSendVisibleInvisiblePresence(BOOL invisible);
 char *TlenPasswordHash(const char *str);
 void TlenUrlDecode(char *str);

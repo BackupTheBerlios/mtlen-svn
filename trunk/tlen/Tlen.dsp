@@ -125,6 +125,14 @@ SOURCE=.\codec\gsm_short.c
 # End Group
 # Begin Source File
 
+SOURCE=.\crypto\aes.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\crypto\bignum.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\jabber_iq.c
 # End Source File
 # Begin Source File
@@ -169,11 +177,11 @@ SOURCE=.\jabber_xml.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\md5.c
+SOURCE=.\crypto\md5.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\sha1.c
+SOURCE=.\crypto\sha1.c
 # End Source File
 # Begin Source File
 
@@ -217,6 +225,18 @@ SOURCE=.\tlen_voice.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\crypto\aes.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\crypto\bignum.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\crypto\bn_asm.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\jabber.h
 # End Source File
 # Begin Source File
@@ -237,7 +257,7 @@ SOURCE=.\jabber_xml.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\md5.h
+SOURCE=.\crypto\md5.h
 # End Source File
 # Begin Source File
 
@@ -245,7 +265,7 @@ SOURCE=.\resource.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\sha1.h
+SOURCE=.\crypto\sha1.h
 # End Source File
 # Begin Source File
 

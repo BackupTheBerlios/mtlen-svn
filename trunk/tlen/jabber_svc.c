@@ -369,7 +369,6 @@ static void JabberConnect(int initialStatus)
 
 		thread = (struct ThreadData *) mir_alloc(sizeof(struct ThreadData));
 		memset(thread, 0, sizeof(struct ThreadData));
-		thread->type = JABBER_SESSION_NORMAL;
 
 		jabberDesiredStatus = initialStatus;
 

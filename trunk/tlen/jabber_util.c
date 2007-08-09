@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber.h"
 #include "jabber_ssl.h"
 #include "jabber_list.h"
-#include "sha1.h"
+#include "crypto/sha1.h"
 #include <ctype.h>
 #include <win2k.h>
 
@@ -37,6 +37,7 @@ static unsigned hookNum = 0;
 static unsigned serviceNum = 0;
 static HANDLE* hHooks = NULL;
 static HANDLE* hServices = NULL;
+
 
 HANDLE HookEvent_Ex(const char *name, MIRANDAHOOK hook) {
 	hookNum ++;
@@ -152,10 +153,6 @@ int JabberSend(HANDLE hConn, const char *fmt, ...)
 	int size;
 	va_list vararg;
 	int result;
-#ifndef TLEN_PLUGIN
-	PVOID ssl;
-	char *szLogBuffer;
-#endif
 
 	EnterCriticalSection(&mutex);
 
@@ -170,23 +167,11 @@ int JabberSend(HANDLE hConn, const char *fmt, ...)
 
 	JabberLog("SEND:%s", str);
 	size = strlen(str);
-#ifndef TLEN_PLUGIN
-	if ((ssl=JabberSslHandleToSsl(hConn)) != NULL) {
-		if (DBGetContactSettingByte(NULL, "Netlib", "DumpSent", TRUE) == TRUE) {
-			if ((szLogBuffer=(char *)mir_alloc(size+32)) != NULL) {
-				strcpy(szLogBuffer, "(SSL) Data sent\n");
-				memcpy(szLogBuffer+strlen(szLogBuffer), str, size+1 /* also copy \0 */);
-				Netlib_Logf(hNetlibUser, "%s", szLogBuffer);	// %s to protect against when fmt tokens are in szLogBuffer causing crash
-				mir_free(szLogBuffer);
-			}
-		}
-		result = pfn_SSL_write(ssl, str, size);
-	}
-	else
+	if (jabberThreadInfo->useAES) {
+		result = JabberWsSendAES(hConn, str, size, &jabberThreadInfo->aes_out_context, jabberThreadInfo->aes_out_iv);
+	} else {
 		result = JabberWsSend(hConn, str, size);
-#else
-	result = JabberWsSend(hConn, str, size);
-#endif
+	}
 	LeaveCriticalSection(&mutex);
 
 	mir_free(str);
@@ -474,58 +459,6 @@ void JabberHttpUrlDecode(char *str)
 		}
 	}
 	*q = '\0';
-}
-
-struct tagErrorCodeToStr {
-	int code;
-	char *str;
-} JabberErrorCodeToStrMapping[] = {
-	{JABBER_ERROR_REDIRECT,					"Redirect"},
-	{JABBER_ERROR_BAD_REQUEST,				"Bad request"},
-	{JABBER_ERROR_UNAUTHORIZED,				"Unauthorized"},
-	{JABBER_ERROR_PAYMENT_REQUIRED,			"Payment required"},
-	{JABBER_ERROR_FORBIDDEN,				"Forbidden"},
-	{JABBER_ERROR_NOT_FOUND,				"Not found"},
-	{JABBER_ERROR_NOT_ALLOWED,				"Not allowed"},
-	{JABBER_ERROR_NOT_ACCEPTABLE,			"Not acceptable"},
-	{JABBER_ERROR_REGISTRATION_REQUIRED,	"Registration required"},
-	{JABBER_ERROR_REQUEST_TIMEOUT,			"Request timeout"},
-	{JABBER_ERROR_CONFLICT,					"Conflict"},
-	{JABBER_ERROR_INTERNAL_SERVER_ERROR,	"Internal server error"},
-	{JABBER_ERROR_NOT_IMPLEMENTED,			"Not implemented"},
-	{JABBER_ERROR_REMOTE_SERVER_ERROR,		"Remote server error"},
-	{JABBER_ERROR_SERVICE_UNAVAILABLE,		"Service unavailable"},
-	{JABBER_ERROR_REMOTE_SERVER_TIMEOUT,	"Remote server timeout"},
-	{-1, "Unknown error"}
-};
-
-char *JabberErrorStr(int errorCode)
-{
-	int i;
-
-	for (i=0; JabberErrorCodeToStrMapping[i].code!=-1 && JabberErrorCodeToStrMapping[i].code!=errorCode; i++);
-	return JabberErrorCodeToStrMapping[i].str;
-}
-
-char *JabberErrorMsg(XmlNode *errorNode)
-{
-	char *errorStr, *str;
-	int errorCode;
-
-	errorStr = (char *) mir_alloc(256);
-	if (errorNode == NULL) {
-		_snprintf(errorStr, 256, "%s -1: %s", TranslateT("Error"), TranslateT("Unknown error message"));
-		return errorStr;
-	}
-
-	errorCode = -1;
-	if ((str=JabberXmlGetAttrValue(errorNode, "code")) != NULL)
-		errorCode = atoi(str);
-	if ((str=errorNode->text) != NULL)
-		_snprintf(errorStr, 256, "%s %d: %s\r\n%s", TranslateT("Error"), errorCode, TranslateT(JabberErrorStr(errorCode)), str);
-	else
-		_snprintf(errorStr, 256, "%s %d: %s", TranslateT("Error"), errorCode, TranslateT(JabberErrorStr(errorCode)));
-	return errorStr;
 }
 
 char *TlenPasswordHash(const char *str)

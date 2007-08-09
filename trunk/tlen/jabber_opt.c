@@ -48,7 +48,7 @@ TLEN_OPTIONS tlenOptions;
 
 void TlenLoadOptions()
 {
-	tlenOptions.useSSL = DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", FALSE);
+	tlenOptions.useSSL = DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", TRUE);
 	tlenOptions.reconnect = DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE);
 	tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0);
 	tlenOptions.rosterSync = DBGetContactSettingByte(NULL, jabberProtoName, "RosterSync", FALSE);
@@ -139,9 +139,6 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 
 			TranslateDialogDefault(hwndDlg);
 			SetDlgItemText(hwndDlg, IDC_TLEN, jabberModuleName);
-#ifdef TLEN_PLUGIN
-			ShowWindow(GetDlgItem(hwndDlg, IDC_USE_SSL), SW_HIDE);
-#endif
 			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, dbv.pszVal);
 				DBFreeVariant(&dbv);
@@ -197,7 +194,6 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
 				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
 			break;
-		case IDC_USE_SSL:
 			// Fall through
 		case IDC_SAVEPASSWORD:
 		case IDC_RECONNECT:
@@ -430,6 +426,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				break;
 			case IDC_KEEPALIVE:
 			case IDC_VISIBILITY_SUPPORT:
+			case IDC_USE_SSL:
 				MarkChanges(4, hwndDlg);
 				break;
 			}

@@ -98,3 +98,61 @@ int JabberWsRecv(JABBER_SOCKET hConn, char *data, long datalen)
 	return ret;
 }
 
+
+int JabberWsSendAES(JABBER_SOCKET hConn, char *data, int datalen, aes_context *aes_ctx, unsigned char *aes_iv)
+{
+	int len, sendlen;
+	unsigned char aes_input[16];
+	unsigned char aes_output[256];
+	JabberLog("Netlib_Send() failed, error=%d", WSAGetLastError());
+	while (datalen > 0) {
+		len = 0;
+		while (datalen > 0 && len < 256) {
+			int pad = datalen < 16 ? 16 - datalen : 0;
+			memcpy(aes_input, data, datalen < 16 ? datalen : 16);
+			memset(aes_input + 16 - pad, ' ', pad);
+			aes_cbc_encrypt(aes_ctx, aes_iv, aes_input, aes_output + len, 16);
+			datalen -= 16;
+			data += 16;
+			len += 16;
+		}
+		if (len > 0) {
+			if ((sendlen=Netlib_Send(hConn, aes_output, len, MSG_NODUMP))==SOCKET_ERROR || len!=sendlen) {
+				JabberLog("Netlib_Send() failed, error=%d", WSAGetLastError());
+				return FALSE;
+			}
+		}
+	}
+	return TRUE;
+}
+
+int JabberWsRecvAES(JABBER_SOCKET hConn, char *data, long datalen, aes_context *aes_ctx, unsigned char *aes_iv)
+{
+	int ret, len;
+	unsigned char aes_input[16];
+	unsigned char *aes_output = (unsigned char *)data;
+
+	do {
+		ret = Netlib_Recv(hConn, data, datalen, MSG_NODUMP);
+		if(ret == SOCKET_ERROR) {
+			JabberLog("Netlib_Recv() failed, error=%d", WSAGetLastError());
+			return 0;
+		}
+		if(ret == 0) {
+			JabberLog("Connection closed gracefully");
+			return 0;
+		}
+		data += ret;
+		datalen = ret & 0xF;
+	} while (datalen != 0);
+
+	len = ret;
+	while (len > 15) {
+		memcpy(aes_input, aes_output, 16);
+		aes_cbc_decrypt(aes_ctx, aes_iv, aes_input, aes_output, 16);
+		aes_output += 16;
+		len -= 16;
+	}
+	return ret;
+}
+

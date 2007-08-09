@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber.h"
 #include "jabber_list.h"
 #include "tlen_avatar.h"
-#include "md5.h"
+#include "crypto/md5.h"
 #include <io.h>
 #include <fcntl.h>
 #include <sys/types.h>

@@ -125,6 +125,9 @@ BEGIN
                     WS_DISABLED
     CONTROL         "Keep connection alive",IDC_KEEPALIVE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,14,47,250,10
+    CONTROL         "Enable encryption",IDC_USE_SSL,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,60,250,10
+		    
     CONTROL         "Enable Always Visible and Never Visible",
                     IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE |
                     WS_TABSTOP,14,60,250,10
