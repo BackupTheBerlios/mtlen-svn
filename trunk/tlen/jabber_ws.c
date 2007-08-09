@@ -133,7 +133,6 @@ int JabberWsRecvAES(JABBER_SOCKET hConn, char *data, long datalen, aes_context *
 	unsigned char *aes_output = (unsigned char *)data;
 
 	for (maxlen = maxlen & ~0xF; maxlen != 0; maxlen = maxlen & 0xF) {
-		JabberLog("Reading (max %d)", maxlen);
 		ret = Netlib_Recv(hConn, data, maxlen, MSG_NODUMP);
 		if(ret == SOCKET_ERROR) {
 			JabberLog("Netlib_Recv() failed, error=%d", WSAGetLastError());
@@ -143,7 +142,6 @@ int JabberWsRecvAES(JABBER_SOCKET hConn, char *data, long datalen, aes_context *
 			JabberLog("Connection closed gracefully");
 			return 0;
 		}
-		JabberLog("Read %d bytes ", ret);
 		data += ret;
 		len += ret;
 		maxlen -= ret;
