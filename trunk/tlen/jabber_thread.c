@@ -486,8 +486,6 @@ static void JabberProcessStreamOpening(XmlNode *node, void *userdata)
 		k2=JabberXmlGetAttrValue(node, "k2");
 		k3=JabberXmlGetAttrValue(node, "k3");
 
-		JabberLog(" keys: k1=%s k2=%s k3=%s", k1, k2, k3);
-
 		memset(&info->aes_in_context, 0, sizeof (aes_context));
 		memset(&info->aes_out_context, 0, sizeof (aes_context));
 		memset(&aes_mpi, 0, sizeof (mpi));
@@ -506,12 +504,6 @@ static void JabberProcessStreamOpening(XmlNode *node, void *userdata)
 		aes_set_key(&info->aes_out_context, aes_key, 128);
 		memset(&aes_mpi, 0, sizeof (mpi));
 		mpi_read_binary(&aes_mpi, aes_key, 16);
-		/* <-- */
-		slen = 140;
-		mpi_write_string(&aes_mpi, 16, aes_key_str, &slen);
-		JabberLog("AES key: %s", aes_key_str);
-		JabberLog("AES iv : %s", aes_iv_str);
-		/* --> */
 		memset(&k1_mpi, 0, sizeof (mpi));
 		mpi_read_string( &k1_mpi, 16, k1 );
 		memset(&k2_mpi, 0, sizeof (mpi));
@@ -521,7 +513,6 @@ static void JabberProcessStreamOpening(XmlNode *node, void *userdata)
 		mpi_exp_mod( &aes_mpi, &aes_mpi, &k1_mpi, &k2_mpi, NULL );
 		slen = 140;
 		mpi_write_string(&aes_mpi, 16, aes_key_str, &slen);
-		JabberLog("AES key encrypted: %s", aes_key_str);
 		JabberSend(info->s, "<cipher k1='%s' k2='%s'/>", aes_key_str, aes_iv_str);
 	} else {
 		TlenSendAuth(userdata);
