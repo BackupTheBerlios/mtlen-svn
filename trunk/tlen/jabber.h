@@ -80,12 +80,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define TLEN_MAX_SEARCH_RESULTS_PER_PAGE 20
 
 // User-defined message
-#define WM_JABBER_REGDLG_UPDATE				WM_USER + 100
-#define WM_JABBER_REFRESH					WM_USER + 104
-#define WM_JABBER_CHECK_ONLINE				WM_USER + 105
-#define WM_JABBER_CHANGED					WM_USER + 106
-#define WM_JABBER_ACTIVATE					WM_USER + 107
-#define WM_JABBER_SHUTDOWN					WM_USER + 112
+#define WM_TLEN_REFRESH						(WM_USER + 100)
 // Error code
 #define JABBER_ERROR_REDIRECT				302
 #define JABBER_ERROR_BAD_REQUEST			400

@@ -87,6 +87,50 @@ static void RemoveAvatar(HANDLE hContact) {
 	DeleteFileA(tFileName);
 }
 
+int TlenProcessAvatarNode(XmlNode *avatarNode, JABBER_LIST_ITEM *item) {
+	XmlNode *aNode;
+	char *oldHash = NULL;
+	char *md5 = NULL, *type = NULL;
+	HANDLE hContact;
+	hContact = NULL;
+	if (item != NULL) {
+		if ((hContact=JabberHContactFromJID(item->jid)) == NULL) return 0;
+	} 
+	if (item == NULL) {
+		oldHash = jabberThreadInfo->avatarHash;
+	} else {
+		oldHash = item->avatarHash;
+	}
+	aNode = JabberXmlGetChild(avatarNode, "a");
+	if (aNode != NULL) {
+		type = JabberXmlGetAttrValue(aNode, "type");
+		md5 = JabberXmlGetAttrValue(aNode, "md5");
+	}
+	if (md5 != NULL) {
+		/* check contact's avatar hash - md5 */
+		if (oldHash == NULL || strcmp(oldHash, md5)) {
+			if (item != NULL) {
+				item->newAvatarDownloading = TRUE;
+			}
+			TlenGetAvatar(hContact);
+			return 1;
+		}
+	} else {
+		/* remove avatar */
+		if (oldHash != NULL) {
+			if (item != NULL) {
+				item->avatarHash = NULL;
+				mir_free(oldHash);
+				item->newAvatarDownloading = FALSE;
+			}
+			RemoveAvatar(hContact);
+			ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void TlenProcessPresenceAvatar(XmlNode *node, JABBER_LIST_ITEM *item) {
 	XmlNode *avatarNode, *aNode;
 	char *md5 = NULL, *type = NULL;
@@ -168,6 +212,8 @@ static char *replaceTokens(const char *base, const char *uri, const char *login,
 	result[size] = '\0';
 	return result;
 }
+
+static getAvatarMutex = 0;
 
 static int TlenGetAvatarThread(HANDLE hContact) {
 	JABBER_LIST_ITEM *item = NULL;
@@ -284,10 +330,15 @@ static int TlenGetAvatarThread(HANDLE hContact) {
 		mir_free(request);
 		mir_free(login);
 	}
+	getAvatarMutex = 0;
 	return !success;
 }
 
 void TlenGetAvatar(HANDLE hContact) {
+	if (hContact == NULL && getAvatarMutex != 0) {
+		return;
+	}
+	getAvatarMutex = 1;
 	TlenGetAvatarThread(hContact);
 }
 
@@ -357,7 +408,6 @@ int TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 		resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)&req);
 		if (resp != NULL) {
 			if (resp->resultCode/100==2) {
-				TlenGetAvatarThread(NULL);
 				success = TRUE;
 			}
 		}

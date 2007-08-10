@@ -75,6 +75,8 @@ JABBER_FIELD_MAP tlenFieldPlan[] = {
 	{ 0, NULL }
 };
 
+HWND hAvatarDlg = NULL;
+
 static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK TlenSetAvatarDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -180,9 +182,9 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		InitComboBox(GetDlgItem(hwndDlg, IDC_OCCUPATION), tlenFieldOccupation);
 		InitComboBox(GetDlgItem(hwndDlg, IDC_LOOKFOR), tlenFieldLookfor);
 
-		SendMessage(hwndDlg, WM_JABBER_REFRESH, 0, 0);
+		SendMessage(hwndDlg, WM_TLEN_REFRESH, 0, 0);
 		return TRUE;
-	case WM_JABBER_REFRESH:
+	case WM_TLEN_REFRESH:
 		{
 			DBVARIANT dbv;
 			HANDLE hContact;
@@ -296,7 +298,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			case PSN_INFOCHANGED:
 				{
 					HANDLE hContact = (HANDLE) ((LPPSHNOTIFY) lParam)->lParam;
-					SendMessage(hwndDlg, WM_JABBER_REFRESH, 0, (LPARAM) hContact);
+					SendMessage(hwndDlg, WM_TLEN_REFRESH, 0, (LPARAM) hContact);
 				}
 				break;
 			}
@@ -330,8 +332,6 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 	}
 	return FALSE;
 }
-
-static HWND hAvatarDlg = NULL;
 
 int OnSaveMyAvatar( WPARAM wParam, LPARAM lParam )
 {
@@ -398,17 +398,6 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 							close( fileIn );
 							result = TlenUploadAvatar(pResult, dwPngSize, IsDlgButtonChecked(hwndDlg, IDC_PUBLICAVATAR));
 							mir_free(pResult);
-							if (result == 0) {
-								char tFileName[ MAX_PATH ];
-								HBITMAP hAvatar;
-								TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, FALSE);
-								hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)tFileName );
-								if (hAvatar) {
-									hAvatar = (HBITMAP) SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
-									if ( hAvatar != NULL )
-										DeleteObject( hAvatar );
-								}
-							}
 						}
 					}
 				}
@@ -426,6 +415,19 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 
 			}
 		break;
+	case WM_TLEN_REFRESH:
+		{
+			char tFileName[ MAX_PATH ];
+			HBITMAP hAvatar;
+			TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, FALSE);
+			hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)tFileName );
+			if (hAvatar) {
+				hAvatar = (HBITMAP) SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
+				if ( hAvatar != NULL )
+					DeleteObject( hAvatar );
+			}
+		}
+		break;
 	case WM_DESTROY:
 		{
 			HBITMAP hAvatar = ( HBITMAP )SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, 0 );
@@ -434,6 +436,7 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 			hAvatar = ( HBITMAP )SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, 0 );
 			if ( hAvatar != NULL )
 				DeleteObject( hAvatar );
+			hAvatarDlg = NULL;
 		}
 	}
 
