@@ -149,3 +149,4 @@
 [Set]
 [Delete]
 [Note: Image size max. 64x64]
+[Enable encryption]
