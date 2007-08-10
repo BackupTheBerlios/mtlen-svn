@@ -95,7 +95,6 @@ char *TlenAdvSearchCreateQuery(HWND hwndDlg, int iqId)
 
 	if (hwndDlg == NULL) return NULL;
 	str = NULL;
-	JabberStringAppend(&str, &strSize, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>", iqId);
 	FetchField(hwndDlg, IDC_FIRSTNAME, "first", &str, &strSize);
 	FetchField(hwndDlg, IDC_LASTNAME, "last", &str, &strSize);
 	FetchField(hwndDlg, IDC_NICK, "nick", &str, &strSize);
@@ -109,6 +108,5 @@ char *TlenAdvSearchCreateQuery(HWND hwndDlg, int iqId)
 	FetchCombo(hwndDlg, IDC_STATUS, "m", &str, &strSize);
 	FetchCombo(hwndDlg, IDC_LOOKFOR, "r", &str, &strSize);
 	FetchCombo(hwndDlg, IDC_PLAN, "p", &str, &strSize);
-	JabberStringAppend(&str, &strSize, "</query></iq>");
 	return str;
 }

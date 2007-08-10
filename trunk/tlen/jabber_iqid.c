@@ -395,6 +395,7 @@ void JabberIqResultSetSearch(XmlNode *iqNode, void *userdata)
 							jsr.hdr.email = JabberTextDecode(n->text);
 						else
 							jsr.hdr.email = mir_strdup("");
+
 						ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_SEARCH, ACKRESULT_DATA, (HANDLE) id, (LPARAM) &jsr);
 						found = 1;
 						mir_free(jsr.hdr.nick);
@@ -423,9 +424,14 @@ void JabberIqResultSetSearch(XmlNode *iqNode, void *userdata)
 			}
 			DBFreeVariant(&dbv);
 		}
-		ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_SEARCH, ACKRESULT_SUCCESS, (HANDLE) id, 0);
-	}
-	else if (!strcmp(type, "error")) {
+		found = 0;
+		if (queryNode->numChild == TLEN_MAX_SEARCH_RESULTS_PER_PAGE) {
+			found = JabberRunSearch();
+		}
+		if (!found) {
+			ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_SEARCH, ACKRESULT_SUCCESS, (HANDLE) id, 0);
+		}
+	} else if (!strcmp(type, "error")) {
 		// ProtoBroadcastAck(jabberProtoName, NULL, ACKTYPE_SEARCH, ACKRESULT_FAILED, (HANDLE) id, 0);
 		// There is no ACKRESULT_FAILED for ACKTYPE_SEARCH :) look at findadd.c
 		// So we will just send a SUCCESS

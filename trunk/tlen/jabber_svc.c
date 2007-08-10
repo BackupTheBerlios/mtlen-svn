@@ -42,6 +42,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define PS_ISAVATARFORMATSUPPORTED "/IsAvatarFormatSupported"
 
 char *searchJID = NULL;
+static int searchID;
+static int searchIndex = 0;
+static char *searchQuery = NULL;
+static int searchQueryLen = 0;
 
 int JabberGetCaps(WPARAM wParam, LPARAM lParam)
 {
@@ -74,19 +78,43 @@ int JabberLoadIcon(WPARAM wParam, LPARAM lParam)
 		return (int) (HICON) NULL;
 }
 
+int JabberRunSearch() {
+	int iqId = 0;
+	if (!jabberOnline) return 0;
+	if (searchQuery != NULL && searchIndex < 10) {
+		iqId = searchID;
+		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSetSearch);
+		if (searchIndex == 0) {
+			JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>%s</query></iq>", iqId, searchQuery);
+		} else {
+			JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>%s<f>%d</f></query></iq>", iqId, searchQuery, searchIndex * TLEN_MAX_SEARCH_RESULTS_PER_PAGE);
+		}
+		searchIndex ++;
+	}
+	return iqId;
+}
+
+void JabberResetSearchQuery() {
+	if (searchQuery != NULL) {
+		mir_free(searchQuery);
+		searchQuery = NULL;
+	}
+	searchQueryLen = 0;
+	searchIndex = 0;
+	searchID = JabberSerialNext();
+}
+
 int JabberBasicSearch(WPARAM wParam, LPARAM lParam)
 {
 	char *jid;
 	int iqId;
-
 	if (!jabberOnline) return 0;
 	if ((char *) lParam == NULL) return 0;
-
 	if ((jid=JabberTextEncode((char *) lParam)) != NULL) {
-		iqId = JabberSerialNext();
 		searchJID = mir_strdup((char *)lParam);
-		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSetSearch);
-		JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'><i>%s</i></query></iq>", iqId, jid);
+		JabberResetSearchQuery();
+		JabberStringAppend(&searchQuery, &searchQueryLen, "<i>%s</i>", jid);
+		iqId = JabberRunSearch();
 		mir_free(jid);
 		return iqId;
 	}
@@ -102,9 +130,9 @@ int JabberSearchByEmail(WPARAM wParam, LPARAM lParam)
 	if ((char *) lParam == NULL) return 0;
 
 	if ((email=JabberTextEncode((char *) lParam)) != NULL) {
-		iqId = JabberSerialNext();
-		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSetSearch);
-		JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'><email>%s</email></query></iq>", iqId, email);
+		JabberResetSearchQuery();
+		JabberStringAppend(&searchQuery, &searchQueryLen, "<email>%s</email>", email);
+		iqId = JabberRunSearch();
 		mir_free(email);
 		return iqId;
 	}
@@ -116,53 +144,54 @@ int JabberSearchByName(WPARAM wParam, LPARAM lParam)
 {
 	PROTOSEARCHBYNAME *psbn = (PROTOSEARCHBYNAME *) lParam;
 	char *p;
-	char text[128];
-	unsigned int size;
 	int iqId;
 
 	if (!jabberOnline) return 0;
 
-	text[0] = text[sizeof(text)-1] = '\0';
-	size = sizeof(text)-1;
+	JabberResetSearchQuery();
+
 	if (psbn->pszNick[0] != '\0') {
 		if ((p=JabberTextEncode(psbn->pszNick)) != NULL) {
-			if (strlen(p)+13 < size) {
-				strcat(text, "<nick>");
-				strcat(text, p);
-				strcat(text, "</nick>");
-				size = sizeof(text)-strlen(text)-1;
-			}
+			JabberStringAppend(&searchQuery, &searchQueryLen, "<nick>%s</nick>", p);
 			mir_free(p);
 		}
 	}
 	if (psbn->pszFirstName[0] != '\0') {
 		if ((p=JabberTextEncode(psbn->pszFirstName)) != NULL) {
-			if (strlen(p)+15 < size) {
-				strcat(text, "<first>");
-				strcat(text, p);
-				strcat(text, "</first>");
-				size = sizeof(text)-strlen(text)-1;
-			}
+			JabberStringAppend(&searchQuery, &searchQueryLen, "<first>%s</first>", p);
 			mir_free(p);
 		}
 	}
 	if (psbn->pszLastName[0] != '\0') {
 		if ((p=JabberTextEncode(psbn->pszLastName)) != NULL) {
-			if (strlen(p)+13 < size) {
-				strcat(text, "<last>");
-				strcat(text, p);
-				strcat(text, "</last>");
-				size = sizeof(text)-strlen(text)-1;
-			}
+			JabberStringAppend(&searchQuery, &searchQueryLen, "<last>%s</last>", p);
 			mir_free(p);
 		}
 	}
 
-	iqId = JabberSerialNext();
-	JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSetSearch);
-	JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>%s</query></iq>", iqId, text);
-
+	iqId = JabberRunSearch();
 	return iqId;
+}
+
+int JabberCreateAdvSearchUI(WPARAM wParam, LPARAM lParam)
+{
+	return (int) CreateDialog(hInst, MAKEINTRESOURCE(IDD_ADVSEARCH), (HWND) lParam, TlenAdvSearchDlgProc);
+}
+
+int JabberSearchByAdvanced(WPARAM wParam, LPARAM lParam)
+{
+	int iqId;
+
+	if (!jabberOnline) return 0;
+
+	JabberResetSearchQuery();
+	iqId = JabberSerialNext();
+	if ((searchQuery = TlenAdvSearchCreateQuery((HWND) lParam, iqId)) != NULL) {
+		iqId = JabberRunSearch();
+		return iqId;
+	}
+
+	return 0;
 }
 
 static HANDLE AddToListByJID(const char *newJid, DWORD flags)
@@ -1049,29 +1078,6 @@ int JabberContactDeleted(WPARAM wParam, LPARAM lParam)
 
 		DBFreeVariant(&dbv);
 	}
-	return 0;
-}
-
-int JabberCreateAdvSearchUI(WPARAM wParam, LPARAM lParam)
-{
-	return (int) CreateDialog(hInst, MAKEINTRESOURCE(IDD_ADVSEARCH), (HWND) lParam, TlenAdvSearchDlgProc);
-}
-
-int JabberSearchByAdvanced(WPARAM wParam, LPARAM lParam)
-{
-	char *queryStr;
-	int iqId;
-
-	if (!jabberOnline) return 0;
-
-	iqId = JabberSerialNext();
-	if ((queryStr=TlenAdvSearchCreateQuery((HWND) lParam, iqId)) != NULL) {
-		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSetSearch);
-		JabberSend(jabberThreadInfo->s, "%s", queryStr);
-		mir_free(queryStr);
-		return iqId;
-	}
-
 	return 0;
 }
 

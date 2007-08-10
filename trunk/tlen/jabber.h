@@ -77,6 +77,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "mim_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"
+#define TLEN_MAX_SEARCH_RESULTS_PER_PAGE 20
+
 // User-defined message
 #define WM_JABBER_REGDLG_UPDATE				WM_USER + 100
 #define WM_JABBER_REFRESH					WM_USER + 104
@@ -371,6 +373,7 @@ void JabberContactListCreateGroup(char *groupName);
 unsigned long JabberForkThread(void (__cdecl *threadcode)(void*), unsigned long stacksize, void *arg);
 // jabber_svc.c
 int JabberGetInfo(WPARAM wParam, LPARAM lParam);
+int JabberRunSearch();
 // jabber_advsearch.c
 extern JABBER_FIELD_MAP tlenFieldGender[];
 extern JABBER_FIELD_MAP tlenFieldLookfor[];
