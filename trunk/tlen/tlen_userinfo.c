@@ -405,10 +405,6 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 			case IDC_DELETEAVATAR:
 				{
 					if (TlenRemoveAvatar() == 0) {
-						HBITMAP hBitmap = (HBITMAP)SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)NULL );
-						if ( hBitmap )
-							DeleteObject( hBitmap );
-						InvalidateRect( hwndDlg, NULL, TRUE );
 					}
 					break;
 				}
@@ -425,6 +421,11 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 				hAvatar = (HBITMAP) SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
 				if ( hAvatar != NULL )
 					DeleteObject( hAvatar );
+			} else {
+				HBITMAP hBitmap = (HBITMAP)SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)NULL );
+				if ( hBitmap )
+					DeleteObject( hBitmap );
+				InvalidateRect( hwndDlg, NULL, TRUE );
 			}
 		}
 		break;

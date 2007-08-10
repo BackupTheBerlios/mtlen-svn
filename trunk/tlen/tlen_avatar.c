@@ -361,7 +361,6 @@ int TlenRemoveAvatar() {
 		if (resp != NULL) {
 			if (resp->resultCode/100==2) {
 				success = TRUE;
-				RemoveAvatar(NULL);
 			}
 		}
 		mir_free(request);
