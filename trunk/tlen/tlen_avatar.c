@@ -138,7 +138,6 @@ int TlenProcessAvatarNode(XmlNode *avatarNode, JABBER_LIST_ITEM *item) {
 }
 
 void TlenProcessPresenceAvatar(XmlNode *node, JABBER_LIST_ITEM *item) {
-	XmlNode *avatarNode;
 	HANDLE hContact;
 	if ((hContact=JabberHContactFromJID(item->jid)) == NULL) return;
 	TlenProcessAvatarNode(JabberXmlGetChild(node, "avatar"), item);
@@ -193,7 +192,7 @@ static char *replaceTokens(const char *base, const char *uri, const char *login,
 	return result;
 }
 
-static getAvatarMutex = 0;
+static int getAvatarMutex = 0;
 
 static void TlenGetAvatarThread(HANDLE hContact) {
 	JABBER_LIST_ITEM *item = NULL;
@@ -326,10 +325,10 @@ void TlenGetAvatar(HANDLE hContact) {
 
 void TlenRemoveAvatar() {
 	NETLIBHTTPREQUEST req;
-    NETLIBHTTPREQUEST *resp;
+	NETLIBHTTPREQUEST *resp;
 	BOOL success = FALSE;
 	char *request;
-    if (jabberThreadInfo != NULL) {
+	if (jabberThreadInfo != NULL) {
 		request = replaceTokens(jabberThreadInfo->tlenConfig.mailBase, jabberThreadInfo->tlenConfig.avatarRemove, "", jabberThreadInfo->avatarToken, 0, 0);
 		ZeroMemory(&req, sizeof(req));
 		req.cbSize = sizeof(req);
@@ -346,11 +345,12 @@ void TlenRemoveAvatar() {
 			}
 		}
 		mir_free(request);
-    }
+	}
 }
 
-void TlenUploadAvatarThread(NETLIBHTTPREQUEST *req) {
-    NETLIBHTTPREQUEST *resp;
+void TlenUploadAvatarThread(void *ptr) {
+	NETLIBHTTPREQUEST *resp;
+	NETLIBHTTPREQUEST *req = (NETLIBHTTPREQUEST *)ptr;
 	resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)req);
 	mir_free(req->pData);
 	mir_free(req->szUrl);
@@ -361,11 +361,10 @@ void TlenUploadAvatarThread(NETLIBHTTPREQUEST *req) {
 void TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 	NETLIBHTTPREQUEST *req;
 	NETLIBHTTPHEADER *headers;
-	BOOL success = FALSE;
 	char *request;
 	unsigned char *buffer;
-    if (jabberThreadInfo != NULL && dataLen > 0 && data != NULL) {
-    	int size, sizeHead, sizeTail;
+	if (jabberThreadInfo != NULL && dataLen > 0 && data != NULL) {
+		int size, sizeHead, sizeTail;
 		request = replaceTokens(jabberThreadInfo->tlenConfig.mailBase, jabberThreadInfo->tlenConfig.avatarUpload, "", jabberThreadInfo->avatarToken, 0, access);
 		req = (NETLIBHTTPREQUEST *)mir_alloc(sizeof(NETLIBHTTPREQUEST));
 		headers = (NETLIBHTTPHEADER *)mir_alloc(sizeof(NETLIBHTTPHEADER));
@@ -388,6 +387,6 @@ void TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 		req->dataLength = size;
 		req->pData = buffer;
 		JabberForkThread(TlenUploadAvatarThread, 0, req);
-    }
+	}
 }
 

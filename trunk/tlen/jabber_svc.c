@@ -1125,9 +1125,13 @@ int TlenSetMyAvatar(WPARAM wParam, LPARAM lParam)
 {
 	char* szFileName = ( char* )lParam;
    	char tFileName[ MAX_PATH ];
-   	TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, TRUE);
-	if ( CopyFileA( szFileName, tFileName, FALSE ) == FALSE ) {
-		return 1;
+	if (szFileName != NULL) {
+		TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, TRUE);
+		if ( CopyFileA( szFileName, tFileName, FALSE ) == FALSE ) {
+			return 1;
+		}
+	} else {
+		TlenRemoveAvatar();
 	}
 	return 0;
 }
