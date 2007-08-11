@@ -323,40 +323,31 @@ void TlenGetAvatar(HANDLE hContact) {
 	JabberForkThread(TlenGetAvatarThread, 0, hContact);
 }
 
-void TlenRemoveAvatar() {
-	NETLIBHTTPREQUEST req;
-	NETLIBHTTPREQUEST *resp;
-	BOOL success = FALSE;
-	char *request;
-	if (jabberThreadInfo != NULL) {
-		request = replaceTokens(jabberThreadInfo->tlenConfig.mailBase, jabberThreadInfo->tlenConfig.avatarRemove, "", jabberThreadInfo->avatarToken, 0, 0);
-		ZeroMemory(&req, sizeof(req));
-		req.cbSize = sizeof(req);
-		req.requestType = jabberThreadInfo->tlenConfig.avatarGetMthd;
-		req.flags = 0;
-		req.headersCount = 0;
-		req.headers = NULL;
-		req.dataLength = 0;
-		req.szUrl = request;
-		resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)&req);
-		if (resp != NULL) {
-			if (resp->resultCode/100==2) {
-				success = TRUE;
-			}
-		}
-		mir_free(request);
-	}
-}
-
-void TlenUploadAvatarThread(void *ptr) {
+void TlenSendHttpRequestThread(void *ptr) {
 	NETLIBHTTPREQUEST *resp;
 	NETLIBHTTPREQUEST *req = (NETLIBHTTPREQUEST *)ptr;
 	resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)req);
-	mir_free(req->pData);
 	mir_free(req->szUrl);
 	mir_free(req->headers);
+	mir_free(req->pData);
 	mir_free(req);
 }
+
+void TlenRemoveAvatar() {
+	NETLIBHTTPREQUEST *req;
+	BOOL success = FALSE;
+	char *request;
+	if (jabberThreadInfo != NULL) {
+		req = (NETLIBHTTPREQUEST *)mir_alloc(sizeof(NETLIBHTTPREQUEST));
+		request = replaceTokens(jabberThreadInfo->tlenConfig.mailBase, jabberThreadInfo->tlenConfig.avatarRemove, "", jabberThreadInfo->avatarToken, 0, 0);
+		ZeroMemory(req, sizeof(NETLIBHTTPREQUEST));
+		req->cbSize = sizeof(NETLIBHTTPREQUEST);
+		req->requestType = jabberThreadInfo->tlenConfig.avatarGetMthd;
+		req->szUrl = request;
+		JabberForkThread(TlenSendHttpRequestThread, 0, req);
+	}
+}
+
 
 void TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 	NETLIBHTTPREQUEST *req;
@@ -371,12 +362,12 @@ void TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 		ZeroMemory(req, sizeof(NETLIBHTTPREQUEST));
 		req->cbSize = sizeof(NETLIBHTTPREQUEST);
 		req->requestType = jabberThreadInfo->tlenConfig.avatarUploadMthd;
+		req->szUrl = request;
 		req->flags = 0;
 		headers[0].szName = "Content-Type";
 		headers[0].szValue = "multipart/form-data; boundary=AaB03x";
 		req->headersCount = 1;
 		req->headers = headers;
-		req->szUrl = request;
 		sizeHead = strlen("--AaB03x\r\nContent-Disposition: form-data; name=\"filename\"; filename=\"plik.png\"\r\nContent-Type: image/png\r\n\r\n");
 		sizeTail = strlen("\r\n--AaB03x--\r\n");
 		size = dataLen + sizeHead + sizeTail;
@@ -386,7 +377,7 @@ void TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 		strcpy(buffer + sizeHead + dataLen, "\r\n--AaB03x--\r\n");
 		req->dataLength = size;
 		req->pData = buffer;
-		JabberForkThread(TlenUploadAvatarThread, 0, req);
+		JabberForkThread(TlenSendHttpRequestThread, 0, req);
 	}
 }
 
