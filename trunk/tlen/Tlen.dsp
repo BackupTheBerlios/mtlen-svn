@@ -153,10 +153,6 @@ SOURCE=.\jabber_opt.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\jabber_ssl.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\jabber_svc.c
 # End Source File
 # Begin Source File
@@ -246,10 +242,6 @@ SOURCE=.\jabber_iq.h
 # Begin Source File
 
 SOURCE=.\jabber_list.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\jabber_ssl.h
 # End Source File
 # Begin Source File
 

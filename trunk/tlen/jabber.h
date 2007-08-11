@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _JABBER_H_
 #define _JABBER_H_
 
-#define MIRANDA_VER 0x0600
+#define MIRANDA_VER 0x0700
 
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
@@ -72,8 +72,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,9,0)
-#define TLEN_VERSION_STRING  "1.0.9.0"
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,9,1)
+#define TLEN_VERSION_STRING  "1.0.9.1"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "mim_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"

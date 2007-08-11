@@ -706,10 +706,6 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 	}
 	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline) {
 		/* get avatar */
-		if (!downloadingAvatar) {
-//			item->newAvatarDownloading = TRUE;
-//			JabberSend(jabberThreadInfo->s, "<message to='%s' type='tAvatar'><avatar type='request'>get_file</avatar></message>", item->jid);
-		}
 		return GAIR_WAITFOR;
 	}
 	return GAIR_NOAVATAR;
