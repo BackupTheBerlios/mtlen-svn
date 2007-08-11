@@ -393,22 +393,17 @@ static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam
 						long  dwPngSize = filelength(fileIn);
 						BYTE* pResult = (BYTE *)mir_alloc(dwPngSize);
 						if (pResult != NULL) {
-							int result;
 							read( fileIn, pResult, dwPngSize );
 							close( fileIn );
-							result = TlenUploadAvatar(pResult, dwPngSize, IsDlgButtonChecked(hwndDlg, IDC_PUBLICAVATAR));
+							TlenUploadAvatar(pResult, dwPngSize, IsDlgButtonChecked(hwndDlg, IDC_PUBLICAVATAR));
 							mir_free(pResult);
 						}
 					}
 				}
 				break;
 			case IDC_DELETEAVATAR:
-				{
-					if (TlenRemoveAvatar() == 0) {
-					}
-					break;
-				}
-
+				TlenRemoveAvatar();
+				break;
 			}
 		break;
 	case WM_TLEN_REFRESH:

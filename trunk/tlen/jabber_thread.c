@@ -34,8 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/types.h>
 #include <sys/stat.h>
 
-extern HWND hAvatarDlg;
-
 //static void __cdecl TlenProcessInvitation(struct ThreadData *info);
 static void __cdecl JabberKeepAliveThread(JABBER_SOCKET s);
 static void JabberProcessStreamOpening(XmlNode *node, void *userdata);
@@ -640,9 +638,6 @@ static void TlenProcessAvatar(XmlNode* node, void *userdata)
 	}
 	if (aNode != NULL) {
 		if (TlenProcessAvatarNode(node, NULL)) {
-			if (hAvatarDlg != NULL) {
-				PostMessage(hAvatarDlg, WM_TLEN_REFRESH, 0, 0);
-			}
 		}
 	}
 }

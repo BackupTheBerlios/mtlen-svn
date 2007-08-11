@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/types.h>
 #include <sys/stat.h>
 
+extern HWND hAvatarDlg;
 extern char *jabberProtoName;
 extern HANDLE hNetlibUser;
 extern struct ThreadData *jabberThreadInfo;
@@ -74,7 +75,7 @@ void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen, BOO
 	}
 }
 
-static void RemoveAvatar(HANDLE hContact) {
+static void RemoveAvatarNotification(HANDLE hContact) {
 	char tFileName[ MAX_PATH ];
 	if (hContact != NULL) {
 		DBDeleteContactSetting(hContact, "ContactPhoto", "File");
@@ -85,6 +86,9 @@ static void RemoveAvatar(HANDLE hContact) {
 	DBDeleteContactSetting(hContact, jabberProtoName, "AvatarFormat");
 	TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName, FALSE );
 	DeleteFileA(tFileName);
+	if (hContact == NULL && hAvatarDlg != NULL) {
+		PostMessage(hAvatarDlg, WM_TLEN_REFRESH, 0, 0);
+	}
 }
 
 int TlenProcessAvatarNode(XmlNode *avatarNode, JABBER_LIST_ITEM *item) {
@@ -101,10 +105,12 @@ int TlenProcessAvatarNode(XmlNode *avatarNode, JABBER_LIST_ITEM *item) {
 	} else {
 		oldHash = item->avatarHash;
 	}
-	aNode = JabberXmlGetChild(avatarNode, "a");
-	if (aNode != NULL) {
-		type = JabberXmlGetAttrValue(aNode, "type");
-		md5 = JabberXmlGetAttrValue(aNode, "md5");
+	if (avatarNode != NULL) {
+		aNode = JabberXmlGetChild(avatarNode, "a");
+		if (aNode != NULL) {
+			type = JabberXmlGetAttrValue(aNode, "type");
+			md5 = JabberXmlGetAttrValue(aNode, "md5");
+		}
 	}
 	if (md5 != NULL) {
 		/* check contact's avatar hash - md5 */
@@ -123,7 +129,7 @@ int TlenProcessAvatarNode(XmlNode *avatarNode, JABBER_LIST_ITEM *item) {
 				mir_free(oldHash);
 				item->newAvatarDownloading = FALSE;
 			}
-			RemoveAvatar(hContact);
+			RemoveAvatarNotification(hContact);
 			ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
 			return 1;
 		}
@@ -132,36 +138,10 @@ int TlenProcessAvatarNode(XmlNode *avatarNode, JABBER_LIST_ITEM *item) {
 }
 
 void TlenProcessPresenceAvatar(XmlNode *node, JABBER_LIST_ITEM *item) {
-	XmlNode *avatarNode, *aNode;
-	char *md5 = NULL, *type = NULL;
+	XmlNode *avatarNode;
 	HANDLE hContact;
 	if ((hContact=JabberHContactFromJID(item->jid)) == NULL) return;
-	if ((avatarNode = JabberXmlGetChild(node, "avatar")) != NULL) {
-		aNode = JabberXmlGetChild(avatarNode, "a");
-		if (aNode != NULL) {
-			type = JabberXmlGetAttrValue(aNode, "type");
-			md5 = JabberXmlGetAttrValue(aNode, "md5");
-		}
-	}
-	if (md5 != NULL) {
-		/* check contact's avatar hash - md5 */
-		if (item->avatarHash == NULL || strcmp(item->avatarHash, md5)) {
-			item->newAvatarDownloading = TRUE;
-			//ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
-			TlenGetAvatar(hContact);
-		}
-	} else {
-		/* remove avatar */
-		if (item->avatarHash != NULL) {
-			char *p = item->avatarHash;
-			item->avatarHash = NULL;
-			mir_free(p);
-			item->newAvatarDownloading = FALSE;
-			RemoveAvatar(hContact);
-			ProtoBroadcastAck(jabberProtoName, hContact, ACKTYPE_AVATAR, ACKRESULT_STATUS, NULL, 0);
-		}
-	}
-
+	TlenProcessAvatarNode(JabberXmlGetChild(node, "avatar"), item);
 }
 
 static char *replaceTokens(const char *base, const char *uri, const char *login, const char* token, int type, int access) {
@@ -215,7 +195,7 @@ static char *replaceTokens(const char *base, const char *uri, const char *login,
 
 static getAvatarMutex = 0;
 
-static int TlenGetAvatarThread(HANDLE hContact) {
+static void TlenGetAvatarThread(HANDLE hContact) {
 	JABBER_LIST_ITEM *item = NULL;
 	NETLIBHTTPREQUEST req;
     NETLIBHTTPREQUEST *resp;
@@ -312,8 +292,11 @@ static int TlenGetAvatarThread(HANDLE hContact) {
 						DBWriteContactSettingDword(hContact, jabberProtoName, "AvatarFormat",  AI.format);
 						success = TRUE;
 					}
+					if (hContact == NULL && hAvatarDlg != NULL) {
+						PostMessage(hAvatarDlg, WM_TLEN_REFRESH, 0, 0);
+					}
 				} else {
-					RemoveAvatar(hContact);
+					RemoveAvatarNotification(hContact);
 					success = TRUE;
 				}
 			}
@@ -331,7 +314,6 @@ static int TlenGetAvatarThread(HANDLE hContact) {
 		mir_free(login);
 	}
 	getAvatarMutex = 0;
-	return !success;
 }
 
 void TlenGetAvatar(HANDLE hContact) {
@@ -339,10 +321,10 @@ void TlenGetAvatar(HANDLE hContact) {
 		return;
 	}
 	getAvatarMutex = 1;
-	TlenGetAvatarThread(hContact);
+	JabberForkThread(TlenGetAvatarThread, 0, hContact);
 }
 
-int TlenRemoveAvatar() {
+void TlenRemoveAvatar() {
 	NETLIBHTTPREQUEST req;
     NETLIBHTTPREQUEST *resp;
 	BOOL success = FALSE;
@@ -365,36 +347,37 @@ int TlenRemoveAvatar() {
 		}
 		mir_free(request);
     }
-	return !success;
 }
 
-int TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
-	NETLIBHTTPREQUEST req;
+void TlenUploadAvatarThread(NETLIBHTTPREQUEST *req) {
     NETLIBHTTPREQUEST *resp;
-	NETLIBHTTPHEADER headers[1];
+	resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)req);
+	mir_free(req->pData);
+	mir_free(req->szUrl);
+	mir_free(req->headers);
+	mir_free(req);
+}
+
+void TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
+	NETLIBHTTPREQUEST *req;
+	NETLIBHTTPHEADER *headers;
 	BOOL success = FALSE;
 	char *request;
 	unsigned char *buffer;
-    if (jabberThreadInfo != NULL) {
+    if (jabberThreadInfo != NULL && dataLen > 0 && data != NULL) {
     	int size, sizeHead, sizeTail;
-    	char tFileName[ MAX_PATH ];
-		FILE* out;
-    	TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, FALSE );
-		out = fopen( tFileName, "wb" );
-		if ( out != NULL ) {
-			fwrite( data, dataLen, 1, out );
-			fclose( out );
-		}
 		request = replaceTokens(jabberThreadInfo->tlenConfig.mailBase, jabberThreadInfo->tlenConfig.avatarUpload, "", jabberThreadInfo->avatarToken, 0, access);
-		ZeroMemory(&req, sizeof(req));
-		req.cbSize = sizeof(req);
-		req.requestType = jabberThreadInfo->tlenConfig.avatarUploadMthd;
-		req.flags = 0;
+		req = (NETLIBHTTPREQUEST *)mir_alloc(sizeof(NETLIBHTTPREQUEST));
+		headers = (NETLIBHTTPHEADER *)mir_alloc(sizeof(NETLIBHTTPHEADER));
+		ZeroMemory(req, sizeof(NETLIBHTTPREQUEST));
+		req->cbSize = sizeof(NETLIBHTTPREQUEST);
+		req->requestType = jabberThreadInfo->tlenConfig.avatarUploadMthd;
+		req->flags = 0;
 		headers[0].szName = "Content-Type";
 		headers[0].szValue = "multipart/form-data; boundary=AaB03x";
-		req.headersCount = 1;
-		req.headers = headers;
-		req.szUrl = request;
+		req->headersCount = 1;
+		req->headers = headers;
+		req->szUrl = request;
 		sizeHead = strlen("--AaB03x\r\nContent-Disposition: form-data; name=\"filename\"; filename=\"plik.png\"\r\nContent-Type: image/png\r\n\r\n");
 		sizeTail = strlen("\r\n--AaB03x--\r\n");
 		size = dataLen + sizeHead + sizeTail;
@@ -402,17 +385,9 @@ int TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 		strcpy(buffer, "--AaB03x\r\nContent-Disposition: form-data; name=\"filename\"; filename=\"plik.png\"\r\nContent-Type: image/png\r\n\r\n");
 		memcpy(buffer + sizeHead, data, dataLen);
 		strcpy(buffer + sizeHead + dataLen, "\r\n--AaB03x--\r\n");
-		req.dataLength = size;
-		req.pData = buffer;
-		resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)&req);
-		if (resp != NULL) {
-			if (resp->resultCode/100==2) {
-				success = TRUE;
-			}
-		}
-		mir_free(buffer);
-		mir_free(request);
+		req->dataLength = size;
+		req->pData = buffer;
+		JabberForkThread(TlenUploadAvatarThread, 0, req);
     }
-	return !success;
 }
 
