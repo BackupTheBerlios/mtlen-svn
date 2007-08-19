@@ -671,10 +671,12 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 				//2.  <message to='the_leech7@tlen.pl' from='ps' type='pic' pid='1014' st='CtIO' rt='nWGa' idt='7709'/>
 				char *crc, *crc_c, *idt, *size, *rt, *pid, *st;
 				idt = JabberXmlGetAttrValue(node, "idt");
+				size = JabberXmlGetAttrValue(node, "size");
 				pid = JabberXmlGetAttrValue(node, "pid");
 				crc_c = JabberXmlGetAttrValue(node, "crc_c");
-				crc_c = JabberXmlGetAttrValue(node, "crc");
+				crc = JabberXmlGetAttrValue(node, "crc");
 				rt = JabberXmlGetAttrValue(node, "rt");
+				st = JabberXmlGetAttrValue(node, "st");
 				if (strcmp(from, "ps")) {
 					if (pid == NULL && crc != NULL) {
 						JabberSend(info->s, "<message type='pic' to='%s' crc_c='n' idt='%s'/>", from, idt);
