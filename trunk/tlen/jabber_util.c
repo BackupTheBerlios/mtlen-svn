@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "jabber.h"
-#include "jabber_ssl.h"
 #include "jabber_list.h"
 #include "crypto/sha1.h"
 #include <ctype.h>

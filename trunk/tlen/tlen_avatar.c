@@ -335,7 +335,6 @@ void TlenSendHttpRequestThread(void *ptr) {
 
 void TlenRemoveAvatar() {
 	NETLIBHTTPREQUEST *req;
-	BOOL success = FALSE;
 	char *request;
 	if (jabberThreadInfo != NULL) {
 		req = (NETLIBHTTPREQUEST *)mir_alloc(sizeof(NETLIBHTTPREQUEST));

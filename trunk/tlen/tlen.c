@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_muc.h"
 #include "tlen_file.h"
 #include "tlen_voice.h"
-//#include "jabber_ssl.h"
 #include "jabber_list.h"
 #include "jabber_iq.h"
 #include "resource.h"
@@ -94,11 +93,6 @@ char *jabberVcardPhotoType;
 BOOL jabberSendKeepAlive;
 
 HANDLE hTlenNudge = NULL;
-#ifndef TLEN_PLUGIN
-// SSL-related global variable
-HANDLE hLibSSL;
-PVOID jabberSslCtx;
-#endif
 
 HANDLE hMenuMUC, hMenuChats, hMenuInbox;
 HANDLE hMenuContactMUC;
@@ -108,9 +102,6 @@ HANDLE hMenuContactRequestAuth;
 HANDLE hMenuContactFile;
 
 HWND hwndJabberVcard;
-#ifndef TLEN_PLUGIN
-HWND hwndJabberChangePassword;
-#endif
 
 HICON tlenIcons[TLEN_ICON_TOTAL];
 

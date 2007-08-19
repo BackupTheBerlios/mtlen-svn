@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "jabber.h"
-#include "jabber_ssl.h"
 #include "jabber_list.h"
 #include "jabber_iq.h"
 #include "resource.h"
@@ -110,11 +109,6 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 	int reconnectTime;
 	char *str;
 	CLISTMENUITEM clmi;
-#ifndef TLEN_PLUGIN
-	PVOID ssl;
-	BOOL sslMode;
-	char *szLogBuffer;
-#endif
 
 	JabberLog("Thread started");
 
