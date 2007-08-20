@@ -331,6 +331,26 @@ void TlenSendHttpRequestThread(void *ptr) {
 	mir_free(req->headers);
 	mir_free(req->pData);
 	mir_free(req);
+	if (resp != NULL) {
+		CallService(MS_NETLIB_FREEHTTPREQUESTSTRUCT, (WPARAM)0, (LPARAM)resp);
+	}
+	
+}
+
+void TlenSendHttpRequestThread2(void *ptr) {
+	NETLIBHTTPREQUEST *resp;
+	NETLIBHTTPREQUEST *req = (NETLIBHTTPREQUEST *)ptr;
+	resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)hNetlibUser, (LPARAM)req);
+	mir_free(req->szUrl);
+	mir_free(req->headers);
+	mir_free(req->pData);
+	mir_free(req);
+	if (resp != NULL) {
+	//	if (resp->resultCode/100==2) {
+	//		TlenGetAvatar(NULL);
+	//	}
+		CallService(MS_NETLIB_FREEHTTPREQUESTSTRUCT, (WPARAM)0, (LPARAM)resp);
+	}
 }
 
 void TlenRemoveAvatar() {
@@ -376,7 +396,7 @@ void TlenUploadAvatar(unsigned char *data, int dataLen, int access) {
 		strcpy(buffer + sizeHead + dataLen, "\r\n--AaB03x--\r\n");
 		req->dataLength = size;
 		req->pData = buffer;
-		JabberForkThread(TlenSendHttpRequestThread, 0, req);
+		JabberForkThread(TlenSendHttpRequestThread2, 0, req);
 	}
 }
 
