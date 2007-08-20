@@ -172,7 +172,7 @@ struct ThreadData {
 	int  avatarFormat;
 	WORD port;
 	JABBER_SOCKET s;
-	BOOL useSSL;
+	BOOL useEncryption;
 
 	aes_context aes_in_context;
 	aes_context aes_out_context;
@@ -197,15 +197,6 @@ typedef struct {
 	char *szFreechat;
 	char *szInvisible;
 } JABBER_MODEMSGS;
-
-typedef struct {
-	char username[128];
-	char password[128];
-	char server[128];
-	char manualHost[128];
-	WORD port;
-	BOOL useSSL;
-} JABBER_REG_ACCOUNT;
 
 typedef enum { FT_CONNECTING, FT_INITIALIZING, FT_RECEIVING, FT_DONE, FT_ERROR, FT_DENIED, FT_SWITCH } JABBER_FILE_STATE;
 typedef enum { FT_RECV, FT_SEND} JABBER_FILE_MODE;
@@ -257,7 +248,7 @@ typedef struct {
 } JABBER_FIELD_MAP;
 
 typedef struct {
-	int useSSL;
+	int useEncryption;
 	int reconnect;
 	int rosterSync;
 	int offlineAsInvisible;

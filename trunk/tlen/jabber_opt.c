@@ -48,7 +48,7 @@ TLEN_OPTIONS tlenOptions;
 
 void TlenLoadOptions()
 {
-	tlenOptions.useSSL = DBGetContactSettingByte(NULL, jabberProtoName, "UseSSL", TRUE);
+	tlenOptions.useEncryption = DBGetContactSettingByte(NULL, jabberProtoName, "UseEncryption", TRUE);
 	tlenOptions.reconnect = DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE);
 	tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0);
 	tlenOptions.rosterSync = DBGetContactSettingByte(NULL, jabberProtoName, "RosterSync", FALSE);
@@ -332,20 +332,20 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, "tlen.pl");
 			}
 
-			CheckDlgButton(hwndDlg, IDC_USE_SSL, tlenOptions.useSSL);
-
 			EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), TRUE);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), TRUE);
 
 			if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_HOST, dbv.pszVal);
 				DBFreeVariant(&dbv);
-			}
-			else
+			} else
 				SetDlgItemText(hwndDlg, IDC_HOST, "s1.tlen.pl");
 			SetDlgItemInt(hwndDlg, IDC_HOSTPORT, DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT), FALSE);
 
 			CheckDlgButton(hwndDlg, IDC_KEEPALIVE, DBGetContactSettingByte(NULL, jabberProtoName, "KeepAlive", TRUE));
+
+			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, jabberProtoName, "UseEncryption", TRUE));
+			
 			CheckDlgButton(hwndDlg, IDC_VISIBILITY_SUPPORT, DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE));
 			// File transfer options
 			bChecked = FALSE;
@@ -438,6 +438,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			case PSN_APPLY:
 				{
 					WORD port;
+					BOOL useEncryption;
 					BOOL reconnectRequired = FALSE;
 					DBVARIANT dbv;
 					GetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, text, sizeof(text));
@@ -445,8 +446,6 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 						reconnectRequired = TRUE;
 					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
 					DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", strlwr(text));
-
-					DBWriteContactSettingByte(NULL, jabberProtoName, "UseSSL", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_USE_SSL));
 
 					GetDlgItemText(hwndDlg, IDC_HOST, text, sizeof(text));
 					if (DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv) || strcmp(text, dbv.pszVal))
@@ -458,8 +457,15 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					if (DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT) != port)
 						reconnectRequired = TRUE;
 					DBWriteContactSettingWord(NULL, jabberProtoName, "ManualPort", port);
-					DBWriteContactSettingByte(NULL, jabberProtoName, "KeepAlive", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE));
+
 					jabberSendKeepAlive = IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE);
+					DBWriteContactSettingByte(NULL, jabberProtoName, "KeepAlive", (BYTE) jabberSendKeepAlive);
+
+					useEncryption = IsDlgButtonChecked(hwndDlg, IDC_USE_SSL);
+					if (DBGetContactSettingWord(NULL, jabberProtoName, "UseEncryption", TRUE) != useEncryption)
+						reconnectRequired = TRUE;
+					DBWriteContactSettingByte(NULL, jabberProtoName, "UseEncryption", (BYTE) useEncryption);
+
 					DBWriteContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VISIBILITY_SUPPORT));
 					// File transfer options
 					DBWriteContactSettingByte(NULL, jabberProtoName, "UseFileProxy", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY));

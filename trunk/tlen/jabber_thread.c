@@ -220,7 +220,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 		DBFreeVariant(&dbv);
 	}
 	info->port = DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT);
-	info->useSSL = tlenOptions.useSSL;
+	info->useEncryption = tlenOptions.useEncryption;
 
 	if (info->manualHost[0])
 		connectHost = info->manualHost;
@@ -316,7 +316,7 @@ void __cdecl JabberServerThread(struct ThreadData *info)
 
 			info->useAES = FALSE;
 
-			if (info->useSSL) {
+			if (info->useEncryption) {
 				JabberSend(info->s, "<s s='1' v='9' t='06000106'>");
 				
 			} else {
