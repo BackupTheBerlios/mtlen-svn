@@ -462,7 +462,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					DBWriteContactSettingByte(NULL, jabberProtoName, "KeepAlive", (BYTE) jabberSendKeepAlive);
 
 					useEncryption = IsDlgButtonChecked(hwndDlg, IDC_USE_SSL);
-					if (DBGetContactSettingWord(NULL, jabberProtoName, "UseEncryption", TRUE) != useEncryption)
+					if (DBGetContactSettingByte(NULL, jabberProtoName, "UseEncryption", TRUE) != useEncryption)
 						reconnectRequired = TRUE;
 					DBWriteContactSettingByte(NULL, jabberProtoName, "UseEncryption", (BYTE) useEncryption);
 
