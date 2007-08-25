@@ -15,7 +15,7 @@ CFLAGS = $(INCS) -DBUILDING_DLL=1 -DTLEN_PLUGIN -fno-exceptions -fexpensive-opti
 # -save-temps
 LIBS =  -lversion -lwsock32 -lwinmm
 LFLAGS = -s -mdll -mwindows --no-export-all-symbols --add-stdcall-alias
-RCFLAGS = -I rc -O coff
+RCFLAGS = -J rc -O coff
 # --no-export-all-symbols --add-stdcall-alias
 
 .PHONY: all all-before all-after clean clean-custom
