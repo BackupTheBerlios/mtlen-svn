@@ -3,6 +3,7 @@
 Jabber Protocol Plugin for Miranda IM
 Tlen Protocol Plugin for Miranda IM
 Copyright (C) 2002-2004  Santithorn Bunchua
+Copyright (C) 2004-2007  Piotr Piastucki
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -37,10 +38,14 @@ void JabberIqUninit();
 JABBER_IQ_PFUNC JabberIqFetchFunc(int iqId);
 void JabberIqAdd(unsigned int iqId, JABBER_IQ_PROCID procId, JABBER_IQ_PFUNC func);
 
-void JabberIqResultSetAuth(XmlNode *iqNode, void *userdata);
-void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata);
-void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata);
-void JabberIqResultSetSearch(XmlNode *iqNode, void *userdata);
+void JabberIqResultAuth(XmlNode *iqNode, void *userdata);
+void JabberIqResultRoster(XmlNode *iqNode, void *userdata);
+void TlenIqResultVcard(XmlNode *iqNode, void *userdata);
+void JabberIqResultSearch(XmlNode *iqNode, void *userdata);
+void TlenIqResultVersion(XmlNode *iqNode, void *userdata);
+void TlenIqResultInfo(XmlNode *iqNode, void *userdata);
+void TlenIqResultTcfg(XmlNode *iqNode, void *userdata);
+
 void TlenIqResultChatGroups(XmlNode *iqNode, void *userdata);
 void TlenIqResultChatRooms(XmlNode *iqNode, void *userdata);
 void TlenIqResultUserRooms(XmlNode *iqNode, void *userdata);
@@ -48,7 +53,6 @@ void TlenIqResultUserNicks(XmlNode *iqNode, void *userdata);
 void TlenIqResultRoomSearch(XmlNode *iqNode, void *userdata);
 void TlenIqResultRoomInfo(XmlNode *iqNode, void *userdata);
 void TlenIqResultChatRoomUsers(XmlNode *iqNode, void *userdata);
-void TlenIqResultTcfg(XmlNode *iqNode, void *userdata);
 //void JabberIqResultSetPassword(XmlNode *iqNode, void *userdata);
 
 #endif

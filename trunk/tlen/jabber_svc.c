@@ -3,6 +3,7 @@
 Jabber Protocol Plugin for Miranda IM
 Tlen Protocol Plugin for Miranda IM
 Copyright (C) 2002-2004  Santithorn Bunchua
+Copyright (C) 2004-2007  Piotr Piastucki
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -83,7 +84,7 @@ int JabberRunSearch() {
 	if (!jabberOnline) return 0;
 	if (searchQuery != NULL && searchIndex < 10) {
 		iqId = searchID;
-		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSetSearch);
+		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSearch);
 		if (searchIndex == 0) {
 			JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>%s</query></iq>", iqId, searchQuery);
 		} else {
@@ -532,14 +533,14 @@ int JabberGetInfo(WPARAM wParam, LPARAM lParam)
 	if (!jabberOnline) return 1;
 	if (ccs->hContact==NULL) {
 		iqId = JabberSerialNext();
-		JabberIqAdd(iqId, IQ_PROC_NONE, TlenIqResultGetVcard);
+		JabberIqAdd(iqId, IQ_PROC_NONE, TlenIqResultVcard);
 		JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:register'></query></iq>", iqId);
 	} else {
 		if (DBGetContactSetting(ccs->hContact, jabberProtoName, "jid", &dbv)) return 1;
 		if ((nick=JabberNickFromJID(dbv.pszVal)) != NULL) {
 			if ((pNick=JabberTextEncode(nick)) != NULL) {
 				iqId = JabberSerialNext();
-				JabberIqAdd(iqId, IQ_PROC_NONE, TlenIqResultGetVcard);
+				JabberIqAdd(iqId, IQ_PROC_NONE, TlenIqResultVcard);
 				JabberSend(jabberThreadInfo->s, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'><i>%s</i></query></iq>", iqId, pNick);
 				mir_free(pNick);
 			}

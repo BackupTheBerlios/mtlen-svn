@@ -1,7 +1,7 @@
 /*
 
 Tlen Protocol Plugin for Miranda IM
-Copyright (C) 2004  Piotr Piastucki
+Copyright (C) 2004-2007  Piotr Piastucki
 
 This program is based on GSM 06.10 source code developed by 
 Jutta Degener and Carsten Bormann,

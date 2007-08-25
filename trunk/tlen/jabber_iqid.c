@@ -3,6 +3,7 @@
 Jabber Protocol Plugin for Miranda IM
 Tlen Protocol Plugin for Miranda IM
 Copyright (C) 2002-2004  Santithorn Bunchua
+Copyright (C) 2004-2007  Piotr Piastucki
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -29,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern char *streamId;
 extern char *searchJID;
 
-void JabberIqResultSetAuth(XmlNode *iqNode, void *userdata)
+void JabberIqResultAuth(XmlNode *iqNode, void *userdata)
 {
 	struct ThreadData *info = (struct ThreadData *) userdata;
 	char *type;
@@ -65,7 +66,7 @@ void JabberIqResultSetAuth(XmlNode *iqNode, void *userdata)
 	}
 }
 
-void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
+void JabberIqResultRoster(XmlNode *iqNode, void *userdata)
 {
 	//struct ThreadData *info = (struct ThreadData *) userdata;
 	XmlNode *queryNode;
@@ -199,8 +200,9 @@ void JabberIqResultGetRoster(XmlNode *iqNode, void *userdata)
 	}
 }
 
+
 // Tlen actually use jabber:iq:search for other users vCard or jabber:iq:register for own vCard
-void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
+void TlenIqResultVcard(XmlNode *iqNode, void *userdata)
 {
 	XmlNode *queryNode, *itemNode, *n;
 	char *type, *jid;
@@ -355,7 +357,7 @@ void TlenIqResultGetVcard(XmlNode *iqNode, void *userdata)
 	}
 }
 
-void JabberIqResultSetSearch(XmlNode *iqNode, void *userdata)
+void JabberIqResultSearch(XmlNode *iqNode, void *userdata)
 {
 	XmlNode *queryNode, *itemNode, *n;
 	char *type, *jid, *str;
@@ -486,6 +488,64 @@ void TlenIqResultTcfg(XmlNode *iqNode, void *userdata)
 		}
 		if ((node=JabberXmlGetChild(miniMailNode, "avatar-remove")) != NULL) {
 			GetConfigItem(node, info->tlenConfig.avatarRemove, TRUE, &info->tlenConfig.avatarRemoveMthd);
+		}
+	}
+}
+
+void TlenIqResultVersion(XmlNode *node, void *userdata) {
+	XmlNode *queryNode = JabberXmlGetChild(node, "query");
+	if (queryNode != NULL) {
+		char* from;
+		if (( from=JabberXmlGetAttrValue( node, "from" )) != NULL ) {
+			JABBER_LIST_ITEM *item;
+			if (( item=JabberListGetItemPtr( LIST_ROSTER, from ))!=NULL) {
+				HANDLE hContact;
+				XmlNode *n;
+				if ( item->software ) mir_free( item->software );
+				if ( item->version ) mir_free( item->version );
+				if ( item->system ) mir_free( item->system );
+				if (( n=JabberXmlGetChild( queryNode, "name" ))!=NULL && n->text ) {
+					item->software = JabberTextDecode( n->text );
+				} else
+					item->software = NULL;
+				if (( n=JabberXmlGetChild( queryNode, "version" ))!=NULL && n->text )
+					item->version = JabberTextDecode( n->text );
+				else
+					item->version = NULL;
+				if (( n=JabberXmlGetChild( queryNode, "os" ))!=NULL && n->text )
+					item->system = JabberTextDecode( n->text );
+				else
+					item->system = NULL;
+				if (( hContact=JabberHContactFromJID( item->jid )) != NULL ) {
+					if (item->software != NULL) {
+						DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", item->software);
+					} else {
+						DBDeleteContactSetting(hContact, jabberProtoName, "MirVer");
+					}
+				}
+			}
+		}
+	}
+}
+
+void TlenIqResultInfo(XmlNode *node, void *userdata) {
+	XmlNode *queryNode = JabberXmlGetChild(node, "query");
+	if (queryNode != NULL) {
+		char* from;
+		if (( from=JabberXmlGetAttrValue( queryNode, "from" )) != NULL ) {
+			JABBER_LIST_ITEM *item;
+			if (( item=JabberListGetItemPtr( LIST_ROSTER, from ))!=NULL) {
+				HANDLE hContact;
+				XmlNode *version = JabberXmlGetChild(queryNode, "version");
+				item->protocolVersion = JabberTextDecode(version->text);
+				if (( hContact=JabberHContactFromJID( item->jid )) != NULL ) {
+					if (item->software == NULL) {
+						char str[128];
+						mir_snprintf(str, sizeof(str), "Tlen Protocol %s", item->protocolVersion);
+						DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", str);
+					}
+				}
+			}
 		}
 	}
 }

@@ -2,7 +2,8 @@
 
 Jabber Protocol Plugin for Miranda IM
 Tlen Protocol Plugin for Miranda IM
-Copyright (C) 2002-2004  Santithorn Bunchua, Piotr Piastucki
+Copyright (C) 2002-2004  Santithorn Bunchua
+Copyright (C) 2004-2007  Piotr Piastucki
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -71,8 +72,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,9,1)
-#define TLEN_VERSION_STRING  "1.0.9.1"
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,9,2)
+#define TLEN_VERSION_STRING  "1.0.9.2"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "mim_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"
@@ -274,8 +275,6 @@ extern char *jabberProtoName;
 extern char *jabberModuleName;
 extern HANDLE hNetlibUser;
 extern HANDLE hFileNetlibUser;
-extern HANDLE hLibSSL;
-extern PVOID jabberSslCtx;
 
 extern struct ThreadData *jabberThreadInfo;
 extern char *jabberJID;

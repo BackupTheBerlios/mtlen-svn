@@ -3,6 +3,7 @@
 Jabber Protocol Plugin for Miranda IM
 Tlen Protocol Plugin for Miranda IM
 Copyright (C) 2002-2004  Santithorn Bunchua
+Copyright (C) 2004-2007  Piotr Piastucki
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -448,7 +449,7 @@ static void TlenSendAuth(void *userdata) {
 	str = JabberSha1(text);
 	if ((p=JabberTextEncode(info->username)) != NULL) {
 		iqId = JabberSerialNext();
-		JabberIqAdd(iqId, IQ_PROC_NONE, JabberIqResultSetAuth);
+		JabberIqAdd(iqId, IQ_PROC_NONE, JabberIqResultAuth);
 		JabberSend(info->s, "<iq type='set' id='"JABBER_IQID"%d'><query xmlns='jabber:iq:auth'><username>%s</username><digest>%s</digest><resource>t</resource></query></iq>", iqId, p /*info->username*/, str);
 		mir_free(p);
 	}
@@ -567,7 +568,7 @@ static void TlenProcessCipher(XmlNode *node, void *userdata)
 	TlenSendAuth(userdata);
 }
 
-static void TlenProcessIqVersion(XmlNode* node)
+static void TlenProcessIqGetVersion(XmlNode* node)
 {
 	OSVERSIONINFO osvi = { 0 };
 	char mversion[128];
@@ -904,9 +905,13 @@ static void JabberProcessPresence(XmlNode *node, void *userdata)
 							DBWriteContactSettingWord(hContact, jabberProtoName, "Status", (WORD) status);
 					}
 					if (item != NULL) {
-						if (tlenOptions.enableVersion && !item->versionRequested && jabberStatus != ID_STATUS_INVISIBLE) {
+						if (tlenOptions.enableVersion && !item->versionRequested) {
+							int iqId = JabberSerialNext();
 							item->versionRequested = TRUE;
-							JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
+							JabberSend( info->s, "<iq type='get' id='"JABBER_IQID"%d'><query xmlns='jabber:iq:info' to='%s'></query></iq>", iqId, from);
+							if (jabberStatus != ID_STATUS_INVISIBLE) {
+								JabberSend( info->s, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
+							}
 						}
 					}
 					JabberLog("%s (%s) online, set contact status to %d", nick, from, status);
@@ -1182,7 +1187,7 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 	else if ( !strcmp( type, "get" ) && queryNode!=NULL && xmlns!=NULL ) {
 		// RECVED: software version query
 		// ACTION: return my software version
-		if ( !strcmp( xmlns, "jabber:iq:version" )) TlenProcessIqVersion(node);
+		if ( !strcmp( xmlns, "jabber:iq:version" )) TlenProcessIqGetVersion(node);
 //		else if ( !strcmp( xmlns, "jabber:iq:avatar" ))
 //			JabberProcessIqAvatar( idStr, node );
 	}
@@ -1190,39 +1195,11 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 	else if ( !strcmp( type, "result") && queryNode!=NULL) {
 		if (xmlns!=NULL ) {
 			if ( !strcmp(xmlns, "jabber:iq:roster" )) {
-				JabberIqResultGetRoster(node, userdata);
+				JabberIqResultRoster(node, userdata);
 			} else if ( !strcmp( xmlns, "jabber:iq:version" )) {
-			// RECVED: software version result
-			// ACTION: update version information for the specified jid/resource
-				char* from;
-				XmlNode *n;
-				JABBER_LIST_ITEM *item;
-				if (( from=JabberXmlGetAttrValue( node, "from" )) != NULL ) {
-					if (( item=JabberListGetItemPtr( LIST_ROSTER, from ))!=NULL) {
-						if ( item->software ) mir_free( item->software );
-						if ( item->version ) mir_free( item->version );
-						if ( item->system ) mir_free( item->system );
-						if (( n=JabberXmlGetChild( queryNode, "name" ))!=NULL && n->text ) {
-							item->software = JabberTextDecode( n->text );
-						} else
-							item->software = NULL;
-						if (( n=JabberXmlGetChild( queryNode, "version" ))!=NULL && n->text )
-							item->version = JabberTextDecode( n->text );
-						else
-							item->version = NULL;
-						if (( n=JabberXmlGetChild( queryNode, "os" ))!=NULL && n->text )
-							item->system = JabberTextDecode( n->text );
-						else
-							item->system = NULL;
-						if (( hContact=JabberHContactFromJID( item->jid )) != NULL ) {
-							if (item->software != NULL) {
-								DBWriteContactSettingString(hContact, jabberProtoName, "MirVer", item->software);
-							} else {
-								DBDeleteContactSetting(hContact, jabberProtoName, "MirVer");
-							}
-						}
-					}
-				}
+				TlenIqResultVersion(node, userdata);
+			} else if ( !strcmp( xmlns, "jabber:iq:info" )) {
+				TlenIqResultInfo(node, userdata);
 			}
 		} else {
 			char *from;

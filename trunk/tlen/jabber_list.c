@@ -3,6 +3,7 @@
 Jabber Protocol Plugin for Miranda IM
 Tlen Protocol Plugin for Miranda IM
 Copyright (C) 2002-2004  Santithorn Bunchua
+Copyright (C) 2004-2007  Piotr Piastucki
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -90,6 +91,8 @@ static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item)
 	if (item->software) mir_free(item->software);
 	if (item->system) mir_free(item->system);
 	if (item->avatarHash) mir_free(item->avatarHash);
+
+	if (item->protocolVersion) mir_free(item->protocolVersion);
 }
 
 int JabberListExist(JABBER_LIST list, const char *jid)

@@ -56,6 +56,7 @@ typedef struct {
 	char *version;
 	char *system;
 	char *group;
+	char *protocolVersion;
 	int	 avatarFormat;
 	char *avatarHash;
 	BOOL newAvatarDownloading;
