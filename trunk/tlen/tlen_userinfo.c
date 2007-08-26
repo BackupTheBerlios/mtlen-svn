@@ -152,20 +152,8 @@ int TlenUserInfoInit(WPARAM wParam, LPARAM lParam)
 		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
 
 	}
-	if (!lParam && tlenOptions.enableAvatars && jabberOnline) {
-	/* if not enabled - return */
+	if (!lParam && jabberOnline) {
 		CCSDATA ccs = {0};
-		char title[256];
-		mir_snprintf(title, sizeof(title), "%s Avatar", jabberModuleName);
-		odp.cbSize = sizeof(odp);
-		odp.hIcon = NULL;
-		odp.hInstance = hInst;
-		odp.pfnDlgProc = TlenSetAvatarDlgProc;
-		odp.position = 2000000001;
-		odp.pszTemplate = MAKEINTRESOURCE(IDD_USER_SETAVATAR);
-		odp.pszTitle = title;//jabberModuleName;
-		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
-
 		JabberGetInfo(0, (LPARAM) &ccs);
 	}
 	return 0;
@@ -332,110 +320,4 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		break;
 	}
 	return FALSE;
-}
-
-int OnSaveMyAvatar( WPARAM wParam, LPARAM lParam )
-{
-	if ( !lstrcmpA(( char* )wParam, jabberProtoName ) && hAvatarDlg ) {
-		AVATARCACHEENTRY* ace = ( AVATARCACHEENTRY* )lParam;
-		if (ace != NULL) {
-			/*
-			HBITMAP hAvatar = ( HBITMAP )SendDlgItemMessage( hAvatarDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)ace->hbmPic );
-			if ( hAvatar != NULL )
-				DeleteObject( hAvatar );
-			*/
-		}
-	}
-	return 0;
-}
-
-static BOOL CALLBACK TlenSetAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam )
-{
-	switch ( msg ) {
-	case WM_INITDIALOG:
-		TranslateDialogDefault( hwndDlg );
-		hAvatarDlg = hwndDlg;
-		{
-			HBITMAP hAvatar;
-			char tFileName[ MAX_PATH ];
-			TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName, TRUE);
-			DeleteFileA(tFileName);
-			TlenGetAvatarFileName( NULL, tFileName, sizeof tFileName, FALSE);
-			hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)tFileName );
-			if (hAvatar) {
-				SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
-			}
-		}
-		return TRUE;
-	case WM_COMMAND:
-		if ( HIWORD( wParam ) == BN_CLICKED )
-			switch( LOWORD( wParam )) {
-			case IDC_BROWSEAVATAR:
-				CallService(MS_AV_SETMYAVATAR, ( WPARAM )jabberProtoName, 0);
-				{
-					HBITMAP hAvatar;
-					char tFileName[ MAX_PATH ];
-					TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, TRUE);
-					hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)tFileName );
-					if (hAvatar) {
-						hAvatar = (HBITMAP) SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
-						if ( hAvatar != NULL )
-							DeleteObject( hAvatar );
-					}
-				}
-				break;
-			case IDC_SETAVATAR:
-				{
-					char tFileName[ MAX_PATH ];
-					int fileIn;
-					TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, TRUE);
-					fileIn = open( tFileName, O_RDWR | O_BINARY, S_IREAD | S_IWRITE );
-					if ( fileIn != -1 ) {
-						long  dwPngSize = filelength(fileIn);
-						BYTE* pResult = (BYTE *)mir_alloc(dwPngSize);
-						if (pResult != NULL) {
-							read( fileIn, pResult, dwPngSize );
-							close( fileIn );
-							TlenUploadAvatar(pResult, dwPngSize, IsDlgButtonChecked(hwndDlg, IDC_PUBLICAVATAR));
-							mir_free(pResult);
-						}
-					}
-				}
-				break;
-			case IDC_DELETEAVATAR:
-				TlenRemoveAvatar();
-				break;
-			}
-		break;
-	case WM_TLEN_REFRESH:
-		{
-			char tFileName[ MAX_PATH ];
-			HBITMAP hAvatar;
-			TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, FALSE);
-			hAvatar = (HBITMAP)CallService(MS_UTILS_LOADBITMAP, 0, (WPARAM)tFileName );
-			if (hAvatar) {
-				hAvatar = (HBITMAP) SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)hAvatar );
-				if ( hAvatar != NULL )
-					DeleteObject( hAvatar );
-			} else {
-				HBITMAP hBitmap = (HBITMAP)SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)NULL );
-				if ( hBitmap )
-					DeleteObject( hBitmap );
-				InvalidateRect( hwndDlg, NULL, TRUE );
-			}
-		}
-		break;
-	case WM_DESTROY:
-		{
-			HBITMAP hAvatar = ( HBITMAP )SendDlgItemMessage(hwndDlg, IDC_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, 0 );
-			if ( hAvatar != NULL )
-				DeleteObject( hAvatar );
-			hAvatar = ( HBITMAP )SendDlgItemMessage(hwndDlg, IDC_OLD_AVATAR, STM_SETIMAGE, IMAGE_BITMAP, 0 );
-			if ( hAvatar != NULL )
-				DeleteObject( hAvatar );
-			hAvatarDlg = NULL;
-		}
-	}
-
-	return 0;
 }

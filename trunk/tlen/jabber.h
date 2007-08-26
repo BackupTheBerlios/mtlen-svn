@@ -210,7 +210,6 @@ typedef struct {
 	int fileId;
 	char *iqId;
 	int	mode;
-	BOOL newP2P;
 
 	// Used by file receiving only
 	char *hostName;
@@ -230,6 +229,12 @@ typedef struct {
 	long allFileReceivedBytes;
 	char *szDescription;
 	int currentFile;
+	
+	// New p2p
+	BOOL newP2P;
+	aes_context aes_context;
+	unsigned char aes_iv[16];
+
 } TLEN_FILE_TRANSFER;
 
 typedef struct {

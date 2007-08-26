@@ -33,8 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <m_icolib.h>
 #include <m_avatars.h>
 
-extern int OnSaveMyAvatar( WPARAM wParam, LPARAM lParam );
-
 HINSTANCE hInst;
 PLUGINLINK *pluginLink;
 
@@ -129,7 +127,7 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvReserved)
 __declspec(dllexport) PLUGININFO *MirandaPluginInfo(DWORD mirandaVersion)
 {
 	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,6,0,0)) {
-		MessageBoxA(NULL, "The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.6.0 or later.", "Tlen Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
+		MessageBoxA(NULL, "The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.6 or later.", "Tlen Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
 		return NULL;
 	}
 	return &pluginInfo;
@@ -138,8 +136,8 @@ __declspec(dllexport) PLUGININFO *MirandaPluginInfo(DWORD mirandaVersion)
 
 __declspec(dllexport) PLUGININFOEX *MirandaPluginInfoEx( DWORD mirandaVersion )
 {
-	if ( mirandaVersion < PLUGIN_MAKE_VERSION( 0,7,0,0 )) {
-		MessageBoxA( NULL, "The Jabber protocol plugin cannot be loaded. It requires Miranda IM 0.7.0.0 or later.", "Jabber Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST );
+	if ( mirandaVersion < PLUGIN_MAKE_VERSION( 0,7,0,20 )) {
+		MessageBoxA( NULL, "The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.7 or later.", "Jabber Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST );
 		return NULL;
 	}
 
@@ -207,7 +205,6 @@ static int ModulesLoaded(WPARAM wParam, LPARAM lParam)
 	//JabberSslInit();
 	TlenMUCInit();
 	HookEvent_Ex(ME_USERINFO_INITIALISE, TlenUserInfoInit);
-	HookEvent_Ex(ME_AV_MYAVATARCHANGED, OnSaveMyAvatar);
 	sprintf(str, "%s", TranslateT("Incoming mail"));
 	SkinAddNewSoundEx("TlenMailNotify", jabberModuleName, str);
 	sprintf(str, "%s", TranslateT("Alert"));

@@ -645,7 +645,7 @@ void TlenProcessF(XmlNode *node, void *userdata)
 							if (hEvent != NULL) {
 								SetEvent(hEvent);
 							} else {
-								TlenP2PFreeFileTransfer(ft);
+								TlenP2PFreeFileTransfer(item->ft);
 							}
 						} else {
 							JabberListRemove(LIST_FILE, p);

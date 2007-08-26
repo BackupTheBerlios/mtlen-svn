@@ -33,15 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_avatar.h"
 #include "m_avatars.h"
 
-// Functions to set avatar for a protocol
-#define PS_SETMYAVATAR "/SetMyAvatar"
-#define PS_GETMYAVATAR "/GetMyAvatar"
-#define PS_GETMYAVATARMAXSIZE "/GetMyAvatarMaxSize"
-#define PIP_FREEPROPORTIONS	0
-#define PIP_SQUARE			1
-#define PS_GETMYAVATARIMAGEPROPORTION "/GetMyAvatarImageProportion"
-#define PS_ISAVATARFORMATSUPPORTED "/IsAvatarFormatSupported"
-
 char *searchJID = NULL;
 static int searchID;
 static int searchIndex = 0;
@@ -1112,11 +1103,6 @@ int JabberUserIsTyping(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenGetAvatarFormatSupported(WPARAM wParam, LPARAM lParam)
-{
-	return (lParam == PA_FORMAT_PNG) ? 1 : 0;
-}
-
 int TlenGetMyAvatar(WPARAM wParam, LPARAM lParam)
 {
 	char* buf = ( char* )wParam;
@@ -1129,14 +1115,53 @@ int TlenGetMyAvatar(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+static BOOL CALLBACK TlenChangeAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam )
+{
+	switch ( msg ) {
+	case WM_INITDIALOG:
+		TranslateDialogDefault( hwndDlg );
+		SendMessage(hwndDlg, WM_SETICON, (WPARAM) ICON_BIG, (LPARAM) tlenIcons[TLEN_IDI_TLEN]);
+		CheckDlgButton(hwndDlg, IDC_PUBLICAVATAR, TRUE);
+		return TRUE;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDOK:
+			{
+				int result = LOWORD(wParam);
+				if (IsDlgButtonChecked(hwndDlg, IDC_PUBLICAVATAR)) {
+					result |= 0x10000;
+				}
+				EndDialog(hwndDlg, result);
+			}
+			return TRUE;
+		}
+		break;
+	}
+	return 0;
+}
+
 int TlenSetMyAvatar(WPARAM wParam, LPARAM lParam)
 {
 	char* szFileName = ( char* )lParam;
    	char tFileName[ MAX_PATH ];
+	int fileIn;
+	if(!jabberOnline) return 1;
 	if (szFileName != NULL) {
-		TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, TRUE);
+		int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_USER_CHANGEAVATAR), NULL, TlenChangeAvatarDlgProc, (LPARAM) NULL);
+		TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, FALSE);
 		if ( CopyFileA( szFileName, tFileName, FALSE ) == FALSE ) {
 			return 1;
+		}
+		fileIn = open( tFileName, O_RDWR | O_BINARY, S_IREAD | S_IWRITE );
+		if ( fileIn != -1 ) {
+			long  dwPngSize = filelength(fileIn);
+			BYTE* pResult = (BYTE *)mir_alloc(dwPngSize);
+			if (pResult != NULL) {
+				read( fileIn, pResult, dwPngSize );
+				close( fileIn );
+				TlenUploadAvatar(pResult, dwPngSize, (result & 0x10000) != 0);
+				mir_free(pResult);
+			}
 		}
 	} else {
 		TlenRemoveAvatar();
@@ -1144,16 +1169,30 @@ int TlenSetMyAvatar(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenGetAvatarMaxSize(WPARAM wParam, LPARAM lParam)
+int TlenGetAvatarCaps(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam != 0) *((int*) wParam) = 64;
-	if (lParam != 0) *((int*) lParam) = 64;
+	switch (wParam) {
+	case AF_MAXSIZE:
+		{
+			POINT* size = (POINT*)lParam;
+			if ( size )
+				size->x = size->y = 64;
+		}
+	    return 0;
+	case AF_PROPORTION:
+		return PIP_SQUARE;
+	case AF_FORMATSUPPORTED:
+		return (lParam == PA_FORMAT_PNG) ? 1 : 0;
+	case AF_ENABLED:
+		return (tlenOptions.enableAvatars && jabberOnline) ? 1 : 0;
+	case AF_DONTNEEDDELAYS:
+		return 1;
+	case AF_MAXFILESIZE:
+		return 10 * 1024;
+	case AF_DELAYAFTERFAIL:
+		return 0;
+	}
 	return 0;
-}
-
-int TlenGetAvatarProportion(WPARAM wParam, LPARAM lParam)
-{
-	return PIP_SQUARE;
 }
 
 
@@ -1248,14 +1287,8 @@ int JabberSvcInit(void)
 	sprintf(s, "%s%s", jabberProtoName, "/SendNudge");
 	CreateServiceFunction_Ex(s, TlenSendAlert);
 
-	sprintf(s, "%s%s", jabberProtoName, PS_ISAVATARFORMATSUPPORTED);
-	CreateServiceFunction_Ex(s, TlenGetAvatarFormatSupported);
-
-	sprintf(s, "%s%s", jabberProtoName, PS_GETMYAVATARMAXSIZE);
-	CreateServiceFunction_Ex(s, TlenGetAvatarMaxSize);
-
-	sprintf(s, "%s%s", jabberProtoName, PS_GETMYAVATARIMAGEPROPORTION);
-	CreateServiceFunction_Ex(s, TlenGetAvatarProportion);
+	sprintf(s, "%s%s", jabberProtoName, PS_GETAVATARCAPS);
+	CreateServiceFunction_Ex(s, TlenGetAvatarCaps);
 
 	sprintf(s, "%s%s", jabberProtoName, PS_SETMYAVATAR);
 	CreateServiceFunction_Ex(s, TlenSetMyAvatar);
