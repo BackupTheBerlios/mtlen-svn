@@ -62,4 +62,5 @@ extern TLEN_FILE_PACKET* TlenP2PPacketReceive(JABBER_SOCKET s);
 extern void TlenP2PEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft, BOOL sendAck);
 extern TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET s, int list, BOOL sendAck);
 extern JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft);
+extern void TlenP2PStopListening(JABBER_SOCKET s);
 #endif

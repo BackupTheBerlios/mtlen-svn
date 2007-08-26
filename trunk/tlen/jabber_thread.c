@@ -42,7 +42,6 @@ static void JabberProcessProtocol(XmlNode *node, void *userdata);
 static void JabberProcessMessage(XmlNode *node, void *userdata);
 static void JabberProcessPresence(XmlNode *node, void *userdata);
 static void JabberProcessIq(XmlNode *node, void *userdata);
-static void TlenProcessF(XmlNode *node, void *userdata);
 static void TlenProcessW(XmlNode *node, void *userdata);
 static void TlenProcessM(XmlNode *node, void *userdata);
 static void TlenProcessN(XmlNode *node, void *userdata);
@@ -50,6 +49,7 @@ static void TlenProcessP(XmlNode *node, void *userdata);
 static void TlenProcessV(XmlNode *node, void *userdata);
 static void TlenProcessAvatar(XmlNode* node, void *userdata);
 static void TlenProcessCipher(XmlNode *node, void *userdata);
+static void TlenProcessP2P(XmlNode *node, void *userdata);
 
 static VOID CALLBACK JabberDummyApcFunc(DWORD param)
 {
@@ -1018,92 +1018,13 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 	if ((pfunc=JabberIqFetchFunc(id)) != NULL) {
 		JabberLog("Handling iq request for id=%d", id);
 		pfunc(node, userdata);
-	} else if (type == NULL) { // no type - maybe new p2p connection
-		/*
-		JABBER_LIST_ITEM *item;
-		char *from;
-		if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
-			if (!strcmp(xmlns, "p2p")) {
-				XmlNode *fs , *vs, *dcng, *dc;
-				fs = JabberXmlGetChild(queryNode, "fs");
-				vs  = JabberXmlGetChild(queryNode, "vs");
-				dcng  = JabberXmlGetChild(queryNode, "dcng");
-				dc  = JabberXmlGetChild(queryNode, "dc");
-				if (fs  != NULL) {
-					char *e, *id;
-					e=JabberXmlGetAttrValue(fs, "e");
-					id = JabberXmlGetAttrValue(fs, "i");
-					if (e != NULL) {
-						if (!strcmp(e, "1")) {
-							TLEN_FILE_TRANSFER * ft = (TLEN_FILE_TRANSFER *) mir_alloc(sizeof(TLEN_FILE_TRANSFER));
-							memset(ft, 0, sizeof(TLEN_FILE_TRANSFER));
-							ft->jid = mir_strdup(from);
-							ft->hContact = JabberHContactFromJID(from);
-							ft->iqId = mir_strdup(id);
-							if ((item=JabberListAdd(LIST_FILE, ft->iqId)) != NULL) {
-								item->ft = ft;
-							}
-							JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><fs t='%s' e='5' i='%s' v='1'/></query></iq>",
-								from, JabberXmlGetAttrValue(fs, "t"), id);
-						} else if (!strcmp(e, "5")) {
-							id = JabberXmlGetAttrValue(fs, "i");
-							if ((item=JabberListGetItemPtr(LIST_FILE, id)) != NULL) {
-								item->id2 = mir_strdup("84273372");
-								JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dcng n='file_send' k='5' v='2' s='1' i='%s' ck='o7a32V9n2UZYCWpBUhSbFw==' ks='16' iv='MhjWEj9WTsovrQc=o7a32V9n2UZYCWpBUhSbFw==' mi='%s'/></query></iq>",
-								from, item->id2, id);
-							}
-						}
-					}
-				} else if (vs != NULL) {
-
-				} else if (dcng != NULL) {
-					char *n, *k, *v, *s, *id, *ck, *ks, *iv, *mi;
-					n = JabberXmlGetAttrValue(dcng, "n");
-					k = JabberXmlGetAttrValue(dcng, "k");
-					v = JabberXmlGetAttrValue(dcng, "v");
-					s = JabberXmlGetAttrValue(dcng, "s");
-					id = JabberXmlGetAttrValue(dcng, "i");
-					ck = JabberXmlGetAttrValue(dcng, "ck");
-					iv = JabberXmlGetAttrValue(dcng, "iv");
-					mi = JabberXmlGetAttrValue(dcng, "mi");
-					if (!strcmp(s, "1")) {
-//					if (!strcmp(n, "file_send")) {
-						if ((item=JabberListGetItemPtr(LIST_FILE, mi)) != NULL) {
-							JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dcng la='83.175.179.227' lp='4942' pa='83.175.179.227' pp='4942' i='%s' v='2' k='5' s='2'/></query></iq>",
-								from, id);
-							item->id2 = mir_strdup(id);
-						} else {
-							MessageBoxA(NULL, "p2p", p2p1", MB_OK);
-						}
-					} else if (!strcmp(s, "2")) {
-						if ((item=JabberListFindItemPtrById2(LIST_FILE, id)) != NULL) {
-//							JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dc n='file_send' v='1' s='1' i='%s' mi='%s'/></query></iq>",
-//								from, id, item->ft->iqId);
-							JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dcng la='83.175.179.227' lp='4942' pa='83.175.179.227' pp='4942' i='%s' k='5' s='4'/></query></iq>",
-								from, id);
-						} else {
-							MessageBoxA(NULL, "p2p", "p2p2", MB_OK);
-						}
-					} else if (!strcmp(s, "4")) {
-						if ((item=JabberListFindItemPtrById2(LIST_FILE, id)) != NULL) {
-							JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dc n='file_send' v='1' s='1' i='%s' mi='%s'/></query></iq>",
-								from, id, item->ft->iqId);
-						} else {
-							MessageBoxA(NULL, "p2p", "p2p3", MB_OK);
-						}
-					}
-				} else if (dc != NULL) {
-
-				}
-			}
-		}
-		return;
-		*/
-	}
-
 	/////////////////////////////////////////////////////////////////////////
 	// MORE GENERAL ROUTINES, WHEN ID DOES NOT MATCH
 	/////////////////////////////////////////////////////////////////////////
+	// new p2p connections
+	} else if (xmlns != NULL && !strcmp(xmlns, "p2p")) { 
+		//TlenProcessP2P(node, userdata);
+	}
 	// RECVED: <iq type='set'><query ...
 	else if (!strcmp(type, "set") && queryNode!=NULL && xmlns!=NULL) {
 
@@ -1188,8 +1109,6 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 		// RECVED: software version query
 		// ACTION: return my software version
 		if ( !strcmp( xmlns, "jabber:iq:version" )) TlenProcessIqGetVersion(node);
-//		else if ( !strcmp( xmlns, "jabber:iq:avatar" ))
-//			JabberProcessIqAvatar( idStr, node );
 	}
 	// RECVED: <iq type='result'><query ...
 	else if ( !strcmp( type, "result") && queryNode!=NULL) {
@@ -1295,172 +1214,6 @@ static void JabberProcessIq(XmlNode *node, void *userdata)
 	}
 }
 
-/*
- * File transfer
- */
-static void TlenProcessF(XmlNode *node, void *userdata)
-{
-	struct ThreadData *info;
-	TLEN_FILE_TRANSFER *ft;
-	CCSDATA ccs;
-	PROTORECVEVENT pre;
-	char *szBlob, *from, *p, *e, *nick;
-	char jid[128], szFilename[MAX_PATH];
-	int numFiles;
-	JABBER_LIST_ITEM *item;
-
-//	if (!node->name || strcmp(node->name, "f")) return;
-	if ((info=(struct ThreadData *) userdata) == NULL) return;
-
-	if ((from=JabberXmlGetAttrValue(node, "f")) != NULL) {
-
-		if ((e=JabberXmlGetAttrValue(node, "e")) != NULL) {
-
-			if (!strcmp(e, "1")) {
-				// FILE_RECV : e='1' : File transfer request
-				_snprintf(jid, sizeof(jid), "%s@%s", from, info->server);
-				ft = (TLEN_FILE_TRANSFER *) mir_alloc(sizeof(TLEN_FILE_TRANSFER));
-				memset(ft, 0, sizeof(TLEN_FILE_TRANSFER));
-				ft->jid = mir_strdup(jid);
-				ft->hContact = JabberHContactFromJID(jid);
-
-				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL)
-					ft->iqId = mir_strdup(p);
-
-				szFilename[0] = '\0';
-				if ((p=JabberXmlGetAttrValue(node, "c")) != NULL) {
-					numFiles = atoi(p);
-					if (numFiles == 1) {
-						if ((p=JabberXmlGetAttrValue(node, "n")) != NULL) {
-							p = JabberTextDecode(p);
-							strncpy(szFilename, p, sizeof(szFilename));
-							mir_free(p);
-						} else {
-							strcpy(szFilename, TranslateT("1 File"));
-						}
-					}
-					else if (numFiles > 1) {
-						_snprintf(szFilename, sizeof(szFilename), TranslateT("%d Files"), numFiles);
-					}
-				}
-
-				if (szFilename[0]!='\0' && ft->iqId!=NULL) {
-					// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
-					szBlob = (char *) mir_alloc(sizeof(DWORD) + strlen(szFilename) + 2);
-					*((PDWORD) szBlob) = (DWORD) ft;
-					strcpy(szBlob + sizeof(DWORD), szFilename);
-					szBlob[sizeof(DWORD) + strlen(szFilename) + 1] = '\0';
-					pre.flags = 0;
-					pre.timestamp = time(NULL);
-					pre.szMessage = szBlob;
-					pre.lParam = 0;
-					ccs.szProtoService = PSR_FILE;
-					ccs.hContact = ft->hContact;
-					ccs.wParam = 0;
-					ccs.lParam = (LPARAM) &pre;
-					JabberLog("sending chainrecv");
-					CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
-					mir_free(szBlob);
-				}
-				else {
-					// malformed <f/> request, reject
-					if (ft->iqId)
-						JabberSend(info->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, from);
-					else
-						JabberSend(info->s, "<f e='4' t='%s'/>", from);
-					TlenP2PFreeFileTransfer(ft);
-				}
-			}
-			else if (!strcmp(e, "3")) {
-				// FILE_RECV : e='3' : invalid transfer error
-				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
-						if (item->ft != NULL) {
-							HANDLE  hEvent = item->ft->hFileEvent;
-							item->ft->hFileEvent = NULL;
-							item->ft->state = FT_ERROR;
-							Netlib_CloseHandle(item->ft->s);
-							item->ft->s = NULL;
-							if (hEvent != NULL) {
-								SetEvent(hEvent);
-							}
-						} else {
-							JabberListRemove(LIST_FILE, p);
-						}
-					}
-				}
-			}
-			else if (!strcmp(e, "4")) {
-				// FILE_SEND : e='4' : File sending request was denied by the remote client
-				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
-						nick = JabberNickFromJID(item->ft->jid);
-						if (!strcmp(nick, from)) {
-							ProtoBroadcastAck(jabberProtoName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, item->ft, 0);
-							JabberListRemove(LIST_FILE, p);
-						}
-						mir_free(nick);
-					}
-				}
-			}
-			else if (!strcmp(e, "5")) {
-				// FILE_SEND : e='5' : File sending request was accepted
-				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
-						nick = JabberNickFromJID(item->ft->jid);
-						if (!strcmp(nick, from))
-							JabberForkThread((void (__cdecl *)(void*))TlenFileSendingThread, 0, item->ft);
-						mir_free(nick);
-					}
-				}
-			}
-			else if (!strcmp(e, "6")) {
-				// FILE_RECV : e='6' : IP and port information to connect to get file
-				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
-						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
-							item->ft->hostName = mir_strdup(p);
-							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
-								item->ft->wPort = atoi(p);
-								JabberForkThread((void (__cdecl *)(void*))TlenFileReceiveThread, 0, item->ft);
-							}
-						}
-					}
-				}
-			}
-			else if (!strcmp(e, "7")) {
-				// FILE_RECV : e='7' : IP and port information to connect to send file
-				// in case the conection to the given server was not successful
-				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
-						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
-							if (item->ft->hostName!=NULL) mir_free(item->ft->hostName);
-							item->ft->hostName = mir_strdup(p);
-							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
-								item->ft->wPort = atoi(p);
-								item->ft->state = FT_SWITCH;
-								SetEvent(item->ft->hFileEvent);
-							}
-						}
-					}
-				}
-			}
-			else if (!strcmp(e, "8")) {
-				// FILE_RECV : e='8' : transfer error
-				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
-						item->ft->state = FT_ERROR;
-						if (item->ft->hFileEvent != NULL) {
-							SetEvent(item->ft->hFileEvent);
-						} else {
-							ProtoBroadcastAck(jabberProtoName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, item->ft, 0);
-						}
-					}
-				}
-			}
-		}
-	}
-}
 /*
  * Web messages
  */
@@ -1869,6 +1622,8 @@ static void TlenProcessV(XmlNode *node, void *userdata)
 							item->ft->s = NULL;
 							if (hEvent != NULL) {
 								SetEvent(hEvent);
+							} else {
+								TlenP2PFreeFileTransfer(item->ft);
 							}
 						} else {
 							JabberListRemove(LIST_VOICE, p);
@@ -1958,4 +1713,142 @@ static void __cdecl JabberKeepAliveThread(JABBER_SOCKET s)
 			JabberSend(s, " \t ");
 	}
 	JabberLog("Exiting KeepAliveThread");
+}
+
+/*
+aaa sends a file to bbb:
+
+1) aaa wants to SEND bbb a file
+A SEND: <iq to='bbb@tlen.pl'><query xmlns='p2p'><fs t="bbb@tlen.pl" e="1" i="179610858" c="1" s="308278" v="2" /></query></iq>
+B RECV: <iq from='aaa@tlen.pl'><query xmlns='p2p'><fs t="bbb@tlen.pl" e="1" i="179610858" c="1" s="308278" v="2" /></query></iq>
+
+2) bbb ACCEPTs
+B SEND: <iq to='aaa@tlen.pl'><query xmlns='p2p'><fs t="aaa@tlen.pl" e="5" i="179610858" v="2" /></query></iq>
+A RECV: <iq from='bbb@tlen.pl'><query xmlns='p2p'><fs t="aaa@tlen.pl" e="5" i="179610858" v="2" /></query></iq>    
+
+3) aaa tries to establish p2p connection:
+
+A SEND: <iq to='bbb@tlen.pl'><query xmlns='p2p'><dcng n='file_send' k='5' v='2' s='1' i='179610858' ck='rNbjnfRSQwJyaI+oRAXmfQ==' ks='16' iv='MAfaCCrqtuU2Ngw=rNbjnfRSQwJyaI+oRAXmfQ==' mi='24835584'/></query></iq>
+*/
+
+
+					/*
+				} else if (!strcmp(e, "5")) {
+					id = JabberXmlGetAttrValue(fs, "i");
+					if ((item=JabberListGetItemPtr(LIST_FILE, id)) != NULL) {
+						item->id2 = mir_strdup("84273372");
+						JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dcng n='file_send' k='5' v='2' s='1' i='%s' ck='o7a32V9n2UZYCWpBUhSbFw==' ks='16' iv='MhjWEj9WTsovrQc=o7a32V9n2UZYCWpBUhSbFw==' mi='%s'/></query></iq>",
+						from, item->id2, id);
+					}
+					*/
+
+static void TlenProcessP2P(XmlNode *node, void *userdata) {
+	XmlNode *queryNode;
+	struct ThreadData *info;
+	JABBER_LIST_ITEM *item;
+	char *from;
+
+	if ((info=(struct ThreadData *) userdata) == NULL) return;
+	
+	queryNode = JabberXmlGetChild(node, "query");
+	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
+		XmlNode *fs , *vs, *dcng, *dc;
+		/* file send */
+		fs = JabberXmlGetChild(queryNode, "fs");
+		/* voice send */
+		vs  = JabberXmlGetChild(queryNode, "vs");
+		dcng  = JabberXmlGetChild(queryNode, "dcng");
+		dc  = JabberXmlGetChild(queryNode, "dc");
+		if (fs  != NULL) {
+			char *e, *id;
+			/* e - step in the process (starting with 1)*/
+			/* i - id of the file */
+			/* s - size of the file */
+			/* c - number of files */
+			/* v - ??? */
+			e = JabberXmlGetAttrValue(fs, "e");
+			id = JabberXmlGetAttrValue(fs, "i");
+			if (e != NULL) {
+				if (!strcmp(e, "1")) {
+					CCSDATA ccs;
+					PROTORECVEVENT pre;
+					char *c, *s;
+					TLEN_FILE_TRANSFER * ft = (TLEN_FILE_TRANSFER *) mir_alloc(sizeof(TLEN_FILE_TRANSFER));
+					memset(ft, 0, sizeof(TLEN_FILE_TRANSFER));
+					c = JabberXmlGetAttrValue(fs, "c");
+					s = JabberXmlGetAttrValue(fs, "s");
+					ft->jid = mir_strdup(from);
+					ft->hContact = JabberHContactFromJID(from);
+					ft->iqId = mir_strdup(id);
+					ft->fileTotalSize = atoi(s);
+					ft->newP2P = TRUE;
+					if ((item=JabberListAdd(LIST_FILE, ft->iqId)) != NULL) {
+						char *szBlob;
+						char fileInfo[128];
+						item->ft = ft;
+						mir_snprintf(fileInfo, sizeof(fileInfo), "%s file(s), %s bytes", c, s);
+						// blob is DWORD(*ft), ASCIIZ(filenames), ASCIIZ(description)
+						szBlob = (char *) mir_alloc(sizeof(DWORD) + strlen(fileInfo) + 2);
+						*((PDWORD) szBlob) = (DWORD) ft;
+						strcpy(szBlob + sizeof(DWORD), fileInfo);
+						szBlob[sizeof(DWORD) + strlen(fileInfo) + 1] = '\0';
+						pre.flags = 0;
+						pre.timestamp = time(NULL);
+						pre.szMessage = szBlob;
+						pre.lParam = 0;
+						ccs.szProtoService = PSR_FILE;
+						ccs.hContact = ft->hContact;
+						ccs.wParam = 0;
+						ccs.lParam = (LPARAM) &pre;
+						JabberLog("sending chainrecv");
+						CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
+						mir_free(szBlob);
+					}
+				}
+			}
+		} else if (vs != NULL) {
+
+		} else if (dcng != NULL) {
+			char *n, *k, *v, *s, *id, *ck, *ks, *iv, *mi;
+			n = JabberXmlGetAttrValue(dcng, "n");
+			k = JabberXmlGetAttrValue(dcng, "k");
+			v = JabberXmlGetAttrValue(dcng, "v");
+			s = JabberXmlGetAttrValue(dcng, "s");
+			id = JabberXmlGetAttrValue(dcng, "i");
+			ck = JabberXmlGetAttrValue(dcng, "ck");
+			iv = JabberXmlGetAttrValue(dcng, "iv");
+			mi = JabberXmlGetAttrValue(dcng, "mi");
+			
+			/*
+			if (!strcmp(s, "1")) {
+//					if (!strcmp(n, "file_send")) {
+				if ((item=JabberListGetItemPtr(LIST_FILE, mi)) != NULL) {
+					JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dcng la='83.175.179.227' lp='4942' pa='83.175.179.227' pp='4942' i='%s' v='2' k='5' s='2'/></query></iq>",
+						from, id);
+					item->id2 = mir_strdup(id);
+				} else {
+					MessageBoxA(NULL, "p2p", p2p1", MB_OK);
+				}
+			} else if (!strcmp(s, "2")) {
+				if ((item=JabberListFindItemPtrById2(LIST_FILE, id)) != NULL) {
+//							JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dc n='file_send' v='1' s='1' i='%s' mi='%s'/></query></iq>",
+//								from, id, item->ft->iqId);
+					JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dcng la='83.175.179.227' lp='4942' pa='83.175.179.227' pp='4942' i='%s' k='5' s='4'/></query></iq>",
+						from, id);
+				} else {
+					MessageBoxA(NULL, "p2p", "p2p2", MB_OK);
+				}
+			} else if (!strcmp(s, "4")) {
+				if ((item=JabberListFindItemPtrById2(LIST_FILE, id)) != NULL) {
+					JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dc n='file_send' v='1' s='1' i='%s' mi='%s'/></query></iq>",
+						from, id, item->ft->iqId);
+				} else {
+					MessageBoxA(NULL, "p2p", "p2p3", MB_OK);
+				}
+			}
+			*/
+		} else if (dc != NULL) {
+
+		}
+	}
 }

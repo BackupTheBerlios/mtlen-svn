@@ -754,7 +754,11 @@ int JabberFileAllow(WPARAM wParam, LPARAM lParam)
 		item->ft = ft;
 	}
 	nick = JabberNickFromJID(ft->jid);
-	JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='5' v='1'/>", nick, ft->iqId);
+	if (ft->newP2P) {
+		JabberSend(jabberThreadInfo->s, "<iq to='%s'><query xmlns='p2p'><fs t='%s' e='5' i='%s' v='1'/></query></iq>", ft->jid, ft->jid, ft->iqId);
+	} else {
+		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='5' v='1'/>", nick, ft->iqId);
+	}
 	mir_free(nick);
 	return ccs->wParam;
 }
@@ -769,7 +773,11 @@ int JabberFileDeny(WPARAM wParam, LPARAM lParam)
 
 	ft = (TLEN_FILE_TRANSFER *) ccs->wParam;
 	nick = JabberNickFromJID(ft->jid);
-	JabberSend(jabberThreadInfo->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, nick);\
+	if (ft->newP2P) {
+		JabberSend(jabberThreadInfo->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, nick);\
+	} else {
+		JabberSend(jabberThreadInfo->s, "<f i='%s' e='4' t='%s'/>", ft->iqId, nick);\
+	}
 	mir_free(nick);
 	TlenP2PFreeFileTransfer(ft);
 	return 0;
@@ -841,11 +849,14 @@ int JabberSendFile(WPARAM wParam, LPARAM lParam)
 		ft->iqId = mir_strdup(idStr);
 		nick = JabberNickFromJID(ft->jid);
 		item->ft = ft;
-
 /*
-		JabberSend(jabberThreadInfo->s, "<iq to='%s'><query xmlns='p2p'><fs t='%s' e='1' i='%s' c='1' s='%d' v='1'/></query></iq>",
-			ft->jid, ft->jid, idStr, ft->allFileTotalSize);
-			*/
+		{
+			JabberSend(jabberThreadInfo->s, "<iq to='%s'><query xmlns='p2p'><fs t='%s' e='1' i='%s' c='%d' s='%d' v='%d'/></query></iq>",
+				ft->jid, ft->jid, idStr, ft->fileCount, ft->allFileTotalSize, ft->fileCount);
+			
+			ft->newP2P = TRUE;
+		}
+		*/
 
 		if (ft->fileCount == 1) {
 			if ((p=strrchr(files[0], '\\')) != NULL)

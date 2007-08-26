@@ -27,6 +27,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "tlen_p2p_old.h"
 
+static int listenCount = 0;
+static int listenPort;
+static CRITICAL_SECTION listenMutex;
+
 
 void TlenP2PFreeFileTransfer(TLEN_FILE_TRANSFER *ft)
 {
@@ -110,6 +114,12 @@ void TlenP2PPacketPackBuffer(TLEN_FILE_PACKET *packet, char *buffer, int len)
 			JabberLog("TlenP2PPacketPackBuffer() overflow");
 		}
 	}
+}
+
+void TlenP2PInit() {
+}
+
+void TlenP2PUninit() {
 }
 
 int TlenP2PPacketSend(JABBER_SOCKET s, TLEN_FILE_PACKET *packet)
@@ -505,7 +515,7 @@ JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft)
 	if (useProxy<2) {
 		nlb.cbSize = sizeof(NETLIBBIND);
 		nlb.pfnNewConnectionV2 = ft->pfnNewConnectionV2;
-		nlb.wPort = 0;	// User user-specified incoming port ranges, if available
+		nlb.wPort = 0;	// Use user-specified incoming port ranges, if available
 		nlb.pExtra = NULL;
 		JabberLog("Calling MS_NETLIB_BINDPORT");
 		s = (HANDLE) CallService(MS_NETLIB_BINDPORT, (WPARAM) hNetlibUser, (LPARAM) &nlb);
@@ -517,5 +527,17 @@ JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft)
 		ft->wPort = nlb.wPort;
 		ft->wExPort = nlb.wExPort;
 	}
+	if (s != NULL) {
+		listenCount++;
+	}
 	return s;
+}
+
+void TlenP2PStopListening(JABBER_SOCKET s) {
+	if (s != NULL) {
+		listenCount--;
+		if (listenCount <= 0) {
+			Netlib_CloseHandle(s);
+		}
+	}
 }

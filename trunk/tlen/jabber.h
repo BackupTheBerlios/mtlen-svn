@@ -210,6 +210,7 @@ typedef struct {
 	int fileId;
 	char *iqId;
 	int	mode;
+	BOOL newP2P;
 
 	// Used by file receiving only
 	char *hostName;

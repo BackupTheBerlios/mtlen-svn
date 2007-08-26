@@ -730,19 +730,24 @@ int TlenVoiceCancelAll()
 	while ((i=JabberListFindNext(LIST_VOICE, 0)) >=0 ) {
 		if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
 			ft = item->ft;
-			JabberLog("Closing ft->s = %d", ft->s);
 			JabberListRemoveByIndex(i);
-			if (ft->s) {
-				//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-				ft->state = FT_ERROR;
-				Netlib_CloseHandle(ft->s);
-				ft->s = NULL;
-				if (ft->hFileEvent != NULL) {
-					hEvent = ft->hFileEvent;
-					ft->hFileEvent = NULL;
-					SetEvent(hEvent);
+			if (ft != NULL) {
+				if (ft->s) {
+					//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+					JabberLog("Closing ft->s = %d", ft->s);
+					ft->state = FT_ERROR;
+					Netlib_CloseHandle(ft->s);
+					ft->s = NULL;
+					if (ft->hFileEvent != NULL) {
+						hEvent = ft->hFileEvent;
+						ft->hFileEvent = NULL;
+						SetEvent(hEvent);
+						JabberLog("setting event");
+						continue;
+					}
 				}
-				JabberLog("ft->s is now NULL, ft->state is now FT_ERROR");
+				JabberLog("freeing ft struct");
+				TlenP2PFreeFileTransfer(ft);
 			}
 		}
 	}
