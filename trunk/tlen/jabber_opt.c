@@ -63,6 +63,7 @@ void TlenLoadOptions()
 	tlenOptions.enableVersion = DBGetContactSettingByte(NULL, jabberProtoName, "EnableVersion", FALSE);
 	tlenOptions.useNudge = DBGetContactSettingByte(NULL, jabberProtoName, "UseNudge", FALSE);
 	tlenOptions.logAlerts = DBGetContactSettingByte(NULL, jabberProtoName, "LogAlerts", FALSE);
+	tlenOptions.useNewP2P = FALSE;
 }
 
 static int changed = 0;

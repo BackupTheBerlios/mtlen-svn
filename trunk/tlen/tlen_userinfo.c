@@ -79,7 +79,6 @@ JABBER_FIELD_MAP tlenFieldPlan[] = {
 HWND hAvatarDlg = NULL;
 
 static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK TlenSetAvatarDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
 static void InitComboBox(HWND hwndCombo, JABBER_FIELD_MAP *fieldMap)
 {

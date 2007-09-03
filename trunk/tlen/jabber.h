@@ -214,7 +214,8 @@ typedef struct {
 	// Used by file receiving only
 	char *hostName;
 	WORD wPort;
-	WORD wExPort;
+	char *localName;
+	WORD wLocalPort;
 	char *szSavePath;
 	long fileReceivedBytes;
 	long fileTotalSize;
@@ -232,6 +233,8 @@ typedef struct {
 	
 	// New p2p
 	BOOL newP2P;
+	char *id2;
+	SOCKET udps;
 	aes_context aes_context;
 	unsigned char aes_iv[16];
 
@@ -269,6 +272,7 @@ typedef struct {
 	int enableVersion;
 	int useNudge;
 	int logAlerts;
+	int useNewP2P;
 } TLEN_OPTIONS;
 
 /*******************************************************************

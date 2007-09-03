@@ -205,6 +205,10 @@ SOURCE=.\tlen_muc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\tlen_p2p_new.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tlen_p2p_old.c
 # End Source File
 # Begin Source File

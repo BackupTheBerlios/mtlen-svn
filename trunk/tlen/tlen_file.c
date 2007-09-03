@@ -74,7 +74,7 @@ static void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 			ft->currentFile = 0;
 			ft->state = FT_CONNECTING;
 			nick = JabberNickFromJID(ft->jid);
-			JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wExPort);
+			JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
 			mir_free(nick);
 			JabberLog("Waiting for the file to be received...");
 			WaitForSingleObject(hEvent, INFINITE);
@@ -281,7 +281,7 @@ static void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 		ft->state = FT_CONNECTING;
 
 		nick = JabberNickFromJID(ft->jid);
-		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->hostName, ft->wExPort);
+		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
 		mir_free(nick);
 		JabberLog("Waiting for the file to be sent...");
 		WaitForSingleObject(hEvent, INFINITE);
@@ -544,12 +544,11 @@ int TlenFileCancelAll()
 						hEvent = ft->hFileEvent;
 						ft->hFileEvent = NULL;
 						SetEvent(hEvent);
-						JabberLog("setting event");
-						continue;
 					}
+				} else {
+					JabberLog("freeing ft struct");
+					TlenP2PFreeFileTransfer(ft);
 				}
-				JabberLog("freeing ft struct");
-				TlenP2PFreeFileTransfer(ft);
 			}
 		}
 	}
@@ -640,10 +639,12 @@ void TlenProcessF(XmlNode *node, void *userdata)
 							HANDLE  hEvent = item->ft->hFileEvent;
 							item->ft->hFileEvent = NULL;
 							item->ft->state = FT_ERROR;
-							Netlib_CloseHandle(item->ft->s);
-							item->ft->s = NULL;
-							if (hEvent != NULL) {
-								SetEvent(hEvent);
+							if (item->ft->s != NULL) {
+								Netlib_CloseHandle(item->ft->s);
+								item->ft->s = NULL;
+								if (hEvent != NULL) {
+									SetEvent(hEvent);
+								}
 							} else {
 								TlenP2PFreeFileTransfer(item->ft);
 							}

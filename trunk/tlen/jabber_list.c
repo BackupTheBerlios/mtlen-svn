@@ -93,6 +93,7 @@ static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item)
 	if (item->avatarHash) mir_free(item->avatarHash);
 
 	if (item->protocolVersion) mir_free(item->protocolVersion);
+	if (item->id2) mir_free(item->id2);
 }
 
 int JabberListExist(JABBER_LIST list, const char *jid)
@@ -143,6 +144,7 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 
 	lists = (JABBER_LIST_ITEM *) mir_realloc(lists, sizeof(JABBER_LIST_ITEM)*(count+1));
 	item = &(lists[count]);
+	memset(item, 0, sizeof(JABBER_LIST_ITEM));
 	item->list = list;
 	item->jid = s;
 	item->nick = NULL;
@@ -162,6 +164,7 @@ JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid)
 	item->avatarFormat = PA_FORMAT_UNKNOWN;
 	item->newAvatarDownloading = FALSE;
 	item->versionRequested = FALSE;
+	item->infoRequested = FALSE;
 	count++;
 	LeaveCriticalSection(&csLists);
 
@@ -284,9 +287,11 @@ JABBER_LIST_ITEM *JabberListFindItemPtrById2(JABBER_LIST list, const char *id)
 	for(i=0; i<count; i++) {
 		if (lists[i].list==list) {
 			p = lists[i].id2;
-			if (!strncmp(p, id, len)) {
-			  	LeaveCriticalSection(&csLists);
-				return &(lists[i]);
+			if (p != NULL) {
+				if (!strncmp(p, id, len)) {
+			  		LeaveCriticalSection(&csLists);
+					return &(lists[i]);
+				}
 			}
 		}
 	}

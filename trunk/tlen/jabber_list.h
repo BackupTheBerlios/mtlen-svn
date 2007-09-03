@@ -62,6 +62,7 @@ typedef struct {
 	char *avatarHash;
 	BOOL newAvatarDownloading;
 	BOOL versionRequested;
+	BOOL infoRequested;
 	int idMsgAckPending;
 	char *messageEventIdStr;
 	BOOL wantComposingEvent;
