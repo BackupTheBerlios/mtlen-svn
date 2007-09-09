@@ -138,7 +138,6 @@ void __cdecl TlenNewFileSendThread(TLEN_FILE_TRANSFER *ft)
 		}
 		for (step = 0; step < 10; step ++) {
 //		while (ft->udps != INVALID_SOCKET) {
-			SOCKADDR_IN cad;
 			int alen;
 			int j, n;
 			char buff[1024];
@@ -156,7 +155,7 @@ void __cdecl TlenNewFileSendThread(TLEN_FILE_TRANSFER *ft)
 			n=sendto(ft->udps, buff, n, 0, (struct sockaddr *)&toad, alen);
 			logInfo("tlen_send.dxx", "UDP");
 			if (fout != NULL) {
-				fprintf(fout, "|send: %d %s %d|",n, inet_ntoa(cad.sin_addr), cad.sin_port);
+				fprintf(fout, "|send: %d %s %d|",n, inet_ntoa(toad.sin_addr), toad.sin_port);
 				for (j = 0; j < n; j++) {
 					fprintf(fout, "%02X-", buff[j]);
 				}
