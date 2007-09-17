@@ -578,7 +578,11 @@ void TlenProcessF(XmlNode *node, void *userdata)
 
 			if (!strcmp(e, "1")) {
 				// FILE_RECV : e='1' : File transfer request
-				_snprintf(jid, sizeof(jid), "%s@%s", from, info->server);
+				if (strchr(from, '@') == NULL) {
+					_snprintf(jid, sizeof(jid), "%s@%s", from, info->server);
+				} else {
+					_snprintf(jid, sizeof(jid), "%s", from);
+				}
 				ft = (TLEN_FILE_TRANSFER *) mir_alloc(sizeof(TLEN_FILE_TRANSFER));
 				memset(ft, 0, sizeof(TLEN_FILE_TRANSFER));
 				ft->jid = mir_strdup(jid);
