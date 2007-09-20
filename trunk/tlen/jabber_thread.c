@@ -662,7 +662,7 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 	}
 	else {
 		if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
-			if (DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", TRUE) && !strcmp(from, "b73@tlen.pl")) {
+			if (DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", TRUE) && strstr(from, "b73@tlen.pl") == from) {
 				return;
 			}
 			// If message is from a stranger (not in roster), item is NULL
@@ -708,8 +708,8 @@ static void JabberProcessMessage(XmlNode *node, void *userdata)
 				if ((bodyNode=JabberXmlGetChild(node, "body")) != NULL) {
 					if (bodyNode->text != NULL) {
 						if ((subjectNode=JabberXmlGetChild(node, "subject"))!=NULL && subjectNode->text!=NULL && subjectNode->text[0]!='\0') {
-							p = (char *) mir_alloc(strlen(subjectNode->text)+strlen(bodyNode->text)+12);
-							sprintf(p, "Subject: %s\r\n%s", subjectNode->text, bodyNode->text);
+							p = (char *) mir_alloc(strlen(subjectNode->text)+strlen(bodyNode->text)+5);
+							sprintf(p, "%s\r\n%s", subjectNode->text, bodyNode->text);
 							localMessage = JabberTextDecode(p);
 							mir_free(p);
 						} else {
