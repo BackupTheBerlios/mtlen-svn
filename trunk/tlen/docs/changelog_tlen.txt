@@ -3,6 +3,8 @@
 * avatar management UI changes
 * user info page changes
 * some clean-up and bugfixes
+* fix for advertisement blocking
+* fix for file transfers
 1.0.9.1
 -------
 * avatar management improvements
