@@ -73,8 +73,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,9,2)
-#define TLEN_VERSION_STRING  "1.0.9.2"
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,9,3)
+#define TLEN_VERSION_STRING  "1.0.9.3"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "mim_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"
@@ -99,10 +99,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define JABBER_ERROR_REMOTE_SERVER_ERROR	502
 #define JABBER_ERROR_SERVICE_UNAVAILABLE	503
 #define JABBER_ERROR_REMOTE_SERVER_TIMEOUT	504
-// File transfer setting
-#define JABBER_OPTION_FT_DIRECT		0	// Direct connection
-#define JABBER_OPTION_FT_PASS		1	// Use PASS server
-#define JABBER_OPTION_FT_PROXY		2	// Use proxy with local port forwarding
 
 #define TLEN_ALERTS_ACCEPT_ALL 0
 #define TLEN_ALERTS_IGNORE_NIR 1
