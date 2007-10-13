@@ -31,7 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_iq.h"
 #include "tlen_p2p_old.h"
 #include "tlen_avatar.h"
-#include "m_avatars.h"
 
 char *searchJID = NULL;
 static int searchID;
@@ -539,7 +538,6 @@ int JabberGetInfo(WPARAM wParam, LPARAM lParam)
 		}
 		DBFreeVariant(&dbv);
 	}
-	JabberLog("hContact = %d", ccs->hContact);
 	return 0;
 }
 
@@ -692,7 +690,7 @@ static int TlenGetAvatarInfo(WPARAM wParam,LPARAM lParam)
 		return GAIR_NOAVATAR;
 	}
 	if (avatarHash != NULL && !downloadingAvatar) {
-		TlenGetAvatarFileName(item, AI->filename, sizeof AI->filename, FALSE);
+		TlenGetAvatarFileName(item, AI->filename, sizeof AI->filename);
 		AI->format = ( AI->hContact == NULL ) ? jabberThreadInfo->avatarFormat : item->avatarFormat;
 		return GAIR_SUCCESS;
 	}
@@ -1108,7 +1106,7 @@ int TlenGetMyAvatar(WPARAM wParam, LPARAM lParam)
 	if ( buf == NULL || size <= 0 )
 		return -1;
 
-	TlenGetAvatarFileName( NULL, buf, size, FALSE);
+	TlenGetAvatarFileName( NULL, buf, size );
 	return 0;
 }
 
@@ -1145,7 +1143,7 @@ int TlenSetMyAvatar(WPARAM wParam, LPARAM lParam)
 	if(!jabberOnline) return 1;
 	if (szFileName != NULL) {
 		int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_USER_CHANGEAVATAR), NULL, TlenChangeAvatarDlgProc, (LPARAM) NULL);
-		TlenGetAvatarFileName( NULL, tFileName, MAX_PATH, FALSE);
+		TlenGetAvatarFileName( NULL, tFileName, MAX_PATH);
 		if ( CopyFileA( szFileName, tFileName, FALSE ) == FALSE ) {
 			return 1;
 		}

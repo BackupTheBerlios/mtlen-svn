@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "jabber.h"
-#include <m_avatars.h>
 #include <commctrl.h>
 #include <io.h>
 #include <fcntl.h>
@@ -75,8 +74,6 @@ JABBER_FIELD_MAP tlenFieldPlan[] = {
 	{ 6, "Waiting for suggestion" },
 	{ 0, NULL }
 };
-
-HWND hAvatarDlg = NULL;
 
 static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 

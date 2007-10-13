@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void TlenProcessPresenceAvatar(XmlNode *node, JABBER_LIST_ITEM *item);
 int TlenProcessAvatarNode(XmlNode *avatarNode, JABBER_LIST_ITEM *item);
-void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen, BOOL isTemp);
+void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen);
 void TlenGetAvatar(HANDLE hContact);
 void TlenUploadAvatar();
 void TlenRemoveAvatar();

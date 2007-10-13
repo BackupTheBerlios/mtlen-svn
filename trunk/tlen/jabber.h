@@ -64,6 +64,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <m_message.h>
 #include <m_skin.h>
 #include <m_popup.h>
+#include <m_avatars.h>
 
 #include "jabber_xml.h"
 #include "crypto/aes.h"
