@@ -73,8 +73,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,0,9,3)
-#define TLEN_VERSION_STRING  "1.0.9.3"
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,1,0,0)
+#define TLEN_VERSION_STRING  "1.1.0.0"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "mim_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"

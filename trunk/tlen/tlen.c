@@ -38,19 +38,6 @@ PLUGINLINK *pluginLink;
 struct MM_INTERFACE memoryManagerInterface;
 HANDLE hEventSkin2IconsChanged;
 
-PLUGININFO pluginInfo = {
-	sizeof(PLUGININFO),
-	"Tlen Protocol",
-	TLEN_VERSION,
-	"Tlen protocol plugin for Miranda IM ("TLEN_VERSION_STRING" "__DATE__")",
-	"Santithorn Bunchua, Adam Strzelecki, Piotr Piastucki",
-	"the_leech@users.berlios.de",
-	"(c) 2002-2007 Santithorn Bunchua, Piotr Piastucki",
-	"http://mtlen.berlios.de",
-	0,
-	0
-};
-
 PLUGININFOEX pluginInfoEx = {
 	sizeof(PLUGININFOEX),
 	"Tlen Protocol",
@@ -123,20 +110,11 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvReserved)
 	return TRUE;
 }
 
-__declspec(dllexport) PLUGININFO *MirandaPluginInfo(DWORD mirandaVersion)
-{
-	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,6,0,0)) {
-		MessageBoxA(NULL, "The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.6 or later.", "Tlen Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
-		return NULL;
-	}
-	return &pluginInfo;
-}
-
 
 __declspec(dllexport) PLUGININFOEX *MirandaPluginInfoEx( DWORD mirandaVersion )
 {
-	if ( mirandaVersion < PLUGIN_MAKE_VERSION( 0,7,0,20 )) {
-		MessageBoxA( NULL, "The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.7 or later.", "Jabber Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST );
+	if ( mirandaVersion < PLUGIN_MAKE_VERSION( 0,7,0,40 )) {
+		MessageBox( NULL, TranslateT("The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.7 or later."), TranslateT("Tlen Protocol Plugin"), MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST );
 		return NULL;
 	}
 
