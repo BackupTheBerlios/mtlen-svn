@@ -6,8 +6,8 @@ CC   = gcc.exe
 WINDRES = windres.exe
 RM = rm
 UPX = upx -9 -q --compress-icons=0
-SRC = chat/AdminWindow.cpp chat/ChatContainer.cpp chat/ChatEvent.cpp chat/ChatGroup.cpp chat/ChatRoom.cpp chat/ChatUser.cpp chat/ChatWindow.cpp chat/FontList.cpp chat/HelperDialog.cpp chat/ManagerWindow.cpp chat/mucc.cpp chat/Options.cpp chat/mucc_services.cpp chat/Utils.cpp
-RES  = chat/mucc.res
+SRC = chats/AdminWindow.cpp chats/ChatContainer.cpp chats/ChatEvent.cpp chats/ChatGroup.cpp chats/ChatRoom.cpp chats/ChatUser.cpp chats/ChatWindow.cpp chats/FontList.cpp chats/HelperDialog.cpp chats/ManagerWindow.cpp chats/mucc.cpp chats/Options.cpp chats/mucc_services.cpp chats/Utils.cpp
+RES  = chats/mucc.res
 OBJ = $(SRC:.cpp=.o) $(RES)
 BIN  = mucc.dll
 INCS =  -I"../../include"
