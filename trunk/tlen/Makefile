@@ -1,4 +1,4 @@
-# Project: mtlen
+# Project: tlen
 # Makefile created by Dev-C++ 4.9.9.0
 
 CPP  = g++.exe
