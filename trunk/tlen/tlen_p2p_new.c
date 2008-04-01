@@ -105,7 +105,7 @@ void __cdecl TlenNewFileReceiveThread(TlenProtocol *proto,  TLEN_FILE_TRANSFER *
 		closesocket(ft->udps);
 	}
 
-	JabberListRemove(LIST_FILE, ft->iqId);
+	JabberListRemove(ft->proto, LIST_FILE, ft->iqId);
 	if (ft->state==FT_DONE)
 		ProtoBroadcastAck(proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 	else {
@@ -261,7 +261,7 @@ void TlenProcessP2P(TlenProtocol *proto, XmlNode *node, ThreadData *info) {
 					ft->iqId = mir_strdup(id);
 					ft->fileTotalSize = atoi(s);
 					ft->newP2P = TRUE;
-					if ((item=JabberListAdd(LIST_FILE, ft->iqId)) != NULL) {
+					if ((item=JabberListAdd(ft->proto, LIST_FILE, ft->iqId)) != NULL) {
 						char *szBlob;
 						char fileInfo[128];
 						item->ft = ft;
@@ -289,7 +289,7 @@ void TlenProcessP2P(TlenProtocol *proto, XmlNode *node, ThreadData *info) {
 					/* transfer denied */
 				} else if (!strcmp(e, "5")) {
 					/* transfer accepted */
-					if ((item=JabberListGetItemPtr(LIST_FILE, id)) != NULL) {
+					if ((item=JabberListGetItemPtr(proto, LIST_FILE, id)) != NULL) {
 						item->id2 = mir_strdup("84273372");
 						item->ft->id2 = mir_strdup("84273372");
 						JabberSend(proto, "<iq to='%s'><query xmlns='p2p'><dcng n='file_send' k='5' v='2' s='1' i='%s' ck='o7a32V9n2UZYCWpBUhSbFw==' ks='16' iv='MhjWEj9WTsovrQc=o7a32V9n2UZYCWpBUhSbFw==' mi='%s'/></query></iq>", from, item->id2, id);
@@ -322,7 +322,7 @@ void TlenProcessP2P(TlenProtocol *proto, XmlNode *node, ThreadData *info) {
 				ck = JabberXmlGetAttrValue(dcng, "ck");
 				iv = JabberXmlGetAttrValue(dcng, "iv");
 				if (!strcmp(n, "file_send")) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, id)) != NULL) {
+					if ((item=JabberListGetItemPtr(proto, LIST_FILE, id)) != NULL) {
 						item->id2 = mir_strdup(id2);
 						item->ft->id2 = mir_strdup(id2);
 						TlenBindUDPSocket(item->ft);
@@ -335,7 +335,7 @@ void TlenProcessP2P(TlenProtocol *proto, XmlNode *node, ThreadData *info) {
 				JabberLog(proto, "%s",from);
 				JabberLog(proto, "%s",id2);
 				/* IP and port */
-				if ((item=JabberListFindItemPtrById2(LIST_FILE, id2)) != NULL) {
+				if ((item=JabberListFindItemPtrById2(proto, LIST_FILE, id2)) != NULL) {
 					item->ft->hostName = mir_strdup(JabberXmlGetAttrValue(dcng, "pa"));
 					item->ft->wPort = atoi(JabberXmlGetAttrValue(dcng, "pp"));
 					TlenBindUDPSocket(item->ft);
@@ -346,7 +346,7 @@ void TlenProcessP2P(TlenProtocol *proto, XmlNode *node, ThreadData *info) {
 				}
 			} else if (!strcmp(s, "4")) {
 				/* IP and port */
-				if ((item=JabberListFindItemPtrById2(LIST_FILE, id2)) != NULL) {
+				if ((item=JabberListFindItemPtrById2(proto, LIST_FILE, id2)) != NULL) {
 					JabberLog(proto, "step = 4");
 					item->ft->hostName = mir_strdup(JabberXmlGetAttrValue(dcng, "pa"));
 					item->ft->wPort = atoi(JabberXmlGetAttrValue(dcng, "pp"));

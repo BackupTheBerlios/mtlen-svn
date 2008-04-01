@@ -39,6 +39,9 @@ static int searchIndex = 0;
 static char *searchQuery = NULL;
 static int searchQueryLen = 0;
 
+extern int TlenOnModulesLoaded(void *ptr, WPARAM wParam, LPARAM lParam);
+extern int TlenOptionsInit(void *ptr, WPARAM wParam, LPARAM lParam);
+
 DWORD TlenGetCaps(PROTO_INTERFACE *ptr, int type, HANDLE hContact)
 {
 	if (type == PFLAGNUM_1)
@@ -58,7 +61,8 @@ DWORD TlenGetCaps(PROTO_INTERFACE *ptr, int type, HANDLE hContact)
 
 int TlenGetName(void *ptr, WPARAM wParam, LPARAM lParam)
 {
-	lstrcpyn((char *) lParam, jabberModuleName, wParam);
+    TlenProtocol *proto = (TlenProtocol *)ptr;
+	lstrcpyn((char *) lParam, proto->iface.m_szProtoName, wParam);
 	return 0;
 }
 
@@ -74,7 +78,7 @@ int TlenRunSearch(TlenProtocol *proto) {
 	if (!jabberOnline) return 0;
 	if (searchQuery != NULL && searchIndex < 10) {
 		iqId = searchID;
-		JabberIqAdd(iqId, IQ_PROC_GETSEARCH, JabberIqResultSearch);
+		JabberIqAdd(proto, iqId, IQ_PROC_GETSEARCH, JabberIqResultSearch);
 		if (searchIndex == 0) {
 			JabberSend(proto, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>%s</query></iq>", iqId, searchQuery);
 		} else {
@@ -321,7 +325,7 @@ int TlenAuthAllow(PROTO_INTERFACE *ptr, HANDLE hContact)
 		HANDLE hContact;
 		JABBER_LIST_ITEM *item;
 
-		if ((item=JabberListGetItemPtr(LIST_ROSTER, jid))==NULL || (item->subscription!=SUB_BOTH && item->subscription!=SUB_TO)) {
+		if ((item=JabberListGetItemPtr(proto, LIST_ROSTER, jid))==NULL || (item->subscription!=SUB_BOTH && item->subscription!=SUB_TO)) {
 			JabberLog(proto, "Try adding contact automatically jid=%s", jid);
 			if ((hContact=AddToListByJID(proto, jid, 0)) != NULL) {
 				// Trigger actual add by removing the "NotOnList" added by AddToListByJID()
@@ -385,9 +389,9 @@ static void TlenConnect(TlenProtocol *proto, int initialStatus)
         thread->proto = proto;
 		proto->iface.m_iDesiredStatus = initialStatus;
 
-		oldStatus = jabberStatus;
-		jabberStatus = ID_STATUS_CONNECTING;
-		ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, jabberStatus);
+		oldStatus = proto->iface.m_iStatus;
+		proto->iface.m_iStatus = ID_STATUS_CONNECTING;
+		ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, proto->iface.m_iStatus);
 		thread->hThread = (HANDLE) JabberForkThread((void (__cdecl *)(void*))JabberServerThread, 0, thread);
 	}
 }
@@ -401,12 +405,12 @@ int TlenSetStatus(PROTO_INTERFACE *ptr, int iNewStatus)
 	proto->iface.m_iDesiredStatus = iNewStatus;
 
  	if (iNewStatus == ID_STATUS_OFFLINE) {
-		if (jabberThreadInfo) {
+		if (proto->threadData) {
 			if (jabberConnected) {
 				JabberSendPresence(proto, ID_STATUS_OFFLINE);
 			}
 			s = proto;
-			jabberThreadInfo = NULL;
+			proto->threadData = NULL;
 			if (jabberConnected) {
 				Sleep(200);
 //				JabberSend(s, "</s>");
@@ -417,22 +421,22 @@ int TlenSetStatus(PROTO_INTERFACE *ptr, int iNewStatus)
 			}
 		}
 		else {
-			if (jabberStatus != ID_STATUS_OFFLINE) {
-				oldStatus = jabberStatus;
-				jabberStatus = ID_STATUS_OFFLINE;
-				ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, jabberStatus);
+			if (proto->iface.m_iStatus != ID_STATUS_OFFLINE) {
+				oldStatus = proto->iface.m_iStatus;
+				proto->iface.m_iStatus = ID_STATUS_OFFLINE;
+				ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, proto->iface.m_iStatus);
 			}
 		}
 	}
-	else if (iNewStatus != jabberStatus) {
+	else if (iNewStatus != proto->iface.m_iStatus) {
 		if (!jabberConnected)
 			TlenConnect(proto, iNewStatus);
 		else {
 			// change status
-			oldStatus = jabberStatus;
+			oldStatus = proto->iface.m_iStatus;
 			// send presence update
 			JabberSendPresence(proto, iNewStatus);
-			ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, jabberStatus);
+			ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, proto->iface.m_iStatus);
 		}
 	}
 	return 0;
@@ -441,7 +445,7 @@ int TlenSetStatus(PROTO_INTERFACE *ptr, int iNewStatus)
 int TlenGetStatus(void *ptr, WPARAM wParam, LPARAM lParam)
 {
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	return jabberStatus;
+	return proto->iface.m_iStatus;
 }
 
 
@@ -459,25 +463,25 @@ int TlenSetAwayMsg(PROTO_INTERFACE *ptr, int iStatus, const char* msg )
 
 	switch (iStatus) {
 	case ID_STATUS_ONLINE:
-		szMsg = &modeMsgs.szOnline;
+		szMsg = &proto->modeMsgs.szOnline;
 		break;
 	case ID_STATUS_AWAY:
 	case ID_STATUS_ONTHEPHONE:
 	case ID_STATUS_OUTTOLUNCH:
-		szMsg = &modeMsgs.szAway;
+		szMsg = &proto->modeMsgs.szAway;
 		break;
 	case ID_STATUS_NA:
-		szMsg = &modeMsgs.szNa;
+		szMsg = &proto->modeMsgs.szNa;
 		break;
 	case ID_STATUS_DND:
 	case ID_STATUS_OCCUPIED:
-		szMsg = &modeMsgs.szDnd;
+		szMsg = &proto->modeMsgs.szDnd;
 		break;
 	case ID_STATUS_FREECHAT:
-		szMsg = &modeMsgs.szFreechat;
+		szMsg = &proto->modeMsgs.szFreechat;
 		break;
 	case ID_STATUS_INVISIBLE:
-		szMsg = &modeMsgs.szInvisible;
+		szMsg = &proto->modeMsgs.szInvisible;
 		break;
 	default:
 		LeaveCriticalSection(&modeMsgMutex);
@@ -494,8 +498,8 @@ int TlenSetAwayMsg(PROTO_INTERFACE *ptr, int iStatus, const char* msg )
 		if (*szMsg != NULL) mir_free(*szMsg);
 		*szMsg = newModeMsg;
 		// Send a presence update if needed
-		if (iStatus == jabberStatus) {
-			JabberSendPresence(proto, jabberStatus);
+		if (iStatus == proto->iface.m_iStatus) {
+			JabberSendPresence(proto, proto->iface.m_iStatus);
 		}
 	}
 
@@ -513,14 +517,14 @@ int JabberGetInfo(PROTO_INTERFACE *ptr, HANDLE hContact, int infoType)
 	if (!jabberOnline) return 1;
 	if (hContact==NULL) {
 		iqId = JabberSerialNext(proto);
-		JabberIqAdd(iqId, IQ_PROC_NONE, TlenIqResultVcard);
+		JabberIqAdd(proto, iqId, IQ_PROC_NONE, TlenIqResultVcard);
 		JabberSend(proto, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:register'></query></iq>", iqId);
 	} else {
 		if (DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) return 1;
 		if ((nick=JabberNickFromJID(dbv.pszVal)) != NULL) {
 			if ((pNick=JabberTextEncode(nick)) != NULL) {
 				iqId = JabberSerialNext(proto);
-				JabberIqAdd(iqId, IQ_PROC_NONE, TlenIqResultVcard);
+				JabberIqAdd(proto, iqId, IQ_PROC_NONE, TlenIqResultVcard);
 				JabberSend(proto, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'><i>%s</i></query></iq>", iqId, pNick);
 				mir_free(pNick);
 			}
@@ -548,17 +552,17 @@ int TlenSetApparentMode(PROTO_INTERFACE *ptr, HANDLE hContact, int mode)
 		jid = dbv.pszVal;
 		switch (mode) {
 		case ID_STATUS_ONLINE:
-			if (jabberStatus==ID_STATUS_INVISIBLE || oldMode==ID_STATUS_OFFLINE)
+			if (proto->iface.m_iStatus==ID_STATUS_INVISIBLE || oldMode==ID_STATUS_OFFLINE)
 				JabberSend(proto, "<presence to='%s'><show>available</show></presence>", jid);
 			break;
 		case ID_STATUS_OFFLINE:
-			if (jabberStatus!=ID_STATUS_INVISIBLE || oldMode==ID_STATUS_ONLINE)
+			if (proto->iface.m_iStatus!=ID_STATUS_INVISIBLE || oldMode==ID_STATUS_ONLINE)
 				JabberSend(proto, "<presence to='%s' type='invisible'/>", jid);
 			break;
 		case 0:
-			if (oldMode==ID_STATUS_ONLINE && jabberStatus==ID_STATUS_INVISIBLE)
+			if (oldMode==ID_STATUS_ONLINE && proto->iface.m_iStatus==ID_STATUS_INVISIBLE)
 				JabberSend(proto, "<presence to='%s' type='invisible'/>", jid);
-			else if (oldMode==ID_STATUS_OFFLINE && jabberStatus!=ID_STATUS_INVISIBLE)
+			else if (oldMode==ID_STATUS_OFFLINE && proto->iface.m_iStatus!=ID_STATUS_INVISIBLE)
 				JabberSend(proto, "<presence to='%s'><show>available</show></presence>", jid);
 			break;
 		}
@@ -594,7 +598,7 @@ static void __cdecl TlenGetAwayMsgThread(void *ptr)
 	JABBER_LIST_ITEM *item;
     SENDACKTHREADDATA *data = (SENDACKTHREADDATA *)ptr;
 	if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "jid", &dbv)) {
-		if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
+		if ((item=JabberListGetItemPtr(data->proto, LIST_ROSTER, dbv.pszVal)) != NULL) {
             DBFreeVariant(&dbv);
             if (item->statusMessage != NULL) {
 				ProtoBroadcastAck(data->proto->iface.m_szModuleName, data->hContact, ACKTYPE_AWAYMSG, ACKRESULT_SUCCESS, (HANDLE) 1, (LPARAM) item->statusMessage);
@@ -654,7 +658,7 @@ int TlenSendMessage(PROTO_INTERFACE *ptr, HANDLE hContact, int flags, const char
 		JabberForkThread(JabberSendMessageAckThread, 0, (void *) tdata);
 	} else {
 		if ((msgEnc=JabberTextEncode(msg)) != NULL) {
-			if (JabberListExist(LIST_CHATROOM, dbv.pszVal) && strchr(dbv.pszVal, '/')==NULL) {
+			if (JabberListExist(proto, LIST_CHATROOM, dbv.pszVal) && strchr(dbv.pszVal, '/')==NULL) {
 				strcpy(msgType, "groupchat");
 			} else if (DBGetContactSettingByte(hContact, proto->iface.m_szModuleName, "bChat", FALSE)) {
 				strcpy(msgType, "privchat");
@@ -677,7 +681,7 @@ int TlenSendMessage(PROTO_INTERFACE *ptr, HANDLE hContact, int flags, const char
 			}
 			else {
 				id = JabberSerialNext(proto);
-				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL)
+				if ((item=JabberListGetItemPtr(proto, LIST_ROSTER, dbv.pszVal)) != NULL)
 					item->idMsgAckPending = id;
 				JabberSend(proto, "<message to='%s' type='%s' id='"JABBER_IQID"%d'><body>%s</body><x xmlns='jabber:x:event'><offline/><delivered/><composing/></x></message>", dbv.pszVal, msgType, id, msgEnc);
 			}
@@ -703,7 +707,7 @@ static int TlenGetAvatarInfo(void *ptr, WPARAM wParam, LPARAM lParam)
 
 	if (AI->hContact != NULL) {
 		if (!DBGetContactSetting(AI->hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
-			item = JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal);
+			item = JabberListGetItemPtr(proto, LIST_ROSTER, dbv.pszVal);
 			DBFreeVariant(&dbv);
 			if (item != NULL) {
 				downloadingAvatar = item->newAvatarDownloading;
@@ -711,8 +715,8 @@ static int TlenGetAvatarInfo(void *ptr, WPARAM wParam, LPARAM lParam)
 			}
 		}
 	} else {
-		if (jabberThreadInfo != NULL) {
-			avatarHash = jabberThreadInfo->avatarHash;
+		if (proto->threadData != NULL) {
+			avatarHash = proto->threadData->avatarHash;
 		}
 	}
 	if ((avatarHash == NULL || avatarHash[0] == '\0') && !downloadingAvatar) {
@@ -720,7 +724,7 @@ static int TlenGetAvatarInfo(void *ptr, WPARAM wParam, LPARAM lParam)
 	}
 	if (avatarHash != NULL && !downloadingAvatar) {
 		TlenGetAvatarFileName(proto, item, AI->filename, sizeof AI->filename);
-		AI->format = ( AI->hContact == NULL ) ? jabberThreadInfo->avatarFormat : item->avatarFormat;
+		AI->format = ( AI->hContact == NULL ) ? proto->threadData->avatarFormat : item->avatarFormat;
 		return GAIR_SUCCESS;
 	}
 	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline) {
@@ -751,7 +755,7 @@ int TlenFileAllow(PROTO_INTERFACE *ptr, HANDLE hContact, HANDLE hTransfer, const
 
 	ft = (TLEN_FILE_TRANSFER *) hTransfer;
 	ft->szSavePath = mir_strdup(szPath);
-	if ((item=JabberListAdd(LIST_FILE, ft->iqId)) != NULL) {
+	if ((item=JabberListAdd(proto, LIST_FILE, ft->iqId)) != NULL) {
 		item->ft = ft;
 	}
 	nick = JabberNickFromJID(ft->jid);
@@ -841,7 +845,7 @@ int TlenSendFile(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szDescriptio
 
 	id = JabberSerialNext(proto);
 	_snprintf(idStr, sizeof(idStr), "%d", id);
-	if ((item=JabberListAdd(LIST_FILE, idStr)) != NULL) {
+	if ((item=JabberListAdd(proto, LIST_FILE, idStr)) != NULL) {
 		ft->iqId = mir_strdup(idStr);
 		nick = JabberNickFromJID(ft->jid);
 		item->ft = ft;
@@ -902,7 +906,7 @@ int JabberDbSettingChanged(void *ptr, WPARAM wParam, LPARAM lParam)
 		// A contact's group is changed
 		if (!strcmp(cws->szSetting, "Group")) {
 			if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
-				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
+				if ((item=JabberListGetItemPtr(proto, LIST_ROSTER, dbv.pszVal)) != NULL) {
 					DBFreeVariant(&dbv);
 					if (!DBGetContactSetting(hContact, "CList", "MyHandle", &dbv)) {
 						nick = JabberTextEncode(dbv.pszVal);
@@ -952,7 +956,7 @@ int JabberDbSettingChanged(void *ptr, WPARAM wParam, LPARAM lParam)
 
 			if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 				jid = dbv.pszVal;
-				if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
+				if ((item=JabberListGetItemPtr(proto, LIST_ROSTER, dbv.pszVal)) != NULL) {
 					if (cws->value.type == DBVT_DELETED) {
 						newNick = mir_strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, GCDNF_NOMYHANDLE));
 					} else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL) {
@@ -1043,7 +1047,7 @@ int JabberContactDeleted(void *ptr, WPARAM wParam, LPARAM lParam)
 			if ((q=strchr(p, '/')) != NULL)
 				*q = '\0';
 		}
-		if (JabberListExist(LIST_ROSTER, jid)) {
+		if (JabberListExist(proto, LIST_ROSTER, jid)) {
 			// Remove from roster, server also handles the presence unsubscription process.
 			JabberSend(proto, "<iq type='set'><query xmlns='jabber:iq:roster'><item jid='%s' subscription='remove'/></query></iq>", jid);
 		}
@@ -1061,7 +1065,7 @@ int TlenUserIsTyping(PROTO_INTERFACE *ptr, HANDLE hContact, int type)
 
 	if (!jabberOnline) return 0;
 	if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
-		if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal))!=NULL /*&& item->wantComposingEvent==TRUE*/) {
+		if ((item=JabberListGetItemPtr(proto, LIST_ROSTER, dbv.pszVal))!=NULL /*&& item->wantComposingEvent==TRUE*/) {
 			switch (type) {
 			case PROTOTYPE_SELFTYPING_OFF:
 				JabberSend(proto, "<m tp='u' to='%s'/>", dbv.pszVal);
@@ -1173,12 +1177,12 @@ int TlenGetAvatarCaps(void *ptr, WPARAM wParam, LPARAM lParam)
 
 int TlenOnEvent( PROTO_INTERFACE *ptr, PROTOEVENTTYPE eventType, WPARAM wParam, LPARAM lParam )
 {
-    /*
     TlenProtocol *proto = (TlenProtocol *)ptr;
 	switch( eventType ) {
-//	case EV_PROTO_ONLOAD:    return TlenOnModulesLoaded(proto, 0, 0 );
+	case EV_PROTO_ONLOAD:    return TlenOnModulesLoaded(proto, 0, 0 );
 	case EV_PROTO_ONOPTIONS: return TlenOptionsInit(proto, wParam, lParam );
-	case EV_PROTO_ONEXIT:    return OnPreShutdown( 0, 0 );
+	//case EV_PROTO_ONEXIT:    return TlenPreShutdown( 0, 0 );
+    /*
 	case EV_PROTO_ONRENAME:
 		{	
 			CLISTMENUITEM clmi = { 0 };
@@ -1186,9 +1190,9 @@ int TlenOnEvent( PROTO_INTERFACE *ptr, PROTOEVENTTYPE eventType, WPARAM wParam, 
 			clmi.flags = CMIM_NAME | CMIF_TCHAR;
 			clmi.ptszName = m_tszUserName;
 			CallService( MS_CLIST_MODIFYMENUITEM, ( WPARAM )m_hMenuRoot, ( LPARAM )&clmi );
-	}	
+    	}	
+     */
     }	
-    */
 	return 1;
 }
 
@@ -1240,6 +1244,7 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
 
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETNAME);
 	CreateServiceFunction_Ex(s, proto, TlenGetName);
+    
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETAVATARINFO);
 	CreateServiceFunction_Ex(s, proto,TlenGetAvatarInfo);
  
@@ -1260,49 +1265,3 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
 
 }
 
-int JabberSvcInit(TlenProtocol *proto)
-{
-    
-  
-/*
-	char s[128];
-	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETNAME);
-	CreateServiceFunction_Ex(s, proto, JabberGetName);
-
-
-	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETSTATUS);
-	CreateServiceFunction_Ex(s, proto,JabberGetStatus);
-
-	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_SETAWAYMSG);
-	CreateServiceFunction_Ex(s, proto,JabberSetAwayMsg);
-
- * sprintf(s, "%s%s", proto->iface.m_szModuleName, PSS_GETAWAYMSG);
-	CreateServiceFunction_Ex(s, proto,JabberGetAwayMsg);
-
-	sprintf(s, "%s%s", proto->iface.m_szModuleName, PSS_USERISTYPING);
-	CreateServiceFunction_Ex(s, proto,JabberUserIsTyping);
-
-	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETAVATARINFO);
-	CreateServiceFunction_Ex(s, proto,TlenGetAvatarInfo);
- 
-	sprintf(s, "%s%s", proto->iface.m_szModuleName, "/SendNudge");
-	CreateServiceFunction_Ex(s, proto,TlenSendAlert);
-
-	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETAVATARCAPS);
-	CreateServiceFunction_Ex(s, proto,TlenGetAvatarCaps);
-
-	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_SETMYAVATAR);
-	CreateServiceFunction_Ex(s, proto,TlenSetMyAvatar);
-
-	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETMYAVATAR);
-	CreateServiceFunction_Ex(s, proto,TlenGetMyAvatar);
-
-*/
-	return 0;
-}
-
-int JabberSvcUninit(void)
-{
-	DestroyServices_Ex();
-	return 0;
-}

@@ -35,8 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_p2p_old.h"
 #include "tlen_file.h"
 
-extern ThreadData *jabberThreadInfo;
-
 static int modeFrequency[]= {0, 0, 8000, 11025, 22050, 44100};
 static int modeFrameSize[]= {0, 0, 5, 5, 10, 25};
 
@@ -409,7 +407,7 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 			ft->state = FT_ERROR;
 		}
 	}
-	JabberListRemove(LIST_VOICE, ft->iqId);
+	JabberListRemove(ft->proto, LIST_VOICE, ft->iqId);
 	if (ft->state==FT_DONE) {
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Finished...");
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
@@ -432,7 +430,7 @@ static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemo
 	TLEN_FILE_TRANSFER *ft;
 	TlenProtocol *proto = (TlenProtocol *)pExtra;
 
-	ft = TlenP2PEstablishIncomingConnection(hConnection, LIST_VOICE, FALSE);
+	ft = TlenP2PEstablishIncomingConnection(proto, hConnection, LIST_VOICE, FALSE);
 	if (ft != NULL) {
 		slisten = ft->s;
 		ft->s = hConnection;
@@ -657,7 +655,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 		JabberLog(ft->proto, "Cannot allocate port to bind for file server thread, thread ended.");
 		ft->state = FT_ERROR;
 	}
-	JabberListRemove(LIST_VOICE, ft->iqId);
+	JabberListRemove(ft->proto, LIST_VOICE, ft->iqId);
 	switch (ft->state) {
 	case FT_DONE:
 		JabberLog(ft->proto, "Finish successfully");
@@ -720,16 +718,16 @@ static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft)
 	}
 }
 
-int TlenVoiceCancelAll()
+int TlenVoiceCancelAll(TlenProtocol *proto)
 {
 	JABBER_LIST_ITEM *item;
 	HANDLE hEvent;
 	int i = 0;
 
-	while ((i=JabberListFindNext(LIST_VOICE, 0)) >=0 ) {
-		if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
+	while ((i=JabberListFindNext(proto, LIST_VOICE, 0)) >=0 ) {
+		if ((item=JabberListGetItemPtrFromIndex(proto, i)) != NULL) {
 			TLEN_FILE_TRANSFER *ft = item->ft;
-			JabberListRemoveByIndex(i);
+			JabberListRemoveByIndex(proto, i);
 			if (ft != NULL) {
 				if (ft->s) {
 					//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
@@ -769,7 +767,7 @@ int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 			char serialId[32];
 			sprintf(serialId, "%d", JabberSerialNext(proto));
-			if ((item = JabberListAdd(LIST_VOICE, serialId)) != NULL) {
+			if ((item = JabberListAdd(proto, LIST_VOICE, serialId)) != NULL) {
                 char *jid = JabberNickFromJID(dbv.pszVal);
                 ft = TlenFileCreateFT(proto, jid);
                 mir_free(jid);
@@ -786,8 +784,8 @@ int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenVoiceIsInUse() {
-	if (JabberListFindNext(LIST_VOICE, 0) >= 0 || voiceDlgHWND!=NULL) {
+int TlenVoiceIsInUse(TlenProtocol *proto) {
+	if (JabberListFindNext(proto, LIST_VOICE, 0) >= 0 || voiceDlgHWND!=NULL) {
 		return 1;
 	}
 	return 0;
@@ -973,9 +971,11 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 
 static void __cdecl TlenVoiceDlgThread(void *ptr)
 {
+    
+    TLEN_FILE_TRANSFER *ft = (TLEN_FILE_TRANSFER *)ptr;
 	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_VOICE), NULL, TlenVoiceDlgProc, (LPARAM) NULL);
 	voiceDlgHWND = NULL;
-	TlenVoiceCancelAll();
+	TlenVoiceCancelAll(ft->proto);
 }
 
 int TlenVoiceStart(TLEN_FILE_TRANSFER *ft, int mode)
@@ -1056,7 +1056,7 @@ static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
 		if (jabberOnline) {
 			JabberSend(data->proto, "<v t='%s' i='%s' e='4' />", data->item->nick, data->item->jid);
 		}
-		JabberListRemove(LIST_VOICE, data->item->jid);
+		JabberListRemove(data->proto, LIST_VOICE, data->item->jid);
 	}
     mir_free(data);
 }
@@ -1064,8 +1064,8 @@ static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
 int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from)
 {
 	JABBER_LIST_ITEM * item;
-	if (!TlenVoiceIsInUse()) {
-		if ((item = JabberListAdd(LIST_VOICE, id)) != NULL) {
+	if (!TlenVoiceIsInUse(proto)) {
+		if ((item = JabberListAdd(proto, LIST_VOICE, id)) != NULL) {
 			int ask, ignore, voiceChatPolicy;
 			ask = TRUE;
 			ignore = FALSE;
@@ -1085,7 +1085,7 @@ int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from)
 				} else {
 					strcpy(jid, from);
 				}
-				item = JabberListGetItemPtr(LIST_ROSTER, jid);
+				item = JabberListGetItemPtr(proto, LIST_ROSTER, jid);
 				ignore = FALSE;
 				if (item == NULL) ignore = TRUE;
 				else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) ignore = TRUE;
@@ -1100,7 +1100,7 @@ int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from)
 				} else {
 					strcpy(jid, from);
 				}
-				item = JabberListGetItemPtr(LIST_ROSTER, jid);
+				item = JabberListGetItemPtr(proto, LIST_ROSTER, jid);
 				ask = FALSE;
 				if (item == NULL) ask = TRUE;
 				else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) ask = TRUE;
@@ -1113,7 +1113,7 @@ int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from)
 				if (jabberOnline) {
 					JabberSend(proto, "<v t='%s' i='%s' e='4' />", from, id);
 				}
-				JabberListRemove(LIST_VOICE, id);
+				JabberListRemove(proto, LIST_VOICE, id);
 			} else {
 				item->nick = mir_strdup(from);
 				if (ask) {

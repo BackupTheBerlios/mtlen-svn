@@ -74,8 +74,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,1,0,0)
-#define TLEN_VERSION_STRING  "1.1.0.0"
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,8,0,0)
+#define TLEN_VERSION_STRING  "1.8.0.0"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "mim_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"
@@ -126,13 +126,85 @@ enum {
 	TLEN_ICON_TOTAL
 };
 
-extern HICON tlenIcons[TLEN_ICON_TOTAL];
-
-
 /*******************************************************************
  * Global data structures and data type definitions
  *******************************************************************/
 typedef HANDLE JABBER_SOCKET;
+
+typedef enum {
+	LIST_ROSTER,	// Roster list
+	LIST_CHATROOM,	// Groupchat room currently joined
+	LIST_FILE,		// Current file transfer session
+	LIST_INVITATIONS,// Invitations to be sent
+	LIST_SEARCH,	 // Rooms names being searched
+	LIST_VOICE,
+	LIST_PICTURE
+} JABBER_LIST;
+
+typedef enum {
+	IQ_PROC_NONE,
+	IQ_PROC_GETSEARCH
+} JABBER_IQ_PROCID;
+
+typedef enum {
+	SUB_NONE,
+	SUB_TO,
+	SUB_FROM,
+	SUB_BOTH
+} JABBER_SUBSCRIPTION;
+
+typedef struct {
+	JABBER_LIST list;
+	char *jid;
+	char *id2;
+
+	// LIST_ROSTER
+	// jid = jid of the contact
+	char *nick;
+	int status;	// Main status, currently useful for transport where no resource information is kept.
+				// On normal contact, this is the same status as shown on contact list.
+	JABBER_SUBSCRIPTION subscription;
+	char *statusMessage;	// Status message when the update is to JID with no resource specified (e.g. transport user)
+	char *software;
+	char *version;
+	char *system;
+	char *group;
+	char *protocolVersion;
+	int	 avatarFormat;
+	char *avatarHash;
+	BOOL newAvatarDownloading;
+	BOOL versionRequested;
+	BOOL infoRequested;
+	int idMsgAckPending;
+	char *messageEventIdStr;
+	BOOL wantComposingEvent;
+	BOOL isTyping;
+
+	// LIST_ROOM
+	// jid = room JID
+	// char *name; // room name
+	//char *type;	// room type
+
+	// LIST_CHATROOM
+	// jid = room JID
+	// char *nick;	// my nick in this chat room (SPECIAL: in UTF8)
+	// JABBER_RESOURCE_STATUS *resource;	// participant nicks in this room
+	char *roomName;
+
+	// LIST_FILE
+	// jid = string representation of port number
+	struct TLEN_FILE_TRANSFER_STRUCT *ft;
+	//WORD port;
+} JABBER_LIST_ITEM;
+
+typedef struct {
+	char *szOnline;
+	char *szAway;
+	char *szNa;
+	char *szDnd;
+	char *szFreechat;
+	char *szInvisible;
+} JABBER_MODEMSGS;
 
 typedef struct {
 	char mailBase[256];
@@ -157,9 +229,33 @@ typedef struct {
 typedef struct {
     PROTO_INTERFACE iface;
     HANDLE hNetlibUser;
+    HANDLE hFileNetlibUser;    
+
+    JABBER_MODEMSGS modeMsgs;
     
     struct ThreadDataStruct *threadData;
+    HANDLE hTlenNudge;
+    HANDLE hMenuMUC;
+    HANDLE hMenuChats;
+    HANDLE hMenuInbox;
+    HANDLE hMenuContactMUC;
+    HANDLE hMenuContactFile;
+    HANDLE hMenuContactVoice;
+    HANDLE hMenuContactGrantAuth;
+    HANDLE hMenuContactRequestAuth;
+    
+    HANDLE* hHooks;
+    unsigned hookNum;
+    
+    int listsCount;
+    JABBER_LIST_ITEM *lists;
+    CRITICAL_SECTION csLists;
+
+    CRITICAL_SECTION serialMutex;
+    unsigned int serial;
+    
 } TlenProtocol;
+
 
 typedef struct ThreadDataStruct{
 	HANDLE hThread;
@@ -186,19 +282,9 @@ typedef struct ThreadDataStruct{
 } ThreadData;
 
 
-
-typedef struct {
-	char *szOnline;
-	char *szAway;
-	char *szNa;
-	char *szDnd;
-	char *szFreechat;
-	char *szInvisible;
-} JABBER_MODEMSGS;
-
 typedef enum { FT_CONNECTING, FT_INITIALIZING, FT_RECEIVING, FT_DONE, FT_ERROR, FT_DENIED, FT_SWITCH } JABBER_FILE_STATE;
 typedef enum { FT_RECV, FT_SEND} JABBER_FILE_MODE;
-typedef struct {
+typedef struct TLEN_FILE_TRANSFER_STRUCT{
 	HANDLE hContact;
 	JABBER_SOCKET s;
 	NETLIBNEWCONNECTIONPROC_V2 pfnNewConnectionV2;
@@ -283,25 +369,15 @@ typedef struct {
  *******************************************************************/
 extern HINSTANCE hInst;
 extern HANDLE hMainThread;
-extern char *jabberModuleName;
-extern HANDLE hFileNetlibUser;
 
-extern ThreadData *jabberThreadInfo;
+extern HICON tlenIcons[TLEN_ICON_TOTAL];
+
 extern BOOL jabberConnected;
 extern BOOL jabberOnline;
-extern int jabberStatus;
 //extern char *jabberModeMsg;
 extern CRITICAL_SECTION modeMsgMutex;
-extern JABBER_MODEMSGS modeMsgs;
 extern TLEN_OPTIONS tlenOptions;
 
-extern HANDLE hEventSettingChanged, hEventContactDeleted, hEventTlenUserInfoInit, hEventTlenOptInit, hEventTlenPrebuildContactMenu;
-
-extern HANDLE hMenuMUC;
-extern HANDLE hMenuChats;
-extern HANDLE hMenuContactMUC;
-extern HANDLE hMenuContactVoice;
-extern HANDLE hTlenNudge;
 
 /*******************************************************************
  * Function declarations
@@ -318,10 +394,9 @@ int JabberWsSendAES(TlenProtocol *proto, char *data, int datalen, aes_context *a
 int JabberWsRecvAES(TlenProtocol *proto, char *data, long datalen, aes_context *aes_ctx, unsigned char *aes_iv);
 // jabber_util.c
 HANDLE HookEventObj_Ex(const char *name, TlenProtocol *proto, MIRANDAHOOKOBJ hook);
-HANDLE HookEvent_Ex(const char *name, MIRANDAHOOK hook);
 HANDLE CreateServiceFunction_Ex(const char *name, TlenProtocol *proto, MIRANDASERVICEOBJ service);
-void UnhookEvents_Ex();
-void DestroyServices_Ex();
+void UnhookEvents_Ex(TlenProtocol *proto);
+void DestroyServices_Ex(TlenProtocol *proto);
 void JabberSerialInit(TlenProtocol *proto);
 void JabberSerialUninit(TlenProtocol *proto);
 unsigned int JabberSerialNext(TlenProtocol *proto);

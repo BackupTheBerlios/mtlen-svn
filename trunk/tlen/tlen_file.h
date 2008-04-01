@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <windows.h>
 
-extern int TlenFileCancelAll();
+extern int TlenFileCancelAll(TlenProtocol *proto);
 extern void TlenProcessF(XmlNode *node, void *userdata);
 extern TLEN_FILE_TRANSFER *TlenFileCreateFT(TlenProtocol *proto, const char *jid);
 #endif

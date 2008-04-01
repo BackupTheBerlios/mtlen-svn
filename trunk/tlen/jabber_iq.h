@@ -27,17 +27,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_xml.h"
 #include "jabber.h"
 
-typedef enum {
-	IQ_PROC_NONE,
-	IQ_PROC_GETSEARCH
-} JABBER_IQ_PROCID;
-
 typedef void (*JABBER_IQ_PFUNC)(TlenProtocol *proto, XmlNode *iqNode);
 
-void JabberIqInit();
-void JabberIqUninit();
-JABBER_IQ_PFUNC JabberIqFetchFunc(int iqId);
-void JabberIqAdd(unsigned int iqId, JABBER_IQ_PROCID procId, JABBER_IQ_PFUNC func);
+typedef struct {
+	int iqId;					// id to match IQ get/set with IQ result
+	JABBER_IQ_PROCID procId;	// must be unique in the list, except for IQ_PROC_NONE which can have multiple entries
+	JABBER_IQ_PFUNC func;		// callback function
+	time_t requestTime;			// time the request was sent, used to remove relinquent entries
+} JABBER_IQ_FUNC;
+
+void JabberIqInit(TlenProtocol *proto);
+void JabberIqUninit(TlenProtocol *proto);
+JABBER_IQ_PFUNC JabberIqFetchFunc(TlenProtocol *proto, int iqId);
+void JabberIqAdd(TlenProtocol *proto, unsigned int iqId, JABBER_IQ_PROCID procId, JABBER_IQ_PFUNC func);
 
 void JabberIqResultAuth(TlenProtocol *proto, XmlNode *iqNode);
 void JabberIqResultRoster(TlenProtocol *proto, XmlNode *iqNode);

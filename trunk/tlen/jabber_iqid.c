@@ -59,7 +59,7 @@ void JabberIqResultAuth(TlenProtocol *proto, XmlNode *iqNode)
 		_snprintf(text, sizeof(text), "%s %s@%s.", TranslateT("Authentication failed for"), proto->threadData->username, proto->threadData->server);
 		MessageBox(NULL, text, TranslateT("Tlen Authentication"), MB_OK|MB_ICONSTOP|MB_SETFOREGROUND);
 		ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_LOGIN, ACKRESULT_FAILED, NULL, LOGINERR_WRONGPASSWORD);
-		jabberThreadInfo = NULL;	// To disallow auto reconnect
+		proto->threadData = NULL;	// To disallow auto reconnect
 	}
 }
 
@@ -82,9 +82,9 @@ void JabberResultSetRoster(TlenProtocol *proto, XmlNode *queryNode) {
                         if (DBGetContactSettingWord(hContact, proto->iface.m_szModuleName, "Status", ID_STATUS_OFFLINE) != ID_STATUS_OFFLINE)
                             DBWriteContactSettingWord(hContact, proto->iface.m_szModuleName, "Status", ID_STATUS_OFFLINE);
                     }
-                    JabberListRemove(LIST_ROSTER, jid);
+                    JabberListRemove(proto, LIST_ROSTER, jid);
                 } else {
-                    item = JabberListAdd(LIST_ROSTER, jid);
+                    item = JabberListAdd(proto, LIST_ROSTER, jid);
                     if (item != NULL) {
                         if (str == NULL) item->subscription = SUB_NONE;
                         else if (!strcmp(str, "both")) item->subscription = SUB_BOTH;
@@ -168,7 +168,7 @@ void JabberIqResultRoster(TlenProtocol *proto, XmlNode *iqNode)
 							nick = JabberLocalNickFromJID(jid);
 						}
 						if (nick != NULL) {
-							item = JabberListAdd(LIST_ROSTER, jid);
+							item = JabberListAdd(proto, LIST_ROSTER, jid);
 							if (item->nick) mir_free(item->nick);
 							item->nick = nick;
 							item->subscription = sub;
@@ -218,7 +218,7 @@ void JabberIqResultRoster(TlenProtocol *proto, XmlNode *iqNode)
 					str = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
 					if(str!=NULL && !strcmp(str, proto->iface.m_szModuleName)) {
 						if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
-							if (!JabberListExist(LIST_ROSTER, dbv.pszVal)) {
+							if (!JabberListExist(proto, LIST_ROSTER, dbv.pszVal)) {
 								JabberLog(proto, "Syncing roster: preparing to delete %s (hContact=0x%x)", dbv.pszVal, hContact);
 								if (listSize >= listAllocSize) {
 									listAllocSize = listSize + 100;
@@ -247,15 +247,15 @@ void JabberIqResultRoster(TlenProtocol *proto, XmlNode *iqNode)
 				memset(&clmi, 0, sizeof(CLISTMENUITEM));
 				clmi.cbSize = sizeof(CLISTMENUITEM);
 				clmi.flags = CMIM_FLAGS;
-				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuMUC, (LPARAM) &clmi);
-				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChats, (LPARAM) &clmi);
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuMUC, (LPARAM) &clmi);
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuChats, (LPARAM) &clmi);
 			}
 
 			jabberOnline = TRUE;
 			JabberLog(proto, "Status changed via THREADSTART");
-			oldStatus = jabberStatus;
+			oldStatus = proto->iface.m_iStatus;
 			JabberSendPresence(proto, proto->iface.m_iDesiredStatus);
-			ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, jabberStatus);
+			ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, proto->iface.m_iStatus);
 			//////////////////////////////////
 		}
 	}
@@ -559,7 +559,7 @@ void TlenIqResultVersion(TlenProtocol *proto, XmlNode *iqNode)
 		char* from;
 		if (( from=JabberXmlGetAttrValue( iqNode, "from" )) != NULL ) {
 			JABBER_LIST_ITEM *item;
-			if (( item=JabberListGetItemPtr( LIST_ROSTER, from ))!=NULL) {
+			if (( item=JabberListGetItemPtr( proto, LIST_ROSTER, from ))!=NULL) {
 				HANDLE hContact;
 				XmlNode *n;
 				if ( item->software ) mir_free( item->software );
@@ -596,7 +596,7 @@ void TlenIqResultInfo(TlenProtocol *proto, XmlNode *iqNode)
 		char* from;
 		if (( from=JabberXmlGetAttrValue( queryNode, "from" )) != NULL ) {
 			JABBER_LIST_ITEM *item;
-			if (( item=JabberListGetItemPtr( LIST_ROSTER, from ))!=NULL) {
+			if (( item=JabberListGetItemPtr( proto, LIST_ROSTER, from ))!=NULL) {
 				HANDLE hContact;
 				XmlNode *version = JabberXmlGetChild(queryNode, "version");
 				item->protocolVersion = JabberTextDecode(version->text);

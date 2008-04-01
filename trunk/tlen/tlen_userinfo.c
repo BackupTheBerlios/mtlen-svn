@@ -127,11 +127,6 @@ static void FetchCombo(HWND hwndDlg, UINT idCtrl, char *fieldName, char **str, i
 	}
 }
 
-typedef struct {
-    TlenProtocol *proto;
-    HANDLE hContact;
-}TLENUSERINFODLGDATA;
-
 
 int TlenUserInfoInit(void *ptr, WPARAM wParam, LPARAM lParam)
 {
@@ -145,17 +140,13 @@ int TlenUserInfoInit(void *ptr, WPARAM wParam, LPARAM lParam)
 	hContact = (HANDLE) lParam;
 	szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
 	if ((szProto!=NULL && !strcmp(szProto, proto->iface.m_szModuleName)) || !lParam) {
-        TLENUSERINFODLGDATA *data = (TLENUSERINFODLGDATA*)mir_alloc(sizeof(TLENUSERINFODLGDATA));
-        data->proto = proto;
-        data->hContact = hContact;
 		odp.cbSize = sizeof(odp);
-		odp.hIcon = NULL;
 		odp.hInstance = hInst;
 		odp.pfnDlgProc = TlenUserInfoDlgProc;
 		odp.position = -2000000000;
 		odp.pszTemplate = ((HANDLE)lParam!=NULL) ? MAKEINTRESOURCE(IDD_USER_INFO):MAKEINTRESOURCE(IDD_USER_VCARD);
-		odp.pszTitle = jabberModuleName;
-        odp.dwInitParam = (LPARAM)data;
+		odp.pszTitle = LPGEN("Account");
+        odp.dwInitParam = (LPARAM)proto;
 		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
 
 	}
@@ -166,15 +157,23 @@ int TlenUserInfoInit(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+typedef struct {
+    TlenProtocol *proto;
+    HANDLE hContact;
+}TLENUSERINFODLGDATA;
+
+
 static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     TLENUSERINFODLGDATA *data = (TLENUSERINFODLGDATA *) GetWindowLong(hwndDlg, GWL_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
+
+        data = (TLENUSERINFODLGDATA*)mir_alloc(sizeof(TLENUSERINFODLGDATA));
+        data->hContact = (HANDLE) lParam;
+        SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)data);
 		// lParam is hContact
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)(HANDLE) lParam);
-
 		InitComboBox(GetDlgItem(hwndDlg, IDC_GENDER), tlenFieldGender);
 		InitComboBox(GetDlgItem(hwndDlg, IDC_OCCUPATION), tlenFieldOccupation);
 		InitComboBox(GetDlgItem(hwndDlg, IDC_LOOKFOR), tlenFieldLookfor);
@@ -260,7 +259,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				mir_free(jid);
 				jid = dbv.pszVal;
 				if (jabberOnline) {
-					if ((item=JabberListGetItemPtr(LIST_ROSTER, jid)) != NULL) {
+					if ((item=JabberListGetItemPtr(data->proto, LIST_ROSTER, jid)) != NULL) {
 						switch (item->subscription) {
 						case SUB_BOTH:
 							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("both"));
@@ -296,6 +295,10 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 					SendMessage(hwndDlg, WM_TLEN_REFRESH, 0, (LPARAM) hContact);
 				}
 				break;
+			case PSN_PARAMCHANGED:
+				{
+					data->proto = ( TlenProtocol* )(( LPPSHNOTIFY )lParam )->lParam;
+				}
 			}
 			break;
 		}

@@ -37,14 +37,14 @@ void TlenGetAvatarFileName(TlenProtocol *proto, JABBER_LIST_ITEM *item, char* ps
 	char* szFileType;
 	if (item != NULL) {
 		format = item->avatarFormat;
-	} else if (jabberThreadInfo != NULL) {
-		format = jabberThreadInfo->avatarFormat;
+	} else if (proto->threadData != NULL) {
+		format = proto->threadData->avatarFormat;
 	} else {
 		format = DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "AvatarFormat", PA_FORMAT_UNKNOWN);
 	}
 	CallService( MS_DB_GETPROFILEPATH, cbLen, (LPARAM) pszDest );
 	tPathLen = strlen( pszDest );
-	tPathLen += mir_snprintf( pszDest + tPathLen, cbLen - tPathLen, "\\%s\\", jabberModuleName  );
+	tPathLen += mir_snprintf( pszDest + tPathLen, cbLen - tPathLen, "\\%s\\", proto->iface.m_szProtoName  );
 	CreateDirectoryA( pszDest, NULL );
 	szFileType = "png";
 	switch(format) {
@@ -67,7 +67,7 @@ void TlenGetAvatarFileName(TlenProtocol *proto, JABBER_LIST_ITEM *item, char* ps
 static void RemoveAvatar(TlenProtocol *proto, HANDLE hContact) {
 	char tFileName[ MAX_PATH ];
 	if (hContact == NULL) {
-		jabberThreadInfo->avatarHash[0] = '\0';
+		proto->threadData->avatarHash[0] = '\0';
 	}
 	TlenGetAvatarFileName( proto, NULL, tFileName, sizeof tFileName );
 	DeleteFileA(tFileName);
@@ -92,15 +92,15 @@ static void SetAvatar(TlenProtocol *proto, HANDLE hContact, JABBER_LIST_ITEM *it
     mir_md5_append( &ctx, data, len);
 	mir_md5_finish( &ctx, ( BYTE* )digest );
     
-	sprintf( md5, "%08x%08x%08x%08x", htonl(digest[0]), htonl(digest[1]), htonl(digest[2]), htonl(digest[3]));
+	sprintf( md5, "%08x%08x%08x%08x", (int)htonl(digest[0]), (int)htonl(digest[1]), (int)htonl(digest[2]), (int)htonl(digest[3]));
 	if (item != NULL) {
 		char *hash = item->avatarHash;
 		item->avatarFormat = format;
 		item->avatarHash = mir_strdup(md5);
 		mir_free(hash);
 	} else {
-		jabberThreadInfo->avatarFormat = format;
-		strcpy(jabberThreadInfo->avatarHash, md5);
+		proto->threadData->avatarFormat = format;
+		strcpy(proto->threadData->avatarHash, md5);
 	}
 	TlenGetAvatarFileName(proto, item, filename, sizeof filename );
 	DeleteFileA(filename);
@@ -125,7 +125,7 @@ int TlenProcessAvatarNode(TlenProtocol *proto, XmlNode *avatarNode, JABBER_LIST_
 		if ((hContact=JabberHContactFromJID(proto, item->jid)) == NULL) return 0;
 	} 
 	if (item == NULL) {
-		oldHash = jabberThreadInfo->avatarHash;
+		oldHash = proto->threadData->avatarHash;
 	} else {
 		oldHash = item->avatarHash;
 	}
@@ -223,6 +223,7 @@ typedef struct {
     TlenProtocol *proto;
     HANDLE hContact;
 } TLENGETAVATARTHREADDATA;
+
 static void TlenGetAvatarThread(void *ptr) {
     
     JABBER_LIST_ITEM *item = NULL;
@@ -235,20 +236,20 @@ static void TlenGetAvatarThread(void *ptr) {
 	if (hContact != NULL) {
 		char *jid = JabberJIDFromHContact(data->proto, hContact);
 		login = JabberNickFromJID(jid);
-		item = JabberListGetItemPtr(LIST_ROSTER, jid);
+		item = JabberListGetItemPtr(data->proto, LIST_ROSTER, jid);
 		mir_free(jid);
 	} else {
-		login = mir_strdup(jabberThreadInfo->username);
+		login = mir_strdup(data->proto->threadData->username);
 	}
-	if ((jabberThreadInfo != NULL && hContact == NULL) || item != NULL) {
+	if ((data->proto->threadData != NULL && hContact == NULL) || item != NULL) {
 		DWORD format = PA_FORMAT_UNKNOWN;
 		if (item!= NULL) {
 			item->newAvatarDownloading = TRUE;
 		}
-		request = replaceTokens(jabberThreadInfo->tlenConfig.mailBase, jabberThreadInfo->tlenConfig.avatarGet, login, jabberThreadInfo->avatarToken, 0, 0);
+		request = replaceTokens(data->proto->threadData->tlenConfig.mailBase, data->proto->threadData->tlenConfig.avatarGet, login, data->proto->threadData->avatarToken, 0, 0);
 		ZeroMemory(&req, sizeof(req));
 		req.cbSize = sizeof(req);
-		req.requestType = jabberThreadInfo->tlenConfig.avatarGetMthd;
+		req.requestType = data->proto->threadData->tlenConfig.avatarGetMthd;
 		req.flags = 0;
 		req.headersCount = 0;
 		req.headers = NULL;
@@ -360,15 +361,15 @@ static void TlenUploadAvatarRequestThread(void *ptr) {
 void TlenRemoveAvatar(TlenProtocol *proto) {
 	NETLIBHTTPREQUEST *req;
 	char *request;
-	if (jabberThreadInfo != NULL) {
+	if (proto->threadData != NULL) {
         TLENREMOVEAVATARTHREADDATA *data = (TLENREMOVEAVATARTHREADDATA *)mir_alloc(sizeof(TLENREMOVEAVATARTHREADDATA));
 		req = (NETLIBHTTPREQUEST *)mir_alloc(sizeof(NETLIBHTTPREQUEST));
         data->proto =proto;
         data->req = req;
-		request = replaceTokens(jabberThreadInfo->tlenConfig.mailBase, jabberThreadInfo->tlenConfig.avatarRemove, "", jabberThreadInfo->avatarToken, 0, 0);
+		request = replaceTokens(proto->threadData->tlenConfig.mailBase, proto->threadData->tlenConfig.avatarRemove, "", proto->threadData->avatarToken, 0, 0);
 		ZeroMemory(req, sizeof(NETLIBHTTPREQUEST));
 		req->cbSize = sizeof(NETLIBHTTPREQUEST);
-		req->requestType = jabberThreadInfo->tlenConfig.avatarGetMthd;
+		req->requestType = proto->threadData->tlenConfig.avatarGetMthd;
 		req->szUrl = request;
 		JabberForkThread(TlenRemoveAvatarRequestThread, 0, data);
 	}
@@ -381,16 +382,16 @@ void TlenUploadAvatar(TlenProtocol *proto, unsigned char *data, int dataLen, int
 	TLENUPLOADAVATARTHREADDATA *threadData;
 	char *request;
 	unsigned char *buffer;
-	if (jabberThreadInfo != NULL && dataLen > 0 && data != NULL) {
+	if (proto->threadData != NULL && dataLen > 0 && data != NULL) {
 		int size, sizeHead, sizeTail;
-		request = replaceTokens(jabberThreadInfo->tlenConfig.mailBase, jabberThreadInfo->tlenConfig.avatarUpload, "", jabberThreadInfo->avatarToken, 0, access);
+		request = replaceTokens(proto->threadData->tlenConfig.mailBase, proto->threadData->tlenConfig.avatarUpload, "", proto->threadData->avatarToken, 0, access);
 		threadData = (TLENUPLOADAVATARTHREADDATA *)mir_alloc(sizeof(TLENUPLOADAVATARTHREADDATA));
         threadData->proto = proto;
 		req = (NETLIBHTTPREQUEST *)mir_alloc(sizeof(NETLIBHTTPREQUEST));
 		headers = (NETLIBHTTPHEADER *)mir_alloc(sizeof(NETLIBHTTPHEADER));
 		ZeroMemory(req, sizeof(NETLIBHTTPREQUEST));
 		req->cbSize = sizeof(NETLIBHTTPREQUEST);
-		req->requestType = jabberThreadInfo->tlenConfig.avatarUploadMthd;
+		req->requestType = proto->threadData->tlenConfig.avatarUploadMthd;
 		req->szUrl = request;
 		req->flags = 0;
 		headers[0].szName = "Content-Type";

@@ -89,9 +89,8 @@ int TlenOptInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
 	odp.position = 0;
 	odp.hInstance = hInst;
 	odp.pszGroup = TranslateT("Network");
-	odp.pszTitle = jabberModuleName;
+	odp.pszTitle = proto->iface.m_szProtoName;
 	odp.flags = ODPF_BOLDGROUPS | ODPF_TCHAR;
-	odp.nIDBottomSimpleControl = 0;//IDC_SIMPLE;
     odp.dwInitParam = (LPARAM)proto;
 	for (i = 0; i < SIZEOF(tabPages); i++) {
 		odp.pszTemplate = MAKEINTRESOURCEA(tabPages[i].dlgId);
@@ -103,14 +102,13 @@ int TlenOptInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
 	if (ServiceExists(MS_POPUP_ADDPOPUP)) {
 		ZeroMemory(&odp,sizeof(odp));
 		odp.cbSize = sizeof(odp);
+    	odp.pszTitle = proto->iface.m_szProtoName;
 		odp.position = 100000000;
 		odp.hInstance = hInst;
 		odp.pszGroup = TranslateT("PopUps");
 		odp.pszTemplate = MAKEINTRESOURCE(IDD_OPTIONS_POPUPS);
-		odp.pszTitle = jabberModuleName;
 		odp.flags=ODPF_BOLDGROUPS;
 		odp.pfnDlgProc = TlenPopupsDlgProc;
-		odp.nIDBottomSimpleControl = 0;
 		CallService(MS_OPT_ADDPAGE,wParam,(LPARAM)&odp);
 	}
 	return 0;
@@ -141,9 +139,9 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		{
 			DBVARIANT dbv;
 			proto = (TlenProtocol *)lParam;
-            SetWindowLong(hwndDlg, DWL_USER, (LONG)proto);
+            SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
 			TranslateDialogDefault(hwndDlg);
-			SetDlgItemText(hwndDlg, IDC_TLEN, jabberModuleName);
+			SetDlgItemText(hwndDlg, IDC_TLEN, proto->iface.m_szProtoName);
 			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, dbv.pszVal);
 				DBFreeVariant(&dbv);
@@ -285,7 +283,7 @@ static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 	case WM_INITDIALOG:
 		{
 			proto = (TlenProtocol *)lParam;
-            SetWindowLong(hwndDlg, DWL_USER, (LONG)proto);
+            SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Always ask me"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept invitations from authorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept all invitations"));
@@ -334,7 +332,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 		{
 			DBVARIANT dbv;
 			proto = (TlenProtocol *)lParam;
-            SetWindowLong(hwndDlg, DWL_USER, (LONG)proto);
+            SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
 			TranslateDialogDefault(hwndDlg);
 			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, dbv.pszVal);
@@ -543,7 +541,7 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			{
 				BYTE delayMode;
 				proto = (TlenProtocol *)lParam;
-                SetWindowLong(hwndDlg, DWL_USER, (LONG)proto);
+                SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
 				TranslateDialogDefault(hwndDlg);
 				CheckDlgButton(hwndDlg, IDC_ENABLEPOPUP, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "MailPopupEnabled", TRUE));
 				SendDlgItemMessage(hwndDlg, IDC_COLORBKG, CPM_SETCOLOUR, 0, DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupBack", POPUP_DEFAULT_COLORBKG));
@@ -581,7 +579,7 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					} else {
 						delay=GetDlgItemInt(hwndDlg, IDC_DELAY, NULL, FALSE);
 					}
-					_snprintf(title, sizeof(title), TranslateT("%s mail"), jabberModuleName);
+					_snprintf(title, sizeof(title), TranslateT("%s mail"), proto->iface.m_szProtoName);
 					MailPopupPreview((DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0),
 									 (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0),
 									 title,

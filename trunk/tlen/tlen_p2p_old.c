@@ -168,7 +168,7 @@ void TlenP2PEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft, BOOL sendAck)
 		TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_CONNECTION_REQUEST);
 		TlenP2PPacketPackDword(packet, 1);
 		TlenP2PPacketPackDword(packet, (DWORD) atoi(ft->iqId));
-		_snprintf(str, sizeof(str), "%08X%s%d", atoi(ft->iqId), jabberThreadInfo->username, atoi(ft->iqId));
+		_snprintf(str, sizeof(str), "%08X%s%d", atoi(ft->iqId), proto->threadData->username, atoi(ft->iqId));
 		hash = TlenSha1(str, strlen(str));
 		TlenP2PPacketPackBuffer(packet, hash, 20);
 		mir_free(hash);
@@ -189,7 +189,7 @@ void TlenP2PEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft, BOOL sendAck)
 	}
 }
 
-TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET s, int list, BOOL sendAck)
+TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(TlenProtocol *proto, JABBER_SOCKET s, int list, BOOL sendAck)
 {
 	JABBER_LIST_ITEM *item = NULL;
 	TLEN_FILE_PACKET *packet;
@@ -210,8 +210,8 @@ TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET s, int list
 	}
 	iqId = *((DWORD *)(packet->packet+sizeof(DWORD)));
 	i = 0;
-	while ((i=JabberListFindNext(list, i)) >= 0) {
-		if ((item=JabberListGetItemPtrFromIndex(i))!=NULL) {
+	while ((i=JabberListFindNext(proto, list, i)) >= 0) {
+		if ((item=JabberListGetItemPtrFromIndex(proto, i))!=NULL) {
 			_snprintf(str, sizeof(str), "%d", iqId);
 			if (!strcmp(item->ft->iqId, str)) {
 				char *hash, *nick;
@@ -313,7 +313,7 @@ static JABBER_SOCKET TlenP2PBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	nloc.szHost = sb->szHost;
 	nloc.wPort = sb->wPort;
 	nloc.flags = 0;
-	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hFileNetlibUser, (LPARAM) &nloc);
+	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hFileNetlibUser, (LPARAM) &nloc);
 	if (s==NULL) {
 //		JabberLog("Connection failed (%d), thread ended", WSAGetLastError());
 		return NULL;
@@ -368,7 +368,7 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	nloc.szHost = sb->szHost;
 	nloc.wPort = sb->wPort;
 	nloc.flags = 0;
-	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hFileNetlibUser, (LPARAM) &nloc);
+	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hFileNetlibUser, (LPARAM) &nloc);
 	if (s==NULL) {
 		JabberLog(ft->proto, "Connection failed (%d), thread ended", WSAGetLastError());
 		return NULL;

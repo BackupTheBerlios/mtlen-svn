@@ -23,19 +23,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber.h"
 #include "jabber_iq.h"
 
-typedef struct {
-	int iqId;					// id to match IQ get/set with IQ result
-	JABBER_IQ_PROCID procId;	// must be unique in the list, except for IQ_PROC_NONE which can have multiple entries
-	JABBER_IQ_PFUNC func;		// callback function
-	time_t requestTime;			// time the request was sent, used to remove relinquent entries
-} JABBER_IQ_FUNC;
 
 static CRITICAL_SECTION csIqList;
 static JABBER_IQ_FUNC *iqList;
 static int iqCount;
 static int iqAlloced;
 
-void JabberIqInit()
+void JabberIqInit(TlenProtocol *proto)
 {
 	InitializeCriticalSection(&csIqList);
 	iqList = NULL;
@@ -43,7 +37,7 @@ void JabberIqInit()
 	iqAlloced = 0;
 }
 
-void JabberIqUninit()
+void JabberIqUninit(TlenProtocol *proto)
 {
 	if (iqList) mir_free(iqList);
 	iqList = NULL;
@@ -52,7 +46,7 @@ void JabberIqUninit()
 	DeleteCriticalSection(&csIqList);
 }
 
-static void JabberIqRemove(int index)
+static void JabberIqRemove(TlenProtocol *proto, int index)
 {
 	EnterCriticalSection(&csIqList);
 	if (index>=0 && index<iqCount) {
@@ -62,7 +56,7 @@ static void JabberIqRemove(int index)
 	LeaveCriticalSection(&csIqList);
 }
 
-static void JabberIqExpire()
+static void JabberIqExpire(TlenProtocol *proto)
 {
 	int i;
 	time_t expire;
@@ -72,24 +66,24 @@ static void JabberIqExpire()
 	i = 0;
 	while (i < iqCount) {
 		if (iqList[i].requestTime < expire)
-			JabberIqRemove(i);
+			JabberIqRemove(proto, i);
 		else
 			i++;
 	}
 	LeaveCriticalSection(&csIqList);
 }
 
-JABBER_IQ_PFUNC JabberIqFetchFunc(int iqId)
+JABBER_IQ_PFUNC JabberIqFetchFunc(TlenProtocol *proto, int iqId)
 {
 	int i;
 	JABBER_IQ_PFUNC res;
 
 	EnterCriticalSection(&csIqList);
-	JabberIqExpire();
+	JabberIqExpire(proto);
 	for (i=0; i<iqCount && iqList[i].iqId!=iqId; i++);
 	if (i < iqCount) {
 		res = iqList[i].func;
-		JabberIqRemove(i);
+		JabberIqRemove(proto, i);
 	}
 	else {
 		res = (JABBER_IQ_PFUNC) NULL;
@@ -98,7 +92,7 @@ JABBER_IQ_PFUNC JabberIqFetchFunc(int iqId)
 	return res;
 }
 
-void JabberIqAdd(unsigned int iqId, JABBER_IQ_PROCID procId, JABBER_IQ_PFUNC func)
+void JabberIqAdd(TlenProtocol *proto, unsigned int iqId, JABBER_IQ_PROCID procId, JABBER_IQ_PFUNC func)
 {
 	int i;
 

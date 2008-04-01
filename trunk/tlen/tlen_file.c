@@ -27,8 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "tlen_p2p_old.h"
 
-extern ThreadData *jabberThreadInfo;
-
 static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft);
 static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft);
 static void TlenFileSendingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
@@ -83,7 +81,7 @@ static void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 			ft->state = FT_ERROR;
 		}
 	}
-	JabberListRemove(LIST_FILE, ft->iqId);
+	JabberListRemove(ft->proto, LIST_FILE, ft->iqId);
 	if (ft->state==FT_DONE)
 		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 	else {
@@ -102,7 +100,9 @@ static void TlenFileReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemot
 {
 	JABBER_SOCKET slisten;
 	TLEN_FILE_TRANSFER *ft;
-	ft = TlenP2PEstablishIncomingConnection(hConnection, LIST_FILE, TRUE);
+
+    TlenProtocol *proto = (TlenProtocol *)pExtra;
+    ft = TlenP2PEstablishIncomingConnection(proto, hConnection, LIST_FILE, TRUE);
 	if (ft != NULL) {
 		slisten = ft->s;
 		ft->s = hConnection;
@@ -320,7 +320,7 @@ static void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
 		JabberLog(ft->proto, "Cannot allocate port to bind for file server thread, thread ended.");
 		ft->state = FT_ERROR;
 	}
-	JabberListRemove(LIST_FILE, ft->iqId);
+	JabberListRemove(ft->proto, LIST_FILE, ft->iqId);
 	switch (ft->state) {
 	case FT_DONE:
 		JabberLog(ft->proto, "Finish successfully");
@@ -347,7 +347,7 @@ static void TlenFileSendingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteI
 	TLEN_FILE_TRANSFER *ft;
 	TlenProtocol *proto = (TlenProtocol *)pExtra;
 
-	ft = TlenP2PEstablishIncomingConnection(hConnection, LIST_FILE, TRUE);
+	ft = TlenP2PEstablishIncomingConnection(proto, hConnection, LIST_FILE, TRUE);
 	if (ft != NULL) {
 		slisten = ft->s;
 		ft->s = hConnection;
@@ -519,16 +519,16 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 	}
 }
 
-int TlenFileCancelAll()
+int TlenFileCancelAll(TlenProtocol *proto)
 {
 	JABBER_LIST_ITEM *item;
 	HANDLE hEvent;
 	int i = 0;
 
-	while ((i=JabberListFindNext(LIST_FILE, 0)) >=0 ) {
-		if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
+	while ((i=JabberListFindNext(proto, LIST_FILE, 0)) >=0 ) {
+		if ((item=JabberListGetItemPtrFromIndex(proto, i)) != NULL) {
 			TLEN_FILE_TRANSFER *ft = item->ft;
-			JabberListRemoveByIndex(i);
+			JabberListRemoveByIndex(proto, i);
 			if (ft != NULL) {
 				if (ft->s) {
 					//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
@@ -640,7 +640,7 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 			else if (!strcmp(e, "3")) {
 				// FILE_RECV : e='3' : invalid transfer error
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
+					if ((item=JabberListGetItemPtr(info->proto, LIST_FILE, p)) != NULL) {
 						if (item->ft != NULL) {
 							HANDLE  hEvent = item->ft->hFileEvent;
 							item->ft->hFileEvent = NULL;
@@ -655,7 +655,7 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 								TlenP2PFreeFileTransfer(item->ft);
 							}
 						} else {
-							JabberListRemove(LIST_FILE, p);
+							JabberListRemove(info->proto, LIST_FILE, p);
 						}
 					}
 				}
@@ -663,10 +663,10 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 			else if (!strcmp(e, "4")) {
 				// FILE_SEND : e='4' : File sending request was denied by the remote client
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
+					if ((item=JabberListGetItemPtr(info->proto, LIST_FILE, p)) != NULL) {
 						if (!strcmp(item->ft->jid, jid)) {
 							ProtoBroadcastAck(info->proto->iface.m_szModuleName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, item->ft, 0);
-							JabberListRemove(LIST_FILE, p);
+							JabberListRemove(info->proto, LIST_FILE, p);
 						}
 					}
 				}
@@ -674,7 +674,7 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 			else if (!strcmp(e, "5")) {
 				// FILE_SEND : e='5' : File sending request was accepted
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
+					if ((item=JabberListGetItemPtr(info->proto, LIST_FILE, p)) != NULL) {
 						if (!strcmp(item->ft->jid, jid))
 							JabberForkThread((void (__cdecl *)(void*))TlenFileSendingThread, 0, item->ft);
 					}
@@ -683,7 +683,7 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 			else if (!strcmp(e, "6")) {
 				// FILE_RECV : e='6' : IP and port information to connect to get file
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
+					if ((item=JabberListGetItemPtr(info->proto, LIST_FILE, p)) != NULL) {
 						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
 							item->ft->hostName = mir_strdup(p);
 							if ((p=JabberXmlGetAttrValue(node, "p")) != NULL) {
@@ -698,7 +698,7 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 				// FILE_RECV : e='7' : IP and port information to connect to send file
 				// in case the conection to the given server was not successful
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
+					if ((item=JabberListGetItemPtr(info->proto, LIST_FILE, p)) != NULL) {
 						if ((p=JabberXmlGetAttrValue(node, "a")) != NULL) {
 							if (item->ft->hostName!=NULL) mir_free(item->ft->hostName);
 							item->ft->hostName = mir_strdup(p);
@@ -714,7 +714,7 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 			else if (!strcmp(e, "8")) {
 				// FILE_RECV : e='8' : transfer error
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
-					if ((item=JabberListGetItemPtr(LIST_FILE, p)) != NULL) {
+					if ((item=JabberListGetItemPtr(info->proto, LIST_FILE, p)) != NULL) {
 						item->ft->state = FT_ERROR;
 						if (item->ft->hFileEvent != NULL) {
 							SetEvent(item->ft->hFileEvent);

@@ -39,8 +39,6 @@ struct MM_INTERFACE mmi;
 struct SHA1_INTERFACE sha1i;
 struct MD5_INTERFACE   md5i;
 
-HANDLE hEventSkin2IconsChanged;
-
 PLUGININFOEX pluginInfoEx = {
 	sizeof(PLUGININFOEX),
 	"Tlen Protocol",
@@ -59,40 +57,18 @@ TlenProtocol *tlenProtocol;
 
 HANDLE hMainThread;
 DWORD jabberMainThreadId;
-char *jabberModuleName;	// "Tlen"
 CRITICAL_SECTION mutex;
-HANDLE hFileNetlibUser;
 // Main jabber server connection thread global variables
 BOOL jabberConnected;
 BOOL jabberOnline;
-int jabberStatus;
-int jabberDesiredStatus;
-char *streamId;
 UINT jabberCodePage;
-JABBER_MODEMSGS modeMsgs;
-//char *jabberModeMsg;
 CRITICAL_SECTION modeMsgMutex;
-char *jabberVcardPhotoFileName;
-char *jabberVcardPhotoType;
-
-HANDLE hTlenNudge = NULL;
-
-HANDLE hMenuMUC, hMenuChats, hMenuInbox;
-HANDLE hMenuContactMUC;
-HANDLE hMenuContactVoice;
-HANDLE hMenuContactGrantAuth;
-HANDLE hMenuContactRequestAuth;
-HANDLE hMenuContactFile;
-
-HWND hwndJabberVcard;
 
 HICON tlenIcons[TLEN_ICON_TOTAL];
 
 void TlenLoadOptions(TlenProtocol *proto);
 int TlenOptInit(void *ptr, WPARAM wParam, LPARAM lParam);
 int TlenUserInfoInit(void *ptr, WPARAM wParam, LPARAM lParam);
-extern int JabberSvcInit(TlenProtocol *proto);
-extern int JabberSvcUninit(TlenProtocol *proto);
 extern void TlenInitServicesVTbl(TlenProtocol *proto);
 extern int JabberContactDeleted(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int JabberDbSettingChanged(void *ptr, WPARAM wParam, LPARAM lParam);
@@ -129,46 +105,22 @@ __declspec(dllexport) const MUUID* MirandaPluginInterfaces(void)
 
 int __declspec(dllexport) Unload(void)
 {
-#ifdef _DEBUG
-	OutputDebugString("Unloading...");
-#endif
-	UnhookEvents_Ex();
-	if (hTlenNudge)
-		DestroyHookableEvent(hTlenNudge);
-	JabberSvcUninit(tlenProtocol);
-	//JabberSslUninit();
-	JabberListUninit(tlenProtocol);
-	JabberIqUninit(tlenProtocol);
-	JabberSerialUninit(tlenProtocol);
+   MessageBoxA(NULL, "tu1", "tu21", MB_OK);
 	DeleteCriticalSection(&modeMsgMutex);
+   MessageBoxA(NULL, "tu2", "tu21", MB_OK);
 	DeleteCriticalSection(&mutex);
-	mir_free(modeMsgs.szOnline);
-	mir_free(modeMsgs.szAway);
-	mir_free(modeMsgs.szNa);
-	mir_free(modeMsgs.szDnd);
-	mir_free(modeMsgs.szFreechat);
-	mir_free(modeMsgs.szInvisible);
-	//mir_free(jabberModeMsg);
-	mir_free(jabberModuleName);
+   MessageBoxA(NULL, "tu3", "tu21", MB_OK);
 	mir_free(tlenProtocol);
-	if (streamId) mir_free(streamId);
 
-#ifdef _DEBUG
-	OutputDebugString("Finishing Unload, returning to Miranda");
-	//OutputDebugString("========== Memory leak from TLEN");
-	//_CrtDumpMemoryLeaks();
-	//OutputDebugString("========== End memory leak from TLEN");
-#endif
+   MessageBoxA(NULL, "tu4", "tu41", MB_OK);
 	return 0;
 }
 
-static int PreShutdown(WPARAM wParam, LPARAM lParam)
+static int TlenPreShutdown(void *ptr, WPARAM wParam, LPARAM lParam)
 {
-#ifdef _DEBUG
-	OutputDebugString("PreShutdown...");
-#endif
-	TlenVoiceCancelAll();
-	TlenFileCancelAll();
+    TlenProtocol *proto = (TlenProtocol *)ptr;
+	TlenVoiceCancelAll(proto);
+	TlenFileCancelAll(proto);
 	return 0;
 }
 
@@ -199,121 +151,100 @@ static void TlenReleaseIcons() {
 	int i;
 	char iconName[256];
 	for (i=0; i<TLEN_ICON_TOTAL; i++) {
-		if (hEventSkin2IconsChanged) {
-			GetIconName(iconName, sizeof(iconName), i);
-			CallService(MS_SKIN2_RELEASEICON, 0, (LPARAM)iconName);
-		} else {
-			DestroyIcon(tlenIcons[i]);
-		}
+		GetIconName(iconName, sizeof(iconName), i);
+		CallService(MS_SKIN2_RELEASEICON, 0, (LPARAM)iconName);
 	}
 }
 
 static void TlenLoadIcons() {
 	int i;
 	char iconName[256];
-	static int iconList[] = {
-		IDI_TLEN,
-		IDI_MAIL,
-		IDI_MUC,
-		IDI_CHATS,
-		IDI_GRANT,
-		IDI_REQUEST,
-		IDI_VOICE,
-		IDI_MICROPHONE,
-		IDI_SPEAKER,
-	};
 	for (i=0; i<TLEN_ICON_TOTAL; i++) {
-		if (hEventSkin2IconsChanged) {
-			GetIconName(iconName, sizeof(iconName), i);
-			tlenIcons[i] = (HICON) CallService(MS_SKIN2_GETICON, 0, (LPARAM)iconName);
-		} else {
-			tlenIcons[i] = (HICON) LoadImage(hInst, MAKEINTRESOURCE(iconList[i]), IMAGE_ICON, 0, 0, 0);
-		}
+		GetIconName(iconName, sizeof(iconName), i);
+		tlenIcons[i] = (HICON) CallService(MS_SKIN2_GETICON, 0, (LPARAM)iconName);
 	}
 }
 
-static int IcoLibIconsChanged(WPARAM wParam, LPARAM lParam)
+static int TlenIconsChanged(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	CLISTMENUITEM mi;
+    TlenProtocol *proto = (TlenProtocol *)ptr;
 	mi.cbSize = sizeof(mi);
 	mi.flags = CMIM_ICON;
 	TlenReleaseIcons();
 	TlenLoadIcons();
 	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuMUC, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuMUC, (LPARAM) &mi);
 	mi.hIcon = tlenIcons[TLEN_IDI_CHATS];
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChats, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuChats, (LPARAM) &mi);
 	mi.hIcon = tlenIcons[TLEN_IDI_MAIL];
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuInbox, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuInbox, (LPARAM) &mi);
 	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactMUC, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactMUC, (LPARAM) &mi);
 	mi.hIcon = tlenIcons[TLEN_IDI_VOICE];
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactVoice, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactVoice, (LPARAM) &mi);
 	mi.hIcon = tlenIcons[TLEN_IDI_GRANT];
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactGrantAuth, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactGrantAuth, (LPARAM) &mi);
 	mi.hIcon = tlenIcons[TLEN_IDI_REQUEST];
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactRequestAuth, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactRequestAuth, (LPARAM) &mi);
 	return 0;
 }
 
 static void TlenRegisterIcons()
 {
-	hEventSkin2IconsChanged = HookEvent_Ex(ME_SKIN2_ICONSCHANGED, IcoLibIconsChanged);
-	if (hEventSkin2IconsChanged) {
-		char iconName[256];
-		char path[MAX_PATH];
-		SKINICONDESC sid = { 0 };
-		GetModuleFileNameA(hInst, path, MAX_PATH);
-		sid.cbSize = sizeof(SKINICONDESC);
-		sid.cx = sid.cy = 16;
-		sid.pszSection = jabberModuleName;
-		sid.pszDefaultFile = path;
-		GetIconName(iconName, sizeof(iconName), TLEN_IDI_TLEN);
-		sid.pszName = (char *) iconName;
-		sid.iDefaultIndex = -IDI_TLEN;
-		sid.pszDescription = GetIconDescription(TLEN_IDI_TLEN);
-		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
-		GetIconName(iconName, sizeof(iconName), TLEN_IDI_MAIL);
-		sid.pszName = (char *) iconName;
-		sid.iDefaultIndex = -IDI_MAIL;
-		sid.pszDescription = GetIconDescription(TLEN_IDI_MAIL);
-		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
-		GetIconName(iconName, sizeof(iconName), TLEN_IDI_MUC);
-		sid.pszName = (char *) iconName;
-		sid.iDefaultIndex = -IDI_MUC;
-		sid.pszDescription = GetIconDescription(TLEN_IDI_MUC);
-		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
-		GetIconName(iconName, sizeof(iconName), TLEN_IDI_CHATS);
-		sid.pszName = (char *) iconName;
-		sid.iDefaultIndex = -IDI_CHATS;
-		sid.pszDescription = GetIconDescription(TLEN_IDI_CHATS);
-		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
-		GetIconName(iconName, sizeof(iconName), TLEN_IDI_GRANT);
-		sid.pszName = (char *) iconName;
-		sid.iDefaultIndex = -IDI_GRANT;
-		sid.pszDescription = GetIconDescription(TLEN_IDI_GRANT);
-		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
-		GetIconName(iconName, sizeof(iconName), TLEN_IDI_REQUEST);
-		sid.pszName = (char *) iconName;
-		sid.iDefaultIndex = -IDI_REQUEST;
-		sid.pszDescription = GetIconDescription(TLEN_IDI_REQUEST);
-		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
-		GetIconName(iconName, sizeof(iconName), TLEN_IDI_VOICE);
-		sid.pszName = (char *) iconName;
-		sid.iDefaultIndex = -IDI_VOICE;
-		sid.pszDescription = GetIconDescription(TLEN_IDI_VOICE);
-		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
-		GetIconName(iconName, sizeof(iconName), TLEN_IDI_MICROPHONE);
-		sid.pszName = (char *) iconName;
-		sid.iDefaultIndex = -IDI_MICROPHONE;
-		sid.pszDescription = GetIconDescription(TLEN_IDI_MICROPHONE);
-		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
-		GetIconName(iconName, sizeof(iconName), TLEN_IDI_SPEAKER);
-		sid.pszName = (char *) iconName;
-		sid.iDefaultIndex = -IDI_SPEAKER;
-		sid.pszDescription = GetIconDescription(TLEN_IDI_SPEAKER);
-		CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
-	}
+    char iconName[256];
+    char path[MAX_PATH];
+    SKINICONDESC sid = { 0 };
+    GetModuleFileNameA(hInst, path, MAX_PATH);
+    sid.cbSize = sizeof(SKINICONDESC);
+    sid.cx = sid.cy = 16;
+    sid.pszSection = "Tlen";
+    sid.pszDefaultFile = path;
+    GetIconName(iconName, sizeof(iconName), TLEN_IDI_TLEN);
+    sid.pszName = (char *) iconName;
+    sid.iDefaultIndex = -IDI_TLEN;
+    sid.pszDescription = GetIconDescription(TLEN_IDI_TLEN);
+    CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+    GetIconName(iconName, sizeof(iconName), TLEN_IDI_MAIL);
+    sid.pszName = (char *) iconName;
+    sid.iDefaultIndex = -IDI_MAIL;
+    sid.pszDescription = GetIconDescription(TLEN_IDI_MAIL);
+    CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+    GetIconName(iconName, sizeof(iconName), TLEN_IDI_MUC);
+    sid.pszName = (char *) iconName;
+    sid.iDefaultIndex = -IDI_MUC;
+    sid.pszDescription = GetIconDescription(TLEN_IDI_MUC);
+    CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+    GetIconName(iconName, sizeof(iconName), TLEN_IDI_CHATS);
+    sid.pszName = (char *) iconName;
+    sid.iDefaultIndex = -IDI_CHATS;
+    sid.pszDescription = GetIconDescription(TLEN_IDI_CHATS);
+    CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+    GetIconName(iconName, sizeof(iconName), TLEN_IDI_GRANT);
+    sid.pszName = (char *) iconName;
+    sid.iDefaultIndex = -IDI_GRANT;
+    sid.pszDescription = GetIconDescription(TLEN_IDI_GRANT);
+    CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+    GetIconName(iconName, sizeof(iconName), TLEN_IDI_REQUEST);
+    sid.pszName = (char *) iconName;
+    sid.iDefaultIndex = -IDI_REQUEST;
+    sid.pszDescription = GetIconDescription(TLEN_IDI_REQUEST);
+    CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+    GetIconName(iconName, sizeof(iconName), TLEN_IDI_VOICE);
+    sid.pszName = (char *) iconName;
+    sid.iDefaultIndex = -IDI_VOICE;
+    sid.pszDescription = GetIconDescription(TLEN_IDI_VOICE);
+    CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+    GetIconName(iconName, sizeof(iconName), TLEN_IDI_MICROPHONE);
+    sid.pszName = (char *) iconName;
+    sid.iDefaultIndex = -IDI_MICROPHONE;
+    sid.pszDescription = GetIconDescription(TLEN_IDI_MICROPHONE);
+    CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
+    GetIconName(iconName, sizeof(iconName), TLEN_IDI_SPEAKER);
+    sid.pszName = (char *) iconName;
+    sid.iDefaultIndex = -IDI_SPEAKER;
+    sid.pszDescription = GetIconDescription(TLEN_IDI_SPEAKER);
+    CallService(MS_SKIN2_ADDICON, 0, (LPARAM)&sid);
 	TlenLoadIcons();
 }
 
@@ -327,30 +258,30 @@ static int TlenPrebuildContactMenu(void *ptr, WPARAM wParam, LPARAM lParam)
 	clmi.cbSize = sizeof(CLISTMENUITEM);
 	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
 		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
-			if ((item=JabberListGetItemPtr(LIST_ROSTER, dbv.pszVal)) != NULL) {
+			if ((item=JabberListGetItemPtr(proto, LIST_ROSTER, dbv.pszVal)) != NULL) {
 				if (item->subscription==SUB_NONE || item->subscription==SUB_FROM)
 					clmi.flags = CMIM_FLAGS;
 				else
 					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
-				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactRequestAuth, (LPARAM) &clmi);
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactRequestAuth, (LPARAM) &clmi);
 
 				if (item->subscription==SUB_NONE || item->subscription==SUB_TO)
 					clmi.flags = CMIM_FLAGS;
 				else
 					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
-				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactGrantAuth, (LPARAM) &clmi);
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactGrantAuth, (LPARAM) &clmi);
 
 				if (item->status!=ID_STATUS_OFFLINE)
 					clmi.flags = CMIM_FLAGS;
 				else
 					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
-				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactMUC, (LPARAM) &clmi);
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactMUC, (LPARAM) &clmi);
 
-				if (item->status!=ID_STATUS_OFFLINE && !TlenVoiceIsInUse())
+				if (item->status!=ID_STATUS_OFFLINE && !TlenVoiceIsInUse(proto))
 					clmi.flags = CMIM_FLAGS;
 				else
 					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
-				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactVoice, (LPARAM) &clmi);
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactVoice, (LPARAM) &clmi);
 
 				DBFreeVariant(&dbv);
 				return 0;
@@ -359,10 +290,10 @@ static int TlenPrebuildContactMenu(void *ptr, WPARAM wParam, LPARAM lParam)
 		}
 	}
 	clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactMUC, (LPARAM) &clmi);
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactVoice, (LPARAM) &clmi);
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactRequestAuth, (LPARAM) &clmi);
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuContactGrantAuth, (LPARAM) &clmi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactMUC, (LPARAM) &clmi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactVoice, (LPARAM) &clmi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactRequestAuth, (LPARAM) &clmi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactGrantAuth, (LPARAM) &clmi);
 	return 0;
 }
 
@@ -376,7 +307,7 @@ int TlenMenuHandleInbox(void *ptr, WPARAM wParam, LPARAM lParam)
 		int tPathLen;
 		CallService( MS_DB_GETPROFILEPATH, MAX_PATH, (LPARAM) szFileName );
 		tPathLen = strlen( szFileName );
-		tPathLen += mir_snprintf( szFileName + tPathLen, MAX_PATH - tPathLen, "\\%s\\", jabberModuleName);
+		tPathLen += mir_snprintf( szFileName + tPathLen, MAX_PATH - tPathLen, "\\%s\\", proto->iface.m_szProtoName);
 		CreateDirectoryA( szFileName, NULL );
 		mir_snprintf( szFileName + tPathLen, MAX_PATH - tPathLen, "openinbox.html" );
 		if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
@@ -435,13 +366,14 @@ int TlenOnModulesLoaded(void *ptr, WPARAM wParam, LPARAM lParam) {
 	sprintf(str, "%s", TranslateT("Voice chat"));
 	SkinAddNewSoundEx("TlenVoiceNotify", proto->iface.m_szProtoName, str);
 
+    HookEventObj_Ex(ME_USERINFO_INITIALISE, proto, TlenUserInfoInit);
+
     return 0;
 }
 
 int TlenOptionsInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam) {
 
 //    MessageBoxA(NULL, "ASASAS", "ASASS", MB_OK);
-//    HookEventObj_Ex(ME_USERINFO_INITIALISE, proto, TlenUserInfoInit);
     return 0;
 }
 
@@ -465,8 +397,8 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.position = 2000050001;
 	mi.hIcon = tlenIcons[TLEN_IDI_CHATS];
 	mi.pszService = text;
-	hMenuChats = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuChats, (LPARAM) &clmi);
+	proto->hMenuChats = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuChats, (LPARAM) &clmi);
 
 	// "Multi-User Conference"
 	wsprintf(text, "%s/MainMenuMUC", proto->iface.m_szModuleName);
@@ -475,8 +407,8 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.position = 2000050002;
 	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
 	mi.pszService = text;
-	hMenuMUC = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) hMenuMUC, (LPARAM) &clmi);
+	proto->hMenuMUC = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
+	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuMUC, (LPARAM) &clmi);
 
 	wsprintf(text, "%s/MainMenuInbox", proto->iface.m_szModuleName);
 	CreateServiceFunction_Ex(text, proto, TlenMenuHandleInbox);
@@ -484,7 +416,7 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.position = 2000050003;
 	mi.hIcon = tlenIcons[TLEN_IDI_MAIL];
 	mi.pszService = text;
-	hMenuInbox = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
+	proto->hMenuInbox = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
 
 	// "Invite to MUC"
 	sprintf(text, "%s/ContactMenuMUC", proto->iface.m_szModuleName);
@@ -493,7 +425,7 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.position = -2000020000;
 	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
 	mi.pszService = text;
-	hMenuContactMUC = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+	proto->hMenuContactMUC = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
 	// "Invite to voice chat"
 	sprintf(text, "%s/ContactMenuVoice", proto->iface.m_szModuleName);
@@ -502,7 +434,7 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.position = -2000018000;
 	mi.hIcon = tlenIcons[TLEN_IDI_VOICE];
 	mi.pszService = text;
-	hMenuContactVoice = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+	proto->hMenuContactVoice = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
 	// "Request authorization"
 	sprintf(text, "%s/RequestAuth", proto->iface.m_szModuleName);
@@ -511,7 +443,7 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.position = -2000001001;
 	mi.hIcon = tlenIcons[TLEN_IDI_REQUEST];
 	mi.pszService = text;
-	hMenuContactRequestAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+	proto->hMenuContactRequestAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
 	// "Grant authorization"
 	sprintf(text, "%s/GrantAuth", proto->iface.m_szModuleName);
@@ -520,7 +452,7 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.position = -2000001000;
 	mi.hIcon = tlenIcons[TLEN_IDI_GRANT];
 	mi.pszService = text;
-	hMenuContactGrantAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+	proto->hMenuContactGrantAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
 	// "Send picture"
 	sprintf(text, "%s/SendPicture", proto->iface.m_szModuleName);
@@ -537,7 +469,7 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.hIcon = LoadSkinnedIcon(SKINICON_EVENT_FILE);
 	mi.pszName = TranslateT("&File");
 	mi.pszService = MS_FILE_SENDFILE;
-	hMenuContactFile = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+	proto->hMenuContactFile = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
     
 }
 
@@ -546,22 +478,25 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
 	DBVARIANT dbv;
     char text[_MAX_PATH];
 	TlenProtocol *proto = (TlenProtocol *)mir_alloc(sizeof(TlenProtocol));
+    memset(proto, 0, sizeof(TlenProtocol));
     proto->iface.m_tszUserName = mir_tstrdup( tszUserName );
     proto->iface.m_szModuleName = mir_strdup(pszProtoName);
     proto->iface.m_szProtoName = mir_strdup(pszProtoName);
     _strlwr( proto->iface.m_szProtoName );
 	proto->iface.m_szProtoName[0] = toupper( proto->iface.m_szProtoName[0] );
-
+    proto->iface.m_iStatus = ID_STATUS_OFFLINE;
     TlenInitServicesVTbl(proto);
 
 	sprintf(text, "%s/%s", proto->iface.m_szModuleName, "Nudge");
-	hTlenNudge = CreateHookableEvent(text);
+	proto->hTlenNudge = CreateHookableEvent(text);
     
 	HookEventObj_Ex(ME_OPT_INITIALISE, proto, TlenOptInit);
 	HookEventObj_Ex(ME_DB_CONTACT_SETTINGCHANGED, proto, JabberDbSettingChanged);
 	HookEventObj_Ex(ME_DB_CONTACT_DELETED, proto, JabberContactDeleted);
 	HookEventObj_Ex(ME_CLIST_PREBUILDCONTACTMENU, proto, TlenPrebuildContactMenu);
     HookEventObj_Ex(ME_SYSTEM_MODULESLOADED, proto, TlenOnModulesLoaded);
+	HookEventObj_Ex(ME_SKIN2_ICONSCHANGED, proto, TlenIconsChanged);
+	HookEventObj_Ex(ME_SYSTEM_PRESHUTDOWN, proto, TlenPreShutdown);
 
 	if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) {
 		DBFreeVariant(&dbv);
@@ -577,9 +512,9 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
 	TlenLoadOptions(proto);
    
     JabberWsInit(proto);
-	JabberSerialInit(tlenProtocol);
-	JabberIqInit(tlenProtocol);
-	JabberListInit(tlenProtocol);
+	JabberSerialInit(proto);
+	JabberIqInit(proto);
+	JabberListInit(proto);
     initMenuItems(proto);
 
     return proto;
@@ -587,9 +522,22 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
 
 static int tlenProtoUninit( TlenProtocol *proto )
 {
+	if (proto->hTlenNudge)
+		DestroyHookableEvent(proto->hTlenNudge);
+    UnhookEvents_Ex(proto);
+    //DestroyServices_Ex(proto);
 	JabberWsUninit(proto);
+	JabberListUninit(proto);
+	JabberIqUninit(proto);
+	JabberSerialUninit(proto);
+	mir_free(proto->modeMsgs.szOnline);
+	mir_free(proto->modeMsgs.szAway);
+	mir_free(proto->modeMsgs.szNa);
+	mir_free(proto->modeMsgs.szDnd);
+	mir_free(proto->modeMsgs.szFreechat);
+	mir_free(proto->modeMsgs.szInvisible);
     mir_free(proto);
-	return 0;
+ 	return 0;
 }
 
 int __declspec(dllexport) Load(PLUGINLINK *link)
@@ -604,8 +552,6 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
     tlenProtocol = mir_alloc(sizeof(TlenProtocol));
     tlenProtocol->iface.m_szModuleName = "TLEN";
     
-	jabberModuleName = mir_strdup("Tlen");
-
 	DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &hMainThread, THREAD_SET_CONTEXT, FALSE, 0);
 
 	// Register protocol module
@@ -619,22 +565,15 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
     
 	TlenRegisterIcons();
 
-	HookEvent_Ex(ME_SYSTEM_PRESHUTDOWN, PreShutdown);
-
-	streamId = NULL;
-	jabberThreadInfo = NULL;
 	jabberConnected = FALSE;
 	jabberOnline = FALSE;
-	jabberStatus = ID_STATUS_OFFLINE;
-	memset((char *) &modeMsgs, 0, sizeof(JABBER_MODEMSGS));
-	//jabberModeMsg = NULL;
 	jabberCodePage = CP_ACP;
 
 	InitializeCriticalSection(&mutex);
 	InitializeCriticalSection(&modeMsgMutex);
 
 	srand((unsigned) time(NULL));
-//	JabberSvcInit(tlenProtocol);
+    
 	return 0;
 }
 

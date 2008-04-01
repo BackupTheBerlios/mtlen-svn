@@ -29,27 +29,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern CRITICAL_SECTION mutex;
 extern UINT jabberCodePage;
 
-static CRITICAL_SECTION serialMutex;
-static unsigned int serial;
-
-static unsigned hookNum = 0;
 static unsigned serviceNum = 0;
-static HANDLE* hHooks = NULL;
 static HANDLE* hServices = NULL;
 
-
-HANDLE HookEvent_Ex(const char *name, MIRANDAHOOK hook) {
-	hookNum ++;
-	hHooks = (HANDLE *) mir_realloc(hHooks, sizeof(HANDLE) * (hookNum));
-	hHooks[hookNum - 1] = HookEvent(name, hook);
-	return hHooks[hookNum - 1] ;
-}
-
 HANDLE HookEventObj_Ex(const char *name, TlenProtocol *proto, MIRANDAHOOKOBJ hook) {
-	hookNum ++;
-	hHooks = (HANDLE *) mir_realloc(hHooks, sizeof(HANDLE) * (hookNum));
-	hHooks[hookNum - 1] = HookEventObj(name, hook, proto);
-	return hHooks[hookNum - 1] ;
+	proto->hookNum ++;
+	proto->hHooks = (HANDLE *) mir_realloc(proto->hHooks, sizeof(HANDLE) * (proto->hookNum));
+	proto->hHooks[proto->hookNum - 1] = HookEventObj(name, hook, proto);
+	return proto->hHooks[proto->hookNum - 1] ;
 }
 
 HANDLE CreateServiceFunction_Ex(const char *name, TlenProtocol *proto, MIRANDASERVICEOBJ service) {
@@ -59,19 +46,19 @@ HANDLE CreateServiceFunction_Ex(const char *name, TlenProtocol *proto, MIRANDASE
 	return hServices[serviceNum - 1] ;
 }
 
-void UnhookEvents_Ex() {
+void UnhookEvents_Ex(TlenProtocol *proto) {
 	unsigned int i;
-	for (i=0; i<hookNum; ++i) {
-		if (hHooks[i] != NULL) {
-			UnhookEvent(hHooks[i]);
+	for (i=0; i<proto->hookNum; ++i) {
+		if (proto->hHooks[i] != NULL) {
+			UnhookEvent(proto->hHooks[i]);
 		}
 	}
-	mir_free(hHooks);
-	hookNum = 0;
-	hHooks = NULL;
+	mir_free(proto->hHooks);
+	proto->hookNum = 0;
+	proto->hHooks = NULL;
 }
 
-void DestroyServices_Ex() {
+void DestroyServices_Ex(TlenProtocol *proto) {
 	unsigned int i;
 	for (i=0; i<serviceNum; ++i) {
 		if (hServices[i] != NULL) {
@@ -85,23 +72,23 @@ void DestroyServices_Ex() {
 
 void JabberSerialInit(TlenProtocol *proto)
 {
-	InitializeCriticalSection(&serialMutex);
-	serial = 0;
+	InitializeCriticalSection(&proto->serialMutex);
+	proto->serial = 0;
 }
 
 void JabberSerialUninit(TlenProtocol *proto)
 {
-	DeleteCriticalSection(&serialMutex);
+	DeleteCriticalSection(&proto->serialMutex);
 }
 
 unsigned int JabberSerialNext(TlenProtocol *proto)
 {
 	unsigned int ret;
 
-	EnterCriticalSection(&serialMutex);
-	ret = serial;
-	serial++;
-	LeaveCriticalSection(&serialMutex);
+	EnterCriticalSection(&proto->serialMutex);
+	ret = proto->serial;
+	proto->serial++;
+	LeaveCriticalSection(&proto->serialMutex);
 	return ret;
 }
 
@@ -734,57 +721,57 @@ void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to, char *extra
 	switch (status) {
 	case ID_STATUS_ONLINE:
 		showBody = "available";
-		statusMsg = modeMsgs.szOnline;
+		statusMsg = proto->modeMsgs.szOnline;
 		break;
 	case ID_STATUS_AWAY:
 	case ID_STATUS_ONTHEPHONE:
 	case ID_STATUS_OUTTOLUNCH:
 		showBody = "away";
-		statusMsg = modeMsgs.szAway;
+		statusMsg = proto->modeMsgs.szAway;
 		break;
 	case ID_STATUS_NA:
 		showBody = "xa";
-		statusMsg = modeMsgs.szNa;
+		statusMsg = proto->modeMsgs.szNa;
 		break;
 	case ID_STATUS_DND:
 	case ID_STATUS_OCCUPIED:
 		showBody = "dnd";
-		statusMsg = modeMsgs.szDnd;
+		statusMsg = proto->modeMsgs.szDnd;
 		break;
 	case ID_STATUS_FREECHAT:
 		showBody = "chat";
-		statusMsg = modeMsgs.szFreechat;
+		statusMsg = proto->modeMsgs.szFreechat;
 		break;
 	case ID_STATUS_INVISIBLE:
 		presenceType = "invisible";
-		statusMsg = modeMsgs.szInvisible;
+		statusMsg = proto->modeMsgs.szInvisible;
 		break;
 	case ID_STATUS_OFFLINE:
 		presenceType = "unavailable";
 		if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", FALSE)) {
 			int offlineMessageOption = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", 0);
 			if (offlineMessageOption == 0) {
-				switch (jabberStatus) {
+				switch (proto->iface.m_iStatus) {
 					case ID_STATUS_ONLINE:
-						ptr = mir_strdup(modeMsgs.szOnline);
+						ptr = mir_strdup(proto->modeMsgs.szOnline);
 						break;
 					case ID_STATUS_AWAY:
 					case ID_STATUS_ONTHEPHONE:
 					case ID_STATUS_OUTTOLUNCH:
-						ptr = mir_strdup(modeMsgs.szAway);
+						ptr = mir_strdup(proto->modeMsgs.szAway);
 						break;
 					case ID_STATUS_NA:
-						ptr = mir_strdup(modeMsgs.szNa);
+						ptr = mir_strdup(proto->modeMsgs.szNa);
 						break;
 					case ID_STATUS_DND:
 					case ID_STATUS_OCCUPIED:
-						ptr = mir_strdup(modeMsgs.szDnd);
+						ptr = mir_strdup(proto->modeMsgs.szDnd);
 						break;
 					case ID_STATUS_FREECHAT:
-						ptr = mir_strdup(modeMsgs.szFreechat);
+						ptr = mir_strdup(proto->modeMsgs.szFreechat);
 						break;
 					case ID_STATUS_INVISIBLE:
-						ptr = mir_strdup(modeMsgs.szInvisible);
+						ptr = mir_strdup(proto->modeMsgs.szInvisible);
 						break;
 				}
 			} else if (offlineMessageOption == 99) {
@@ -817,7 +804,7 @@ void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to, char *extra
 		// Should not reach here
 		break;
 	}
-	jabberStatus = status;
+	proto->iface.m_iStatus = status;
 	if (presenceType) {
 		extra = NULL;
 		if (statusMsg)
