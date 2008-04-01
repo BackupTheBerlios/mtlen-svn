@@ -23,45 +23,45 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "jabber.h"
 
-BOOL JabberWsInit(void)
+BOOL JabberWsInit(TlenProtocol *proto)
 {
 	NETLIBUSER nlu = {0};
 	NETLIBUSERSETTINGS nlus = {0};
 	char name[128];
 
-	sprintf(name, "%s %s", jabberModuleName, TranslateT("connection"));
+	sprintf(name, "%s %s", proto->iface.m_tszUserName, TranslateT("connection"));
 
 	nlu.cbSize = sizeof(nlu);
 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_HTTPCONNS;	// | NUF_HTTPGATEWAY;
 	nlu.szDescriptiveName = name;
-	nlu.szSettingsModule = jabberProtoName;
+	nlu.szSettingsModule = proto->iface.m_szModuleName;
 	//nlu.szHttpGatewayHello = "http://http.proxy.icq.com/hello";
 	//nlu.szHttpGatewayUserAgent = "Mozilla/4.08 [en] (WinNT; U ;Nav)";
 	//nlu.pfnHttpGatewayInit = JabberHttpGatewayInit;
 	//nlu.pfnHttpGatewayBegin = JabberHttpGatewayBegin;
 	//nlu.pfnHttpGatewayWrapSend = JabberHttpGatewayWrapSend;
 	//nlu.pfnHttpGatewayUnwrapRecv = JabberHttpGatewayUnwrapRecv;
-	hNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
+	proto->hNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
 
 	nlu.cbSize = sizeof(nlu);
 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_NOOPTIONS;
-	sprintf(name, "%sSOCKS", jabberProtoName);
+	sprintf(name, "%sSOCKS", proto->iface.m_szModuleName);
 	nlu.szSettingsModule = name;
 	hFileNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
 	nlus.cbSize = sizeof(nlus);
 	nlus.useProxy = 0;
 	CallService(MS_NETLIB_SETUSERSETTINGS, (WPARAM) hFileNetlibUser, (LPARAM) &nlus);
 
-	return (hNetlibUser!=NULL)?TRUE:FALSE;
+	return (proto->hNetlibUser!=NULL)?TRUE:FALSE;
 }
 
-void JabberWsUninit(void)
+void JabberWsUninit(TlenProtocol *proto)
 {
-	if (hNetlibUser!=NULL) Netlib_CloseHandle(hNetlibUser);
+	if (proto->hNetlibUser!=NULL) Netlib_CloseHandle(proto->hNetlibUser);
 	if (hFileNetlibUser!=NULL) Netlib_CloseHandle(hFileNetlibUser);
 }
 
-JABBER_SOCKET JabberWsConnect(char *host, WORD port)
+JABBER_SOCKET JabberWsConnect(TlenProtocol *proto, char *host, WORD port)
 {
 	NETLIBOPENCONNECTION nloc;
 
@@ -69,38 +69,38 @@ JABBER_SOCKET JabberWsConnect(char *host, WORD port)
 	nloc.szHost = host;
 	nloc.wPort = port;
 	nloc.flags = 0;
-	return (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hNetlibUser, (LPARAM) &nloc);
+	return (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) proto->hNetlibUser, (LPARAM) &nloc);
 }
 
-int JabberWsSend(JABBER_SOCKET hConn, char *data, int datalen)
+int JabberWsSend(TlenProtocol *proto, char *data, int datalen)
 {
 	int len;
 
-	if ((len=Netlib_Send(hConn, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT))==SOCKET_ERROR || len!=datalen) {
-		JabberLog("Netlib_Send() failed, error=%d", WSAGetLastError());
+	if ((len=Netlib_Send(proto->threadData->s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT))==SOCKET_ERROR || len!=datalen) {
+		JabberLog(proto, "Netlib_Send() failed, error=%d", WSAGetLastError());
 		return FALSE;
 	}
 	return TRUE;
 }
 
-int JabberWsRecv(JABBER_SOCKET hConn, char *data, long datalen)
+int JabberWsRecv(TlenProtocol *proto, char *data, long datalen)
 {
 	int ret;
 
-	ret = Netlib_Recv(hConn, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT);
+	ret = Netlib_Recv(proto->threadData->s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT);
 	if(ret == SOCKET_ERROR) {
-		JabberLog("Netlib_Recv() failed, error=%d", WSAGetLastError());
+		JabberLog(proto, "Netlib_Recv() failed, error=%d", WSAGetLastError());
 		return 0;
 	}
 	if(ret == 0) {
-		JabberLog("Connection closed gracefully");
+		JabberLog(proto, "Connection closed gracefully");
 		return 0;
 	}
 	return ret;
 }
 
 
-int JabberWsSendAES(JABBER_SOCKET hConn, char *data, int datalen, aes_context *aes_ctx, unsigned char *aes_iv)
+int JabberWsSendAES(TlenProtocol *proto, char *data, int datalen, aes_context *aes_ctx, unsigned char *aes_iv)
 {
 	int len, sendlen;
 	unsigned char aes_input[16];
@@ -117,9 +117,9 @@ int JabberWsSendAES(JABBER_SOCKET hConn, char *data, int datalen, aes_context *a
 			len += 16;
 		}
 		if (len > 0) {
-			JabberLog("Sending %d bytes", len);
-			if ((sendlen=Netlib_Send(hConn, aes_output, len, MSG_NODUMP))==SOCKET_ERROR || len!=sendlen) {
-				JabberLog("Netlib_Send() failed, error=%d", WSAGetLastError());
+			JabberLog(proto, "Sending %d bytes", len);
+			if ((sendlen=Netlib_Send(proto->threadData->s, aes_output, len, MSG_NODUMP))==SOCKET_ERROR || len!=sendlen) {
+				JabberLog(proto, "Netlib_Send() failed, error=%d", WSAGetLastError());
 				return FALSE;
 			}
 		}
@@ -127,20 +127,20 @@ int JabberWsSendAES(JABBER_SOCKET hConn, char *data, int datalen, aes_context *a
 	return TRUE;
 }
 
-int JabberWsRecvAES(JABBER_SOCKET hConn, char *data, long datalen, aes_context *aes_ctx, unsigned char *aes_iv)
+int JabberWsRecvAES(TlenProtocol *proto, char *data, long datalen, aes_context *aes_ctx, unsigned char *aes_iv)
 {
 	int ret, len = 0, maxlen = datalen;
 	unsigned char aes_input[16];
 	unsigned char *aes_output = (unsigned char *)data;
 
 	for (maxlen = maxlen & ~0xF; maxlen != 0; maxlen = maxlen & 0xF) {
-		ret = Netlib_Recv(hConn, data, maxlen, MSG_NODUMP);
+		ret = Netlib_Recv(proto->threadData->s, data, maxlen, MSG_NODUMP);
 		if(ret == SOCKET_ERROR) {
-			JabberLog("Netlib_Recv() failed, error=%d", WSAGetLastError());
+			JabberLog(proto, "Netlib_Recv() failed, error=%d", WSAGetLastError());
 			return 0;
 		}
 		if(ret == 0) {
-			JabberLog("Connection closed gracefully");
+			JabberLog(proto, "Connection closed gracefully");
 			return 0;
 		}
 		data += ret;

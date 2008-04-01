@@ -86,10 +86,6 @@ JABBER_IQ_PFUNC JabberIqFetchFunc(int iqId)
 
 	EnterCriticalSection(&csIqList);
 	JabberIqExpire();
-#ifdef _DEBUG
-	for (i=0; i<iqCount; i++)
-		JabberLog("  %04d : %02d : 0x%x", iqList[i].iqId, iqList[i].procId, iqList[i].func);
-#endif
 	for (i=0; i<iqCount && iqList[i].iqId!=iqId; i++);
 	if (i < iqCount) {
 		res = iqList[i].func;
@@ -107,7 +103,6 @@ void JabberIqAdd(unsigned int iqId, JABBER_IQ_PROCID procId, JABBER_IQ_PFUNC fun
 	int i;
 
 	EnterCriticalSection(&csIqList);
-	JabberLog("IqAdd id=%d, proc=%d, func=0x%x", iqId, procId, func);
 	if (procId == IQ_PROC_NONE)
 		i = iqCount;
 	else

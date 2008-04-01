@@ -47,31 +47,31 @@ static TabDef tabPages[] = {
 
 TLEN_OPTIONS tlenOptions;
 
-void TlenLoadOptions()
+void TlenLoadOptions(TlenProtocol *proto)
 {
-	tlenOptions.useEncryption = DBGetContactSettingByte(NULL, jabberProtoName, "UseEncryption", TRUE);
-	tlenOptions.reconnect = DBGetContactSettingByte(NULL, jabberProtoName, "Reconnect", FALSE);
-	tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "AlertPolicy", 0);
-	tlenOptions.rosterSync = DBGetContactSettingByte(NULL, jabberProtoName, "RosterSync", FALSE);
-	tlenOptions.offlineAsInvisible = DBGetContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", FALSE);
-	tlenOptions.leaveOfflineMessage = DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE);
-	tlenOptions.offlineMessageOption = DBGetContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", 0);
-	tlenOptions.ignoreAdvertisements = DBGetContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", TRUE);
-	tlenOptions.groupChatPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", 0);
-	tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0);
-	tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, jabberProtoName, "EnableAvatars", FALSE);
-	tlenOptions.enableVersion = DBGetContactSettingByte(NULL, jabberProtoName, "EnableVersion", FALSE);
-	tlenOptions.useNudge = DBGetContactSettingByte(NULL, jabberProtoName, "UseNudge", FALSE);
-	tlenOptions.logAlerts = DBGetContactSettingByte(NULL, jabberProtoName, "LogAlerts", FALSE);
+	tlenOptions.useEncryption = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE);
+	tlenOptions.reconnect = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "Reconnect", FALSE);
+	tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", 0);
+	tlenOptions.rosterSync = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "RosterSync", FALSE);
+	tlenOptions.offlineAsInvisible = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "OfflineAsInvisible", FALSE);
+	tlenOptions.leaveOfflineMessage = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", FALSE);
+	tlenOptions.offlineMessageOption = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", 0);
+	tlenOptions.ignoreAdvertisements = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "IgnoreAdvertisements", TRUE);
+	tlenOptions.groupChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "GroupChatPolicy", 0);
+	tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceChatPolicy", 0);
+	tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableAvatars", FALSE);
+	tlenOptions.enableVersion = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", FALSE);
+	tlenOptions.useNudge = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", FALSE);
+	tlenOptions.logAlerts = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", FALSE);
 	tlenOptions.useNewP2P = FALSE;
 }
 
 static int changed = 0;
 
-static void ApplyChanges(int i) {
+static void ApplyChanges(TlenProtocol *proto, int i) {
 	changed &= ~i;
 	if (changed == 0) {
-		TlenLoadOptions();
+		TlenLoadOptions(proto);
 	}
 }
 
@@ -81,7 +81,7 @@ static void MarkChanges(int i, HWND hWnd) {
 }
 
 
-int TlenOptInit(WPARAM wParam, LPARAM lParam)
+int TlenOptInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
 {
 	int i;
 	OPTIONSDIALOGPAGE odp = { 0 };
@@ -92,6 +92,7 @@ int TlenOptInit(WPARAM wParam, LPARAM lParam)
 	odp.pszTitle = jabberModuleName;
 	odp.flags = ODPF_BOLDGROUPS | ODPF_TCHAR;
 	odp.nIDBottomSimpleControl = 0;//IDC_SIMPLE;
+    odp.dwInitParam = (LPARAM)proto;
 	for (i = 0; i < SIZEOF(tabPages); i++) {
 		odp.pszTemplate = MAKEINTRESOURCEA(tabPages[i].dlgId);
 		odp.pfnDlgProc = tabPages[i].dlgProc;
@@ -134,23 +135,25 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 	char text[256];
 	WNDPROC oldProc;
 
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		{
 			DBVARIANT dbv;
-
+			proto = (TlenProtocol *)lParam;
+            SetWindowLong(hwndDlg, DWL_USER, (LONG)proto);
 			TranslateDialogDefault(hwndDlg);
 			SetDlgItemText(hwndDlg, IDC_TLEN, jabberModuleName);
-			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
+			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			}
-			if (!DBGetContactSetting(NULL, jabberProtoName, "Password", &dbv)) {
+			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "Password", &dbv)) {
 				CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
 				SetDlgItemText(hwndDlg, IDC_EDIT_PASSWORD, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			}
-			CheckDlgButton(hwndDlg, IDC_SAVEPASSWORD, DBGetContactSettingByte(NULL, jabberProtoName, "SavePassword", TRUE));
+			CheckDlgButton(hwndDlg, IDC_SAVEPASSWORD, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", TRUE));
 
 			CheckDlgButton(hwndDlg, IDC_RECONNECT, tlenOptions.reconnect);
 			CheckDlgButton(hwndDlg, IDC_ROSTER_SYNC, tlenOptions.rosterSync);
@@ -235,38 +238,38 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				DBVARIANT dbv;
 
 				GetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, text, sizeof(text));
-				if (DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv) || strcmp(text, dbv.pszVal))
+				if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv) || strcmp(text, dbv.pszVal))
 					reconnectRequired = TRUE;
 				if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
-				DBWriteContactSettingString(NULL, jabberProtoName, "LoginName", strlwr(text));
+				DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "LoginName", strlwr(text));
 
 				if (IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD)) {
 					GetDlgItemText(hwndDlg, IDC_EDIT_PASSWORD, text, sizeof(text));
 					CallService(MS_DB_CRYPT_ENCODESTRING, sizeof(text), (LPARAM) text);
-					if (DBGetContactSetting(NULL, jabberProtoName, "Password", &dbv) || strcmp(text, dbv.pszVal))
+					if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "Password", &dbv) || strcmp(text, dbv.pszVal))
 						reconnectRequired = TRUE;
 					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
-					DBWriteContactSettingString(NULL, jabberProtoName, "Password", text);
+					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "Password", text);
 				}
 				else
-					DBDeleteContactSetting(NULL, jabberProtoName, "Password");
+					DBDeleteContactSetting(NULL, proto->iface.m_szModuleName, "Password");
 
-				DBWriteContactSettingByte(NULL, jabberProtoName, "SavePassword", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "Reconnect", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_RECONNECT));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "RosterSync", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ROSTER_SYNC));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "OfflineAsInvisible", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SHOW_OFFLINE));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "IgnoreAdvertisements", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_IGNORE_ADVERTISEMENTS));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_OFFLINE_MESSAGE));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", (WORD) SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "AlertPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "GroupChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "EnableAvatars", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_AVATARS));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "EnableVersion", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VERSIONINFO));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "UseNudge", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_NUDGE_SUPPORT));
-				DBWriteContactSettingByte(NULL, jabberProtoName, "LogAlerts", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_LOG_ALERTS));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "Reconnect", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_RECONNECT));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "RosterSync", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ROSTER_SYNC));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "OfflineAsInvisible", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SHOW_OFFLINE));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "IgnoreAdvertisements", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_IGNORE_ADVERTISEMENTS));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_OFFLINE_MESSAGE));
+				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", (WORD) SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "GroupChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableAvatars", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_AVATARS));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VERSIONINFO));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_NUDGE_SUPPORT));
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_LOG_ALERTS));
 				if (reconnectRequired && jabberConnected)
 					MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
-				ApplyChanges(1);
+				ApplyChanges(proto, 1);
 				return TRUE;
 			}
 		}
@@ -277,17 +280,20 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 
 static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		{
+			proto = (TlenProtocol *)lParam;
+            SetWindowLong(hwndDlg, DWL_USER, (LONG)proto);
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Always ask me"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept invitations from authorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept all invitations"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore invitations from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore all invitation"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, tlenOptions.voiceChatPolicy, 0);
-			TlenVoiceBuildInDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_IN));
-			TlenVoiceBuildOutDeviceList(GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_OUT));
+			TlenVoiceBuildInDeviceList(proto, GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_IN));
+			TlenVoiceBuildOutDeviceList(proto, GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_OUT));
 			return TRUE;
 		}
 	case WM_COMMAND:
@@ -304,10 +310,10 @@ static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		switch (((LPNMHDR) lParam)->code) {
 		case PSN_APPLY:
 			{
-				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_IN, CB_GETCURSEL, 0, 0));
-				DBWriteContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
-				ApplyChanges(2);
+				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceDeviceIn", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_IN, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceDeviceOut", (WORD) SendDlgItemMessage(hwndDlg, IDC_VOICE_DEVICE_OUT, CB_GETCURSEL, 0, 0));
+				ApplyChanges(proto, 2);
 				return TRUE;
 			}
 		}
@@ -321,13 +327,16 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 {
 	char text[256];
 	BOOL bChecked;
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
 
 	switch (msg) {
 	case WM_INITDIALOG:
 		{
 			DBVARIANT dbv;
+			proto = (TlenProtocol *)lParam;
+            SetWindowLong(hwndDlg, DWL_USER, (LONG)proto);
 			TranslateDialogDefault(hwndDlg);
-			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			} else {
@@ -337,21 +346,21 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), TRUE);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), TRUE);
 
-			if (!DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv)) {
+			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "ManualHost", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_HOST, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			} else
 				SetDlgItemText(hwndDlg, IDC_HOST, "s1.tlen.pl");
-			SetDlgItemInt(hwndDlg, IDC_HOSTPORT, DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT), FALSE);
+			SetDlgItemInt(hwndDlg, IDC_HOSTPORT, DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "ManualPort", TLEN_DEFAULT_PORT), FALSE);
 
-			CheckDlgButton(hwndDlg, IDC_KEEPALIVE, DBGetContactSettingByte(NULL, jabberProtoName, "KeepAlive", TRUE));
+			CheckDlgButton(hwndDlg, IDC_KEEPALIVE, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "KeepAlive", TRUE));
 
-			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, jabberProtoName, "UseEncryption", TRUE));
+			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE));
 			
-			CheckDlgButton(hwndDlg, IDC_VISIBILITY_SUPPORT, DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE));
+			CheckDlgButton(hwndDlg, IDC_VISIBILITY_SUPPORT, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "VisibilitySupport", FALSE));
 			// File transfer options
 			bChecked = FALSE;
-			if (DBGetContactSettingByte(NULL, jabberProtoName, "UseFileProxy", FALSE) == TRUE) {
+			if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseFileProxy", FALSE) == TRUE) {
 			    bChecked = TRUE;
 				CheckDlgButton(hwndDlg, IDC_FILE_USE_PROXY, TRUE);
 			}
@@ -362,7 +371,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PORT_LABEL), bChecked);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_PORT), bChecked);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_FILE_PROXY_USE_AUTH), bChecked);
-			if (DBGetContactSettingByte(NULL, jabberProtoName, "FileProxyAuth", FALSE) == TRUE) {
+			if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "FileProxyAuth", FALSE) == TRUE) {
 				CheckDlgButton(hwndDlg, IDC_FILE_PROXY_USE_AUTH, TRUE);
 			} else {
 			    bChecked = FALSE;
@@ -375,17 +384,17 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)TranslateT("Forwarding"));
             SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)TranslateT("SOCKS4"));
             SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)TranslateT("SOCKS5"));
-			SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_SETCURSEL, DBGetContactSettingWord(NULL, jabberProtoName, "FileProxyType", 0), 0);
-			if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyHost", &dbv)) {
+			SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_SETCURSEL, DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyType", 0), 0);
+			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "FileProxyHost", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			}
-			SetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, DBGetContactSettingWord(NULL, jabberProtoName, "FileProxyPort", 0), FALSE);
-			if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyUsername", &dbv)) {
+			SetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyPort", 0), FALSE);
+			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "FileProxyUsername", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_USER, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			}
-			if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyPassword", &dbv)) {
+			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "FileProxyPassword", &dbv)) {
 				CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
 				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_PASSWORD, dbv.pszVal);
 				DBFreeVariant(&dbv);
@@ -444,46 +453,46 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					BOOL reconnectRequired = FALSE;
 					DBVARIANT dbv;
 					GetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, text, sizeof(text));
-					if (DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv) || strcmp(text, dbv.pszVal))
+					if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv) || strcmp(text, dbv.pszVal))
 						reconnectRequired = TRUE;
 					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
-					DBWriteContactSettingString(NULL, jabberProtoName, "LoginServer", strlwr(text));
+					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "LoginServer", strlwr(text));
 
 					GetDlgItemText(hwndDlg, IDC_HOST, text, sizeof(text));
-					if (DBGetContactSetting(NULL, jabberProtoName, "ManualHost", &dbv) || strcmp(text, dbv.pszVal))
+					if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "ManualHost", &dbv) || strcmp(text, dbv.pszVal))
 						reconnectRequired = TRUE;
 					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
-					DBWriteContactSettingString(NULL, jabberProtoName, "ManualHost", text);
+					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "ManualHost", text);
 
 					port = (WORD) GetDlgItemInt(hwndDlg, IDC_HOSTPORT, NULL, FALSE);
-					if (DBGetContactSettingWord(NULL, jabberProtoName, "ManualPort", TLEN_DEFAULT_PORT) != port)
+					if (DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "ManualPort", TLEN_DEFAULT_PORT) != port)
 						reconnectRequired = TRUE;
-					DBWriteContactSettingWord(NULL, jabberProtoName, "ManualPort", port);
+					DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "ManualPort", port);
 
-					jabberSendKeepAlive = IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE);
-					DBWriteContactSettingByte(NULL, jabberProtoName, "KeepAlive", (BYTE) jabberSendKeepAlive);
+					tlenOptions.sendKeepAlive = IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE);
+					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "KeepAlive", (BYTE) tlenOptions.sendKeepAlive);
 
 					useEncryption = IsDlgButtonChecked(hwndDlg, IDC_USE_SSL);
-					if (DBGetContactSettingByte(NULL, jabberProtoName, "UseEncryption", TRUE) != useEncryption)
+					if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE) != useEncryption)
 						reconnectRequired = TRUE;
-					DBWriteContactSettingByte(NULL, jabberProtoName, "UseEncryption", (BYTE) useEncryption);
+					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", (BYTE) useEncryption);
 
-					DBWriteContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VISIBILITY_SUPPORT));
+					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "VisibilitySupport", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VISIBILITY_SUPPORT));
 					// File transfer options
-					DBWriteContactSettingByte(NULL, jabberProtoName, "UseFileProxy", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY));
-					DBWriteContactSettingWord(NULL, jabberProtoName, "FileProxyType", (WORD) SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_GETCURSEL, 0, 0));
+					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "UseFileProxy", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY));
+					DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyType", (WORD) SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_GETCURSEL, 0, 0));
 					GetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, text, sizeof(text));
-					DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyHost", text);
-					DBWriteContactSettingWord(NULL, jabberProtoName, "FileProxyPort", (WORD) GetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, NULL, FALSE));
-					DBWriteContactSettingByte(NULL, jabberProtoName, "FileProxyAuth", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_PROXY_USE_AUTH));
+					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "FileProxyHost", text);
+					DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyPort", (WORD) GetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, NULL, FALSE));
+					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "FileProxyAuth", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_PROXY_USE_AUTH));
 					GetDlgItemText(hwndDlg, IDC_FILE_PROXY_USER, text, sizeof(text));
-					DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyUsername", text);
+					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "FileProxyUsername", text);
 					GetDlgItemText(hwndDlg, IDC_FILE_PROXY_PASSWORD, text, sizeof(text));
 					CallService(MS_DB_CRYPT_ENCODESTRING, sizeof(text), (LPARAM) text);
-					DBWriteContactSettingString(NULL, jabberProtoName, "FileProxyPassword", text);
+					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "FileProxyPassword", text);
 					if (reconnectRequired && jabberConnected)
 						MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
-					ApplyChanges(4);
+					ApplyChanges(proto, 4);
 					return TRUE;
 				}
 			}
@@ -528,16 +537,19 @@ static void MailPopupPreview(DWORD colorBack, DWORD colorText, char *title, char
 
 static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
 	switch (msg) {
 		case WM_INITDIALOG:
 			{
 				BYTE delayMode;
+				proto = (TlenProtocol *)lParam;
+                SetWindowLong(hwndDlg, DWL_USER, (LONG)proto);
 				TranslateDialogDefault(hwndDlg);
-				CheckDlgButton(hwndDlg, IDC_ENABLEPOPUP, DBGetContactSettingByte(NULL, jabberProtoName, "MailPopupEnabled", TRUE));
-				SendDlgItemMessage(hwndDlg, IDC_COLORBKG, CPM_SETCOLOUR, 0, DBGetContactSettingDword(NULL, jabberProtoName, "MailPopupBack", POPUP_DEFAULT_COLORBKG));
-				SendDlgItemMessage(hwndDlg, IDC_COLORTXT, CPM_SETCOLOUR, 0, DBGetContactSettingDword(NULL, jabberProtoName, "MailPopupText", POPUP_DEFAULT_COLORTXT));
-				SetDlgItemInt(hwndDlg, IDC_DELAY, DBGetContactSettingDword(NULL, jabberProtoName, "MailPopupDelay", 4), FALSE);
-				delayMode = DBGetContactSettingByte(NULL, jabberProtoName, "MailPopupDelayMode", 0);
+				CheckDlgButton(hwndDlg, IDC_ENABLEPOPUP, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "MailPopupEnabled", TRUE));
+				SendDlgItemMessage(hwndDlg, IDC_COLORBKG, CPM_SETCOLOUR, 0, DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupBack", POPUP_DEFAULT_COLORBKG));
+				SendDlgItemMessage(hwndDlg, IDC_COLORTXT, CPM_SETCOLOUR, 0, DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupText", POPUP_DEFAULT_COLORTXT));
+				SetDlgItemInt(hwndDlg, IDC_DELAY, DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupDelay", 4), FALSE);
+				delayMode = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "MailPopupDelayMode", 0);
 				if (delayMode==1) {
 					CheckDlgButton(hwndDlg, IDC_DELAY_CUSTOM, TRUE);
 				} else if (delayMode==2) {
@@ -586,10 +598,10 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				case PSN_APPLY:
 				{
 					BYTE delayMode;
-					DBWriteContactSettingByte(NULL, jabberProtoName, "MailPopupEnabled", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ENABLEPOPUP));
-					DBWriteContactSettingDword(NULL, jabberProtoName, "MailPopupBack", (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0));
-					DBWriteContactSettingDword(NULL, jabberProtoName, "MailPopupText", (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0));
-					DBWriteContactSettingDword(NULL, jabberProtoName, "MailPopupDelay", (DWORD) GetDlgItemInt(hwndDlg,IDC_DELAY, NULL, FALSE));
+					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "MailPopupEnabled", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_ENABLEPOPUP));
+					DBWriteContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupBack", (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0));
+					DBWriteContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupText", (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0));
+					DBWriteContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupDelay", (DWORD) GetDlgItemInt(hwndDlg,IDC_DELAY, NULL, FALSE));
 					delayMode=0;
 					if (IsDlgButtonChecked(hwndDlg, IDC_DELAY_CUSTOM)) {
 						delayMode=1;
@@ -597,7 +609,7 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 						delayMode=2;
 
 					}
-					DBWriteContactSettingByte(NULL, jabberProtoName, "MailPopupDelayMode", delayMode);
+					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "MailPopupDelayMode", delayMode);
 					return TRUE;
 				}
 			}

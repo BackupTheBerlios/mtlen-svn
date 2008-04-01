@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#include "jabber.h"
+
+
 #ifndef _JABBER_LIST_H_
 #define _JABBER_LIST_H_
 
@@ -85,10 +88,10 @@ typedef struct {
 	//WORD port;
 } JABBER_LIST_ITEM;
 
-void JabberListInit(void);
-void JabberListUninit(void);
-void JabberListWipe(void);
-void JabberListWipeSpecial(void);
+void JabberListInit(TlenProtocol *proto);
+void JabberListUninit(TlenProtocol *proto);
+void JabberListWipe(TlenProtocol *proto);
+void JabberListWipeSpecial(TlenProtocol *proto);
 int JabberListExist(JABBER_LIST list, const char *jid);
 JABBER_LIST_ITEM *JabberListAdd(JABBER_LIST list, const char *jid);
 void JabberListRemove(JABBER_LIST list, const char *jid);

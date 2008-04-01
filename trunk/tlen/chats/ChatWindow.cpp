@@ -851,7 +851,6 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 		}
 		ied.dwFlags = getOptions() & FLAG_FORMAT_ALL;
 		ied.next = NULL;
-		ied.fontStyle = event->dwFlags;
 		ied.color = event->color;
 		ied.fontSize = event->iFontSize;
 		ied.fontStyle = event->dwFlags;

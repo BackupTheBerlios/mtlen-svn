@@ -28,9 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_p2p_old.h"
 
 static int listenCount = 0;
-static int listenPort;
-static CRITICAL_SECTION listenMutex;
-
 
 void TlenP2PFreeFileTransfer(TLEN_FILE_TRANSFER *ft)
 {
@@ -57,12 +54,15 @@ TLEN_FILE_PACKET *TlenP2PPacketCreate(int datalen)
 {
 	TLEN_FILE_PACKET *packet;
 
-	if ((packet=(TLEN_FILE_PACKET *) malloc(sizeof(TLEN_FILE_PACKET))) == NULL)
+	if ((packet=(TLEN_FILE_PACKET *) mir_alloc(sizeof(TLEN_FILE_PACKET))) == NULL)
 		return NULL;
-	if ((packet->packet=(char *) malloc(datalen)) == NULL) {
-		free(packet);
-		return NULL;
-	}
+    packet->packet = NULL;
+    if (datalen > 0) {
+        if ((packet->packet=(char *) mir_alloc(datalen)) == NULL) {
+            mir_free(packet);
+            return NULL;
+        }
+    }
 	packet->maxDataLen = datalen;
 	packet->type=0;
 	packet->len=0;
@@ -73,8 +73,8 @@ void TlenP2PPacketFree(TLEN_FILE_PACKET *packet)
 {
 	if (packet != NULL) {
 		if (packet->packet != NULL)
-			free(packet->packet);
-		free(packet);
+			mir_free(packet->packet);
+		mir_free(packet);
 	}
 }
 
@@ -99,9 +99,6 @@ void TlenP2PPacketPackDword(TLEN_FILE_PACKET *packet, DWORD data)
 			(*((DWORD*)((packet->packet)+(packet->len)))) = data;
 			packet->len += sizeof(DWORD);
 		}
-		else {
-			JabberLog("TlenP2PPacketPackDword() overflow");
-		}
 	}
 }
 
@@ -111,9 +108,6 @@ void TlenP2PPacketPackBuffer(TLEN_FILE_PACKET *packet, char *buffer, int len)
 		if (packet->len + len <= packet->maxDataLen) {
 			memcpy((packet->packet)+(packet->len), buffer, len);
 			packet->len += len;
-		}
-		else {
-			JabberLog("TlenP2PPacketPackBuffer() overflow");
 		}
 	}
 }
@@ -166,7 +160,9 @@ void TlenP2PEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft, BOOL sendAck)
 	char *hash;
 	char str[300];
 	TLEN_FILE_PACKET *packet;
-	JabberLog("Establishing outgoing connection.");
+	TlenProtocol *proto = ft->proto;
+
+	JabberLog(proto, "Establishing outgoing connection.");
 	ft->state = FT_ERROR;
 	if ((packet = TlenP2PPacketCreate(2*sizeof(DWORD) + 20))!=NULL) {
 		TlenP2PPacketSetType(packet, TLEN_FILE_PACKET_CONNECTION_REQUEST);
@@ -175,7 +171,7 @@ void TlenP2PEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft, BOOL sendAck)
 		_snprintf(str, sizeof(str), "%08X%s%d", atoi(ft->iqId), jabberThreadInfo->username, atoi(ft->iqId));
 		hash = TlenSha1(str, strlen(str));
 		TlenP2PPacketPackBuffer(packet, hash, 20);
-		free(hash);
+		mir_free(hash);
 		TlenP2PPacketSend(ft->s, packet);
 		TlenP2PPacketFree(packet);
 		packet = TlenP2PPacketReceive(ft->s);
@@ -184,7 +180,7 @@ void TlenP2PEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft, BOOL sendAck)
 				if ((int)(*((DWORD*)packet->packet)) == atoi(ft->iqId)) {
 					ft->state = FT_CONNECTING;
 					if (sendAck) {
-						ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, ft, 0);
+						ProtoBroadcastAck(proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, ft, 0);
 					}
 				}
 			}
@@ -200,7 +196,6 @@ TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET s, int list
 	int i;
 	char str[300];
 	DWORD iqId;
-	JabberLog("Establishing incoming connection.");
 	// TYPE: 0x1
 	// LEN:
 	// (DWORD) 0x1
@@ -211,7 +206,6 @@ TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET s, int list
 		if (packet!=NULL) {
 			TlenP2PPacketFree(packet);
 		}
-		JabberLog("Unable to read first packet.");
 		return NULL;
 	}
 	iqId = *((DWORD *)(packet->packet+sizeof(DWORD)));
@@ -224,12 +218,12 @@ TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET s, int list
 				int j;
 				nick = JabberNickFromJID(item->ft->jid);
 				_snprintf(str, sizeof(str), "%08X%s%d", iqId, nick, iqId);
-				free(nick);
+				mir_free(nick);
 				hash = TlenSha1(str, strlen(str));
 				for (j=0;j<20;j++) {
 					if (hash[j]!=packet->packet[2*sizeof(DWORD)+j]) break;
 				}
-				free(hash);
+				mir_free(hash);
 				if (j==20) break;
 			}
 		}
@@ -245,7 +239,7 @@ TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(JABBER_SOCKET s, int list
 			TlenP2PPacketFree(packet);
 			item->ft->state = FT_CONNECTING;
 			if (sendAck) {
-				ProtoBroadcastAck(jabberProtoName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, item->ft, 0);
+				ProtoBroadcastAck(item->ft->proto->iface.m_szModuleName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTED, item->ft, 0);
 			}
 			return item->ft;
 		}
@@ -273,7 +267,7 @@ static void __cdecl TlenFileBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
 			ft->state = FT_ERROR;
 		}
 	}
-	JabberLog("Closing connection for this file transfer...");
+	JabberLog(ft->proto, "Closing connection for this file transfer...");
 //	Netlib_CloseHandle(ft->s);
 	if (ft->hFileEvent != NULL)
 		SetEvent(ft->hFileEvent);
@@ -376,7 +370,7 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	nloc.flags = 0;
 	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hFileNetlibUser, (LPARAM) &nloc);
 	if (s==NULL) {
-		JabberLog("Connection failed (%d), thread ended", WSAGetLastError());
+		JabberLog(ft->proto, "Connection failed (%d), thread ended", WSAGetLastError());
 		return NULL;
 	}
 	buf[0] = 5;  //yep, socks5
@@ -384,13 +378,13 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	buf[2] = sb->useAuth?2:0; // authorization
 	status = Netlib_Send(s, buf, 3, MSG_NODUMP);
 	if (status==SOCKET_ERROR || status<3) {
-		JabberLog("Send failed (%d), thread ended", WSAGetLastError());
+		JabberLog(ft->proto, "Send failed (%d), thread ended", WSAGetLastError());
 		Netlib_CloseHandle(s);
 		return NULL;
 	}
 	status = Netlib_Recv(s, buf, 2, MSG_NODUMP);
 	if (status==SOCKET_ERROR || status<2 || (buf[1]!=0 && buf[1]!=2)) {
-		JabberLog("SOCKS5 negotiation failed");
+		JabberLog(ft->proto, "SOCKS5 negotiation failed");
 		Netlib_CloseHandle(s);
 		return NULL;
 	}
@@ -409,13 +403,13 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 		status = Netlib_Send(s, pAuthBuf, 3+nUserLen+nPassLen, MSG_NODUMP);
 		mir_free(pAuthBuf);
 		if (status==SOCKET_ERROR || status<3+nUserLen+nPassLen) {
-			JabberLog("Send failed (%d), thread ended", WSAGetLastError());
+			JabberLog(ft->proto, "Send failed (%d), thread ended", WSAGetLastError());
 			Netlib_CloseHandle(s);
 			return NULL;
 		}
 		status = Netlib_Recv(s, buf, sizeof(buf), MSG_NODUMP);
 		if (status==SOCKET_ERROR || status<2 || buf[1]!=0) {
-			JabberLog("SOCKS5 sub-negotiation failed");
+			JabberLog(ft->proto, "SOCKS5 sub-negotiation failed");
 			Netlib_CloseHandle(s);
 			return NULL;
 		}
@@ -471,32 +465,32 @@ JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft)
 	DBVARIANT dbv;
 	SOCKSBIND sb;
 	struct in_addr in;
-
+	TlenProtocol *proto = ft->proto;
 	useProxy=0;
 	if (ft->localName!= NULL) mir_free(ft->localName);
 	ft->localName = NULL;
 	ft->wPort = 0;
-	if (DBGetContactSettingByte(NULL, jabberProtoName, "UseFileProxy", FALSE)) {
-		if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyHost", &dbv)) {
+	if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseFileProxy", FALSE)) {
+		if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "FileProxyHost", &dbv)) {
 			strcpy(sb.szHost, dbv.pszVal);
 			DBFreeVariant(&dbv);
-			sb.wPort = DBGetContactSettingWord(NULL, jabberProtoName, "FileProxyPort", 0);
+			sb.wPort = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyPort", 0);
 			sb.useAuth = FALSE;
 			strcpy(sb.szUser, "");
 			strcpy(sb.szPassword, "");
-			if (DBGetContactSettingByte(NULL, jabberProtoName, "FileProxyAuth", FALSE)) {
+			if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "FileProxyAuth", FALSE)) {
 				sb.useAuth = TRUE;
-				if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyUsername", &dbv)) {
+				if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "FileProxyUsername", &dbv)) {
 					strcpy(sb.szUser, dbv.pszVal);
 					DBFreeVariant(&dbv);
 				}
-				if (!DBGetContactSetting(NULL, jabberProtoName, "FileProxyPassword", &dbv)) {
+				if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "FileProxyPassword", &dbv)) {
 					CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
 					strcpy(sb.szPassword, dbv.pszVal);
 					DBFreeVariant(&dbv);
 				}
 			}
-			switch (DBGetContactSettingWord(NULL, jabberProtoName, "FileProxyType", 0)) {
+			switch (DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyType", 0)) {
 				case 0: // forwarding
 					useProxy = 1;
 					break;
@@ -518,10 +512,10 @@ JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft)
 		nlb.cbSize = sizeof(NETLIBBIND);
 		nlb.pfnNewConnectionV2 = ft->pfnNewConnectionV2;
 		nlb.wPort = 0;	// Use user-specified incoming port ranges, if available
-		nlb.pExtra = NULL;
-		JabberLog("Calling MS_NETLIB_BINDPORT");
-		s = (HANDLE) CallService(MS_NETLIB_BINDPORT, (WPARAM) hNetlibUser, (LPARAM) &nlb);
-		JabberLog("listening on %d",s);
+		nlb.pExtra = proto;
+		JabberLog(ft->proto, "Calling MS_NETLIB_BINDPORT");
+		s = (HANDLE) CallService(MS_NETLIB_BINDPORT, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nlb);
+		JabberLog(ft->proto, "listening on %d",s);
 	}
 	if (useProxy==0) {
 		in.S_un.S_addr = htonl(nlb.dwExternalIP);

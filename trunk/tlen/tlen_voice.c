@@ -33,10 +33,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "tlen_voice.h"
 #include "tlen_p2p_old.h"
+#include "tlen_file.h"
 
-extern char *jabberProtoName;
-extern HANDLE hNetlibUser;
-extern struct ThreadData *jabberThreadInfo;
+extern ThreadData *jabberThreadInfo;
 
 static int modeFrequency[]= {0, 0, 8000, 11025, 22050, 44100};
 static int modeFrameSize[]= {0, 0, 5, 5, 10, 25};
@@ -64,6 +63,7 @@ typedef struct {
 	TLEN_FILE_TRANSFER *ft;
 	int			vuMeter;
 	int			bytesSum;
+	TlenProtocol *proto;
 } TLEN_VOICE_CONTROL;
 
 static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft);
@@ -131,7 +131,7 @@ static DWORD WINAPI TlenVoiceRecordingThreadProc(TLEN_VOICE_CONTROL *control)
 		}
 	}
 	control->isRunning = 0;
-	JabberLog("recording thread ended...");
+	JabberLog(control->proto, "recording thread ended...");
 	return 0;
 }
 
@@ -171,7 +171,7 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
 	control->waveHeadersPos = 0;
 	control->waveHeadersNum = availLimitMin + 2;
 
-	j = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", 0);
+	j = DBGetContactSettingWord(NULL, control->proto->iface.m_szModuleName, "VoiceDeviceOut", 0);
 	iSelDev = WAVE_MAPPER;
 	if (j!=0) {
 		iNumDevs = waveOutGetNumDevs();
@@ -188,18 +188,18 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
 		}
 	}
 	if (!waveOutGetDevCaps(iSelDev, &wic, sizeof(WAVEOUTCAPS))) {
-		JabberLog("Playback device ID #%u: %s\r\n", iSelDev, wic.szPname);
+		JabberLog(control->proto, "Playback device ID #%u: %s\r\n", iSelDev, wic.szPname);
 	}
 
 	mmres = waveOutOpen(&control->hWaveOut, iSelDev, &wfm, (DWORD) &TlenVoicePlaybackCallback, (DWORD) control, CALLBACK_FUNCTION);
 	if (mmres!=MMSYSERR_NOERROR) {
-		JabberLog("TlenVoiceStart FAILED!");
+		JabberLog(control->proto, "TlenVoiceStart FAILED!");
 		return 1;
 	}
 	control->waveData = (short *)mir_alloc(control->waveHeadersNum * control->waveFrameSize * 2);
 	memset(control->waveData, 0, control->waveHeadersNum * control->waveFrameSize * 2);
 	control->waveHeaders = (WAVEHDR *)mir_alloc(control->waveHeadersNum * sizeof(WAVEHDR));
-	JabberLog("TlenVoiceStart OK!");
+	JabberLog(control->proto, "TlenVoiceStart OK!");
 	return 0;
 }
 
@@ -238,7 +238,7 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
 
 	SetThreadPriority(control->hThread, THREAD_PRIORITY_ABOVE_NORMAL);
 
-	j = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", 0);
+	j = DBGetContactSettingWord(NULL, control->proto->iface.m_szModuleName, "VoiceDeviceIn", 0);
 	iSelDev = WAVE_MAPPER;
 	if (j!=0) {
 		iNumDevs = waveInGetNumDevs();
@@ -255,14 +255,14 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
 		}
 	}
 	if (!waveInGetDevCaps(iSelDev, &wic, sizeof(WAVEINCAPS))) {
-		JabberLog("Recording device ID #%u: %s\r\n", iSelDev, wic.szPname);
+		JabberLog(control->proto, "Recording device ID #%u: %s\r\n", iSelDev, wic.szPname);
 	}
 
 	mmres = waveInOpen(&control->hWaveIn, iSelDev, &wfm, (DWORD) control->threadID, 0, CALLBACK_THREAD);
 //	mmres = waveInOpen(&control->hWaveIn, 3, &wfm, (DWORD) &TlenVoiceRecordingCallback, (DWORD) control, CALLBACK_FUNCTION);
 	if (mmres!=MMSYSERR_NOERROR) {
 		PostThreadMessage(control->threadID, WIM_CLOSE, 0, 0);
-		JabberLog("TlenVoiceStart FAILED %d!", mmres);
+		JabberLog(control->proto, "TlenVoiceStart FAILED %d!", mmres);
 		return 1;
 	}
 	control->waveData = (short *)mir_alloc(control->waveHeadersNum * control->waveFrameSize * 2);
@@ -276,7 +276,7 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
 		if (mmres!=MMSYSERR_NOERROR) {
 			waveInClose(control->hWaveIn);
 //			PostThreadMessage(control->threadID, WIM_CLOSE, 0, 0);
-			JabberLog("TlenVoiceStart FAILED #2!");
+			JabberLog(control->proto, "TlenVoiceStart FAILED #2!");
 			return 1;
 	   	}
 	}
@@ -284,24 +284,25 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
 		waveInAddBuffer(control->hWaveIn, &control->waveHeaders[i], sizeof(WAVEHDR));
 	}
 	waveInStart(control->hWaveIn);
-	JabberLog("TlenVoiceRStart OK!");
+	JabberLog(control->proto, "TlenVoiceRStart OK!");
 	return 0;
 }
 
 
-static TLEN_VOICE_CONTROL *TlenVoiceCreateVC(int codec)
+static TLEN_VOICE_CONTROL *TlenVoiceCreateVC(TlenProtocol *proto, int codec)
 {
 	TLEN_VOICE_CONTROL *vc;
 	vc = (TLEN_VOICE_CONTROL *) mir_alloc(sizeof (TLEN_VOICE_CONTROL));
 	memset(vc, 0, sizeof(TLEN_VOICE_CONTROL));
 	vc->gsmstate = gsm_create();
 	vc->codec = codec;
+    vc->proto = proto;
 	return vc;
 }
 static void TlenVoiceFreeVc(TLEN_VOICE_CONTROL *vc)
 {
 	int i;
-	JabberLog("-> TlenVoiceFreeVc");
+	JabberLog(vc->proto, "-> TlenVoiceFreeVc");
 	vc->stopThread = 1;
 	PostThreadMessage(vc->threadID, MM_WIM_CLOSE, 0, 0);
 	while(vc->isRunning) {
@@ -331,8 +332,8 @@ static void TlenVoiceFreeVc(TLEN_VOICE_CONTROL *vc)
 	if (vc->waveData) mir_free(vc->waveData);
 	if (vc->waveHeaders) mir_free(vc->waveHeaders);
 	if (vc->gsmstate) gsm_release(vc->gsmstate);
+	JabberLog(vc->proto, "<- TlenVoiceFreeVc");
 	mir_free(vc);
-	JabberLog("<- TlenVoiceFreeVc");
 }
 
 static void TlenVoiceCrypt(char *buffer, int len)
@@ -354,21 +355,21 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 	NETLIBOPENCONNECTION nloc;
 	JABBER_SOCKET s;
 
-	JabberLog("Thread started: type=file_receive server='%s' port='%d'", ft->hostName, ft->wPort);
+	JabberLog(ft->proto, "Thread started: type=file_receive server='%s' port='%d'", ft->hostName, ft->wPort);
 	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
 	nloc.szHost = ft->hostName;
 	nloc.wPort = ft->wPort;
 	nloc.flags = 0;
 	SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Connecting...");
-//	ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
-	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hNetlibUser, (LPARAM) &nloc);
+//	ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
+	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
 	if (s != NULL) {
 		ft->s = s;
-		JabberLog("Entering file receive loop");
+		JabberLog(ft->proto, "Entering file receive loop");
 		TlenP2PEstablishOutgoingConnection(ft, FALSE);
 		if (ft->state!=FT_ERROR) {
 			playbackControl = NULL;
-			recordingControl = TlenVoiceCreateVC(3);
+			recordingControl = TlenVoiceCreateVC(ft->proto, 3);
 			recordingControl->ft = ft;
 			TlenVoiceRecordingStart(recordingControl);
 			while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
@@ -383,7 +384,7 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 		}
 		ft->s = NULL;
 	} else {
-		JabberLog("Connection failed - receiving as server");
+		JabberLog(ft->proto, "Connection failed - receiving as server");
 		ft->pfnNewConnectionV2 = TlenVoiceReceivingConnection;
 		s = TlenP2PListen(ft);
 		if (s != NULL) {
@@ -396,13 +397,13 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 			ft->currentFile = 0;
 			ft->state = FT_CONNECTING;
 			nick = JabberNickFromJID(ft->jid);
-			JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
+			JabberSend(ft->proto, "<v t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
 			mir_free(nick);
-			JabberLog("Waiting for the file to be received...");
+			JabberLog(ft->proto, "Waiting for the file to be received...");
 			WaitForSingleObject(hEvent, INFINITE);
 			ft->hFileEvent = NULL;
 			CloseHandle(hEvent);
-			JabberLog("Finish all files");
+			JabberLog(ft->proto, "Finish all files");
 			Netlib_CloseHandle(s);
 		} else {
 			ft->state = FT_ERROR;
@@ -411,16 +412,16 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 	JabberListRemove(LIST_VOICE, ft->iqId);
 	if (ft->state==FT_DONE) {
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Finished...");
-		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
+		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 	} else {
 		char *nick;
 		nick = JabberNickFromJID(ft->jid);
-		JabberSend(jabberThreadInfo->s, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
+		JabberSend(ft->proto, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
 		mir_free(nick);
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Error...");
-		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	}
-	JabberLog("Thread ended: type=file_receive server='%s'", ft->hostName);
+	JabberLog(ft->proto, "Thread ended: type=file_receive server='%s'", ft->hostName);
 
 	TlenP2PFreeFileTransfer(ft);
 }
@@ -429,15 +430,16 @@ static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemo
 {
 	JABBER_SOCKET slisten;
 	TLEN_FILE_TRANSFER *ft;
+	TlenProtocol *proto = (TlenProtocol *)pExtra;
 
 	ft = TlenP2PEstablishIncomingConnection(hConnection, LIST_VOICE, FALSE);
 	if (ft != NULL) {
 		slisten = ft->s;
 		ft->s = hConnection;
-		JabberLog("Set ft->s to %d (saving %d)", hConnection, slisten);
-		JabberLog("Entering send loop for this file connection... (ft->s is hConnection)");
+		JabberLog(ft->proto, "Set ft->s to %d (saving %d)", hConnection, slisten);
+		JabberLog(ft->proto, "Entering send loop for this file connection... (ft->s is hConnection)");
 		playbackControl = NULL;
-		recordingControl = TlenVoiceCreateVC(3);
+		recordingControl = TlenVoiceCreateVC(proto, 3);
 		recordingControl->ft = ft;
 		TlenVoiceRecordingStart(recordingControl);
 		while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
@@ -448,14 +450,14 @@ static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemo
 		recordingControl = NULL;
 		if (ft->state==FT_DONE) {
 			SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Finished...");
-//			ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
+//			ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 		} else {
-//			ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+//			ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 			SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Error...");
 		}
-		JabberLog("Closing connection for this file transfer... (ft->s is now hBind)");
+		JabberLog(ft->proto, "Closing connection for this file transfer... (ft->s is now hBind)");
 		ft->s = slisten;
-		JabberLog("ft->s is restored to %d", ft->s);
+		JabberLog(ft->proto, "ft->s is restored to %d", ft->s);
 	}
 	Netlib_CloseHandle(hConnection);
 	if (ft!=NULL && ft->hFileEvent != NULL)
@@ -483,14 +485,14 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 				statusTxt = " Unknown codec ";
 			} else {
 				if (playbackControl == NULL) {
-					playbackControl = TlenVoiceCreateVC(codec);
+					playbackControl = TlenVoiceCreateVC(ft->proto, codec);
 					TlenVoicePlaybackStart(playbackControl);
 					availPlayback = 0;
 					availOverrun = 0;
 					availLimit = availLimitMax;
 				} else if (playbackControl->codec != codec) {
 					TlenVoiceFreeVc(playbackControl);
-					playbackControl = TlenVoiceCreateVC(codec);
+					playbackControl = TlenVoiceCreateVC(ft->proto, codec);
 					TlenVoicePlaybackStart(playbackControl);
 					availPlayback = 0;
 					availOverrun = 0;
@@ -593,12 +595,12 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 	HANDLE hEvent;
 	char *nick;
 
-	JabberLog("Thread started: type=voice_send");
+	JabberLog(ft->proto, "Thread started: type=voice_send");
 	ft->pfnNewConnectionV2 = TlenVoiceReceivingConnection;
 	s = TlenP2PListen(ft);
 	if (s != NULL) {
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Waiting for connection...");
-		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
+		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 		ft->s = s;
 		//JabberLog("ft->s = %d", s);
 		//JabberLog("fileCount = %d", ft->fileCount);
@@ -609,73 +611,73 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 		ft->state = FT_CONNECTING;
 
 		nick = JabberNickFromJID(ft->jid);
-		JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
+		JabberSend(ft->proto, "<v t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
 		mir_free(nick);
-		JabberLog("Waiting for the voice data to be sent...");
+		JabberLog(ft->proto, "Waiting for the voice data to be sent...");
 		WaitForSingleObject(hEvent, INFINITE);
 		ft->hFileEvent = NULL;
 		CloseHandle(hEvent);
-		JabberLog("Finish voice");
+		JabberLog(ft->proto, "Finish voice");
 		Netlib_CloseHandle(s);
 		ft->s = NULL;
-		JabberLog("ft->s is NULL");
+		JabberLog(ft->proto, "ft->s is NULL");
 
 		if (ft->state == FT_SWITCH) {
 			NETLIBOPENCONNECTION nloc;
 			JABBER_SOCKET s;
-			JabberLog("Sending as client...");
+			JabberLog(ft->proto, "Sending as client...");
 			ft->state = FT_CONNECTING;
 			nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
 			nloc.szHost = ft->hostName;
 			nloc.wPort = ft->wPort;
 			nloc.flags = 0;
-			s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) hNetlibUser, (LPARAM) &nloc);
+			s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
 			if (s != NULL) {
 				SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Connecting...");
-				//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
+				//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 				ft->s = s;
 				TlenP2PEstablishOutgoingConnection(ft, FALSE);
 				if (ft->state!=FT_ERROR) {
-					JabberLog("Entering send loop for this file connection...");
+					JabberLog(ft->proto, "Entering send loop for this file connection...");
 					playbackControl = NULL;
-					recordingControl = TlenVoiceCreateVC(3);
+					recordingControl = TlenVoiceCreateVC(ft->proto, 3);
 					recordingControl->ft = ft;
 					TlenVoiceRecordingStart(recordingControl);
 					while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
 						TlenVoiceReceiveParse(ft);
 					}
 				}
-				JabberLog("Closing connection for this file transfer... ");
+				JabberLog(ft->proto, "Closing connection for this file transfer... ");
 				Netlib_CloseHandle(s);
 			} else {
 				ft->state = FT_ERROR;
 			}
 		}
 	} else {
-		JabberLog("Cannot allocate port to bind for file server thread, thread ended.");
+		JabberLog(ft->proto, "Cannot allocate port to bind for file server thread, thread ended.");
 		ft->state = FT_ERROR;
 	}
 	JabberListRemove(LIST_VOICE, ft->iqId);
 	switch (ft->state) {
 	case FT_DONE:
-		JabberLog("Finish successfully");
+		JabberLog(ft->proto, "Finish successfully");
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Finished...");
-		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
+		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 		break;
 	case FT_DENIED:
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Denied...");
-		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, ft, 0);
+		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, ft, 0);
 		break;
 	default: // FT_ERROR:
 		nick = JabberNickFromJID(ft->jid);
-		JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='8'/>", nick, ft->iqId);
+		JabberSend(ft->proto, "<v t='%s' i='%s' e='8'/>", nick, ft->iqId);
 		mir_free(nick);
-		JabberLog("Finish with errors");
+		JabberLog(ft->proto, "Finish with errors");
 		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Error...");
-		//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 		break;
 	}
-	JabberLog("Thread ended: type=voice_send");
+	JabberLog(ft->proto, "Thread ended: type=voice_send");
 	TlenP2PFreeFileTransfer(ft);
 }
 
@@ -721,20 +723,17 @@ static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft)
 int TlenVoiceCancelAll()
 {
 	JABBER_LIST_ITEM *item;
-	TLEN_FILE_TRANSFER *ft;
 	HANDLE hEvent;
-	int i;
+	int i = 0;
 
-	JabberLog("Invoking VoiceCancelAll()");
-	i = 0;
 	while ((i=JabberListFindNext(LIST_VOICE, 0)) >=0 ) {
 		if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
-			ft = item->ft;
+			TLEN_FILE_TRANSFER *ft = item->ft;
 			JabberListRemoveByIndex(i);
 			if (ft != NULL) {
 				if (ft->s) {
-					//ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-					JabberLog("Closing ft->s = %d", ft->s);
+					//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+					JabberLog(ft->proto, "Closing ft->s = %d", ft->s);
 					ft->state = FT_ERROR;
 					Netlib_CloseHandle(ft->s);
 					ft->s = NULL;
@@ -744,42 +743,42 @@ int TlenVoiceCancelAll()
 						SetEvent(hEvent);
 					}
 				} else {
-					JabberLog("freeing (V) ft struct");
+					JabberLog(ft->proto, "freeing (V) ft struct");
 					TlenP2PFreeFileTransfer(ft);
 				}
 			}
 		}
 	}
-	JabberLog("VoiceCancelAll() done");
 	if (voiceDlgHWND !=NULL) {
 		EndDialog(voiceDlgHWND, 0);
 	}
 	return 0;
 }
 
-int TlenVoiceContactMenuHandleVoice(WPARAM wParam, LPARAM lParam)
+int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	HANDLE hContact;
 	DBVARIANT dbv;
 	JABBER_LIST_ITEM *item;
 	TLEN_FILE_TRANSFER *ft;
+    TlenProtocol *proto =(TlenProtocol *)ptr;
 	if (!jabberOnline) {
 		return 1;
 	}
 	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
-		if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 			char serialId[32];
-			sprintf(serialId, "%d", JabberSerialNext());
+			sprintf(serialId, "%d", JabberSerialNext(proto));
 			if ((item = JabberListAdd(LIST_VOICE, serialId)) != NULL) {
-				ft = (TLEN_FILE_TRANSFER *) mir_alloc(sizeof(TLEN_FILE_TRANSFER));
-				memset(ft, 0, sizeof(TLEN_FILE_TRANSFER));
+                char *jid = JabberNickFromJID(dbv.pszVal);
+                ft = TlenFileCreateFT(proto, jid);
+                mir_free(jid);
 				ft->iqId = mir_strdup(serialId);
-				ft->jid = JabberNickFromJID(dbv.pszVal);
 				item->ft = ft;
-//				JabberSend(jabberThreadInfo->s, "<iq to='%s'><query xmlns='voip'><voip k='1' s='1' v='1' i='51245604'/></query></iq>", ft->jid);
+//				JabberSend(ft->proto, "<iq to='%s'><query xmlns='voip'><voip k='1' s='1' v='1' i='51245604'/></query></iq>", ft->jid);
 //				Sleep(5000);
 				TlenVoiceStart(NULL, 2);
-				JabberSend(jabberThreadInfo->s, "<v t='%s' e='1' i='%s' v='1'/>", ft->jid, serialId);
+				JabberSend(ft->proto, "<v t='%s' e='1' i='%s' v='1'/>", ft->jid, serialId);
 			}
 			DBFreeVariant(&dbv);
 		}
@@ -947,7 +946,7 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 					if (codec!=recordingControl->codec && codec>1 && codec<6) {
 						TLEN_FILE_TRANSFER *ft = recordingControl->ft;
 						TlenVoiceFreeVc(recordingControl);
-						recordingControl = TlenVoiceCreateVC(codec);
+						recordingControl = TlenVoiceCreateVC(ft->proto, codec);
 						recordingControl->ft = ft;
 						TlenVoiceRecordingStart(recordingControl);
 					}
@@ -992,31 +991,36 @@ int TlenVoiceStart(TLEN_FILE_TRANSFER *ft, int mode)
 	return 0;
 }
 
-static char *getDisplayName(const char *id)
+static char *getDisplayName(TlenProtocol *proto, const char *id)
 {
 	char jid[256];
 	HANDLE hContact;
 	DBVARIANT dbv;
-	if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+	if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) {
 		_snprintf(jid, sizeof(jid), "%s@%s", id, dbv.pszVal);
 		DBFreeVariant(&dbv);
-		if ((hContact=JabberHContactFromJID(jid)) != NULL) {
+		if ((hContact=JabberHContactFromJID(proto, jid)) != NULL) {
 			return mir_strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, 0));
 		}
 	}
 	return mir_strdup(id);
 }
 
+typedef struct {
+    TlenProtocol *proto;
+    JABBER_LIST_ITEM *item;
+}ACCEPTDIALOGDATA;
+
 static BOOL CALLBACK TlenVoiceAcceptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	JABBER_LIST_ITEM * item;
+	ACCEPTDIALOGDATA * data;
 	char *str;
 	switch (msg) {
 	case WM_INITDIALOG:
 		TranslateDialogDefault(hwndDlg);
 		voiceAcceptDlgHWND = hwndDlg;
-		item = (JABBER_LIST_ITEM *) lParam;
-		str = getDisplayName(item->nick);
+		data = (ACCEPTDIALOGDATA *) lParam;
+		str = getDisplayName(data->proto, data->item->nick);
 		SetDlgItemText(hwndDlg, IDC_FROM, str);
 		mir_free(str);
 		return FALSE;
@@ -1040,25 +1044,24 @@ static BOOL CALLBACK TlenVoiceAcceptDlgProc(HWND hwndDlg, UINT msg, WPARAM wPara
 
 static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
 {
-	JABBER_LIST_ITEM * item;
-	int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ACCEPT_VOICE), NULL, TlenVoiceAcceptDlgProc, (LPARAM) ptr);
-	item = (JABBER_LIST_ITEM *)ptr;
+    
+	ACCEPTDIALOGDATA *data = (ACCEPTDIALOGDATA *)ptr;
+	int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ACCEPT_VOICE), NULL, TlenVoiceAcceptDlgProc, (LPARAM) data);
 	if (result && jabberOnline) {
-		item->ft = (TLEN_FILE_TRANSFER *) mir_alloc(sizeof(TLEN_FILE_TRANSFER));
-		memset(item->ft, 0, sizeof(TLEN_FILE_TRANSFER));
-		item->ft->iqId = mir_strdup(item->jid);
-		item->ft->jid = mir_strdup(item->nick);
+		data->item->ft = TlenFileCreateFT(data->proto, data->item->nick);
+		data->item->ft->iqId = mir_strdup(data->item->jid);
 		TlenVoiceStart(NULL, 2);
-		JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='5' v='1'/>", item->nick, item->jid);
+		JabberSend(data->proto, "<v t='%s' i='%s' e='5' v='1'/>", data->item->nick, data->item->jid);
 	} else {
 		if (jabberOnline) {
-			JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='4' />", item->nick, item->jid);
+			JabberSend(data->proto, "<v t='%s' i='%s' e='4' />", data->item->nick, data->item->jid);
 		}
-		JabberListRemove(LIST_VOICE, item->jid);
+		JabberListRemove(LIST_VOICE, data->item->jid);
 	}
+    mir_free(data);
 }
 
-int TlenVoiceAccept(const char *id, const char *from)
+int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from)
 {
 	JABBER_LIST_ITEM * item;
 	if (!TlenVoiceIsInUse()) {
@@ -1066,7 +1069,7 @@ int TlenVoiceAccept(const char *id, const char *from)
 			int ask, ignore, voiceChatPolicy;
 			ask = TRUE;
 			ignore = FALSE;
-			voiceChatPolicy = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceChatPolicy", 0);
+			voiceChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceChatPolicy", 0);
 			if (voiceChatPolicy == TLEN_MUC_ASK) {
 				ignore = FALSE;
 				ask = TRUE;
@@ -1076,7 +1079,7 @@ int TlenVoiceAccept(const char *id, const char *from)
 				char jid[256];
 				JABBER_LIST_ITEM *item;
 				DBVARIANT dbv;
-				if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+				if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) {
 					_snprintf(jid, sizeof(jid), "%s@%s", from, dbv.pszVal);
 					DBFreeVariant(&dbv);
 				} else {
@@ -1091,7 +1094,7 @@ int TlenVoiceAccept(const char *id, const char *from)
 				char jid[256];
 				JABBER_LIST_ITEM *item;
 				DBVARIANT dbv;
-				if (!DBGetContactSetting(NULL, jabberProtoName, "LoginServer", &dbv)) {
+				if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) {
 					_snprintf(jid, sizeof(jid), "%s@%s", from, dbv.pszVal);
 					DBFreeVariant(&dbv);
 				} else {
@@ -1108,20 +1111,21 @@ int TlenVoiceAccept(const char *id, const char *from)
 			}
 			if (ignore) {
 				if (jabberOnline) {
-					JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='4' />", from, id);
+					JabberSend(proto, "<v t='%s' i='%s' e='4' />", from, id);
 				}
 				JabberListRemove(LIST_VOICE, id);
 			} else {
 				item->nick = mir_strdup(from);
 				if (ask) {
-					JabberForkThread((void (__cdecl *)(void*))TlenVoiceAcceptDlgThread, 0, item);
+                    ACCEPTDIALOGDATA *data = (ACCEPTDIALOGDATA *)mir_alloc(sizeof(ACCEPTDIALOGDATA));
+                    data->proto = proto;
+                    data->item = item;
+					JabberForkThread((void (__cdecl *)(void*))TlenVoiceAcceptDlgThread, 0, data);
 				} else if (jabberOnline) {
-					item->ft = (TLEN_FILE_TRANSFER *) mir_alloc(sizeof(TLEN_FILE_TRANSFER));
-					memset(item->ft, 0, sizeof(TLEN_FILE_TRANSFER));
+					item->ft = TlenFileCreateFT(proto, from);
 					item->ft->iqId = mir_strdup(id);
-					item->ft->jid = mir_strdup(from);
 					TlenVoiceStart(NULL, 2);
-					JabberSend(jabberThreadInfo->s, "<v t='%s' i='%s' e='5' v='1'/>", item->nick, item->jid);
+					JabberSend(proto, "<v t='%s' i='%s' e='5' v='1'/>", item->nick, item->jid);
 				}
 			}
 			return 1;
@@ -1130,7 +1134,7 @@ int TlenVoiceAccept(const char *id, const char *from)
 	return 0;
 }
 
-int TlenVoiceBuildInDeviceList(HWND hWnd)
+int TlenVoiceBuildInDeviceList(TlenProtocol *proto, HWND hWnd)
 {	int i, j, iNumDevs;
 	WAVEINCAPS     wic;
 	iNumDevs = waveInGetNumDevs();
@@ -1143,13 +1147,13 @@ int TlenVoiceBuildInDeviceList(HWND hWnd)
 			}
 		}
 	}
-	i = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceDeviceIn", 0);
+	i = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceDeviceIn", 0);
 	if (i>j) i = 0;
 	SendMessage(hWnd, CB_SETCURSEL, i, 0);
 	return 0;
 }
 
-int TlenVoiceBuildOutDeviceList(HWND hWnd)
+int TlenVoiceBuildOutDeviceList(TlenProtocol *proto, HWND hWnd)
 {	int i, j, iNumDevs;
 	WAVEOUTCAPS  woc;
 	iNumDevs = waveInGetNumDevs();
@@ -1162,7 +1166,7 @@ int TlenVoiceBuildOutDeviceList(HWND hWnd)
 			}
 		}
 	}
-	i = DBGetContactSettingWord(NULL, jabberProtoName, "VoiceDeviceOut", 0);
+	i = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceDeviceOut", 0);
 	if (i>j) i = 0;
 	SendMessage(hWnd, CB_SETCURSEL, i, 0);
 	return 0;

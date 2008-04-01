@@ -24,11 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _TLEN_AVATAR_H_
 #define _TLEN_AVATAR_H_
 
-void TlenProcessPresenceAvatar(XmlNode *node, JABBER_LIST_ITEM *item);
-int TlenProcessAvatarNode(XmlNode *avatarNode, JABBER_LIST_ITEM *item);
-void TlenGetAvatarFileName(JABBER_LIST_ITEM *item, char* pszDest, int cbLen);
-void TlenGetAvatar(HANDLE hContact);
-void TlenUploadAvatar();
-void TlenRemoveAvatar();
+void TlenProcessPresenceAvatar(TlenProtocol *proto, XmlNode *node, JABBER_LIST_ITEM *item);
+int TlenProcessAvatarNode(TlenProtocol *proto, XmlNode *avatarNode, JABBER_LIST_ITEM *item);
+void TlenGetAvatarFileName(TlenProtocol *proto, JABBER_LIST_ITEM *item, char* pszDest, int cbLen);
+void TlenGetAvatar(TlenProtocol *proto, HANDLE hContact);
+void TlenUploadAvatar(TlenProtocol *proto, unsigned char *data, int dataLen, int access);
+void TlenRemoveAvatar(TlenProtocol *proto);
 
 #endif // TLEN_AVATAR_H_INCLUDED

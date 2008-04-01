@@ -67,8 +67,6 @@ XmlNode *JabberXmlGetChild(XmlNode *node, char *tag);
 XmlNode *JabberXmlGetNthChild(XmlNode *node, char *tag, int nth);
 XmlNode *JabberXmlGetChildWithGivenAttrValue(XmlNode *node, char *tag, char *attrKey, char *attrValue);
 void JabberXmlFreeNode(XmlNode *node);
-void JabberXmlDumpAll(XmlState *xmlState);
-void JabberXmlDumpNode(XmlNode *node);
 XmlNode *JabberXmlCopyNode(XmlNode *node);
 
 XmlNode *JabberXmlCreateNode(char *name);

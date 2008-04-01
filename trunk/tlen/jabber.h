@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _JABBER_H_
 #define _JABBER_H_
 
-#define MIRANDA_VER 0x0700
+#define MIRANDA_VER 0x0800
 
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
@@ -53,6 +53,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <m_netlib.h>
 #include <m_protomod.h>
 #include <m_protosvc.h>
+#include <m_protoint.h>
 #include <m_contacts.h>
 #include <m_clist.h>
 #include <m_clui.h>
@@ -129,13 +130,6 @@ extern HICON tlenIcons[TLEN_ICON_TOTAL];
 
 
 /*******************************************************************
- * Macro definitions
- *******************************************************************/
-void JabberLog(const char *fmt, ...);
-#define JabberSendInvisiblePresence()	JabberSendVisibleInvisiblePresence(TRUE)
-#define JabberSendVisiblePresence()		JabberSendVisibleInvisiblePresence(FALSE)
-
-/*******************************************************************
  * Global data structures and data type definitions
  *******************************************************************/
 typedef HANDLE JABBER_SOCKET;
@@ -158,9 +152,18 @@ typedef struct {
 	int  avatarRemoveMthd;
 } TlenConfiguration;
 
-struct ThreadData {
-	HANDLE hThread;
+;
 
+typedef struct {
+    PROTO_INTERFACE iface;
+    HANDLE hNetlibUser;
+    
+    struct ThreadDataStruct *threadData;
+} TlenProtocol;
+
+typedef struct ThreadDataStruct{
+	HANDLE hThread;
+    char *streamId;
 	char username[128];
 	char password[128];
 	char server[128];
@@ -169,22 +172,19 @@ struct ThreadData {
 	char avatarHash[64];
 	int  avatarFormat;
 	WORD port;
-	JABBER_SOCKET s;
 	BOOL useEncryption;
 
+    JABBER_SOCKET s;
 	aes_context aes_in_context;
 	aes_context aes_out_context;
 	unsigned char aes_in_iv[16];
 	unsigned char aes_out_iv[16];
 
 	BOOL useAES;
-
-
-	char newPassword[128];
-
-	HWND reg_hwndDlg;
 	TlenConfiguration tlenConfig;
-};
+    TlenProtocol *proto;
+} ThreadData;
+
 
 
 typedef struct {
@@ -227,13 +227,14 @@ typedef struct {
 	long allFileReceivedBytes;
 	char *szDescription;
 	int currentFile;
-	
+
 	// New p2p
 	BOOL newP2P;
 	char *id2;
 	SOCKET udps;
 	aes_context aes_context;
 	unsigned char aes_iv[16];
+	TlenProtocol *proto;
 
 } TLEN_FILE_TRANSFER;
 
@@ -270,30 +271,28 @@ typedef struct {
 	int useNudge;
 	int logAlerts;
 	int useNewP2P;
+    BOOL sendKeepAlive;
+    
 } TLEN_OPTIONS;
+
+
+
 
 /*******************************************************************
  * Global variables
  *******************************************************************/
 extern HINSTANCE hInst;
 extern HANDLE hMainThread;
-extern DWORD jabberMainThreadId;
-extern char *jabberProtoName;
 extern char *jabberModuleName;
-extern HANDLE hNetlibUser;
 extern HANDLE hFileNetlibUser;
 
-extern struct ThreadData *jabberThreadInfo;
-extern char *jabberJID;
-extern char *streamId;
+extern ThreadData *jabberThreadInfo;
 extern BOOL jabberConnected;
 extern BOOL jabberOnline;
 extern int jabberStatus;
-extern int jabberDesiredStatus;
 //extern char *jabberModeMsg;
 extern CRITICAL_SECTION modeMsgMutex;
 extern JABBER_MODEMSGS modeMsgs;
-extern BOOL jabberSendKeepAlive;
 extern TLEN_OPTIONS tlenOptions;
 
 extern HANDLE hEventSettingChanged, hEventContactDeleted, hEventTlenUserInfoInit, hEventTlenOptInit, hEventTlenPrebuildContactMenu;
@@ -307,26 +306,28 @@ extern HANDLE hTlenNudge;
 /*******************************************************************
  * Function declarations
  *******************************************************************/
-void __cdecl JabberServerThread(struct ThreadData *info);
+void JabberLog(TlenProtocol *proto, const char *fmt, ...);
+void __cdecl JabberServerThread(ThreadData *info);
 // jabber_ws.c
-BOOL JabberWsInit(void);
-void JabberWsUninit(void);
-JABBER_SOCKET JabberWsConnect(char *host, WORD port);
-int JabberWsSend(JABBER_SOCKET s, char *data, int datalen);
-int JabberWsRecv(JABBER_SOCKET s, char *data, long datalen);
-int JabberWsSendAES(JABBER_SOCKET hConn, char *data, int datalen, aes_context *aes_ctx, unsigned char *aes_iv);
-int JabberWsRecvAES(JABBER_SOCKET s, char *data, long datalen, aes_context *aes_ctx, unsigned char *aes_iv);
+BOOL JabberWsInit(TlenProtocol *proto);
+void JabberWsUninit(TlenProtocol *proto);
+JABBER_SOCKET JabberWsConnect(TlenProtocol *proto, char *host, WORD port);
+int JabberWsSend(TlenProtocol *proto, char *data, int datalen);
+int JabberWsRecv(TlenProtocol *proto, char *data, long datalen);
+int JabberWsSendAES(TlenProtocol *proto, char *data, int datalen, aes_context *aes_ctx, unsigned char *aes_iv);
+int JabberWsRecvAES(TlenProtocol *proto, char *data, long datalen, aes_context *aes_ctx, unsigned char *aes_iv);
 // jabber_util.c
+HANDLE HookEventObj_Ex(const char *name, TlenProtocol *proto, MIRANDAHOOKOBJ hook);
 HANDLE HookEvent_Ex(const char *name, MIRANDAHOOK hook);
-HANDLE CreateServiceFunction_Ex(const char *name, MIRANDASERVICE service);
+HANDLE CreateServiceFunction_Ex(const char *name, TlenProtocol *proto, MIRANDASERVICEOBJ service);
 void UnhookEvents_Ex();
 void DestroyServices_Ex();
-void JabberSerialInit(void);
-void JabberSerialUninit(void);
-unsigned int JabberSerialNext(void);
-int JabberSend(JABBER_SOCKET s, const char *fmt, ...);
-HANDLE JabberHContactFromJID(const char *jid);
-char *JabberJIDFromHContact(HANDLE hContact);
+void JabberSerialInit(TlenProtocol *proto);
+void JabberSerialUninit(TlenProtocol *proto);
+unsigned int JabberSerialNext(TlenProtocol *proto);
+int JabberSend(TlenProtocol *proto, const char *fmt, ...);
+HANDLE JabberHContactFromJID(TlenProtocol *proto, const char *jid);
+char *JabberJIDFromHContact(TlenProtocol *proto, HANDLE hContact);
 char *JabberLoginFromJID(const char *jid);
 char *JabberResourceFromJID(const char *jid);
 char *JabberNickFromJID(const char *jid);
@@ -337,11 +338,6 @@ char *JabberUtf8Decode(const char *str);
 char *JabberUtf8Encode(const char *str);
 char *JabberSha1(char *str);
 char *TlenSha1(char *str, int len);
-char *JabberUnixToDos(const char *str);
-void JabberDosToUnix(char *str);
-void JabberHttpUrlDecode(char *str);
-char *JabberHttpUrlEncode(const char *str);
-void JabberSendVisibleInvisiblePresence(BOOL invisible);
 char *TlenPasswordHash(const char *str);
 void TlenUrlDecode(char *str);
 char *TlenUrlEncode(const char *str);
@@ -353,18 +349,18 @@ int JabberGetPictureType(const char* buf);
 //char *JabberGetVersionText();
 time_t JabberIsoToUnixTime(char *stamp);
 time_t TlenTimeToUTC(time_t time);
-void JabberSendPresenceTo(int status, char *to, char *extra);
-void JabberSendPresence(int status);
+void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to, char *extra);
+void JabberSendPresence(TlenProtocol *proto,int status);
 void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 //char *JabberGetClientJID(char *jid);
 // jabber_misc.c
-void JabberDBAddAuthRequest(char *jid, char *nick);
-HANDLE JabberDBCreateContact(char *jid, char *nick, BOOL temporary);
+void JabberDBAddAuthRequest(TlenProtocol *proto, char *jid, char *nick);
+HANDLE JabberDBCreateContact(TlenProtocol *proto, char *jid, char *nick, BOOL temporary);
 void JabberContactListCreateGroup(char *groupName);
 unsigned long JabberForkThread(void (__cdecl *threadcode)(void*), unsigned long stacksize, void *arg);
 // jabber_svc.c
-int JabberGetInfo(WPARAM wParam, LPARAM lParam);
-int JabberRunSearch();
+int JabberGetInfo(PROTO_INTERFACE *ptr, HANDLE hContact, int infoType);
+int TlenRunSearch(TlenProtocol *proto);
 // jabber_advsearch.c
 extern JABBER_FIELD_MAP tlenFieldGender[];
 extern JABBER_FIELD_MAP tlenFieldLookfor[];

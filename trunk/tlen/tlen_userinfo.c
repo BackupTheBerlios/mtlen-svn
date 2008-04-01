@@ -127,17 +127,27 @@ static void FetchCombo(HWND hwndDlg, UINT idCtrl, char *fieldName, char **str, i
 	}
 }
 
-int TlenUserInfoInit(WPARAM wParam, LPARAM lParam)
+typedef struct {
+    TlenProtocol *proto;
+    HANDLE hContact;
+}TLENUSERINFODLGDATA;
+
+
+int TlenUserInfoInit(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	char *szProto;
 	HANDLE hContact;
 	OPTIONSDIALOGPAGE odp = {0};
+	TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!CallService(MS_PROTO_ISPROTOCOLLOADED, 0, (LPARAM) jabberProtoName))
+	if (!CallService(MS_PROTO_ISPROTOCOLLOADED, 0, (LPARAM) proto->iface.m_szModuleName))
 		return 0;
 	hContact = (HANDLE) lParam;
 	szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
-	if ((szProto!=NULL && !strcmp(szProto, jabberProtoName)) || !lParam) {
+	if ((szProto!=NULL && !strcmp(szProto, proto->iface.m_szModuleName)) || !lParam) {
+        TLENUSERINFODLGDATA *data = (TLENUSERINFODLGDATA*)mir_alloc(sizeof(TLENUSERINFODLGDATA));
+        data->proto = proto;
+        data->hContact = hContact;
 		odp.cbSize = sizeof(odp);
 		odp.hIcon = NULL;
 		odp.hInstance = hInst;
@@ -145,18 +155,20 @@ int TlenUserInfoInit(WPARAM wParam, LPARAM lParam)
 		odp.position = -2000000000;
 		odp.pszTemplate = ((HANDLE)lParam!=NULL) ? MAKEINTRESOURCE(IDD_USER_INFO):MAKEINTRESOURCE(IDD_USER_VCARD);
 		odp.pszTitle = jabberModuleName;
+        odp.dwInitParam = (LPARAM)data;
 		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
 
 	}
 	if (!lParam && jabberOnline) {
 		CCSDATA ccs = {0};
-		JabberGetInfo(0, (LPARAM) &ccs);
+		JabberGetInfo(ptr, 0, (LPARAM) &ccs);
 	}
 	return 0;
 }
 
 static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    TLENUSERINFODLGDATA *data = (TLENUSERINFODLGDATA *) GetWindowLong(hwndDlg, GWL_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		// lParam is hContact
@@ -172,7 +184,6 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 	case WM_TLEN_REFRESH:
 		{
 			DBVARIANT dbv;
-			HANDLE hContact;
 			char *jid;
 			int i;
 			JABBER_LIST_ITEM *item;
@@ -181,36 +192,35 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, "");
 			SetFocus(GetDlgItem(hwndDlg, IDC_STATIC));
 
-			hContact = (HANDLE) GetWindowLong(hwndDlg, GWL_USERDATA);
-			if (!DBGetContactSetting(hContact, jabberProtoName, "FirstName", &dbv)) {
+			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "FirstName", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_FIRSTNAME, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			} else SetDlgItemText(hwndDlg, IDC_FIRSTNAME, "");
-			if (!DBGetContactSetting(hContact, jabberProtoName, "LastName", &dbv)) {
+			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "LastName", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_LASTNAME, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			} else SetDlgItemText(hwndDlg, IDC_LASTNAME, "");
-			if (!DBGetContactSetting(hContact, jabberProtoName, "Nick", &dbv)) {
+			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "Nick", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_NICKNAME, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			} else SetDlgItemText(hwndDlg, IDC_NICKNAME, "");
-			if (!DBGetContactSetting(hContact, jabberProtoName, "e-mail", &dbv)) {
+			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "e-mail", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EMAIL, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			} else SetDlgItemText(hwndDlg, IDC_EMAIL, "");
-			if (!DBGetContactSetting(hContact, jabberProtoName, "Age", &dbv)) {
+			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "Age", &dbv)) {
 				SetDlgItemInt(hwndDlg, IDC_AGE, dbv.wVal, FALSE);
 				DBFreeVariant(&dbv);
 			} else SetDlgItemText(hwndDlg, IDC_AGE, "");
-			if (!DBGetContactSetting(hContact, jabberProtoName, "City", &dbv)) {
+			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "City", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_CITY, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			} else SetDlgItemText(hwndDlg, IDC_CITY, "");
-			if (!DBGetContactSetting(hContact, jabberProtoName, "School", &dbv)) {
+			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "School", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_SCHOOL, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			} else SetDlgItemText(hwndDlg, IDC_SCHOOL, "");
-			switch (DBGetContactSettingByte(hContact, jabberProtoName, "Gender", '?')) {
+			switch (DBGetContactSettingByte(data->hContact, data->proto->iface.m_szModuleName, "Gender", '?')) {
 				case 'M':
 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 1, 0);
 					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, TranslateT(tlenFieldGender[0].name));
@@ -224,7 +234,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, "");
 					break;
 			}
-			i = DBGetContactSettingWord(hContact, jabberProtoName, "Occupation", 0);
+			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "Occupation", 0);
 			if (i>0 && i<13) {
 				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, TranslateT(tlenFieldOccupation[i-1].name));
 				SendDlgItemMessage(hwndDlg, IDC_OCCUPATION, CB_SETCURSEL, i, 0);
@@ -232,7 +242,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, "");
 				SendDlgItemMessage(hwndDlg, IDC_OCCUPATION, CB_SETCURSEL, 0, 0);
 			}
-			i = DBGetContactSettingWord(hContact, jabberProtoName, "LookingFor", 0);
+			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "LookingFor", 0);
 			if (i>0 && i<6) {
 				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, TranslateT(tlenFieldLookfor[i-1].name));
 				SendDlgItemMessage(hwndDlg, IDC_LOOKFOR, CB_SETCURSEL, i, 0);
@@ -240,11 +250,11 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, "");
 				SendDlgItemMessage(hwndDlg, IDC_LOOKFOR, CB_SETCURSEL, 0, 0);
 			}
-			i = DBGetContactSettingWord(hContact, jabberProtoName, "VoiceChat", 0);
+			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "VoiceChat", 0);
 			CheckDlgButton(hwndDlg, IDC_VOICECONVERSATIONS, i);
-			i = DBGetContactSettingWord(hContact, jabberProtoName, "PublicStatus", 0);
+			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "PublicStatus", 0);
 			CheckDlgButton(hwndDlg, IDC_PUBLICSTATUS, i);
-			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "jid", &dbv)) {
 				jid = JabberTextDecode(dbv.pszVal);
 				SetDlgItemText(hwndDlg, IDC_INFO_JID, jid);
 				mir_free(jid);
@@ -294,8 +304,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		if (LOWORD(wParam)==IDC_SAVE && HIWORD(wParam)==BN_CLICKED) {
 			char *str = NULL;
 			int strSize;
-			CCSDATA ccs = {0};
-			JabberStringAppend(&str, &strSize, "<iq type='set' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:register'>", JabberSerialNext());
+			JabberStringAppend(&str, &strSize, "<iq type='set' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:register'>", JabberSerialNext(data->proto));
 			FetchField(hwndDlg, IDC_FIRSTNAME, "first", &str, &strSize);
 			FetchField(hwndDlg, IDC_LASTNAME, "last", &str, &strSize);
 			FetchField(hwndDlg, IDC_NICKNAME, "nick", &str, &strSize);
@@ -309,11 +318,14 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			JabberStringAppend(&str, &strSize, "<g>%d</g>", IsDlgButtonChecked(hwndDlg, IDC_VOICECONVERSATIONS) ? 1 : 0);
 			JabberStringAppend(&str, &strSize, "<v>%d</v>", IsDlgButtonChecked(hwndDlg, IDC_PUBLICSTATUS) ? 1 : 0);
 			JabberStringAppend(&str, &strSize, "</query></iq>");
-			JabberSend(jabberThreadInfo->s, "%s", str);
+			JabberSend(data->proto, "%s", str);
 			mir_free(str);
-			JabberGetInfo(0, (LPARAM) &ccs);
+			JabberGetInfo((PROTO_INTERFACE *)data->proto, NULL, 0);
 		}
 		break;
+    case WM_DESTROY:
+        mir_free(data);
+        break;
 	}
 	return FALSE;
 }

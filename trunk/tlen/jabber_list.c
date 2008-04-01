@@ -30,20 +30,20 @@ static CRITICAL_SECTION csLists;
 
 static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item);
 
-void JabberListInit(void)
+void JabberListInit(TlenProtocol *proto)
 {
 	lists = NULL;
 	count = 0;
 	InitializeCriticalSection(&csLists);
 }
 
-void JabberListUninit(void)
+void JabberListUninit(TlenProtocol *proto)
 {
-	JabberListWipe();
+	JabberListWipe(proto);
 	DeleteCriticalSection(&csLists);
 }
 
-void JabberListWipe(void)
+void JabberListWipe(TlenProtocol *proto)
 {
 	int i;
 
@@ -58,7 +58,7 @@ void JabberListWipe(void)
 	LeaveCriticalSection(&csLists);
 }
 
-void JabberListWipeSpecial(void)
+void JabberListWipeSpecial(TlenProtocol *proto)
 {
 	int i;
 	EnterCriticalSection(&csLists);

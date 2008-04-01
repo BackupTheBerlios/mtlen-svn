@@ -37,21 +37,21 @@ static void logInfo(const char *filename, const char *fmt, ...) {
 	if (flog!=NULL) {
 		GetLocalTime(&time);
     	va_start(vararg, fmt);
-    	str = (char *) malloc(strsize=2048);
+    	str = (char *) mir_alloc(strsize=2048);
     	while (_vsnprintf(str, strsize, fmt, vararg) == -1)
     		str = (char *) realloc(str, strsize+=2048);
     	va_end(vararg);
     	fprintf(flog,"%04d-%02d-%02d %02d:%02d:%02d,%03d [%s]",time.wYear,time.wMonth,time.wDay,time.wHour,time.wMinute,time.wSecond,time.wMilliseconds, "INFO");
 		fprintf(flog,"  %s\n",str);
-    	free(str);
+    	mir_free(str);
 		fclose(flog);
 	}
 }
 
-void __cdecl TlenNewFileReceiveThread(TLEN_FILE_TRANSFER *ft)
+void __cdecl TlenNewFileReceiveThread(TlenProtocol *proto,  TLEN_FILE_TRANSFER *ft)
 {
-	JabberLog("P2P receive thread started");
-	ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
+	JabberLog(proto, "P2P receive thread started");
+	ProtoBroadcastAck(proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 //	ft->mode = FT_RECV;
 //	ft->currentFile = 0;
 //	ft->state = FT_CONNECTING;
@@ -72,8 +72,8 @@ void __cdecl TlenNewFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 			int alen;
 			int j, n;
 			char buff[1024];
-			alen = sizeof(struct sockaddr); 
-			n=recvfrom(ft->udps, buff,sizeof(buff),0, (struct sockaddr *) &cad, &alen); 
+			alen = sizeof(struct sockaddr);
+			n=recvfrom(ft->udps, buff,sizeof(buff),0, (struct sockaddr *) &cad, &alen);
 			if (n<0) {
 				break;
 			}
@@ -86,7 +86,7 @@ void __cdecl TlenNewFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 				}
 			}
 			if (n == 1) {
-				alen = sizeof(struct sockaddr); 
+				alen = sizeof(struct sockaddr);
 				n = sendto(ft->udps, buff, n, 0,(struct sockaddr *) &toad, alen);
 				if (fout != NULL) {
 					fprintf(fout, "\n|SEND |");
@@ -104,22 +104,22 @@ void __cdecl TlenNewFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 	if (ft->udps != INVALID_SOCKET) {
 		closesocket(ft->udps);
 	}
-  
+
 	JabberListRemove(LIST_FILE, ft->iqId);
 	if (ft->state==FT_DONE)
-		ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
+		ProtoBroadcastAck(proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 	else {
-		ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+		ProtoBroadcastAck(proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	}
-	JabberLog("P2P receive thread ended");
+	JabberLog(proto, "P2P receive thread ended");
 	TlenP2PFreeFileTransfer(ft);
 }
 
 void __cdecl TlenNewFileSendThread(TLEN_FILE_TRANSFER *ft)
 {
-	JabberLog("P2P send thread started");
+	JabberLog(ft->proto, "P2P send thread started");
 //	ft->mode = FT_RECV;
-//	ProtoBroadcastAck(jabberProtoName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
+//	ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 //	ft->currentFile = 0;
 //	ft->state = FT_CONNECTING;
 	{
@@ -141,7 +141,7 @@ void __cdecl TlenNewFileSendThread(TLEN_FILE_TRANSFER *ft)
 			int alen;
 			int j, n;
 			char buff[1024];
-			alen = sizeof(struct sockaddr); 
+			alen = sizeof(struct sockaddr);
 			if (step < 3 || step > 5) {
 				buff[0] = 1;
 				n = 1;
@@ -167,16 +167,16 @@ void __cdecl TlenNewFileSendThread(TLEN_FILE_TRANSFER *ft)
 			SleepEx(1000, TRUE);
 		}
 	}
-	JabberLog("P2P send thread ended");
+	JabberLog(ft->proto, "P2P send thread ended");
 }
 
 void TlenBindUDPSocket(TLEN_FILE_TRANSFER *ft)
 {
-	JabberLog("Binding UDP socket");
+	JabberLog(ft->proto, "Binding UDP socket");
 	ft->udps = socket(PF_INET, SOCK_DGRAM, 0);
 	if (ft->udps != INVALID_SOCKET) {
 		SOCKADDR_IN sin;
-		int len = sizeof(struct sockaddr); 
+		int len = sizeof(struct sockaddr);
 		memset((char *)&sin,0,sizeof(sin));
 		sin.sin_family = AF_INET;
 		sin.sin_addr.s_addr = htonl(INADDR_ANY);;
@@ -194,7 +194,7 @@ void TlenBindUDPSocket(TLEN_FILE_TRANSFER *ft)
 
 				ft->wLocalPort = ntohs(sin.sin_port);
 				ft->localName= mir_strdup(host_name);
-				JabberLog("UDP socket bound to %s:%d", ft->localName, ft->wLocalPort);
+				JabberLog(ft->proto, "UDP socket bound to %s:%d", ft->localName, ft->wLocalPort);
 			}
 		}
 	}
@@ -210,7 +210,7 @@ B RECV: <iq from='aaa@tlen.pl'><query xmlns='p2p'><fs t="bbb@tlen.pl" e="1" i="1
 
 2) bbb ACCEPTs
 B SEND: <iq to='aaa@tlen.pl'><query xmlns='p2p'><fs t="aaa@tlen.pl" e="5" i="179610858" v="2" /></query></iq>
-A RECV: <iq from='bbb@tlen.pl'><query xmlns='p2p'><fs t="aaa@tlen.pl" e="5" i="179610858" v="2" /></query></iq>    
+A RECV: <iq from='bbb@tlen.pl'><query xmlns='p2p'><fs t="aaa@tlen.pl" e="5" i="179610858" v="2" /></query></iq>
 
 3) aaa tries to establish p2p connection:
 A SEND: <iq to='bbb@tlen.pl'><query xmlns='p2p'><dcng n='file_send' k='5' v='2' s='1' i='179610858' ck='rNbjnfRSQwJyaI+oRAXmfQ==' ks='16' iv='MAfaCCrqtuU2Ngw=rNbjnfRSQwJyaI+oRAXmfQ==' mi='24835584'/></query></iq>
@@ -221,14 +221,13 @@ B SEND: <iq to='bbb@tlen.pl'><query xmlns='p2p'><dcng la='xx.xx.xx.xx' lp='nnn' 
 
 */
 
-void TlenProcessP2P(XmlNode *node, void *userdata) {
+void TlenProcessP2P(TlenProtocol *proto, XmlNode *node, ThreadData *info) {
 	XmlNode *queryNode;
-	struct ThreadData *info;
 	JABBER_LIST_ITEM *item;
 	char *from;
 
-	if ((info=(struct ThreadData *) userdata) == NULL) return;
-	
+	if (info == NULL) return;
+
 	queryNode = JabberXmlGetChild(node, "query");
 	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
 		XmlNode *fs , *vs, *dcng, *dc;
@@ -257,7 +256,8 @@ void TlenProcessP2P(XmlNode *node, void *userdata) {
 					c = JabberXmlGetAttrValue(fs, "c");
 					s = JabberXmlGetAttrValue(fs, "s");
 					ft->jid = mir_strdup(from);
-					ft->hContact = JabberHContactFromJID(from);
+                    ft->proto = proto;
+					ft->hContact = JabberHContactFromJID(proto, from);
 					ft->iqId = mir_strdup(id);
 					ft->fileTotalSize = atoi(s);
 					ft->newP2P = TRUE;
@@ -279,7 +279,7 @@ void TlenProcessP2P(XmlNode *node, void *userdata) {
 						ccs.hContact = ft->hContact;
 						ccs.wParam = 0;
 						ccs.lParam = (LPARAM) &pre;
-						JabberLog("sending chainrecv");
+						JabberLog(ft->proto, "sending chainrecv");
 						CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
 						mir_free(szBlob);
 					}
@@ -292,7 +292,7 @@ void TlenProcessP2P(XmlNode *node, void *userdata) {
 					if ((item=JabberListGetItemPtr(LIST_FILE, id)) != NULL) {
 						item->id2 = mir_strdup("84273372");
 						item->ft->id2 = mir_strdup("84273372");
-						JabberSend(info->s, "<iq to='%s'><query xmlns='p2p'><dcng n='file_send' k='5' v='2' s='1' i='%s' ck='o7a32V9n2UZYCWpBUhSbFw==' ks='16' iv='MhjWEj9WTsovrQc=o7a32V9n2UZYCWpBUhSbFw==' mi='%s'/></query></iq>", from, item->id2, id);
+						JabberSend(proto, "<iq to='%s'><query xmlns='p2p'><dcng n='file_send' k='5' v='2' s='1' i='%s' ck='o7a32V9n2UZYCWpBUhSbFw==' ks='16' iv='MhjWEj9WTsovrQc=o7a32V9n2UZYCWpBUhSbFw==' mi='%s'/></query></iq>", from, item->id2, id);
 					}
 				}
 			}
@@ -300,7 +300,7 @@ void TlenProcessP2P(XmlNode *node, void *userdata) {
 
 		} else if (dcng != NULL) {
 			char *s, *id, *id2;
-			JabberLog("DCNG");
+			JabberLog(proto, "DCNG");
 			s = JabberXmlGetAttrValue(dcng, "s");
 			id2 = JabberXmlGetAttrValue(dcng, "i");
 			id = JabberXmlGetAttrValue(dcng, "mi");
@@ -326,20 +326,20 @@ void TlenProcessP2P(XmlNode *node, void *userdata) {
 						item->id2 = mir_strdup(id2);
 						item->ft->id2 = mir_strdup(id2);
 						TlenBindUDPSocket(item->ft);
-						JabberSend(jabberThreadInfo->s, "<iq to='%s'><query xmlns='p2p'><dcng  la='%s' lp='%d' pa='%s' pp='%d' i='%s' v='2' k='5' s='2'/></query></iq>",
+						JabberSend(proto, "<iq to='%s'><query xmlns='p2p'><dcng  la='%s' lp='%d' pa='%s' pp='%d' i='%s' v='2' k='5' s='2'/></query></iq>",
 							item->ft->jid, item->ft->localName, item->ft->wLocalPort, item->ft->localName, item->ft->wLocalPort, item->ft->id2);
-					} 
+					}
 				}
 			}  else if (!strcmp(s, "2")) {
-				JabberLog("step = 2");
-				JabberLog("%s",from);
-				JabberLog("%s",id2);
+				JabberLog(proto, "step = 2");
+				JabberLog(proto, "%s",from);
+				JabberLog(proto, "%s",id2);
 				/* IP and port */
 				if ((item=JabberListFindItemPtrById2(LIST_FILE, id2)) != NULL) {
 					item->ft->hostName = mir_strdup(JabberXmlGetAttrValue(dcng, "pa"));
 					item->ft->wPort = atoi(JabberXmlGetAttrValue(dcng, "pp"));
 					TlenBindUDPSocket(item->ft);
-					JabberSend(jabberThreadInfo->s, "<iq to='%s'><query xmlns='p2p'><dcng  la='%s' lp='%d' pa='%s' pp='%d' i='%s' k='5' s='4'/></query></iq>",
+					JabberSend(proto, "<iq to='%s'><query xmlns='p2p'><dcng  la='%s' lp='%d' pa='%s' pp='%d' i='%s' k='5' s='4'/></query></iq>",
 						item->ft->jid, item->ft->localName, item->ft->wLocalPort, item->ft->localName, item->ft->wLocalPort, item->ft->id2);
 					JabberForkThread((void (__cdecl *)(void*))TlenNewFileReceiveThread, 0, item->ft);
 					JabberForkThread((void (__cdecl *)(void*))TlenNewFileSendThread, 0, item->ft);
@@ -347,13 +347,13 @@ void TlenProcessP2P(XmlNode *node, void *userdata) {
 			} else if (!strcmp(s, "4")) {
 				/* IP and port */
 				if ((item=JabberListFindItemPtrById2(LIST_FILE, id2)) != NULL) {
-					JabberLog("step = 4");
+					JabberLog(proto, "step = 4");
 					item->ft->hostName = mir_strdup(JabberXmlGetAttrValue(dcng, "pa"));
 					item->ft->wPort = atoi(JabberXmlGetAttrValue(dcng, "pp"));
 					JabberForkThread((void (__cdecl *)(void*))TlenNewFileReceiveThread, 0, item->ft);
 				}
 			}
-			
+
 		} else if (dc != NULL) {
 
 		}

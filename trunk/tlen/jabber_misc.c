@@ -24,44 +24,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber.h"
 #include "jabber_list.h"
 
-#define __try
-#define __except(x) if (0)
-#define __finally
-
-#define _try __try
-#define _except __except
-#define _finally __finally
-#include <excpt.h>
-
-void JabberDBAddAuthRequest(char *jid, char *nick)
+void JabberDBAddAuthRequest(TlenProtocol *proto, char *jid, char *nick)
 {
-	char *s, *p, *q;
+	char *s;
 	DBEVENTINFO dbei = {0};
 	PBYTE pCurBlob;
 	HANDLE hContact;
 
-	// strip resource if present
-	s = mir_strdup(jid);
-	if ((p=strchr(s, '@')) != NULL) {
-		if ((q=strchr(p, '/')) != NULL)
-			*q = '\0';
-	}
-	_strlwr(s);
-
-	if ((hContact=JabberHContactFromJID(jid)) == NULL) {
+	if ((hContact=JabberHContactFromJID(proto, jid)) == NULL) {
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_ADD, 0, 0);
-		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) jabberProtoName);
-		DBWriteContactSettingString(hContact, jabberProtoName, "jid", s);
+		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) proto->iface.m_szModuleName);
+        // strip resource if present
+        s = JabberLoginFromJID(jid);
+        _strlwr(s);
+		DBWriteContactSettingString(hContact, proto->iface.m_szModuleName, "jid", s);
+        mir_free(s);
 	}
 	else {
-		DBDeleteContactSetting(hContact, jabberProtoName, "Hidden");
+		DBDeleteContactSetting(hContact, proto->iface.m_szModuleName, "Hidden");
 	}
-	DBWriteContactSettingString(hContact, jabberProtoName, "Nick", nick);
+	DBWriteContactSettingString(hContact, proto->iface.m_szModuleName, "Nick", nick);
 
 	//blob is: uin(DWORD), hContact(HANDLE), nick(ASCIIZ), first(ASCIIZ), last(ASCIIZ), email(ASCIIZ), reason(ASCIIZ)
 	//blob is: 0(DWORD), hContact(HANDLE), nick(ASCIIZ), ""(ASCIIZ), ""(ASCIIZ), email(ASCIIZ), ""(ASCIIZ)
 	dbei.cbSize = sizeof(DBEVENTINFO);
-	dbei.szModule = jabberProtoName;
+	dbei.szModule = proto->iface.m_szModuleName;
 	dbei.timestamp = (DWORD) time(NULL);
 	dbei.flags = 0;
 	dbei.eventType = EVENTTYPE_AUTHREQUEST;
@@ -76,14 +63,13 @@ void JabberDBAddAuthRequest(char *jid, char *nick)
 	*pCurBlob = '\0';					//reason
 
 	CallService(MS_DB_EVENT_ADD, (WPARAM) (HANDLE) NULL, (LPARAM) &dbei);
-	JabberLog("Setup DBAUTHREQUEST with nick='%s' jid='%s'", nick, jid);
 }
 
-char *JabberJIDFromHContact(HANDLE hContact)
+char *JabberJIDFromHContact(TlenProtocol *proto, HANDLE hContact)
 {
 	char *p = NULL;
 	DBVARIANT dbv;
-	if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+	if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 		p = mir_strdup(dbv.pszVal);
 		DBFreeVariant(&dbv);
 	}
@@ -91,7 +77,7 @@ char *JabberJIDFromHContact(HANDLE hContact)
 }
 
 
-HANDLE JabberHContactFromJID(const char *jid)
+HANDLE JabberHContactFromJID(TlenProtocol *proto, const char *jid)
 {
 	HANDLE hContact, hContactMatched;
 	DBVARIANT dbv;
@@ -102,8 +88,8 @@ HANDLE JabberHContactFromJID(const char *jid)
 	hContact = (HANDLE) CallService(MS_DB_CONTACT_FINDFIRST, 0, 0);
 	while (hContact != NULL) {
 		szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
-		if (szProto!=NULL && !strcmp(jabberProtoName, szProto)) {
-			if (!DBGetContactSetting(hContact, jabberProtoName, "jid", &dbv)) {
+		if (szProto!=NULL && !strcmp(proto->iface.m_szModuleName, szProto)) {
+			if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 				if ((p=dbv.pszVal) != NULL) {
 					if (!stricmp(p, jid)) {	// exact match (node@domain/resource)
 						hContactMatched = hContact;
@@ -122,21 +108,20 @@ HANDLE JabberHContactFromJID(const char *jid)
 	return NULL;
 }
 
-HANDLE JabberDBCreateContact(char *jid, char *nick, BOOL temporary)
+HANDLE JabberDBCreateContact(TlenProtocol *proto, char *jid, char *nick, BOOL temporary)
 {
 	HANDLE hContact;
 	if (jid==NULL || jid[0]=='\0')
 		return NULL;
 
-	if ((hContact=JabberHContactFromJID(jid)) == NULL) {
+	if ((hContact=JabberHContactFromJID(proto, jid)) == NULL) {
 		hContact = (HANDLE) CallService(MS_DB_CONTACT_ADD, 0, 0);
-		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) jabberProtoName);
-		DBWriteContactSettingString(hContact, jabberProtoName, "jid", jid);
+		CallService(MS_PROTO_ADDTOCONTACT, (WPARAM) hContact, (LPARAM) proto->iface.m_szModuleName);
+		DBWriteContactSettingString(hContact, proto->iface.m_szModuleName, "jid", jid);
 		if (nick!=NULL && nick[0]!='\0')
-			DBWriteContactSettingString(hContact, jabberProtoName, "Nick", nick);
+			DBWriteContactSettingString(hContact, proto->iface.m_szModuleName, "Nick", nick);
 		if (temporary)
 			DBWriteContactSettingByte(hContact, "CList", "NotOnList", 1);
-		JabberLog("Create Jabber contact jid=%s, nick=%s", jid, nick);
 	}
 	return hContact;
 }
@@ -201,11 +186,8 @@ static void __cdecl forkthread_r(struct FORK_ARG *fa)
 	void *arg = fa->arg;
 	CallService(MS_SYSTEM_THREAD_PUSH, 0, 0);
 	SetEvent(fa->hEvent);
-	__try {
-		callercode(arg);
-	} __finally {
-		CallService(MS_SYSTEM_THREAD_POP, 0, 0);
-	}
+	callercode(arg);
+	CallService(MS_SYSTEM_THREAD_POP, 0, 0);
 	return;
 }
 

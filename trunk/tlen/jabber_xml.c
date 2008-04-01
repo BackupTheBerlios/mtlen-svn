@@ -120,7 +120,7 @@ int JabberXmlParse(XmlState *xmlState, char *buffer, int datalen)
 			if (q < eob) {	// found closing bracket
 				for (r=p+1; *r!='>' && *r!=' ' && *r!='\t'; r++);
 				if (r-(p+1) > TAG_MAX_LEN) {
-					JabberLog("TAG_MAX_LEN too small, ignore current tag");
+//					JabberLog("TAG_MAX_LEN too small, ignore current tag");
 				}
 				else {
 					if (*(p+1) == '/') {	// closing tag
@@ -142,7 +142,7 @@ int JabberXmlParse(XmlState *xmlState, char *buffer, int datalen)
 					}
 					for (;r<q && (*r==' ' || *r=='\t'); r++);
 					if (q-r > ATTR_MAX_LEN) {
-						JabberLog("ATTR_MAX_LEN too small, ignore current tag");
+//						JabberLog("ATTR_MAX_LEN too small, ignore current tag");
 					}
 					else {
 						strncpy(attr, r, q-r);
@@ -278,7 +278,7 @@ static BOOL JabberXmlProcessElem(XmlState *xmlState, XmlElemType elemType, char 
 	if (elemText == NULL) return FALSE;
 
 	if (elemType==ELEM_OPEN && !strcmp(elemText, "?xml")) {
-		JabberLog("XML: skip <?xml> tag");
+//		JabberLog("XML: skip <?xml> tag");
 		return TRUE;
 	}
 
@@ -360,7 +360,7 @@ static BOOL JabberXmlProcessElem(XmlState *xmlState, XmlElemType elemType, char 
 			mir_free(text);
 		}
 		else {
-			JabberLog("XML: Closing </%s> without opening tag", text);
+//			JabberLog("XML: Closing </%s> without opening tag", text);
 			mir_free(text);
 			if (attr) mir_free(attr);
 			return FALSE;
@@ -431,81 +431,6 @@ XmlNode *JabberXmlGetChildWithGivenAttrValue(XmlNode *node, char *tag, char *att
 		}
 	}
 	return NULL;
-}
-
-void JabberXmlDumpAll(XmlState *xmlState)
-{
-	XmlNode *root;
-	int i;
-
-	JabberLog("XML: DUMPALL: ------------------------");
-	root = &(xmlState->root);
-	if (root->numChild <= 0)
-		JabberLog("XML: DUMPALL: NULL");
-	else {
-		for (i=0; i<root->numChild; i++)
-			JabberXmlDumpNode(root->child[i]);
-	}
-	JabberLog("XML: DUMPALL: ------------------------");
-}
-
-void JabberXmlDumpNode(XmlNode *node)
-{
-	char *str;
-	int i;
-
-	if (node == NULL) {
-		JabberLog("XML: DUMP: NULL");
-		return;
-	}
-
-	str = (char *) mir_alloc(256);
-	str[0] = '\0';
-	for (i=0; i<node->depth; i++)
-		strcat(str, "  ");
-	strcat(str, "<");
-	if (node->name)
-		strcat(str, node->name);
-	else
-		strcat(str, "(NULL)");
-	for (i=0; i<node->numAttr; i++) {
-		strcat(str, " ");
-		if (node->attr[i]->name)
-			strcat(str, node->attr[i]->name);
-		else
-			strcat(str, "(NULL)");
-		strcat(str, "=");
-		if (node->attr[i]->value) {
-			strcat(str, "'");
-			strcat(str, node->attr[i]->value);
-			strcat(str, "'");
-		}
-	}
-	if (node->text || node->numChild>0) {
-		strcat(str, ">");
-		if (node->text)
-			strcat(str, node->text);
-		if (node->numChild > 0) {
-			JabberLog("XML: DUMP: %s", str);
-			for (i=0; i<node->numChild; i++)
-				JabberXmlDumpNode(node->child[i]);
-			str[0] = '\0';
-			for (i=0; i<node->depth; i++)
-				strcat(str, "  ");
-		}
-		if (node->state != NODE_OPEN) {
-			strcat(str, "</");
-			strcat(str, node->name);
-			strcat(str, ">");
-		}
-	}
-	else {
-		if (node->state != NODE_OPEN)
-			strcat(str, "/>");
-	}
-
-	JabberLog("XML: DUMP: %s", str);
-	mir_free(str);
 }
 
 static void JabberXmlRemoveChild(XmlNode *node, XmlNode *child)

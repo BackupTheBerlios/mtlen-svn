@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "jabber.h"
 #include "jabber_list.h"
-#include "crypto/sha1.h"
 #include <ctype.h>
 #include <win2k.h>
 
@@ -46,10 +45,17 @@ HANDLE HookEvent_Ex(const char *name, MIRANDAHOOK hook) {
 	return hHooks[hookNum - 1] ;
 }
 
-HANDLE CreateServiceFunction_Ex(const char *name, MIRANDASERVICE service) {
+HANDLE HookEventObj_Ex(const char *name, TlenProtocol *proto, MIRANDAHOOKOBJ hook) {
+	hookNum ++;
+	hHooks = (HANDLE *) mir_realloc(hHooks, sizeof(HANDLE) * (hookNum));
+	hHooks[hookNum - 1] = HookEventObj(name, hook, proto);
+	return hHooks[hookNum - 1] ;
+}
+
+HANDLE CreateServiceFunction_Ex(const char *name, TlenProtocol *proto, MIRANDASERVICEOBJ service) {
 	serviceNum++;
 	hServices = (HANDLE *) mir_realloc(hServices, sizeof(HANDLE) * (serviceNum));
-	hServices[serviceNum - 1] = CreateServiceFunction(name, service);
+	hServices[serviceNum - 1] = CreateServiceFunctionObj(name, service, proto);
 	return hServices[serviceNum - 1] ;
 }
 
@@ -77,18 +83,18 @@ void DestroyServices_Ex() {
 	hServices = NULL;
 }
 
-void JabberSerialInit(void)
+void JabberSerialInit(TlenProtocol *proto)
 {
 	InitializeCriticalSection(&serialMutex);
 	serial = 0;
 }
 
-void JabberSerialUninit(void)
+void JabberSerialUninit(TlenProtocol *proto)
 {
 	DeleteCriticalSection(&serialMutex);
 }
 
-unsigned int JabberSerialNext(void)
+unsigned int JabberSerialNext(TlenProtocol *proto)
 {
 	unsigned int ret;
 
@@ -99,7 +105,7 @@ unsigned int JabberSerialNext(void)
 	return ret;
 }
 
-void JabberLog(const char *fmt, ...)
+void JabberLog(TlenProtocol *proto, const char *fmt, ...)
 {
 #ifdef ENABLE_LOGGING
 	char *str;
@@ -119,8 +125,8 @@ void JabberLog(const char *fmt, ...)
 	for (p=str; *p!='\0'; p++)
 		if (*p=='\n' || *p=='\r')
 			extra++;
-	text = (char *) mir_alloc(strlen(jabberProtoName)+2+strlen(str)+2+extra);
-	wsprintf(text, "[%s]", jabberProtoName);
+	text = (char *) mir_alloc(strlen("TLEN")+2+strlen(str)+2+extra);
+	wsprintf(text, "[%s]", "TLEN");
 	for (p=str,q=text+strlen(text); *p!='\0'; p++,q++) {
 		if (*p == '\r') {
 			*q = '\\';
@@ -137,8 +143,8 @@ void JabberLog(const char *fmt, ...)
 	}
 	*q = '\n';
 	*(q+1) = '\0';
-	if (hNetlibUser!=NULL) {
-		CallService(MS_NETLIB_LOG, (WPARAM) hNetlibUser, (LPARAM) text);
+	if (proto->hNetlibUser!=NULL) {
+		CallService(MS_NETLIB_LOG, (WPARAM) proto->hNetlibUser, (LPARAM) text);
 	}
 	//OutputDebugString(text);
 	mir_free(text);
@@ -147,7 +153,7 @@ void JabberLog(const char *fmt, ...)
 }
 
 // Caution: DO NOT use JabberSend() to send binary (non-string) data
-int JabberSend(HANDLE hConn, const char *fmt, ...)
+int JabberSend(TlenProtocol *proto, const char *fmt, ...)
 {
 	char *str;
 	int size;
@@ -165,12 +171,12 @@ int JabberSend(HANDLE hConn, const char *fmt, ...)
 	}
 	va_end(vararg);
 
-	JabberLog("SEND:%s", str);
+	JabberLog(proto, "SEND:%s", str);
 	size = strlen(str);
-	if (jabberThreadInfo->useAES) {
-		result = JabberWsSendAES(hConn, str, size, &jabberThreadInfo->aes_out_context, jabberThreadInfo->aes_out_iv);
+	if (proto->threadData->useAES) {
+		result = JabberWsSendAES(proto, str, size, &proto->threadData->aes_out_context, proto->threadData->aes_out_iv);
 	} else {
-		result = JabberWsSend(hConn, str, size);
+		result = JabberWsSend(proto, str, size);
 	}
 	LeaveCriticalSection(&mutex);
 
@@ -339,19 +345,17 @@ char *JabberUtf8Encode(const char *str)
 
 char *JabberSha1(char *str)
 {
-	SHA1Context sha;
-	uint8_t digest[20];
-	char *result;
+	mir_sha1_ctx sha;
+	mir_sha1_byte_t digest[20];
+	char* result;
 	int i;
 
-	if (str==NULL)
+	if ( str == NULL )
 		return NULL;
-	if (SHA1Reset(&sha))
-		return NULL;
-	if (SHA1Input(&sha, str, strlen(str)))
-		return NULL;
-	if (SHA1Result(&sha, digest))
-		return NULL;
+
+	mir_sha1_init( &sha );
+	mir_sha1_append( &sha, (mir_sha1_byte_t* )str, strlen( str ));
+	mir_sha1_finish( &sha, digest );
 	if ((result=(char *)mir_alloc(41)) == NULL)
 		return NULL;
 	for (i=0; i<20; i++)
@@ -361,104 +365,22 @@ char *JabberSha1(char *str)
 
 char *TlenSha1(char *str, int len)
 {
-	SHA1Context sha;
-	uint8_t digest[20];
-	char *result;
+	mir_sha1_ctx sha;
+	mir_sha1_byte_t digest[20];
+	char* result;
 	int i;
 
-	if (str==NULL)
+	if ( str == NULL )
 		return NULL;
-	if (SHA1Reset(&sha))
-		return NULL;
-	if (SHA1Input(&sha, str, len))
-		return NULL;
-	if (SHA1Result(&sha, digest))
-		return NULL;
-	if ((result=(char *)mir_alloc(20)) == NULL)
+
+	mir_sha1_init( &sha );
+	mir_sha1_append( &sha, (mir_sha1_byte_t* )str, len);
+	mir_sha1_finish( &sha, digest );
+	if (( result=( char* )mir_alloc( 20 )) == NULL )
 		return NULL;
 	for (i=0; i<20; i++)
 		result[i]=digest[4*(i>>2)+(3-(i&0x3))];
 	return result;
-}
-
-char *JabberUnixToDos(const char *str)
-{
-	char *p, *q, *res;
-	int extra;
-
-	if (str==NULL || str[0]=='\0')
-		return NULL;
-
-	extra = 0;
-	for (p=(char *) str; *p!='\0'; p++) {
-		if (*p == '\n')
-			extra++;
-	}
-	if ((res=(char *)mir_alloc(strlen(str)+extra+1)) != NULL) {
-		for (p=(char *) str,q=res; *p!='\0'; p++,q++) {
-			if (*p == '\n') {
-				*q = '\r';
-				q++;
-			}
-			*q = *p;
-		}
-		*q = '\0';
-	}
-	return res;
-}
-
-void JabberDosToUnix(char *str)
-{
-	char *p, *q;
-
-	if (str==NULL || str[0]=='\0')
-		return;
-
-	for (p=q=str; *p!='\0'; p++) {
-		if (*p != '\r') {
-			*q = *p;
-			q++;
-		}
-	}
-	*q = '\0';
-}
-
-char *JabberHttpUrlEncode(const char *str)
-{
-	unsigned char *p, *q, *res;
-
-	if (str == NULL) return NULL;
-	res = (char *) mir_alloc(3*strlen(str) + 1);
-	for (p=(char *)str,q=res; *p!='\0'; p++,q++) {
-		if ((*p>='A' && *p<='Z') || (*p>='a' && *p<='z') || (*p>='0' && *p<='9') || strchr("$-_.+!*(),", *p)!=NULL) {
-			*q = *p;
-		}
-		else {
-			sprintf(q, "%%%02X", *p);
-			q += 2;
-		}
-	}
-	*q = '\0';
-	return res;
-}
-
-void JabberHttpUrlDecode(char *str)
-{
-	unsigned char *p, *q;
-	unsigned int code;
-
-	if (str == NULL) return;
-	for (p=q=str; *p!='\0'; p++,q++) {
-		if (*p=='%' && *(p+1)!='\0' && isxdigit(*(p+1)) && *(p+2)!='\0' && isxdigit(*(p+2))) {
-			sscanf(p+1, "%2x", &code);
-			*q = (unsigned char) code;
-			p += 2;
-		}
-		else {
-			*q = *p;
-		}
-	}
-	*q = '\0';
 }
 
 char *TlenPasswordHash(const char *str)
@@ -779,7 +701,6 @@ time_t JabberIsoToUnixTime(char *stamp)
 	t = mktime(&timestamp);
 	t -= _timezone;
 	t = TlenTimeToUTC(t);
-	JabberLog("%s is %s (%d)", stamp, ctime(&t), _timezone);
 
 	if (t >= 0)
 		return t;
@@ -787,38 +708,7 @@ time_t JabberIsoToUnixTime(char *stamp)
 		return (time_t) 0;
 }
 
-void JabberSendVisibleInvisiblePresence(BOOL invisible)
-{
-	JABBER_LIST_ITEM *item;
-	HANDLE hContact;
-	WORD apparentMode;
-	int i;
-
-	if (!jabberOnline) return;
-
-	i = 0;
-	while ((i=JabberListFindNext(LIST_ROSTER, i)) >= 0) {
-		if ((item=JabberListGetItemPtrFromIndex(i)) != NULL) {
-			if ((hContact=JabberHContactFromJID(item->jid)) != NULL) {
-				apparentMode = DBGetContactSettingWord(hContact, jabberProtoName, "ApparentMode", 0);
-				if (invisible==TRUE && apparentMode==ID_STATUS_OFFLINE) {
-					JabberSend(jabberThreadInfo->s, "<presence to='%s' type='invisible'/>", item->jid);
-				}
-				else if (invisible==FALSE && apparentMode==ID_STATUS_ONLINE) {
-					EnterCriticalSection(&modeMsgMutex);
-					if (modeMsgs.szInvisible)
-						JabberSend(jabberThreadInfo->s, "<presence to='%s'><show>available</show><status>%s</status></presence>", item->jid, modeMsgs.szInvisible);
-					else
-						JabberSend(jabberThreadInfo->s, "<presence to='%s'><show>available</show></presence>", item->jid);
-					LeaveCriticalSection(&modeMsgMutex);
-				}
-			}
-		}
-		i++;
-	}
-}
-
-void JabberSendPresenceTo(int status, char *to, char *extra)
+void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to, char *extra)
 {
 	char *showBody, *statusMsg, *presenceType;
 	char *ptr = NULL;
@@ -871,8 +761,8 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 		break;
 	case ID_STATUS_OFFLINE:
 		presenceType = "unavailable";
-		if (DBGetContactSettingByte(NULL, jabberProtoName, "LeaveOfflineMessage", FALSE)) {
-			int offlineMessageOption = DBGetContactSettingWord(NULL, jabberProtoName, "OfflineMessageOption", 0);
+		if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", FALSE)) {
+			int offlineMessageOption = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", 0);
 			if (offlineMessageOption == 0) {
 				switch (jabberStatus) {
 					case ID_STATUS_ONLINE:
@@ -931,14 +821,14 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 	if (presenceType) {
 		extra = NULL;
 		if (statusMsg)
-			JabberSend(jabberThreadInfo->s, "<presence%s type='%s'><status>%s</status>%s%s</presence>", toStr, presenceType, statusMsg, priorityStr, (extra!=NULL)?extra:"");
+			JabberSend(proto, "<presence%s type='%s'><status>%s</status>%s%s</presence>", toStr, presenceType, statusMsg, priorityStr, (extra!=NULL)?extra:"");
 		else
-			JabberSend(jabberThreadInfo->s, "<presence%s type='%s'>%s%s</presence>", toStr, presenceType, priorityStr, (extra!=NULL)?extra:"");
+			JabberSend(proto, "<presence%s type='%s'>%s%s</presence>", toStr, presenceType, priorityStr, (extra!=NULL)?extra:"");
 	} else {
 		if (statusMsg)
-			JabberSend(jabberThreadInfo->s, "<presence%s><show>%s</show><status>%s</status>%s%s</presence>", toStr, showBody, statusMsg, priorityStr, (extra!=NULL)?extra:"");
+			JabberSend(proto, "<presence%s><show>%s</show><status>%s</status>%s%s</presence>", toStr, showBody, statusMsg, priorityStr, (extra!=NULL)?extra:"");
 		else
-			JabberSend(jabberThreadInfo->s, "<presence%s><show>%s</show>%s%s</presence>", toStr, showBody, priorityStr, (extra!=NULL)?extra:"");
+			JabberSend(proto, "<presence%s><show>%s</show>%s%s</presence>", toStr, showBody, priorityStr, (extra!=NULL)?extra:"");
 	}
 	if (ptr) {
 		mir_free(ptr);
@@ -946,7 +836,7 @@ void JabberSendPresenceTo(int status, char *to, char *extra)
 	LeaveCriticalSection(&modeMsgMutex);
 }
 
-void JabberSendPresence(int status)
+void JabberSendPresence(TlenProtocol *proto, int status)
 {
 	switch (status) {
 		case ID_STATUS_ONLINE:
@@ -967,9 +857,9 @@ void JabberSendPresence(int status)
 			status = ID_STATUS_DND;
 			break;
 	}
-	JabberSendPresenceTo(status, NULL, NULL);
+	JabberSendPresenceTo(proto, status, NULL, NULL);
 /*
-	if (DBGetContactSettingByte(NULL, jabberProtoName, "VisibilitySupport", FALSE)) {
+	if (DBGetContactSettingByte(NULL, iface.m_szModuleName, "VisibilitySupport", FALSE)) {
 		if (status == ID_STATUS_INVISIBLE)
 			JabberSendVisiblePresence();
 		else

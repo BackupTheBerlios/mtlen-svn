@@ -25,34 +25,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _JABBER_IQ_H_
 
 #include "jabber_xml.h"
+#include "jabber.h"
 
 typedef enum {
 	IQ_PROC_NONE,
 	IQ_PROC_GETSEARCH
 } JABBER_IQ_PROCID;
 
-typedef void (*JABBER_IQ_PFUNC)(XmlNode *iqNode, void *usedata);
+typedef void (*JABBER_IQ_PFUNC)(TlenProtocol *proto, XmlNode *iqNode);
 
 void JabberIqInit();
 void JabberIqUninit();
 JABBER_IQ_PFUNC JabberIqFetchFunc(int iqId);
 void JabberIqAdd(unsigned int iqId, JABBER_IQ_PROCID procId, JABBER_IQ_PFUNC func);
 
-void JabberIqResultAuth(XmlNode *iqNode, void *userdata);
-void JabberIqResultRoster(XmlNode *iqNode, void *userdata);
-void TlenIqResultVcard(XmlNode *iqNode, void *userdata);
-void JabberIqResultSearch(XmlNode *iqNode, void *userdata);
-void TlenIqResultVersion(XmlNode *iqNode, void *userdata);
-void TlenIqResultInfo(XmlNode *iqNode, void *userdata);
-void TlenIqResultTcfg(XmlNode *iqNode, void *userdata);
+void JabberIqResultAuth(TlenProtocol *proto, XmlNode *iqNode);
+void JabberIqResultRoster(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultVcard(TlenProtocol *proto, XmlNode *iqNode);
+void JabberIqResultSearch(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultVersion(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultInfo(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultTcfg(TlenProtocol *proto, XmlNode *iqNode);
 
-void TlenIqResultChatGroups(XmlNode *iqNode, void *userdata);
-void TlenIqResultChatRooms(XmlNode *iqNode, void *userdata);
-void TlenIqResultUserRooms(XmlNode *iqNode, void *userdata);
-void TlenIqResultUserNicks(XmlNode *iqNode, void *userdata);
-void TlenIqResultRoomSearch(XmlNode *iqNode, void *userdata);
-void TlenIqResultRoomInfo(XmlNode *iqNode, void *userdata);
-void TlenIqResultChatRoomUsers(XmlNode *iqNode, void *userdata);
+void TlenIqResultChatGroups(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultChatRooms(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultUserRooms(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultUserNicks(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultRoomSearch(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultRoomInfo(TlenProtocol *proto, XmlNode *iqNode);
+void TlenIqResultChatRoomUsers(TlenProtocol *proto, XmlNode *iqNode);
 //void JabberIqResultSetPassword(XmlNode *iqNode, void *userdata);
 
 #endif

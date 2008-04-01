@@ -27,11 +27,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft);
 extern void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft);
 extern int TlenVoiceIsInUse();
-extern int TlenVoiceContactMenuHandleVoice(WPARAM wParam, LPARAM lParam);
+extern int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int TlenVoiceCancelAll();
 extern int TlenVoiceStart(TLEN_FILE_TRANSFER *ft, int mode) ;
-extern int TlenVoiceAccept(const char *id, const char *from);
-extern int TlenVoiceBuildInDeviceList(HWND hWnd);
-extern int TlenVoiceBuildOutDeviceList(HWND hWnd);
+extern int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from);
+extern int TlenVoiceBuildInDeviceList(TlenProtocol *proto, HWND hWnd);
+extern int TlenVoiceBuildOutDeviceList(TlenProtocol *proto, HWND hWnd);
 #endif
 
