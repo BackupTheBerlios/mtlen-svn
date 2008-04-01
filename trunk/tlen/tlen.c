@@ -105,14 +105,9 @@ __declspec(dllexport) const MUUID* MirandaPluginInterfaces(void)
 
 int __declspec(dllexport) Unload(void)
 {
-   MessageBoxA(NULL, "tu1", "tu21", MB_OK);
 	DeleteCriticalSection(&modeMsgMutex);
-   MessageBoxA(NULL, "tu2", "tu21", MB_OK);
 	DeleteCriticalSection(&mutex);
-   MessageBoxA(NULL, "tu3", "tu21", MB_OK);
 	mir_free(tlenProtocol);
-
-   MessageBoxA(NULL, "tu4", "tu41", MB_OK);
 	return 0;
 }
 

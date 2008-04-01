@@ -178,7 +178,6 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 		InitComboBox(GetDlgItem(hwndDlg, IDC_OCCUPATION), tlenFieldOccupation);
 		InitComboBox(GetDlgItem(hwndDlg, IDC_LOOKFOR), tlenFieldLookfor);
 
-		SendMessage(hwndDlg, WM_TLEN_REFRESH, 0, 0);
 		return TRUE;
 	case WM_TLEN_REFRESH:
 		{
@@ -298,6 +297,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			case PSN_PARAMCHANGED:
 				{
 					data->proto = ( TlenProtocol* )(( LPPSHNOTIFY )lParam )->lParam;
+					SendMessage(hwndDlg, WM_TLEN_REFRESH, 0, 0);
 				}
 			}
 			break;
