@@ -168,7 +168,7 @@ static void TlenRegisterIcons()
     GetModuleFileNameA(hInst, path, MAX_PATH);
     sid.cbSize = sizeof(SKINICONDESC);
     sid.cx = sid.cy = 16;
-    sid.pszSection = "Tlen";
+    sid.ptszSection = _T("Tlen");
     sid.pszDefaultFile = path;
     #ifdef UNICODE
     sid.flags = SIDF_UNICODE;

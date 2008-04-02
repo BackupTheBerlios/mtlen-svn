@@ -28,7 +28,7 @@ static void InitComboBox(HWND hwndCombo, JABBER_FIELD_MAP *fieldMap)
 {
 	int i, n;
 
-	n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM) "");
+	n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM)_T(""));
 	SendMessage(hwndCombo, CB_SETITEMDATA, n, 0);
 	SendMessage(hwndCombo, CB_SETCURSEL, n, 0);
 	for(i=0;;i++) {

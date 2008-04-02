@@ -54,7 +54,7 @@ DWORD TlenGetCaps(PROTO_INTERFACE *ptr, int type, HANDLE hContact)
 	if (type == PFLAGNUM_4)
 		return PF4_FORCEAUTH|PF4_NOCUSTOMAUTH|PF4_SUPPORTTYPING|PF4_AVATARS;
 	if (type == PFLAG_UNIQUEIDTEXT)
-		return (int) TranslateT("Tlen login");
+		return (int) Translate("Tlen login");
 	if (type == PFLAG_UNIQUEIDSETTING)
 		return (int) "jid";
 	return 0;
