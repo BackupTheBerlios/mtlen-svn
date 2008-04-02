@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 1
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TLEN_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O1 /I "../../include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TLEN_EXPORTS" /D "TLEN_PLUGIN" /FAcs /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O1 /I "C:\MirandaDev\miranda_svn2\include\\" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TLEN_EXPORTS" /D "TLEN_PLUGIN" /FAcs /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 1
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TLEN_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TLEN_EXPORTS" /D "TLEN_PLUGIN" /FAcs /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "C:\MirandaDev\miranda_svn2\include\\" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TLEN_EXPORTS" /D "TLEN_PLUGIN" /FAcs /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -173,14 +173,6 @@ SOURCE=.\jabber_xml.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\crypto\md5.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\crypto\sha1.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\tlen.c
 # End Source File
 # Begin Source File
@@ -253,15 +245,7 @@ SOURCE=.\jabber_xml.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\crypto\md5.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\resource.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\crypto\sha1.h
 # End Source File
 # Begin Source File
 

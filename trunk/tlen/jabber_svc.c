@@ -41,6 +41,7 @@ static int searchQueryLen = 0;
 
 extern int TlenOnModulesLoaded(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int TlenOptionsInit(void *ptr, WPARAM wParam, LPARAM lParam);
+extern int TlenPreShutdown(void *ptr, WPARAM wParam, LPARAM lParam);
 
 DWORD TlenGetCaps(PROTO_INTERFACE *ptr, int type, HANDLE hContact)
 {
@@ -62,7 +63,7 @@ DWORD TlenGetCaps(PROTO_INTERFACE *ptr, int type, HANDLE hContact)
 int TlenGetName(void *ptr, WPARAM wParam, LPARAM lParam)
 {
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	lstrcpyn((char *) lParam, proto->iface.m_szProtoName, wParam);
+	strncpy((char *) lParam, proto->iface.m_szProtoName, wParam);
 	return 0;
 }
 
@@ -75,7 +76,7 @@ HICON TlenGetIcon(PROTO_INTERFACE *ptr, int iconIndex)
 
 int TlenRunSearch(TlenProtocol *proto) {
 	int iqId = 0;
-	if (!jabberOnline) return 0;
+	if (!proto->jabberOnline) return 0;
 	if (searchQuery != NULL && searchIndex < 10) {
 		iqId = searchID;
 		JabberIqAdd(proto, iqId, IQ_PROC_GETSEARCH, JabberIqResultSearch);
@@ -104,7 +105,7 @@ HANDLE TlenBasicSearch(PROTO_INTERFACE *ptr, const char *id)
 	char *jid;
 	int iqId = 0;
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	if (!jabberOnline) return 0;
+	if (!proto->jabberOnline) return 0;
 	if (id == NULL) return 0;
 	if ((jid=JabberTextEncode(id)) != NULL) {
 		searchJID = mir_strdup(id);
@@ -122,7 +123,7 @@ HANDLE TlenSearchByEmail(PROTO_INTERFACE *ptr, const char* email)
 	int iqId = 0;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline) return 0;
+	if (!proto->jabberOnline) return 0;
 	if (email == NULL) return 0;
 
 	if ((emailEnc=JabberTextEncode(email)) != NULL) {
@@ -140,7 +141,7 @@ HANDLE TlenSearchByName(PROTO_INTERFACE *ptr, const char* nick, const char* firs
 	int iqId = 0;
 
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	if (!jabberOnline) return 0;
+	if (!proto->jabberOnline) return 0;
 
 	TlenResetSearchQuery(proto);
 
@@ -176,7 +177,7 @@ HWND TlenSearchAdvanced(PROTO_INTERFACE *ptr, HWND owner)
 {
 	int iqId;
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	if (!jabberOnline) return 0;
+	if (!proto->jabberOnline) return 0;
 
 	TlenResetSearchQuery(proto);
 	iqId = JabberSerialNext(proto);
@@ -291,7 +292,7 @@ int TlenAuthAllow(PROTO_INTERFACE *ptr, HANDLE hContact)
 	char *nick, *firstName, *lastName, *jid;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline)
+	if (!proto->jabberOnline)
 		return 1;
 
 	memset(&dbei, sizeof(dbei), 0);
@@ -345,7 +346,7 @@ int TlenAuthDeny(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szReason)
 	char *nick, *firstName, *lastName, *jid;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline)
+	if (!proto->jabberOnline)
 		return 1;
 
 	memset(&dbei, sizeof(dbei), 0);
@@ -380,7 +381,7 @@ int TlenAuthDeny(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szReason)
 
 static void TlenConnect(TlenProtocol *proto, int initialStatus)
 {
-	if (!jabberConnected) {
+	if (!proto->jabberConnected) {
 		ThreadData *thread;
 		int oldStatus;
 
@@ -406,17 +407,17 @@ int TlenSetStatus(PROTO_INTERFACE *ptr, int iNewStatus)
 
  	if (iNewStatus == ID_STATUS_OFFLINE) {
 		if (proto->threadData) {
-			if (jabberConnected) {
+			if (proto->jabberConnected) {
 				JabberSendPresence(proto, ID_STATUS_OFFLINE);
 			}
 			s = proto;
 			proto->threadData = NULL;
-			if (jabberConnected) {
+			if (proto->jabberConnected) {
 				Sleep(200);
 //				JabberSend(s, "</s>");
 				// Force closing connection
-				jabberConnected = FALSE;
-				jabberOnline = FALSE;
+				proto->jabberConnected = FALSE;
+				proto->jabberOnline = FALSE;
 				Netlib_CloseHandle(s);
 			}
 		}
@@ -429,7 +430,7 @@ int TlenSetStatus(PROTO_INTERFACE *ptr, int iNewStatus)
 		}
 	}
 	else if (iNewStatus != proto->iface.m_iStatus) {
-		if (!jabberConnected)
+		if (!proto->jabberConnected)
 			TlenConnect(proto, iNewStatus);
 		else {
 			// change status
@@ -459,7 +460,7 @@ int TlenSetAwayMsg(PROTO_INTERFACE *ptr, int iStatus, const char* msg )
 
 	newModeMsg = JabberTextEncode(msg);
 
-	EnterCriticalSection(&modeMsgMutex);
+	EnterCriticalSection(&proto->modeMsgMutex);
 
 	switch (iStatus) {
 	case ID_STATUS_ONLINE:
@@ -484,7 +485,7 @@ int TlenSetAwayMsg(PROTO_INTERFACE *ptr, int iStatus, const char* msg )
 		szMsg = &proto->modeMsgs.szInvisible;
 		break;
 	default:
-		LeaveCriticalSection(&modeMsgMutex);
+		LeaveCriticalSection(&proto->modeMsgMutex);
 		return 1;
 	}
 
@@ -503,7 +504,7 @@ int TlenSetAwayMsg(PROTO_INTERFACE *ptr, int iStatus, const char* msg )
 		}
 	}
 
-	LeaveCriticalSection(&modeMsgMutex);
+	LeaveCriticalSection(&proto->modeMsgMutex);
 	return 0;
 }
 
@@ -514,7 +515,7 @@ int JabberGetInfo(PROTO_INTERFACE *ptr, HANDLE hContact, int infoType)
 	char *nick, *pNick;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline) return 1;
+	if (!proto->jabberOnline) return 1;
 	if (hContact==NULL) {
 		iqId = JabberSerialNext(proto);
 		JabberIqAdd(proto, iqId, IQ_PROC_NONE, TlenIqResultVcard);
@@ -542,7 +543,7 @@ int TlenSetApparentMode(PROTO_INTERFACE *ptr, HANDLE hContact, int mode)
 	char *jid;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline) return 0;
+	if (!proto->jabberOnline) return 0;
 	if (!DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "VisibilitySupport", FALSE)) return 0;
 	if (mode!=0 && mode!=ID_STATUS_ONLINE && mode!=ID_STATUS_OFFLINE) return 1;
 	oldMode = DBGetContactSettingWord(hContact, proto->iface.m_szModuleName, "ApparentMode", 0);
@@ -618,7 +619,7 @@ int TlenSendAlert(void *ptr, WPARAM wParam, LPARAM lParam)
 	HANDLE hContact = ( HANDLE )wParam;
 	DBVARIANT dbv;
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	if (jabberOnline && !DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
+	if (proto->jabberOnline && !DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 		JabberSend(proto, "<m tp='a' to='%s'/>", dbv.pszVal);
 
 		DBFreeVariant(&dbv);
@@ -636,7 +637,7 @@ int TlenSendMessage(PROTO_INTERFACE *ptr, HANDLE hContact, int flags, const char
 	char msgType[16];
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline || DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
+	if (!proto->jabberOnline || DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
         SENDACKTHREADDATA *tdata = (SENDACKTHREADDATA*) mir_alloc(sizeof(SENDACKTHREADDATA));
         tdata->proto = proto;
         tdata->hContact = hContact;
@@ -703,7 +704,7 @@ static int TlenGetAvatarInfo(void *ptr, WPARAM wParam, LPARAM lParam)
 	DBVARIANT dbv;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 	PROTO_AVATAR_INFORMATION* AI = ( PROTO_AVATAR_INFORMATION* )lParam;
-	if (!tlenOptions.enableAvatars) return GAIR_NOAVATAR;
+	if (!proto->tlenOptions.enableAvatars) return GAIR_NOAVATAR;
 
 	if (AI->hContact != NULL) {
 		if (!DBGetContactSetting(AI->hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
@@ -727,7 +728,7 @@ static int TlenGetAvatarInfo(void *ptr, WPARAM wParam, LPARAM lParam)
 		AI->format = ( AI->hContact == NULL ) ? proto->threadData->avatarFormat : item->avatarFormat;
 		return GAIR_SUCCESS;
 	}
-	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && jabberOnline) {
+	if (( wParam & GAIF_FORCE ) != 0 && AI->hContact != NULL && proto->jabberOnline) {
 		/* get avatar */
 		return GAIR_WAITFOR;
 	}
@@ -751,7 +752,7 @@ int TlenFileAllow(PROTO_INTERFACE *ptr, HANDLE hContact, HANDLE hTransfer, const
 	char *nick;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline) return 0;
+	if (!proto->jabberOnline) return 0;
 
 	ft = (TLEN_FILE_TRANSFER *) hTransfer;
 	ft->szSavePath = mir_strdup(szPath);
@@ -774,7 +775,7 @@ int TlenFileDeny(PROTO_INTERFACE *ptr, HANDLE hContact, HANDLE hTransfer, const 
 	char *nick;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline) return 1;
+	if (!proto->jabberOnline) return 1;
 
 	ft = (TLEN_FILE_TRANSFER *) hTransfer;
 	nick = JabberNickFromJID(ft->jid);
@@ -820,7 +821,7 @@ int TlenSendFile(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szDescriptio
 	int id;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline) return 0;
+	if (!proto->jabberOnline) return 0;
 //	if (DBGetContactSettingWord(ccs->hContact, iface.m_szModuleName, "Status", ID_STATUS_OFFLINE) == ID_STATUS_OFFLINE) return 0;
 	if (DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) return 0;
     ft = TlenFileCreateFT(proto, dbv.pszVal);
@@ -849,7 +850,7 @@ int TlenSendFile(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szDescriptio
 		ft->iqId = mir_strdup(idStr);
 		nick = JabberNickFromJID(ft->jid);
 		item->ft = ft;
-		if (tlenOptions.useNewP2P) {
+		if (proto->tlenOptions.useNewP2P) {
 			JabberSend(proto, "<iq to='%s'><query xmlns='p2p'><fs t='%s' e='1' i='%s' c='%d' s='%d' v='%d'/></query></iq>",
 				ft->jid, ft->jid, idStr, ft->fileCount, ft->allFileTotalSize, ft->fileCount);
 			
@@ -891,7 +892,7 @@ int JabberDbSettingChanged(void *ptr, WPARAM wParam, LPARAM lParam)
     TlenProtocol *proto = (TlenProtocol *)ptr;
 	// no action for hContact == NULL or when offline
 	if ((HANDLE) wParam == NULL) return 0;
-	if (!jabberConnected) return 0;
+	if (!proto->jabberConnected) return 0;
 
 	if (!strcmp(cws->szModule, "CList")) {
 		HANDLE hContact;
@@ -1034,7 +1035,7 @@ int JabberContactDeleted(void *ptr, WPARAM wParam, LPARAM lParam)
 	DBVARIANT dbv;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if(!jabberOnline)	// should never happen
+	if(!proto->jabberOnline)	// should never happen
 		return 0;
 	szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, wParam, 0);
 	if (szProto==NULL || strcmp(szProto, proto->iface.m_szModuleName))
@@ -1063,7 +1064,7 @@ int TlenUserIsTyping(PROTO_INTERFACE *ptr, HANDLE hContact, int type)
 	JABBER_LIST_ITEM *item;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 
-	if (!jabberOnline) return 0;
+	if (!proto->jabberOnline) return 0;
 	if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 		if ((item=JabberListGetItemPtr(proto, LIST_ROSTER, dbv.pszVal))!=NULL /*&& item->wantComposingEvent==TRUE*/) {
 			switch (type) {
@@ -1124,7 +1125,7 @@ int TlenSetMyAvatar(void *ptr, WPARAM wParam, LPARAM lParam)
    	char tFileName[ MAX_PATH ];
 	int fileIn;
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	if(!jabberOnline) return 1;
+	if(!proto->jabberOnline) return 1;
 	if (szFileName != NULL) {
 		int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_USER_CHANGEAVATAR), NULL, TlenChangeAvatarDlgProc, (LPARAM) NULL);
 		TlenGetAvatarFileName( proto, NULL, tFileName, MAX_PATH);
@@ -1150,6 +1151,7 @@ int TlenSetMyAvatar(void *ptr, WPARAM wParam, LPARAM lParam)
 
 int TlenGetAvatarCaps(void *ptr, WPARAM wParam, LPARAM lParam)
 {
+    TlenProtocol *proto = (TlenProtocol *)ptr;
 	switch (wParam) {
 	case AF_MAXSIZE:
 		{
@@ -1163,7 +1165,7 @@ int TlenGetAvatarCaps(void *ptr, WPARAM wParam, LPARAM lParam)
 	case AF_FORMATSUPPORTED:
 		return (lParam == PA_FORMAT_PNG) ? 1 : 0;
 	case AF_ENABLED:
-		return (tlenOptions.enableAvatars && jabberOnline) ? 1 : 0;
+		return (proto->tlenOptions.enableAvatars && proto->jabberOnline) ? 1 : 0;
 	case AF_DONTNEEDDELAYS:
 		return 1;
 	case AF_MAXFILESIZE:
@@ -1181,17 +1183,15 @@ int TlenOnEvent( PROTO_INTERFACE *ptr, PROTOEVENTTYPE eventType, WPARAM wParam, 
 	switch( eventType ) {
 	case EV_PROTO_ONLOAD:    return TlenOnModulesLoaded(proto, 0, 0 );
 	case EV_PROTO_ONOPTIONS: return TlenOptionsInit(proto, wParam, lParam );
-	//case EV_PROTO_ONEXIT:    return TlenPreShutdown( 0, 0 );
-    /*
+	case EV_PROTO_ONEXIT:    return TlenPreShutdown(proto, 0, 0 );
 	case EV_PROTO_ONRENAME:
 		{	
 			CLISTMENUITEM clmi = { 0 };
 			clmi.cbSize = sizeof( CLISTMENUITEM );
 			clmi.flags = CMIM_NAME | CMIF_TCHAR;
-			clmi.ptszName = m_tszUserName;
-			CallService( MS_CLIST_MODIFYMENUITEM, ( WPARAM )m_hMenuRoot, ( LPARAM )&clmi );
+			clmi.ptszName = proto->iface.m_tszUserName;
+			CallService( MS_CLIST_MODIFYMENUITEM, ( WPARAM )proto->hMenuRoot, ( LPARAM )&clmi );
     	}	
-     */
     }	
 	return 1;
 }

@@ -84,7 +84,7 @@ static char *getDisplayName(TlenProtocol *proto, const char *id)
 			if (!CallService(MS_CONTACT_GETCONTACTINFO, 0, (LPARAM) & ci)) {
 				if (ci.type == CNFT_ASCIIZ) {
 					if (ci.pszVal) {
-						char * str = mir_strdup(ci.pszVal);
+						char * str = mir_strdup((char *)ci.pszVal);
 						miranda_sys_free(ci.pszVal);
 						return str;
 					}
@@ -159,7 +159,7 @@ static int TlenMUCHandleEvent(void *ptr, WPARAM wParam, LPARAM lParam)
 				break;
 			case MUCC_EVENT_REGISTER_ROOM:
 				id = JabberSerialNext(proto);
-				if (jabberOnline) {
+				if (proto->jabberOnline) {
 					if (mucce->pszNick!=NULL) {
 						JabberSend(proto, "<p to='c' tp='c' id='"JABBER_IQID"%d' x='%d' n='%s' p='%s' nick='%s'/>", id, mucce->dwFlags | 0x10, mucce->pszName, mucce->pszID);
 					} else {
@@ -168,14 +168,14 @@ static int TlenMUCHandleEvent(void *ptr, WPARAM wParam, LPARAM lParam)
 				}
 				break;
 			case MUCC_EVENT_REMOVE_ROOM:
-				if (jabberOnline) {
+				if (proto->jabberOnline) {
 					JabberSend(proto, "<p to='%s' type='d'/>", mucce->pszID);
 					JabberListRemove(proto, LIST_CHATROOM, mucce->pszID);
 				//	TlenMUCSendPresence(mucce->pszID, NULL, ID_STATUS_OFFLINE);
 				}
 				break;
 			case MUCC_EVENT_KICK_BAN:
-				if (jabberOnline) {
+				if (proto->jabberOnline) {
 					char *nick;
 					nick = JabberResourceFromJID(mucce->pszUID);
 					if (!isSelf(proto, mucce->pszID, nick)) {
@@ -187,7 +187,7 @@ static int TlenMUCHandleEvent(void *ptr, WPARAM wParam, LPARAM lParam)
 				}
 				break;
 			case MUCC_EVENT_UNBAN:
-				if (jabberOnline) {
+				if (proto->jabberOnline) {
 					char *nick;
 					nick = JabberResourceFromJID(mucce->pszUID);
 					if (!isSelf(proto, mucce->pszID, nick)) {
@@ -197,7 +197,7 @@ static int TlenMUCHandleEvent(void *ptr, WPARAM wParam, LPARAM lParam)
 				}
 				break;
 			case MUCC_EVENT_SET_USER_ROLE:
-				if (jabberOnline) {
+				if (proto->jabberOnline) {
 					char *nick;
 					nick = JabberResourceFromJID(mucce->pszUID);
 					if (!isSelf(proto, mucce->pszID, nick)) {
@@ -223,7 +223,7 @@ static int TlenMUCHandleEvent(void *ptr, WPARAM wParam, LPARAM lParam)
 				TlenMUCQueryContacts(proto, mucce->pszID);
 				break;
 			case MUCC_EVENT_JOIN:
-				if (jabberOnline) {
+				if (proto->jabberOnline) {
 					if (mucce->pszID==NULL || strlen(mucce->pszID)==0) {
 						if (mucce->pszName==NULL || strlen(mucce->pszName)==0) { // create a new chat room
 							id = JabberSerialNext(proto);
@@ -239,7 +239,7 @@ static int TlenMUCHandleEvent(void *ptr, WPARAM wParam, LPARAM lParam)
 				}
 				break;
 			case MUCC_EVENT_START_PRIV:
-				if (jabberOnline) {
+				if (proto->jabberOnline) {
 					JABBER_LIST_ITEM *item;
 					item = JabberListGetItemPtr(proto, LIST_CHATROOM, mucce->pszID);
 					if (item!=NULL) {
@@ -367,7 +367,7 @@ int TlenMUCRecvPresence(TlenProtocol *proto, const char *from, int status, int f
 		if (flags & USER_FLAGS_REGISTERED) mucce.dwFlags |= MUCC_EF_USER_REGISTERED;
 		if (status == ID_STATUS_OFFLINE && mucce.bIsMe && kick!=NULL) {
 			mucce.iType = MUCC_EVENT_ERROR;
-			sprintf(str, TranslateT("You have been kicked. Reason: %s "), kick);
+			sprintf(str, Translate("You have been kicked. Reason: %s "), kick);
 			mucce.pszText = str;
 		}
 		CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
@@ -464,50 +464,50 @@ int TlenMUCRecvError(TlenProtocol *proto, const char *from, XmlNode *errorNode)
 	errCode = atoi(JabberXmlGetAttrValue(errorNode, "code"));
 	switch (errCode) {
 		case 403:
-			sprintf(str, TranslateT("You cannot join this chat room, because you are banned."));
+			sprintf(str, Translate("You cannot join this chat room, because you are banned."));
 			break;
 		case 404:
-			sprintf(str, TranslateT("Chat room not found."));
+			sprintf(str, Translate("Chat room not found."));
 			break;
 		case 407:
-			sprintf(str, TranslateT("This is a private chat room and you are not one of the members."));
+			sprintf(str, Translate("This is a private chat room and you are not one of the members."));
 			break;
 		case 408:
-			sprintf(str, TranslateT("You cannot send any message unless you join this chat room."));
+			sprintf(str, Translate("You cannot send any message unless you join this chat room."));
 			break;
 		case 410:
-			sprintf(str, TranslateT("Chat room with already created."));
+			sprintf(str, Translate("Chat room with already created."));
 			break;
 		case 411:
-			sprintf(str, TranslateT("Nickname '%s' is already registered."),
+			sprintf(str, Translate("Nickname '%s' is already registered."),
 				JabberXmlGetAttrValue(errorNode, "n"));
 			break;
 		case 412:
-			sprintf(str, TranslateT("Nickname already in use, please try another one. Hint: '%s' is free."),
+			sprintf(str, Translate("Nickname already in use, please try another one. Hint: '%s' is free."),
 				JabberXmlGetAttrValue(errorNode, "free"));
 			break;
 		case 413:
-			sprintf(str, TranslateT("You cannot register more than %s nicknames."),
+			sprintf(str, Translate("You cannot register more than %s nicknames."),
 				JabberXmlGetAttrValue(errorNode, "num"));
 			break;
 		case 414:
-			sprintf(str, TranslateT("You cannot create more than %s chat rooms."),
+			sprintf(str, Translate("You cannot create more than %s chat rooms."),
 				JabberXmlGetAttrValue(errorNode, "num"));
 			break;
 		case 415:
-			sprintf(str, TranslateT("You cannot join more than %s chat rooms."),
+			sprintf(str, Translate("You cannot join more than %s chat rooms."),
 				JabberXmlGetAttrValue(errorNode, "num"));
 			break;
 		case 601:
-			sprintf(str, TranslateT("Anonymous nicknames are not allowed in this chat room."));
+			sprintf(str, Translate("Anonymous nicknames are not allowed in this chat room."));
 			break;
 		default:
-			sprintf(str, TranslateT("Unknown error code : %d"), errCode);
+			sprintf(str, Translate("Unknown error code : %d"), errCode);
 			break;
 	}
 	mucce.pszText = str;
 	CallService(MS_MUCC_EVENT, 0, (LPARAM) &mucce);
-	if (jabberOnline) {
+	if (proto->jabberOnline) {
 		switch (errCode) {
 			case 412:
 				item = JabberListGetItemPtr(proto, LIST_CHATROOM, from);
@@ -539,7 +539,7 @@ int TlenMUCRecvError(TlenProtocol *proto, const char *from, XmlNode *errorNode)
 }
 static int TlenMUCSendInvitation(TlenProtocol *proto, const char *roomID, const char *user)
 {
-	if (!jabberOnline) {
+	if (!proto->jabberOnline) {
 		return 1;
 	}
 	JabberSend(proto, "<m to='%s'><x><inv to='%s'><r></r></inv></x></m>", roomID, user);
@@ -551,7 +551,7 @@ static int TlenMUCSendPresence(TlenProtocol *proto, const char *roomID, const ch
 	char str[512];
 	char *jid;
 	JABBER_LIST_ITEM *item;
-	if (!jabberOnline) {
+	if (!proto->jabberOnline) {
 		return 1;
 	}
 	if (nick!=NULL) {
@@ -590,7 +590,7 @@ static int TlenMUCSendMessage(TlenProtocol *proto, MUCCEVENT *event)
 	char *msg, *jid;
 	int style;
 
-	if (!jabberOnline) {
+	if (!proto->jabberOnline) {
 		return 1;
 	}
 	if ((msg = JabberTextEncode(event->pszText))!=NULL) {
@@ -610,7 +610,7 @@ static int TlenMUCSendMessage(TlenProtocol *proto, MUCCEVENT *event)
 static int TlenMUCSendTopic(TlenProtocol *proto, MUCCEVENT *event)
 {
 	char *msg, *jid;
-	if (!jabberOnline) {
+	if (!proto->jabberOnline) {
 		return 1;
 	}
 	if ((msg = JabberTextEncode(event->pszText))!=NULL) {
@@ -625,7 +625,7 @@ static int TlenMUCSendTopic(TlenProtocol *proto, MUCCEVENT *event)
 
 static int TlenMUCSendQuery(TlenProtocol *proto, int type, const char *parent, int page)
 {
-	if (!jabberOnline) {
+	if (!proto->jabberOnline) {
 		return 1;
 	}
 	if (type==3) { // find chat room by name
@@ -661,7 +661,7 @@ int TlenMUCCreateWindow(TlenProtocol *proto, const char *roomID, const char *roo
 {
 	JABBER_LIST_ITEM *item;
 	MUCCWINDOW mucw;
-	if (!jabberOnline || roomID==NULL) {
+	if (!proto->jabberOnline || roomID==NULL) {
 		return 1;
 	}
 	if (JabberListExist(proto, LIST_CHATROOM, roomID)) {
@@ -1018,7 +1018,7 @@ static int TlenMUCQueryContacts(TlenProtocol *proto, const char *roomId) {
 int TlenMUCMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	TlenProtocol *proto = (TlenProtocol *)ptr;
-	if (!jabberOnline) {
+	if (!proto->jabberOnline) {
 		return 1;
 	}
 	JabberSend(proto, "<p to='c' tp='c' id='"JABBER_IQID"%d'/>", JabberSerialNext(proto));
@@ -1042,7 +1042,7 @@ int TlenMUCMenuHandleChats(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	MUCCWINDOW mucw;
 	TlenProtocol *proto = (TlenProtocol *)ptr;
-	if (!jabberOnline) {
+	if (!proto->jabberOnline) {
 		return 1;
 	}
 	mucw.cbSize = sizeof(MUCCWINDOW);
@@ -1059,10 +1059,10 @@ int TlenMUCContactMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam)
 	DBVARIANT dbv;
 	JABBER_LIST_ITEM *item;
 	TlenProtocol *proto = (TlenProtocol *)ptr;
-	if (!jabberOnline) {
+	if (!proto->jabberOnline) {
 		return 1;
 	}
-	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
+	if ((hContact=(HANDLE) wParam)!=NULL && proto->jabberOnline) {
 		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 			char serialId[32];
 			sprintf(serialId, JABBER_IQID"%d", JabberSerialNext(proto));

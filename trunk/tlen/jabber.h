@@ -24,6 +24,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _JABBER_H_
 #define _JABBER_H_
 
+#if defined(UNICODE)
+	#ifndef _UNICODE
+		#define _UNICODE
+	#endif
+#endif
+
 #define MIRANDA_VER 0x0800
 
 #ifdef _DEBUG
@@ -224,7 +230,26 @@ typedef struct {
 	int  avatarRemoveMthd;
 } TlenConfiguration;
 
-;
+typedef struct {
+	int useEncryption;
+	int reconnect;
+	int rosterSync;
+	int offlineAsInvisible;
+	int leaveOfflineMessage;
+	int offlineMessageOption;
+	int ignoreAdvertisements;
+	int alertPolicy;
+	int groupChatPolicy;
+	int voiceChatPolicy;
+	int enableAvatars;
+	int enableVersion;
+	int useNudge;
+	int logAlerts;
+	int useNewP2P;
+    BOOL sendKeepAlive;
+    
+} TLEN_OPTIONS;
+
 
 typedef struct {
     PROTO_INTERFACE iface;
@@ -244,6 +269,8 @@ typedef struct {
     HANDLE hMenuContactGrantAuth;
     HANDLE hMenuContactRequestAuth;
     
+    HANDLE* hServices;
+    unsigned serviceNum;
     HANDLE* hHooks;
     unsigned hookNum;
     
@@ -253,7 +280,14 @@ typedef struct {
 
     CRITICAL_SECTION serialMutex;
     unsigned int serial;
+    BOOL jabberOnline;
+    BOOL jabberConnected;
+
+    CRITICAL_SECTION modeMsgMutex;
     
+    HANDLE hMenuRoot;
+   
+    TLEN_OPTIONS tlenOptions;
 } TlenProtocol;
 
 
@@ -338,30 +372,8 @@ typedef struct {
 
 typedef struct {
 	int id;
-	char *name;
+	TCHAR *name;
 } JABBER_FIELD_MAP;
-
-typedef struct {
-	int useEncryption;
-	int reconnect;
-	int rosterSync;
-	int offlineAsInvisible;
-	int leaveOfflineMessage;
-	int offlineMessageOption;
-	int ignoreAdvertisements;
-	int alertPolicy;
-	int groupChatPolicy;
-	int voiceChatPolicy;
-	int enableAvatars;
-	int enableVersion;
-	int useNudge;
-	int logAlerts;
-	int useNewP2P;
-    BOOL sendKeepAlive;
-    
-} TLEN_OPTIONS;
-
-
 
 
 /*******************************************************************
@@ -371,13 +383,6 @@ extern HINSTANCE hInst;
 extern HANDLE hMainThread;
 
 extern HICON tlenIcons[TLEN_ICON_TOTAL];
-
-extern BOOL jabberConnected;
-extern BOOL jabberOnline;
-//extern char *jabberModeMsg;
-extern CRITICAL_SECTION modeMsgMutex;
-extern TLEN_OPTIONS tlenOptions;
-
 
 /*******************************************************************
  * Function declarations

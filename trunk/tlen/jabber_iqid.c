@@ -57,7 +57,7 @@ void JabberIqResultAuth(TlenProtocol *proto, XmlNode *iqNode)
 
 		JabberSend(proto, "</s>");
 		_snprintf(text, sizeof(text), "%s %s@%s.", TranslateT("Authentication failed for"), proto->threadData->username, proto->threadData->server);
-		MessageBox(NULL, text, TranslateT("Tlen Authentication"), MB_OK|MB_ICONSTOP|MB_SETFOREGROUND);
+		MessageBoxA(NULL, text, Translate("Tlen Authentication"), MB_OK|MB_ICONSTOP|MB_SETFOREGROUND);
 		ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_LOGIN, ACKRESULT_FAILED, NULL, LOGINERR_WRONGPASSWORD);
 		proto->threadData = NULL;	// To disallow auto reconnect
 	}
@@ -251,7 +251,7 @@ void JabberIqResultRoster(TlenProtocol *proto, XmlNode *iqNode)
 				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuChats, (LPARAM) &clmi);
 			}
 
-			jabberOnline = TRUE;
+			proto->jabberOnline = TRUE;
 			JabberLog(proto, "Status changed via THREADSTART");
 			oldStatus = proto->iface.m_iStatus;
 			JabberSendPresence(proto, proto->iface.m_iDesiredStatus);

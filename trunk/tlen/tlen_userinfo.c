@@ -32,46 +32,46 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_avatar.h"
 
 JABBER_FIELD_MAP tlenFieldGender[] = {
-	{ 1, "Male" },
-	{ 2, "Female" },
+	{ 1, _T("Male") },
+	{ 2, _T("Female") },
 	{ 0, NULL }
 };
 JABBER_FIELD_MAP tlenFieldLookfor[] = {
-	{ 1, "Somebody to talk" },
-	{ 2, "Friendship" },
-	{ 3, "Flirt/romance" },
-	{ 4, "Love" },
-	{ 5, "Nothing" },
+	{ 1, _T("Somebody to talk") },
+	{ 2, _T("Friendship") },
+	{ 3, _T("Flirt/romance") },
+	{ 4, _T("Love") },
+	{ 5, _T("Nothing") },
 	{ 0, NULL }
 };
 JABBER_FIELD_MAP tlenFieldStatus[] = {
-	{ 1, "All" },
-	{ 2, "Available" },
-	{ 3, "Free for chat" },
+	{ 1, _T("All") },
+	{ 2, _T("Available") },
+	{ 3, _T("Free for chat") },
 	{ 0, NULL }
 };
 JABBER_FIELD_MAP tlenFieldOccupation[] = {
-	{ 1, "Student" },
-	{ 2, "College student" },
-	{ 3, "Farmer" },
-	{ 4, "Manager" },
-	{ 5, "Specialist" },
-	{ 6, "Clerk" },
-	{ 7, "Unemployed" },
-	{ 8, "Pensioner" },
-	{ 9, "Housekeeper" },
-	{ 10, "Teacher" },
-	{ 11, "Doctor" },
-	{ 12, "Other" },
+	{ 1, _T("Student") },
+	{ 2, _T("College student") },
+	{ 3, _T("Farmer") },
+	{ 4, _T("Manager") },
+	{ 5, _T("Specialist") },
+	{ 6, _T("Clerk") },
+	{ 7, _T("Unemployed") },
+	{ 8, _T("Pensioner") },
+	{ 9, _T("Housekeeper") },
+	{ 10, _T("Teacher") },
+	{ 11, _T("Doctor") },
+	{ 12, _T("Other") },
 	{ 0, NULL }
 };
 JABBER_FIELD_MAP tlenFieldPlan[] = {
-	{ 1, "I'd like to go downtown" },
-	{ 2, "I'd like to go to the cinema" },
-	{ 3, "I'd like to take a walk" },
-	{ 4, "I'd like to go to the disco" },
-	{ 5, "I'd like to go on a blind date" },
-	{ 6, "Waiting for suggestion" },
+	{ 1, _T("I'd like to go downtown") },
+	{ 2, _T("I'd like to go to the cinema") },
+	{ 3, _T("I'd like to take a walk") },
+	{ 4, _T("I'd like to go to the disco") },
+	{ 5, _T("I'd like to go on a blind date") },
+	{ 6, _T("Waiting for suggestion") },
 	{ 0, NULL }
 };
 
@@ -81,14 +81,14 @@ static void InitComboBox(HWND hwndCombo, JABBER_FIELD_MAP *fieldMap)
 {
 	int i, n;
 
-	n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM) "");
-	SendMessage(hwndCombo, CB_SETITEMDATA, n, 0);
-	SendMessage(hwndCombo, CB_SETCURSEL, n, 0);
+	n = SendMessageA(hwndCombo, CB_ADDSTRING, 0, (LPARAM) "");
+	SendMessageA(hwndCombo, CB_SETITEMDATA, n, 0);
+	SendMessageA(hwndCombo, CB_SETCURSEL, n, 0);
 	for(i=0;;i++) {
 		if (fieldMap[i].name == NULL)
 			break;
-		n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM) TranslateT(fieldMap[i].name));
-		SendMessage(hwndCombo, CB_SETITEMDATA, n, fieldMap[i].id);
+		n = SendMessageA(hwndCombo, CB_ADDSTRING, 0, (LPARAM) Translate(fieldMap[i].name));
+		SendMessageA(hwndCombo, CB_SETITEMDATA, n, fieldMap[i].id);
 	}
 }
 
@@ -99,7 +99,7 @@ static void FetchField(HWND hwndDlg, UINT idCtrl, char *fieldName, char **str, i
 
 	if (hwndDlg==NULL || fieldName==NULL || str==NULL || strSize==NULL)
 		return;
-	GetDlgItemText(hwndDlg, idCtrl, text, sizeof(text));
+	GetDlgItemTextA(hwndDlg, idCtrl, text, sizeof(text));
 	if (text[0]) {
 		if ((localFieldName=JabberTextEncode(fieldName)) != NULL) {
 			if ((localText=JabberTextEncode(text)) != NULL) {
@@ -144,13 +144,13 @@ int TlenUserInfoInit(void *ptr, WPARAM wParam, LPARAM lParam)
 		odp.hInstance = hInst;
 		odp.pfnDlgProc = TlenUserInfoDlgProc;
 		odp.position = -2000000000;
-		odp.pszTemplate = ((HANDLE)lParam!=NULL) ? MAKEINTRESOURCE(IDD_USER_INFO):MAKEINTRESOURCE(IDD_USER_VCARD);
+		odp.pszTemplate = ((HANDLE)lParam!=NULL) ? MAKEINTRESOURCEA(IDD_USER_INFO):MAKEINTRESOURCEA(IDD_USER_VCARD);
 		odp.pszTitle = LPGEN("Account");
         odp.dwInitParam = (LPARAM)proto;
 		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
 
 	}
-	if (!lParam && jabberOnline) {
+	if (!lParam && proto->jabberOnline) {
 		CCSDATA ccs = {0};
 		JabberGetInfo(ptr, 0, (LPARAM) &ccs);
 	}
@@ -186,66 +186,66 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			int i;
 			JABBER_LIST_ITEM *item;
 
-			SetDlgItemText(hwndDlg, IDC_INFO_JID, "");
-			SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, "");
+			SetDlgItemText(hwndDlg, IDC_INFO_JID, _T(""));
+			SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, _T(""));
 			SetFocus(GetDlgItem(hwndDlg, IDC_STATIC));
 
-			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "FirstName", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_FIRSTNAME, dbv.pszVal);
+			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "FirstName", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_FIRSTNAME, dbv.ptszVal);
 				DBFreeVariant(&dbv);
-			} else SetDlgItemText(hwndDlg, IDC_FIRSTNAME, "");
-			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "LastName", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_LASTNAME, dbv.pszVal);
+			} else SetDlgItemText(hwndDlg, IDC_FIRSTNAME, _T(""));
+			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "LastName", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_LASTNAME, dbv.ptszVal);
 				DBFreeVariant(&dbv);
-			} else SetDlgItemText(hwndDlg, IDC_LASTNAME, "");
-			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "Nick", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_NICKNAME, dbv.pszVal);
+			} else SetDlgItemText(hwndDlg, IDC_LASTNAME, _T(""));
+			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "Nick", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_NICKNAME, dbv.ptszVal);
 				DBFreeVariant(&dbv);
-			} else SetDlgItemText(hwndDlg, IDC_NICKNAME, "");
-			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "e-mail", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_EMAIL, dbv.pszVal);
+			} else SetDlgItemText(hwndDlg, IDC_NICKNAME, _T(""));
+			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "e-mail", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_EMAIL, dbv.ptszVal);
 				DBFreeVariant(&dbv);
-			} else SetDlgItemText(hwndDlg, IDC_EMAIL, "");
+			} else SetDlgItemText(hwndDlg, IDC_EMAIL, _T(""));
 			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "Age", &dbv)) {
 				SetDlgItemInt(hwndDlg, IDC_AGE, dbv.wVal, FALSE);
 				DBFreeVariant(&dbv);
-			} else SetDlgItemText(hwndDlg, IDC_AGE, "");
-			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "City", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_CITY, dbv.pszVal);
+			} else SetDlgItemText(hwndDlg, IDC_AGE, _T(""));
+			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "City", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_CITY, dbv.ptszVal);
 				DBFreeVariant(&dbv);
-			} else SetDlgItemText(hwndDlg, IDC_CITY, "");
-			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "School", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_SCHOOL, dbv.pszVal);
+			} else SetDlgItemText(hwndDlg, IDC_CITY, _T(""));
+			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "School", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_SCHOOL, dbv.ptszVal);
 				DBFreeVariant(&dbv);
-			} else SetDlgItemText(hwndDlg, IDC_SCHOOL, "");
+			} else SetDlgItemText(hwndDlg, IDC_SCHOOL, _T(""));
 			switch (DBGetContactSettingByte(data->hContact, data->proto->iface.m_szModuleName, "Gender", '?')) {
 				case 'M':
 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 1, 0);
-					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, TranslateT(tlenFieldGender[0].name));
+					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, TranslateTS(tlenFieldGender[0].name));
 					break;
 				case 'F':
 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 2, 0);
-					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, TranslateT(tlenFieldGender[1].name));
+					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, TranslateTS(tlenFieldGender[1].name));
 					break;
 				default:
 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 0, 0);
-					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, "");
+					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, _T(""));
 					break;
 			}
 			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "Occupation", 0);
 			if (i>0 && i<13) {
-				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, TranslateT(tlenFieldOccupation[i-1].name));
+				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, TranslateTS(tlenFieldOccupation[i-1].name));
 				SendDlgItemMessage(hwndDlg, IDC_OCCUPATION, CB_SETCURSEL, i, 0);
 			} else {
-				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, "");
+				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, _T(""));
 				SendDlgItemMessage(hwndDlg, IDC_OCCUPATION, CB_SETCURSEL, 0, 0);
 			}
 			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "LookingFor", 0);
 			if (i>0 && i<6) {
-				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, TranslateT(tlenFieldLookfor[i-1].name));
+				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, TranslateTS(tlenFieldLookfor[i-1].name));
 				SendDlgItemMessage(hwndDlg, IDC_LOOKFOR, CB_SETCURSEL, i, 0);
 			} else {
-				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, "");
+				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, _T(""));
 				SendDlgItemMessage(hwndDlg, IDC_LOOKFOR, CB_SETCURSEL, 0, 0);
 			}
 			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "VoiceChat", 0);
@@ -254,10 +254,10 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			CheckDlgButton(hwndDlg, IDC_PUBLICSTATUS, i);
 			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "jid", &dbv)) {
 				jid = JabberTextDecode(dbv.pszVal);
-				SetDlgItemText(hwndDlg, IDC_INFO_JID, jid);
+				SetDlgItemTextA(hwndDlg, IDC_INFO_JID, jid);
 				mir_free(jid);
 				jid = dbv.pszVal;
-				if (jabberOnline) {
+				if (data->proto->jabberOnline) {
 					if ((item=JabberListGetItemPtr(data->proto, LIST_ROSTER, jid)) != NULL) {
 						switch (item->subscription) {
 						case SUB_BOTH:

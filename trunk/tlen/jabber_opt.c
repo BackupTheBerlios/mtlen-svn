@@ -45,25 +45,23 @@ static TabDef tabPages[] = {
 						 {TlenAdvOptDlgProc, IDD_OPTIONS_ADVANCED, _T("Advanced")}
 						 };
 
-TLEN_OPTIONS tlenOptions;
-
 void TlenLoadOptions(TlenProtocol *proto)
 {
-	tlenOptions.useEncryption = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE);
-	tlenOptions.reconnect = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "Reconnect", FALSE);
-	tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", 0);
-	tlenOptions.rosterSync = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "RosterSync", FALSE);
-	tlenOptions.offlineAsInvisible = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "OfflineAsInvisible", FALSE);
-	tlenOptions.leaveOfflineMessage = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", FALSE);
-	tlenOptions.offlineMessageOption = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", 0);
-	tlenOptions.ignoreAdvertisements = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "IgnoreAdvertisements", TRUE);
-	tlenOptions.groupChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "GroupChatPolicy", 0);
-	tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceChatPolicy", 0);
-	tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableAvatars", FALSE);
-	tlenOptions.enableVersion = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", FALSE);
-	tlenOptions.useNudge = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", FALSE);
-	tlenOptions.logAlerts = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", FALSE);
-	tlenOptions.useNewP2P = FALSE;
+	proto->tlenOptions.useEncryption = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE);
+	proto->tlenOptions.reconnect = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "Reconnect", FALSE);
+	proto->tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", 0);
+	proto->tlenOptions.rosterSync = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "RosterSync", FALSE);
+	proto->tlenOptions.offlineAsInvisible = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "OfflineAsInvisible", FALSE);
+	proto->tlenOptions.leaveOfflineMessage = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", FALSE);
+	proto->tlenOptions.offlineMessageOption = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", 0);
+	proto->tlenOptions.ignoreAdvertisements = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "IgnoreAdvertisements", TRUE);
+	proto->tlenOptions.groupChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "GroupChatPolicy", 0);
+	proto->tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceChatPolicy", 0);
+	proto->tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableAvatars", FALSE);
+	proto->tlenOptions.enableVersion = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", FALSE);
+	proto->tlenOptions.useNudge = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", FALSE);
+	proto->tlenOptions.logAlerts = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", FALSE);
+	proto->tlenOptions.useNewP2P = FALSE;
 }
 
 static int changed = 0;
@@ -81,15 +79,15 @@ static void MarkChanges(int i, HWND hWnd) {
 }
 
 
-int TlenOptInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
+int TlenOptionsInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
 {
 	int i;
 	OPTIONSDIALOGPAGE odp = { 0 };
 	odp.cbSize = sizeof(odp);
 	odp.position = 0;
 	odp.hInstance = hInst;
-	odp.pszGroup = TranslateT("Network");
-	odp.pszTitle = proto->iface.m_szProtoName;
+	odp.ptszGroup = TranslateT("Network");
+	odp.ptszTitle = proto->iface.m_tszUserName;
 	odp.flags = ODPF_BOLDGROUPS | ODPF_TCHAR;
     odp.dwInitParam = (LPARAM)proto;
 	for (i = 0; i < SIZEOF(tabPages); i++) {
@@ -102,12 +100,13 @@ int TlenOptInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
 	if (ServiceExists(MS_POPUP_ADDPOPUP)) {
 		ZeroMemory(&odp,sizeof(odp));
 		odp.cbSize = sizeof(odp);
-    	odp.pszTitle = proto->iface.m_szProtoName;
 		odp.position = 100000000;
 		odp.hInstance = hInst;
-		odp.pszGroup = TranslateT("PopUps");
-		odp.pszTemplate = MAKEINTRESOURCE(IDD_OPTIONS_POPUPS);
-		odp.flags=ODPF_BOLDGROUPS;
+    	odp.flags = ODPF_BOLDGROUPS | ODPF_TCHAR;
+		odp.ptszGroup = TranslateT("PopUps");
+    	odp.ptszTitle = proto->iface.m_tszUserName;
+        odp.dwInitParam = (LPARAM)proto;
+		odp.pszTemplate = MAKEINTRESOURCEA(IDD_OPTIONS_POPUPS);
 		odp.pfnDlgProc = TlenPopupsDlgProc;
 		CallService(MS_OPT_ADDPAGE,wParam,(LPARAM)&odp);
 	}
@@ -141,39 +140,38 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			proto = (TlenProtocol *)lParam;
             SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
 			TranslateDialogDefault(hwndDlg);
-			SetDlgItemText(hwndDlg, IDC_TLEN, proto->iface.m_szProtoName);
-			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, dbv.pszVal);
+			if (!DBGetContactSettingTString(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, dbv.ptszVal);
 				DBFreeVariant(&dbv);
 			}
 			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "Password", &dbv)) {
 				CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
-				SetDlgItemText(hwndDlg, IDC_EDIT_PASSWORD, dbv.pszVal);
+				SetDlgItemTextA(hwndDlg, IDC_EDIT_PASSWORD, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			}
 			CheckDlgButton(hwndDlg, IDC_SAVEPASSWORD, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", TRUE));
 
-			CheckDlgButton(hwndDlg, IDC_RECONNECT, tlenOptions.reconnect);
-			CheckDlgButton(hwndDlg, IDC_ROSTER_SYNC, tlenOptions.rosterSync);
-			CheckDlgButton(hwndDlg, IDC_SHOW_OFFLINE, tlenOptions.offlineAsInvisible);
-			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, tlenOptions.leaveOfflineMessage);
-			CheckDlgButton(hwndDlg, IDC_IGNORE_ADVERTISEMENTS, tlenOptions.ignoreAdvertisements);
-			CheckDlgButton(hwndDlg, IDC_AVATARS, tlenOptions.enableAvatars);
-			CheckDlgButton(hwndDlg, IDC_VERSIONINFO, tlenOptions.enableVersion);
-			CheckDlgButton(hwndDlg, IDC_NUDGE_SUPPORT, tlenOptions.useNudge);
-			CheckDlgButton(hwndDlg, IDC_LOG_ALERTS, tlenOptions.logAlerts);
+			CheckDlgButton(hwndDlg, IDC_RECONNECT, proto->tlenOptions.reconnect);
+			CheckDlgButton(hwndDlg, IDC_ROSTER_SYNC, proto->tlenOptions.rosterSync);
+			CheckDlgButton(hwndDlg, IDC_SHOW_OFFLINE, proto->tlenOptions.offlineAsInvisible);
+			CheckDlgButton(hwndDlg, IDC_OFFLINE_MESSAGE, proto->tlenOptions.leaveOfflineMessage);
+			CheckDlgButton(hwndDlg, IDC_IGNORE_ADVERTISEMENTS, proto->tlenOptions.ignoreAdvertisements);
+			CheckDlgButton(hwndDlg, IDC_AVATARS, proto->tlenOptions.enableAvatars);
+			CheckDlgButton(hwndDlg, IDC_VERSIONINFO, proto->tlenOptions.enableVersion);
+			CheckDlgButton(hwndDlg, IDC_NUDGE_SUPPORT, proto->tlenOptions.useNudge);
+			CheckDlgButton(hwndDlg, IDC_LOG_ALERTS, proto->tlenOptions.logAlerts);
 
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept all alerts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore alerts from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore all alerts"));
-			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_SETCURSEL, tlenOptions.alertPolicy, 0);
+			SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_SETCURSEL, proto->tlenOptions.alertPolicy, 0);
 
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Always ask me"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept invitations from authorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept all invitations"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore invitations from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore all invitation"));
-			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, tlenOptions.groupChatPolicy, 0);
+			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, proto->tlenOptions.groupChatPolicy, 0);
 
 			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)TranslateT("<Last message>"));
 	        //SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)TranslateT("<Ask me>"));
@@ -183,7 +181,7 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 	        SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)TranslateT("DND"));
 	        SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)TranslateT("Free for chat"));
 	        SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)TranslateT("Invisible"));
-			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_SETCURSEL, tlenOptions.offlineMessageOption, 0);
+			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_SETCURSEL, proto->tlenOptions.offlineMessageOption, 0);
 
 			oldProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC);
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_USERDATA, (LONG) oldProc);
@@ -235,14 +233,14 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				BOOL reconnectRequired = FALSE;
 				DBVARIANT dbv;
 
-				GetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, text, sizeof(text));
+				GetDlgItemTextA(hwndDlg, IDC_EDIT_USERNAME, text, sizeof(text));
 				if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv) || strcmp(text, dbv.pszVal))
 					reconnectRequired = TRUE;
 				if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
 				DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "LoginName", strlwr(text));
 
 				if (IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD)) {
-					GetDlgItemText(hwndDlg, IDC_EDIT_PASSWORD, text, sizeof(text));
+					GetDlgItemTextA(hwndDlg, IDC_EDIT_PASSWORD, text, sizeof(text));
 					CallService(MS_DB_CRYPT_ENCODESTRING, sizeof(text), (LPARAM) text);
 					if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "Password", &dbv) || strcmp(text, dbv.pszVal))
 						reconnectRequired = TRUE;
@@ -265,7 +263,7 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VERSIONINFO));
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_NUDGE_SUPPORT));
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_LOG_ALERTS));
-				if (reconnectRequired && jabberConnected)
+				if (reconnectRequired && proto->jabberConnected)
 					MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
 				ApplyChanges(proto, 1);
 				return TRUE;
@@ -289,7 +287,7 @@ static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept all invitations"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore invitations from unauthorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore all invitation"));
-			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, tlenOptions.voiceChatPolicy, 0);
+			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_SETCURSEL, proto->tlenOptions.voiceChatPolicy, 0);
 			TlenVoiceBuildInDeviceList(proto, GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_IN));
 			TlenVoiceBuildOutDeviceList(proto, GetDlgItem(hwndDlg, IDC_VOICE_DEVICE_OUT));
 			return TRUE;
@@ -334,21 +332,21 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			proto = (TlenProtocol *)lParam;
             SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
 			TranslateDialogDefault(hwndDlg);
-			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, dbv.pszVal);
+			if (!DBGetContactSettingTString(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, dbv.ptszVal);
 				DBFreeVariant(&dbv);
 			} else {
-				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, "tlen.pl");
+				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, _T("tlen.pl"));
 			}
 
 			EnableWindow(GetDlgItem(hwndDlg, IDC_HOST), TRUE);
 			EnableWindow(GetDlgItem(hwndDlg, IDC_HOSTPORT), TRUE);
 
-			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "ManualHost", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_HOST, dbv.pszVal);
+			if (!DBGetContactSettingTString(NULL, proto->iface.m_szModuleName, "ManualHost", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_HOST, dbv.ptszVal);
 				DBFreeVariant(&dbv);
 			} else
-				SetDlgItemText(hwndDlg, IDC_HOST, "s1.tlen.pl");
+				SetDlgItemText(hwndDlg, IDC_HOST, _T("s1.tlen.pl"));
 			SetDlgItemInt(hwndDlg, IDC_HOSTPORT, DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "ManualPort", TLEN_DEFAULT_PORT), FALSE);
 
 			CheckDlgButton(hwndDlg, IDC_KEEPALIVE, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "KeepAlive", TRUE));
@@ -383,18 +381,18 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
             SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)TranslateT("SOCKS4"));
             SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_ADDSTRING, 0, (LPARAM)TranslateT("SOCKS5"));
 			SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_SETCURSEL, DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyType", 0), 0);
-			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "FileProxyHost", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, dbv.pszVal);
+			if (!DBGetContactSettingTString(NULL, proto->iface.m_szModuleName, "FileProxyHost", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, dbv.ptszVal);
 				DBFreeVariant(&dbv);
 			}
 			SetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyPort", 0), FALSE);
-			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "FileProxyUsername", &dbv)) {
-				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_USER, dbv.pszVal);
+			if (!DBGetContactSettingTString(NULL, proto->iface.m_szModuleName, "FileProxyUsername", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_USER, dbv.ptszVal);
 				DBFreeVariant(&dbv);
 			}
 			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "FileProxyPassword", &dbv)) {
 				CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
-				SetDlgItemText(hwndDlg, IDC_FILE_PROXY_PASSWORD, dbv.pszVal);
+				SetDlgItemTextA(hwndDlg, IDC_FILE_PROXY_PASSWORD, dbv.pszVal);
 				DBFreeVariant(&dbv);
 			}
 			return TRUE;
@@ -450,13 +448,13 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					BOOL useEncryption;
 					BOOL reconnectRequired = FALSE;
 					DBVARIANT dbv;
-					GetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, text, sizeof(text));
+					GetDlgItemTextA(hwndDlg, IDC_EDIT_LOGIN_SERVER, text, sizeof(text));
 					if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv) || strcmp(text, dbv.pszVal))
 						reconnectRequired = TRUE;
 					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
 					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "LoginServer", strlwr(text));
 
-					GetDlgItemText(hwndDlg, IDC_HOST, text, sizeof(text));
+					GetDlgItemTextA(hwndDlg, IDC_HOST, text, sizeof(text));
 					if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "ManualHost", &dbv) || strcmp(text, dbv.pszVal))
 						reconnectRequired = TRUE;
 					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
@@ -467,8 +465,8 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 						reconnectRequired = TRUE;
 					DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "ManualPort", port);
 
-					tlenOptions.sendKeepAlive = IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE);
-					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "KeepAlive", (BYTE) tlenOptions.sendKeepAlive);
+					proto->tlenOptions.sendKeepAlive = IsDlgButtonChecked(hwndDlg, IDC_KEEPALIVE);
+					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "KeepAlive", (BYTE) proto->tlenOptions.sendKeepAlive);
 
 					useEncryption = IsDlgButtonChecked(hwndDlg, IDC_USE_SSL);
 					if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE) != useEncryption)
@@ -479,16 +477,16 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					// File transfer options
 					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "UseFileProxy", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_USE_PROXY));
 					DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyType", (WORD) SendDlgItemMessage(hwndDlg, IDC_FILE_PROXY_TYPE, CB_GETCURSEL, 0, 0));
-					GetDlgItemText(hwndDlg, IDC_FILE_PROXY_HOST, text, sizeof(text));
+					GetDlgItemTextA(hwndDlg, IDC_FILE_PROXY_HOST, text, sizeof(text));
 					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "FileProxyHost", text);
 					DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "FileProxyPort", (WORD) GetDlgItemInt(hwndDlg, IDC_FILE_PROXY_PORT, NULL, FALSE));
 					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "FileProxyAuth", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_FILE_PROXY_USE_AUTH));
-					GetDlgItemText(hwndDlg, IDC_FILE_PROXY_USER, text, sizeof(text));
+					GetDlgItemTextA(hwndDlg, IDC_FILE_PROXY_USER, text, sizeof(text));
 					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "FileProxyUsername", text);
-					GetDlgItemText(hwndDlg, IDC_FILE_PROXY_PASSWORD, text, sizeof(text));
+					GetDlgItemTextA(hwndDlg, IDC_FILE_PROXY_PASSWORD, text, sizeof(text));
 					CallService(MS_DB_CRYPT_ENCODESTRING, sizeof(text), (LPARAM) text);
 					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "FileProxyPassword", text);
-					if (reconnectRequired && jabberConnected)
+					if (reconnectRequired && proto->jabberConnected)
 						MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
 					ApplyChanges(proto, 4);
 					return TRUE;
@@ -517,8 +515,8 @@ static void MailPopupPreview(DWORD colorBack, DWORD colorText, char *title, char
 	ZeroMemory(&ppd, sizeof(ppd));
 	ppd.lchContact = NULL;
 	ppd.lchIcon = CopyIcon(tlenIcons[TLEN_IDI_MAIL]);
-	lstrcpy(ppd.lpzContactName, lpzContactName);
-	lstrcpy(ppd.lpzText, lpzText);
+	strcpy(ppd.lpzContactName, lpzContactName);
+	strcpy(ppd.lpzText, lpzText);
 	ppd.colorBack = colorBack;
 	ppd.colorText = colorText;
 	ppd.PluginWindowProc = NULL;
@@ -579,7 +577,7 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					} else {
 						delay=GetDlgItemInt(hwndDlg, IDC_DELAY, NULL, FALSE);
 					}
-					_snprintf(title, sizeof(title), TranslateT("%s mail"), proto->iface.m_szProtoName);
+					snprintf(title, sizeof(title), Translate("%s mail"), proto->iface.m_szProtoName);
 					MailPopupPreview((DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0),
 									 (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0),
 									 title,

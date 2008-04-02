@@ -29,7 +29,13 @@ BOOL JabberWsInit(TlenProtocol *proto)
 	NETLIBUSERSETTINGS nlus = {0};
 	char name[128];
 
-	sprintf(name, "%s %s", proto->iface.m_szModuleName, TranslateT("connection"));
+#ifdef UNICODE
+	char *szTmp = mir_u2a(proto->iface.m_tszUserName);
+	sprintf( name, "%s %s", szTmp, Translate( "connection" ));
+	mir_free(szTmp);
+#else
+	sprintf( name, "%s %s", proto->iface.m_tszUserName, Translate( "connection" ));
+#endif
 
 	nlu.cbSize = sizeof(nlu);
 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_HTTPCONNS;	// | NUF_HTTPGATEWAY;

@@ -34,7 +34,7 @@ static void InitComboBox(HWND hwndCombo, JABBER_FIELD_MAP *fieldMap)
 	for(i=0;;i++) {
 		if (fieldMap[i].name == NULL)
 			break;
-		n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM) TranslateT(fieldMap[i].name));
+		n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM) TranslateTS(fieldMap[i].name));
 		SendMessage(hwndCombo, CB_SETITEMDATA, n, fieldMap[i].id);
 	}
 }
@@ -61,7 +61,7 @@ static void FetchField(HWND hwndDlg, UINT idCtrl, char *fieldName, char **str, i
 
 	if (hwndDlg==NULL || fieldName==NULL || str==NULL || strSize==NULL)
 		return;
-	GetDlgItemText(hwndDlg, idCtrl, text, sizeof(text));
+	GetDlgItemTextA(hwndDlg, idCtrl, text, sizeof(text));
 	if (text[0]) {
 		if ((localFieldName=JabberTextEncode(fieldName)) != NULL) {
 			if ((localText=JabberTextEncode(text)) != NULL) {

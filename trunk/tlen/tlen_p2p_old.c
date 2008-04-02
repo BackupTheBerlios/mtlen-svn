@@ -27,8 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "tlen_p2p_old.h"
 
-static int listenCount = 0;
-
 void TlenP2PFreeFileTransfer(TLEN_FILE_TRANSFER *ft)
 {
 	int i;
@@ -323,7 +321,7 @@ static JABBER_SOCKET TlenP2PBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	*(PWORD)(buf+2) = htons(0); // port
 	*(PDWORD)(buf+4) = INADDR_ANY;
 	if (sb->useAuth) {
-		lstrcpy(buf+8, sb->szUser);
+		strcpy(buf+8, sb->szUser);
 		len = strlen(sb->szUser);
 	} else {
 		buf[8] = 0;
@@ -392,8 +390,8 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 		int nUserLen, nPassLen;
 		PBYTE pAuthBuf;
 
-		nUserLen = lstrlen(sb->szUser);
-		nPassLen = lstrlen(sb->szPassword);
+		nUserLen = strlen(sb->szUser);
+		nPassLen = strlen(sb->szPassword);
 		pAuthBuf = (PBYTE)mir_alloc(3+nUserLen+nPassLen);
 		pAuthBuf[0] = 1;		//auth version
 		pAuthBuf[1] = nUserLen;
@@ -524,16 +522,16 @@ JABBER_SOCKET TlenP2PListen(TLEN_FILE_TRANSFER *ft)
 		ft->wLocalPort = nlb.wExPort;
 	}
 	if (s != NULL) {
-		listenCount++;
+//		listenCount++;
 	}
 	return s;
 }
 
 void TlenP2PStopListening(JABBER_SOCKET s) {
 	if (s != NULL) {
-		listenCount--;
-		if (listenCount <= 0) {
-			Netlib_CloseHandle(s);
-		}
+//		listenCount--;
+//		if (listenCount <= 0) {
+//			Netlib_CloseHandle(s);
+//		}
 	}
 }

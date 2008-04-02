@@ -68,7 +68,6 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft);
 static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft);
 static void TlenVoiceReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
 static HWND voiceDlgHWND = NULL;
-static HWND voiceAcceptDlgHWND = NULL;
 static TLEN_VOICE_CONTROL *playbackControl = NULL;
 static TLEN_VOICE_CONTROL *recordingControl = NULL;
 static int availPlayback = 0;
@@ -358,7 +357,7 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 	nloc.szHost = ft->hostName;
 	nloc.wPort = ft->wPort;
 	nloc.flags = 0;
-	SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Connecting...");
+	SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Connecting..."));
 //	ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
 	if (s != NULL) {
@@ -388,7 +387,7 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 		if (s != NULL) {
 			HANDLE hEvent;
 			char *nick;
-			SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Waiting for connection...");
+			SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Waiting for connection..."));
 			ft->s = s;
 			hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 			ft->hFileEvent = hEvent;
@@ -409,14 +408,14 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 	}
 	JabberListRemove(ft->proto, LIST_VOICE, ft->iqId);
 	if (ft->state==FT_DONE) {
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Finished...");
+		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Finished..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 	} else {
 		char *nick;
 		nick = JabberNickFromJID(ft->jid);
 		JabberSend(ft->proto, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
 		mir_free(nick);
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Error...");
+		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Error..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	}
 	JabberLog(ft->proto, "Thread ended: type=file_receive server='%s'", ft->hostName);
@@ -447,11 +446,11 @@ static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemo
 		playbackControl = NULL;
 		recordingControl = NULL;
 		if (ft->state==FT_DONE) {
-			SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Finished...");
+			SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Finished..."));
 //			ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 		} else {
 //			ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-			SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Error...");
+			SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Error..."));
 		}
 		JabberLog(ft->proto, "Closing connection for this file transfer... (ft->s is now hBind)");
 		ft->s = slisten;
@@ -551,29 +550,13 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 						availOverrun -= 10;
 						statusTxt = "!! Skipping frame !!";
 					}
-				/*
-					if (availPlayback < availLimit) {
-						availPlayback++;
-						if (availPlayback == availLimitMax) {
-							availLimit = availLimitMin;
-						} else {
-							availLimit = availLimitMax;
-						}
-						waveOutPrepareHeader(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
-						waveOutWrite(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
-//						playbackAlive--;
-						playbackControl->waveHeadersPos = (playbackControl->waveHeadersPos +1) % playbackControl->waveHeadersNum;
-					} else {
-						statusTxt = "!! Buffer is full !!";
-					}
-					*/
 				}
 			}
 		}
 		{
 			char ttt[2048];
 			sprintf(ttt, "%s %d %d ", statusTxt, availPlayback, availOverrun);
-			SetDlgItemText(voiceDlgHWND, IDC_STATUS, ttt);
+			SetDlgItemTextA(voiceDlgHWND, IDC_STATUS, ttt);
 		}
 		TlenP2PPacketFree(packet);
 	}
@@ -597,7 +580,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 	ft->pfnNewConnectionV2 = TlenVoiceReceivingConnection;
 	s = TlenP2PListen(ft);
 	if (s != NULL) {
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Waiting for connection...");
+		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Waiting for connection..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 		ft->s = s;
 		//JabberLog("ft->s = %d", s);
@@ -631,7 +614,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 			nloc.flags = 0;
 			s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
 			if (s != NULL) {
-				SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Connecting...");
+				SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Connecting..."));
 				//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 				ft->s = s;
 				TlenP2PEstablishOutgoingConnection(ft, FALSE);
@@ -659,11 +642,11 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 	switch (ft->state) {
 	case FT_DONE:
 		JabberLog(ft->proto, "Finish successfully");
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Finished...");
+		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Finished..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 		break;
 	case FT_DENIED:
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Denied...");
+		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Denied..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, ft, 0);
 		break;
 	default: // FT_ERROR:
@@ -671,7 +654,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 		JabberSend(ft->proto, "<v t='%s' i='%s' e='8'/>", nick, ft->iqId);
 		mir_free(nick);
 		JabberLog(ft->proto, "Finish with errors");
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...Error...");
+		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Error..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 		break;
 	}
@@ -760,10 +743,10 @@ int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 	JABBER_LIST_ITEM *item;
 	TLEN_FILE_TRANSFER *ft;
     TlenProtocol *proto =(TlenProtocol *)ptr;
-	if (!jabberOnline) {
+	if (!proto->jabberOnline) {
 		return 1;
 	}
-	if ((hContact=(HANDLE) wParam)!=NULL && jabberOnline) {
+	if ((hContact=(HANDLE) wParam)!=NULL) {
 		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 			char serialId[32];
 			sprintf(serialId, "%d", JabberSerialNext(proto));
@@ -807,7 +790,7 @@ static HBITMAP TlenVoiceMakeBitmap(int w, int h, int bpp, void *ptr)
 	bmih.bmiHeader.biYPelsPerMeter = 0;
 	bmih.bmiHeader.biClrUsed = 0;
 	bmih.bmiHeader.biClrImportant = 0;
-	hdc = CreateDC("DISPLAY", NULL, NULL, NULL);
+	hdc = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
 	hbm = CreateDIBitmap(hdc, (PBITMAPINFOHEADER) &bmih, CBM_INIT, ptr, &bmih, DIB_RGB_COLORS);
 	ReleaseDC(NULL,hdc);
 	return hbm;
@@ -874,7 +857,7 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 		CheckDlgButton(hwndDlg, IDC_MICROPHONE, TRUE);
 		CheckDlgButton(hwndDlg, IDC_SPEAKER, TRUE);
 		TlenVoiceInitVUMeters();
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, "...???...");
+		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...???..."));
 		counter = 0;
 		SetTimer(hwndDlg, 1, 100, NULL);
 		return FALSE;
@@ -920,7 +903,7 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 				fv = 0;
 			}
 			sprintf(str, "%.1f kB/s", fv / 1024);
-			SetDlgItemText(hwndDlg, IDC_BYTESOUT, str);
+			SetDlgItemTextA(hwndDlg, IDC_BYTESOUT, str);
 			if (playbackControl != NULL) {
 				fv = (float)playbackControl->bytesSum;
 				playbackControl->bytesSum = 0;
@@ -928,7 +911,7 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 				fv = 0;
 			}
 			sprintf(str, "%.1f kB/s", fv / 1024);
-			SetDlgItemText(hwndDlg, IDC_BYTESIN, str);
+			SetDlgItemTextA(hwndDlg, IDC_BYTESIN, str);
 		}
 		break;
 	case WM_COMMAND:
@@ -1018,10 +1001,9 @@ static BOOL CALLBACK TlenVoiceAcceptDlgProc(HWND hwndDlg, UINT msg, WPARAM wPara
 	switch (msg) {
 	case WM_INITDIALOG:
 		TranslateDialogDefault(hwndDlg);
-		voiceAcceptDlgHWND = hwndDlg;
 		data = (ACCEPTDIALOGDATA *) lParam;
 		str = getDisplayName(data->proto, data->item->nick);
-		SetDlgItemText(hwndDlg, IDC_FROM, str);
+		SetDlgItemTextA(hwndDlg, IDC_FROM, str);
 		mir_free(str);
 		return FALSE;
 	case WM_COMMAND:
@@ -1047,13 +1029,13 @@ static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
     
 	ACCEPTDIALOGDATA *data = (ACCEPTDIALOGDATA *)ptr;
 	int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ACCEPT_VOICE), NULL, TlenVoiceAcceptDlgProc, (LPARAM) data);
-	if (result && jabberOnline) {
+	if (result && data->proto->jabberOnline) {
 		data->item->ft = TlenFileCreateFT(data->proto, data->item->nick);
 		data->item->ft->iqId = mir_strdup(data->item->jid);
 		TlenVoiceStart(NULL, 2);
 		JabberSend(data->proto, "<v t='%s' i='%s' e='5' v='1'/>", data->item->nick, data->item->jid);
 	} else {
-		if (jabberOnline) {
+		if (data->proto->jabberOnline) {
 			JabberSend(data->proto, "<v t='%s' i='%s' e='4' />", data->item->nick, data->item->jid);
 		}
 		JabberListRemove(data->proto, LIST_VOICE, data->item->jid);
@@ -1110,7 +1092,7 @@ int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from)
 				ignore = FALSE;
 			}
 			if (ignore) {
-				if (jabberOnline) {
+				if (proto->jabberOnline) {
 					JabberSend(proto, "<v t='%s' i='%s' e='4' />", from, id);
 				}
 				JabberListRemove(proto, LIST_VOICE, id);
@@ -1121,7 +1103,7 @@ int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from)
                     data->proto = proto;
                     data->item = item;
 					JabberForkThread((void (__cdecl *)(void*))TlenVoiceAcceptDlgThread, 0, data);
-				} else if (jabberOnline) {
+				} else if (proto->jabberOnline) {
 					item->ft = TlenFileCreateFT(proto, from);
 					item->ft->iqId = mir_strdup(id);
 					TlenVoiceStart(NULL, 2);

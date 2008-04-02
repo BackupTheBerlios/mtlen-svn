@@ -29,9 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern CRITICAL_SECTION mutex;
 extern UINT jabberCodePage;
 
-static unsigned serviceNum = 0;
-static HANDLE* hServices = NULL;
-
 HANDLE HookEventObj_Ex(const char *name, TlenProtocol *proto, MIRANDAHOOKOBJ hook) {
 	proto->hookNum ++;
 	proto->hHooks = (HANDLE *) mir_realloc(proto->hHooks, sizeof(HANDLE) * (proto->hookNum));
@@ -40,10 +37,10 @@ HANDLE HookEventObj_Ex(const char *name, TlenProtocol *proto, MIRANDAHOOKOBJ hoo
 }
 
 HANDLE CreateServiceFunction_Ex(const char *name, TlenProtocol *proto, MIRANDASERVICEOBJ service) {
-	serviceNum++;
-	hServices = (HANDLE *) mir_realloc(hServices, sizeof(HANDLE) * (serviceNum));
-	hServices[serviceNum - 1] = CreateServiceFunctionObj(name, service, proto);
-	return hServices[serviceNum - 1] ;
+	proto->serviceNum++;
+	proto->hServices = (HANDLE *) mir_realloc(proto->hServices, sizeof(HANDLE) * (proto->serviceNum));
+	proto->hServices[proto->serviceNum - 1] = CreateServiceFunctionObj(name, service, proto);
+	return proto->hServices[proto->serviceNum - 1] ;
 }
 
 void UnhookEvents_Ex(TlenProtocol *proto) {
@@ -60,14 +57,14 @@ void UnhookEvents_Ex(TlenProtocol *proto) {
 
 void DestroyServices_Ex(TlenProtocol *proto) {
 	unsigned int i;
-	for (i=0; i<serviceNum; ++i) {
-		if (hServices[i] != NULL) {
-			DestroyServiceFunction(hServices[i]);
+	for (i=0; i<proto->serviceNum; ++i) {
+		if (proto->hServices[i] != NULL) {
+			DestroyServiceFunction(proto->hServices[i]);
 		}
 	}
-	mir_free(hServices);
-	serviceNum = 0;
-	hServices = NULL;
+	mir_free(proto->hServices);
+	proto->serviceNum = 0;
+	proto->hServices = NULL;
 }
 
 void JabberSerialInit(TlenProtocol *proto)
@@ -113,7 +110,7 @@ void JabberLog(TlenProtocol *proto, const char *fmt, ...)
 		if (*p=='\n' || *p=='\r')
 			extra++;
 	text = (char *) mir_alloc(strlen("TLEN")+2+strlen(str)+2+extra);
-	wsprintf(text, "[%s]", "TLEN");
+	sprintf(text, "[%s]", "TLEN");
 	for (p=str,q=text+strlen(text); *p!='\0'; p++,q++) {
 		if (*p == '\r') {
 			*q = '\\';
@@ -145,7 +142,7 @@ int JabberSend(TlenProtocol *proto, const char *fmt, ...)
 	char *str;
 	int size;
 	va_list vararg;
-	int result;
+	int result = 0;
 
 	EnterCriticalSection(&mutex);
 
@@ -160,11 +157,13 @@ int JabberSend(TlenProtocol *proto, const char *fmt, ...)
 
 	JabberLog(proto, "SEND:%s", str);
 	size = strlen(str);
-	if (proto->threadData->useAES) {
-		result = JabberWsSendAES(proto, str, size, &proto->threadData->aes_out_context, proto->threadData->aes_out_iv);
-	} else {
-		result = JabberWsSend(proto, str, size);
-	}
+    if (proto->threadData != NULL) {
+        if (proto->threadData->useAES) {
+            result = JabberWsSendAES(proto, str, size, &proto->threadData->aes_out_context, proto->threadData->aes_out_iv);
+        } else {
+            result = JabberWsSend(proto, str, size);
+        }
+    }
 	LeaveCriticalSection(&mutex);
 
 	mir_free(str);
@@ -702,11 +701,11 @@ void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to, char *extra
 	char priorityStr[32];
 	char toStr[512];
 
-	if (!jabberOnline) return;
+	if (!proto->jabberOnline) return;
 
 	// Send <presence/> update for status (we won't handle ID_STATUS_OFFLINE here)
 	// Note: jabberModeMsg is already encoded using JabberTextEncode()
-	EnterCriticalSection(&modeMsgMutex);
+	EnterCriticalSection(&proto->modeMsgMutex);
 
 	priorityStr[0] = '\0';
 
@@ -787,13 +786,13 @@ void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to, char *extra
 					for(i=0;ptr[i];i++) {
 						if(ptr[i]!='%') continue;
 						if(!_strnicmp(ptr+i,"%time%",6))
-							GetTimeFormat(LOCALE_USER_DEFAULT,TIME_NOSECONDS,NULL,NULL,substituteStr,sizeof(substituteStr));
+							GetTimeFormatA(LOCALE_USER_DEFAULT,TIME_NOSECONDS,NULL,NULL,substituteStr,sizeof(substituteStr));
 						else if(!_strnicmp(ptr+i,"%date%",6))
-							GetDateFormat(LOCALE_USER_DEFAULT,DATE_SHORTDATE,NULL,NULL,substituteStr,sizeof(substituteStr));
+							GetDateFormatA(LOCALE_USER_DEFAULT,DATE_SHORTDATE,NULL,NULL,substituteStr,sizeof(substituteStr));
 						else continue;
-						if(lstrlen(substituteStr)>6) ptr=(char*)mir_realloc(ptr,lstrlen(ptr)+1+lstrlen(substituteStr)-6);
-						MoveMemory(ptr+i+lstrlen(substituteStr),ptr+i+6,lstrlen(ptr)-i-5);
-						CopyMemory(ptr+i,substituteStr,lstrlen(substituteStr));
+						if(strlen(substituteStr)>6) ptr=(char*)mir_realloc(ptr,strlen(ptr)+1+strlen(substituteStr)-6);
+						MoveMemory(ptr+i+strlen(substituteStr),ptr+i+6,strlen(ptr)-i-5);
+						CopyMemory(ptr+i,substituteStr,strlen(substituteStr));
 					}
 				}
 			}
@@ -820,7 +819,7 @@ void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to, char *extra
 	if (ptr) {
 		mir_free(ptr);
 	}
-	LeaveCriticalSection(&modeMsgMutex);
+	LeaveCriticalSection(&proto->modeMsgMutex);
 }
 
 void JabberSendPresence(TlenProtocol *proto, int status)

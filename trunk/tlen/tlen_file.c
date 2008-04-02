@@ -602,11 +602,11 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 							strncpy(szFilename, p, sizeof(szFilename));
 							mir_free(p);
 						} else {
-							strcpy(szFilename, TranslateT("1 File"));
+							strcpy(szFilename, Translate("1 File"));
 						}
 					}
 					else if (numFiles > 1) {
-						_snprintf(szFilename, sizeof(szFilename), TranslateT("%d Files"), numFiles);
+						_snprintf(szFilename, sizeof(szFilename), Translate("%d Files"), numFiles);
 					}
 				}
 

@@ -70,13 +70,13 @@ static BOOL CALLBACK JabberPasswordDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam
 	switch (msg) {
 	case WM_INITDIALOG:
 		TranslateDialogDefault(hwndDlg);
-		wsprintf(text, "%s %s", TranslateT("Enter password for"), (char *) lParam);
-		SetDlgItemText(hwndDlg, IDC_JID, text);
+		sprintf(text, "%s %s", Translate("Enter password for"), (char *) lParam);
+		SetDlgItemTextA(hwndDlg, IDC_JID, text);
 		return TRUE;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
-			GetDlgItemText(hwndDlg, IDC_PASSWORD, onlinePassword, sizeof(onlinePassword));
+			GetDlgItemTextA(hwndDlg, IDC_PASSWORD, onlinePassword, sizeof(onlinePassword));
 			//EndDialog(hwndDlg, (int) onlinePassword);
 			//return TRUE;
 			// Fall through
@@ -215,7 +215,7 @@ void __cdecl JabberServerThread(ThreadData *info)
 		DBFreeVariant(&dbv);
 	}
 	info->port = DBGetContactSettingWord(NULL, info->proto->iface.m_szModuleName, "ManualPort", TLEN_DEFAULT_PORT);
-	info->useEncryption = tlenOptions.useEncryption;
+	info->useEncryption = info->proto->tlenOptions.useEncryption;
 
 	if (info->manualHost[0])
 		connectHost = info->manualHost;
@@ -245,7 +245,7 @@ void __cdecl JabberServerThread(ThreadData *info)
 				info->proto->iface.m_iStatus = ID_STATUS_OFFLINE;
 				ProtoBroadcastAck(info->proto->iface.m_szModuleName, NULL, ACKTYPE_LOGIN, ACKRESULT_FAILED, NULL, LOGINERR_NONETWORK);
 				ProtoBroadcastAck(info->proto->iface.m_szModuleName, NULL, ACKTYPE_STATUS, ACKRESULT_SUCCESS, (HANDLE) oldStatus, info->proto->iface.m_iStatus);
-				if (tlenOptions.reconnect == TRUE) {
+				if (info->proto->tlenOptions.reconnect == TRUE) {
 					reconnectTime = rand() % reconnectMaxTime;
 					JabberLog(info->proto, "Sleeping %d seconds before automatic reconnecting...", reconnectTime);
 					SleepEx(reconnectTime * 1000, TRUE);
@@ -290,11 +290,11 @@ void __cdecl JabberServerThread(ThreadData *info)
 		// User may change status to OFFLINE while we are connecting above
 		if (info->proto->iface.m_iDesiredStatus!=ID_STATUS_OFFLINE) {
 
-			jabberConnected = TRUE;
+			info->proto->jabberConnected = TRUE;
 			if (DBGetContactSettingByte(NULL, info->proto->iface.m_szModuleName, "KeepAlive", 1))
-				tlenOptions.sendKeepAlive = TRUE;
+				info->proto->tlenOptions.sendKeepAlive = TRUE;
 			else
-				tlenOptions.sendKeepAlive = FALSE;
+				info->proto->tlenOptions.sendKeepAlive = FALSE;
 			JabberForkThread(JabberKeepAliveThread, 0, info->proto);
 
 			JabberXmlInitState(&xmlState);
@@ -352,8 +352,8 @@ void __cdecl JabberServerThread(ThreadData *info)
 
 			JabberXmlDestroyState(&xmlState);
 
-			jabberOnline = FALSE;
-			jabberConnected = FALSE;
+			info->proto->jabberOnline = FALSE;
+			info->proto->jabberConnected = FALSE;
 
 			memset(&clmi, 0, sizeof(CLISTMENUITEM));
 			clmi.cbSize = sizeof(CLISTMENUITEM);
@@ -388,7 +388,7 @@ void __cdecl JabberServerThread(ThreadData *info)
 
 		Netlib_CloseHandle(info->s);
 
-		if (tlenOptions.reconnect==FALSE)
+		if (info->proto->tlenOptions.reconnect==FALSE)
 			break;
 
 		if (info->proto->threadData != info)	// Make sure this is still the main Jabber connection thread
@@ -425,7 +425,7 @@ static void TlenSendAuth(TlenProtocol *proto) {
 	char *str;
 	char text[128];
 	str = TlenPasswordHash(proto->threadData->password);
-	wsprintf(text, "%s%s", proto->threadData->streamId, str);
+	sprintf(text, "%s%s", proto->threadData->streamId, str);
 	mir_free(str);
 	str = JabberSha1(text);
 	if ((p=JabberTextEncode(proto->threadData->username)) != NULL) {
@@ -497,7 +497,7 @@ static void JabberProcessStreamClosing(XmlNode *node, ThreadData *info)
 {
 	Netlib_CloseHandle(info->proto);
 	if (node->name && !strcmp(node->name, "stream:error") && node->text)
-		MessageBox(NULL, TranslateT(node->text), TranslateT("Jabber Connection Error"), MB_OK|MB_ICONERROR|MB_SETFOREGROUND);
+		MessageBoxA(NULL, Translate(node->text), Translate("Jabber Connection Error"), MB_OK|MB_ICONERROR|MB_SETFOREGROUND);
 }
 
 static void JabberProcessProtocol(XmlNode *node, ThreadData *info)
@@ -547,7 +547,7 @@ static void TlenProcessIqGetVersion(TlenProtocol *proto, XmlNode* node)
 	JABBER_LIST_ITEM *item;
 
 	if (proto->iface.m_iStatus == ID_STATUS_INVISIBLE) return;
-	if (!tlenOptions.enableVersion) return;
+	if (!proto->tlenOptions.enableVersion) return;
 	if (( from=JabberXmlGetAttrValue( node, "from" )) == NULL ) return;
 	if (( item=JabberListGetItemPtr( proto, LIST_ROSTER, from )) ==NULL) return;
 	version = JabberTextEncode( TLEN_VERSION_STRING );
@@ -556,24 +556,24 @@ static void TlenProcessIqGetVersion(TlenProtocol *proto, XmlNode* node)
 		switch ( osvi.dwPlatformId ) {
 		case VER_PLATFORM_WIN32_NT:
 			if ( osvi.dwMajorVersion == 5 ) {
-				if ( osvi.dwMinorVersion == 2 ) os = JabberTextEncode( TranslateT( "Windows Server 2003" ));
-				else if ( osvi.dwMinorVersion == 1 ) os = JabberTextEncode( TranslateT( "Windows XP" ));
-				else if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( TranslateT( "Windows 2000" ));
+				if ( osvi.dwMinorVersion == 2 ) os = JabberTextEncode( Translate( "Windows Server 2003" ));
+				else if ( osvi.dwMinorVersion == 1 ) os = JabberTextEncode( Translate( "Windows XP" ));
+				else if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( Translate( "Windows 2000" ));
 			}
 			else if ( osvi.dwMajorVersion <= 4 ) {
-				os = JabberTextEncode( TranslateT( "Windows NT" ));
+				os = JabberTextEncode( Translate( "Windows NT" ));
 			}
 			break;
 		case VER_PLATFORM_WIN32_WINDOWS:
 			if ( osvi.dwMajorVersion == 4 ) {
-				if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( TranslateT( "Windows 95" ));
-				if ( osvi.dwMinorVersion == 10 ) os = JabberTextEncode( TranslateT( "Windows 98" ));
-				if ( osvi.dwMinorVersion == 90 ) os = JabberTextEncode( TranslateT( "Windows ME" ));
+				if ( osvi.dwMinorVersion == 0 ) os = JabberTextEncode( Translate( "Windows 95" ));
+				if ( osvi.dwMinorVersion == 10 ) os = JabberTextEncode( Translate( "Windows 98" ));
+				if ( osvi.dwMinorVersion == 90 ) os = JabberTextEncode( Translate( "Windows ME" ));
 			}
 			break;
 	}	}
 
-	if ( os == NULL ) os = JabberTextEncode( TranslateT( "Windows" ));
+	if ( os == NULL ) os = JabberTextEncode( Translate( "Windows" ));
 
 	strcpy(mversion, "Miranda IM ");
 	CallService( MS_SYSTEM_GETVERSIONTEXT, sizeof( mversion ) - 11, ( LPARAM )mversion + 11 );
@@ -824,7 +824,7 @@ static void JabberProcessPresence(XmlNode *node, ThreadData *info)
 			type = JabberXmlGetAttrValue(node, "type");
 			item = JabberListGetItemPtr(info->proto, LIST_ROSTER, from);
 			if (item != NULL) {
-				if (tlenOptions.enableAvatars) {
+				if (info->proto->tlenOptions.enableAvatars) {
 					TlenProcessPresenceAvatar(info->proto, node, item);
 				}
 			}
@@ -877,7 +877,7 @@ static void JabberProcessPresence(XmlNode *node, ThreadData *info)
 							item->infoRequested = TRUE;
 							JabberSend( info->proto, "<iq type='get' id='"JABBER_IQID"%d'><query xmlns='jabber:iq:info' to='%s'></query></iq>", iqId, from);
 						}
-						if (tlenOptions.enableVersion && !item->versionRequested) {
+						if (info->proto->tlenOptions.enableVersion && !item->versionRequested) {
 							item->versionRequested = TRUE;
 							if (info->proto->iface.m_iStatus != ID_STATUS_INVISIBLE) {
 								JabberSend( info->proto, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
@@ -992,7 +992,7 @@ static void JabberProcessIq(XmlNode *node, ThreadData *info)
 	/////////////////////////////////////////////////////////////////////////
 	// new p2p connections
 	} else if (xmlns != NULL && !strcmp(xmlns, "p2p")) { 
-		if (tlenOptions.useNewP2P) {
+		if (info->proto->tlenOptions.useNewP2P) {
 			TlenProcessP2P(node, info);
 		}
 	}
@@ -1201,7 +1201,7 @@ static void TlenProcessW(XmlNode *node, ThreadData *info)
 	if ((f=JabberXmlGetAttrValue(node, "f")) != NULL) {
 
 		char webContactName[128];
-		sprintf(webContactName, TranslateT("%s Web Messages"), info->proto->iface.m_szProtoName);
+		sprintf(webContactName, Translate("%s Web Messages"), info->proto->iface.m_szProtoName);
 		if ((hContact=JabberHContactFromJID(info->proto, webContactName)) == NULL) {
 			hContact = JabberDBCreateContact(info->proto, webContactName, webContactName, TRUE);
 		}
@@ -1211,11 +1211,11 @@ static void TlenProcessW(XmlNode *node, ThreadData *info)
 
 		str = NULL;
 		strSize = 0;
-		JabberStringAppend(&str, &strSize, "%s\r\n%s: ", TranslateT("Web message"), TranslateT("From"));
+		JabberStringAppend(&str, &strSize, "%s\r\n%s: ", Translate("Web message"), Translate("From"));
 
 		if (f != NULL)
 			JabberStringAppend(&str, &strSize, "%s", f);
-		JabberStringAppend(&str, &strSize, "\r\n%s: ", TranslateT("E-mail"));
+		JabberStringAppend(&str, &strSize, "\r\n%s: ", Translate("E-mail"));
 		if (e != NULL)
 			JabberStringAppend(&str, &strSize, "%s", e);
 		JabberStringAppend(&str, &strSize, "\r\n\r\n%s", body);
@@ -1271,20 +1271,20 @@ static void TlenProcessM(XmlNode *node, ThreadData *info)
 				}
 				else if(!strcmp(tp, "a")) {//alert was received
 					int bAlert = TRUE;
-					if (tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_ALL) {
+					if (info->proto->tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_ALL) {
 						bAlert = FALSE;
-					} else if (tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_NIR) {
+					} else if (info->proto->tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_NIR) {
 						if (item == NULL) bAlert = FALSE;
 						else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) bAlert = FALSE;
 					}
 					if (bAlert) {
-						if (tlenOptions.useNudge) {
+						if (info->proto->tlenOptions.useNudge) {
 							NotifyEventHooks(info->proto->hTlenNudge,(WPARAM) hContact,0);
 						} else {
-							if (tlenOptions.logAlerts) {
+							if (info->proto->tlenOptions.logAlerts) {
 								CCSDATA ccs;
 								PROTORECVEVENT recv;
-								char *localMessage = mir_strdup(TranslateT("An alert has been received."));
+								char *localMessage = mir_strdup(Translate("An alert has been received."));
 								recv.flags = 0;
 								recv.timestamp = (DWORD) time(NULL);
 								recv.szMessage = localMessage;
@@ -1367,7 +1367,7 @@ static void TlenProcessM(XmlNode *node, ThreadData *info)
 				if (n!=NULL && strstr(r, n)!=r) {
 					n = JabberTextDecode(n);
 				} else {
-					n = mir_strdup(TranslateT("Private conference"));
+					n = mir_strdup(Translate("Private conference"));
 					//n = JabberNickFromJID(r);
 				}
 				TlenMUCRecvInvitation(info->proto, r, n, f, "");
@@ -1395,8 +1395,8 @@ static void TlenMailPopup(TlenProtocol *proto, char *title, char *emailInfo)
 	ZeroMemory(&ppd, sizeof(ppd));
 	ppd.lchContact = NULL;
 	ppd.lchIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MAIL));
-	lstrcpy(ppd.lpzContactName, lpzContactName);
-	lstrcpy(ppd.lpzText, lpzText);
+	strcpy(ppd.lpzContactName, lpzContactName);
+	strcpy(ppd.lpzText, lpzText);
 	ppd.colorBack = DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupBack", 0);
 	ppd.colorText = DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupText", 0);
 	ppd.PluginWindowProc = NULL;
@@ -1436,15 +1436,15 @@ static void TlenProcessN(XmlNode *node, ThreadData *info)
 		str = NULL;
 		strSize = 0;
 
-		JabberStringAppend(&str, &strSize, TranslateT("%s mail"), info->proto->iface.m_szProtoName);
+		JabberStringAppend(&str, &strSize, Translate("%s mail"), info->proto->iface.m_szProtoName);
 		popupTitle = JabberTextDecode(str);
 		mir_free(str);
 
 		str = NULL;
 		strSize = 0;
 
-		JabberStringAppend(&str, &strSize, "%s: %s\n", TranslateT("From"), f);
-		JabberStringAppend(&str, &strSize, "%s: %s", TranslateT("Subject"), s);
+		JabberStringAppend(&str, &strSize, "%s: %s\n", Translate("From"), f);
+		JabberStringAppend(&str, &strSize, "%s: %s", Translate("Subject"), s);
 		popupText = JabberTextDecode(str);
 		TlenMailPopup(info->proto, popupTitle, popupText);
 		SkinPlaySound("TlenMailNotify");
@@ -1535,7 +1535,7 @@ static void TlenProcessP(XmlNode *node, ThreadData *info)
 			if (n!=NULL) {
 				n = JabberTextDecode(n);
 			} else {
-				n = mir_strdup(TranslateT("Private conference"));// JabberNickFromJID(f);
+				n = mir_strdup(Translate("Private conference"));// JabberNickFromJID(f);
 			}
 			sprintf(jid, "%s/%s", f, info->username);
 //			if (!DBGetContactSetting(NULL, iface.m_szModuleName, "LoginName", &dbv)) {
@@ -1673,7 +1673,7 @@ static void __cdecl JabberKeepAliveThread(void *ptr)
 	for (;;) {
 		if (CallService(MS_NETLIB_SELECT, 0, (LPARAM) &nls) != 0)
 			break;
-		if (tlenOptions.sendKeepAlive)
+		if (proto->tlenOptions.sendKeepAlive)
 			JabberSend(proto, " \t ");
 	}
 	JabberLog(proto, "Exiting KeepAliveThread");
