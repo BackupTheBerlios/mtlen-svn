@@ -160,50 +160,6 @@ typedef enum {
 } JABBER_SUBSCRIPTION;
 
 typedef struct {
-	JABBER_LIST list;
-	char *jid;
-	char *id2;
-
-	// LIST_ROSTER
-	// jid = jid of the contact
-	char *nick;
-	int status;	// Main status, currently useful for transport where no resource information is kept.
-				// On normal contact, this is the same status as shown on contact list.
-	JABBER_SUBSCRIPTION subscription;
-	char *statusMessage;	// Status message when the update is to JID with no resource specified (e.g. transport user)
-	char *software;
-	char *version;
-	char *system;
-	char *group;
-	char *protocolVersion;
-	int	 avatarFormat;
-	char *avatarHash;
-	BOOL newAvatarDownloading;
-	BOOL versionRequested;
-	BOOL infoRequested;
-	int idMsgAckPending;
-	char *messageEventIdStr;
-	BOOL wantComposingEvent;
-	BOOL isTyping;
-
-	// LIST_ROOM
-	// jid = room JID
-	// char *name; // room name
-	//char *type;	// room type
-
-	// LIST_CHATROOM
-	// jid = room JID
-	// char *nick;	// my nick in this chat room (SPECIAL: in UTF8)
-	// JABBER_RESOURCE_STATUS *resource;	// participant nicks in this room
-	char *roomName;
-
-	// LIST_FILE
-	// jid = string representation of port number
-	struct TLEN_FILE_TRANSFER_STRUCT *ft;
-	//WORD port;
-} JABBER_LIST_ITEM;
-
-typedef struct {
 	char *szOnline;
 	char *szAway;
 	char *szNa;
@@ -250,6 +206,8 @@ typedef struct {
     
 } TLEN_OPTIONS;
 
+struct JABBER_IQ_FUNC_STRUCT;
+struct JABBER_LIST_ITEM_STRUCT;
 
 typedef struct {
     PROTO_INTERFACE iface;
@@ -275,10 +233,15 @@ typedef struct {
     unsigned hookNum;
     
     int listsCount;
-    JABBER_LIST_ITEM *lists;
+    struct JABBER_LIST_ITEM_STRUCT *lists;
     CRITICAL_SECTION csLists;
 
-    CRITICAL_SECTION serialMutex;
+    int iqCount;
+    int iqAlloced;
+    struct JABBER_IQ_FUNC_STRUCT *iqList;
+    CRITICAL_SECTION csIqList;
+
+    CRITICAL_SECTION csSerial;
     unsigned int serial;
     BOOL jabberOnline;
     BOOL jabberConnected;
@@ -286,7 +249,15 @@ typedef struct {
     CRITICAL_SECTION modeMsgMutex;
     
     HANDLE hMenuRoot;
-   
+
+    char *searchJID;
+    int searchID;
+    int searchIndex;
+    char *searchQuery;
+    int searchQueryLen;
+
+    CRITICAL_SECTION csSend;
+    
     TLEN_OPTIONS tlenOptions;
 } TlenProtocol;
 
@@ -381,7 +352,6 @@ typedef struct {
  *******************************************************************/
 extern HINSTANCE hInst;
 extern HANDLE hMainThread;
-
 extern HICON tlenIcons[TLEN_ICON_TOTAL];
 
 /*******************************************************************
@@ -414,8 +384,6 @@ char *JabberNickFromJID(const char *jid);
 char *JabberLocalNickFromJID(const char *jid);
 char *TlenGroupEncode(const char *str);
 char *TlenGroupDecode(const char *str);
-char *JabberUtf8Decode(const char *str);
-char *JabberUtf8Encode(const char *str);
 char *JabberSha1(char *str);
 char *TlenSha1(char *str, int len);
 char *TlenPasswordHash(const char *str);

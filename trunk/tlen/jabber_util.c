@@ -26,9 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ctype.h>
 #include <win2k.h>
 
-extern CRITICAL_SECTION mutex;
-extern UINT jabberCodePage;
-
 HANDLE HookEventObj_Ex(const char *name, TlenProtocol *proto, MIRANDAHOOKOBJ hook) {
 	proto->hookNum ++;
 	proto->hHooks = (HANDLE *) mir_realloc(proto->hHooks, sizeof(HANDLE) * (proto->hookNum));
@@ -69,23 +66,23 @@ void DestroyServices_Ex(TlenProtocol *proto) {
 
 void JabberSerialInit(TlenProtocol *proto)
 {
-	InitializeCriticalSection(&proto->serialMutex);
+	InitializeCriticalSection(&proto->csSerial);
 	proto->serial = 0;
 }
 
 void JabberSerialUninit(TlenProtocol *proto)
 {
-	DeleteCriticalSection(&proto->serialMutex);
+	DeleteCriticalSection(&proto->csSerial);
 }
 
 unsigned int JabberSerialNext(TlenProtocol *proto)
 {
 	unsigned int ret;
 
-	EnterCriticalSection(&proto->serialMutex);
+	EnterCriticalSection(&proto->csSerial);
 	ret = proto->serial;
 	proto->serial++;
-	LeaveCriticalSection(&proto->serialMutex);
+	LeaveCriticalSection(&proto->csSerial);
 	return ret;
 }
 
@@ -144,7 +141,7 @@ int JabberSend(TlenProtocol *proto, const char *fmt, ...)
 	va_list vararg;
 	int result = 0;
 
-	EnterCriticalSection(&mutex);
+	EnterCriticalSection(&proto->csSend);
 
 	va_start(vararg,fmt);
 	size = 512;
@@ -164,7 +161,7 @@ int JabberSend(TlenProtocol *proto, const char *fmt, ...)
             result = JabberWsSend(proto, str, size);
         }
     }
-	LeaveCriticalSection(&mutex);
+	LeaveCriticalSection(&proto->csSend);
 
 	mir_free(str);
 	return result;
@@ -238,95 +235,6 @@ char *JabberLocalNickFromJID(const char *jid)
 	localNick = JabberTextDecode(p);
 	mir_free(p);
 	return localNick;
-}
-
-char *JabberUtf8Decode(const char *str)
-{
-	int i, len;
-	char *p;
-	WCHAR *wszTemp;
-	char *szOut;
-
-	if (str == NULL) return NULL;
-
-	len = strlen(str);
-
-	// Convert utf8 to unicode
-	if ((wszTemp=(WCHAR *) mir_alloc(sizeof(WCHAR) * (len + 1))) == NULL)
-		return NULL;
-	p = (char *) str;
-	i = 0;
-	while (*p) {
-		if ((*p & 0x80) == 0)
-			wszTemp[i++] = *(p++);
-		else if ((*p & 0xe0) == 0xe0) {
-			wszTemp[i] = (*(p++) & 0x1f) << 12;
-			wszTemp[i] |= (*(p++) & 0x3f) << 6;
-			wszTemp[i++] |= (*(p++) & 0x3f);
-		}
-		else {
-			wszTemp[i] = (*(p++) & 0x3f) << 6;
-			wszTemp[i++] |= (*(p++) & 0x3f);
-		}
-	}
-	wszTemp[i] = '\0';
-
-	// Convert unicode to local codepage
-	if ((len=WideCharToMultiByte(jabberCodePage, 0, wszTemp, -1, NULL, 0, NULL, NULL)) == 0)
-		return NULL;
-	if ((szOut=(char *) mir_alloc(len)) == NULL)
-		return NULL;
-	WideCharToMultiByte(jabberCodePage, 0, wszTemp, -1, szOut, len, NULL, NULL);
-	mir_free(wszTemp);
-
-	return szOut;
-}
-
-char *JabberUtf8Encode(const char *str)
-{
-	unsigned char *szOut;
-	int len, i;
-	WCHAR *wszTemp, *w;
-
-	if (str == NULL) return NULL;
-
-	len = strlen(str);
-
-	// Convert local codepage to unicode
-	if ((wszTemp=(WCHAR *) mir_alloc(sizeof(WCHAR) * (len + 1))) == NULL) return NULL;
-	MultiByteToWideChar(jabberCodePage, 0, str, -1, wszTemp, len + 1);
-
-	// Convert unicode to utf8
-	len = 0;
-	for (w=wszTemp; *w; w++) {
-		if (*w < 0x0080) len++;
-		else if (*w < 0x0800) len += 2;
-		else len += 3;
-	}
-
-	if ((szOut=(unsigned char *) mir_alloc(len + 1)) == NULL)
-		return NULL;
-
-	i = 0;
-	for (w=wszTemp; *w; w++) {
-		if (*w < 0x0080)
-			szOut[i++] = (unsigned char) *w;
-		else if (*w < 0x0800) {
-			szOut[i++] = 0xc0 | ((*w) >> 6);
-			szOut[i++] = 0x80 | ((*w) & 0x3f);
-		}
-		else {
-			szOut[i++] = 0xe0 | ((*w) >> 12);
-			szOut[i++] = 0x80 | (((*w) >> 6) & 0x3f);
-			szOut[i++] = 0x80 | ((*w) & 0x3f);
-		}
-	}
-	szOut[i] = '\0';
-
-	mir_free(wszTemp);
-
-	return (char *) szOut;
-
 }
 
 char *JabberSha1(char *str)

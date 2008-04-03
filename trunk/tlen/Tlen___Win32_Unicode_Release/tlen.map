@@ -1,0 +1,1387 @@
+ tlen
+
+ Timestamp is 47f531c3 (Thu Apr 03 21:36:35 2008)
+
+ Preferred load address is 32600000
+
+ Start         Length     Name                   Class
+ 0001:00000000 0001d100H .text                   CODE
+ 0002:00000000 0000025cH .idata$5                DATA
+ 0002:00000260 00000474H .rdata                  DATA
+ 0002:000006d4 00000078H .idata$2                DATA
+ 0002:0000074c 00000014H .idata$3                DATA
+ 0002:00000760 0000025cH .idata$4                DATA
+ 0002:000009bc 0000077eH .idata$6                DATA
+ 0002:00001140 00000091H .edata                  DATA
+ 0003:00000000 00000004H .CRT$XCA                DATA
+ 0003:00000004 00000004H .CRT$XCZ                DATA
+ 0003:00000008 00000004H .CRT$XIA                DATA
+ 0003:0000000c 00000004H .CRT$XIZ                DATA
+ 0003:00000010 00004800H .data                   DATA
+ 0003:00004810 000036b8H .bss                    DATA
+ 0004:00000000 000007f0H .rsrc$01                DATA
+ 0004:000007f0 00008020H .rsrc$02                DATA
+
+  Address         Publics by Value              Rva+Base     Lib:Object
+
+ 0001:00000000       _gsm_create                32601000 f   gsm_codec.obj
+ 0001:0000002b       _gsm_release               3260102b f   gsm_codec.obj
+ 0001:00000037       _gsm_encode                32601037 f   gsm_codec.obj
+ 0001:000005af       _gsm_decode                326015af f   gsm_codec.obj
+ 0001:00000ac9       _longTermAnalysis          32601ac9 f   gsm_long.obj
+ 0001:00000ce2       _longTermSynthesis         32601ce2 f   gsm_long.obj
+ 0001:00000d80       _lpcAnalysis               32601d80 f   gsm_lpc.obj
+ 0001:00001084       _gsm_preprocessing         32602084 f   gsm_preprocess.obj
+ 0001:00001139       _gsm_postprocessing        32602139 f   gsm_preprocess.obj
+ 0001:00001180       _encodeRPE                 32602180 f   gsm_rpe.obj
+ 0001:00001485       _decodeRPE                 32602485 f   gsm_rpe.obj
+ 0001:000014f3       _shortTermAnalysis         326024f3 f   gsm_short.obj
+ 0001:0000182c       _shortTermSynthesis        3260282c f   gsm_short.obj
+ 0001:000019d9       _aes_set_key               326029d9 f   aes.obj
+ 0001:000020fa       _aes_encrypt               326030fa f   aes.obj
+ 0001:00002fd9       _aes_decrypt               32603fd9 f   aes.obj
+ 0001:00003eb4       _aes_cbc_encrypt           32604eb4 f   aes.obj
+ 0001:00003f16       _aes_cbc_decrypt           32604f16 f   aes.obj
+ 0001:00003f7d       _mpi_init                  32604f7d f   bignum.obj
+ 0001:00003fa9       _mpi_free                  32604fa9 f   bignum.obj
+ 0001:00003ff7       _mpi_grow                  32604ff7 f   bignum.obj
+ 0001:00004053       _mpi_copy                  32605053 f   bignum.obj
+ 0001:000040c4       _mpi_lset                  326050c4 f   bignum.obj
+ 0001:00004110       _mpi_read_string           32605110 f   bignum.obj
+ 0001:000042f3       _mpi_write_string          326052f3 f   bignum.obj
+ 0001:0000448e       _mpi_read_binary           3260548e f   bignum.obj
+ 0001:00004529       _mpi_write_binary          32605529 f   bignum.obj
+ 0001:000045a3       _mpi_msb                   326055a3 f   bignum.obj
+ 0001:000045e5       _mpi_shift_l               326055e5 f   bignum.obj
+ 0001:000046cd       _mpi_shift_r               326056cd f   bignum.obj
+ 0001:0000476a       _mpi_cmp_abs               3260576a f   bignum.obj
+ 0001:000047e5       _mpi_cmp_mpi               326057e5 f   bignum.obj
+ 0001:00004888       _mpi_cmp_int               32605888 f   bignum.obj
+ 0001:000048cd       _mpi_add_abs               326058cd f   bignum.obj
+ 0001:000049a1       _mpi_sub_abs               326059a1 f   bignum.obj
+ 0001:00004a98       _mpi_add_mpi               32605a98 f   bignum.obj
+ 0001:00004af6       _mpi_sub_mpi               32605af6 f   bignum.obj
+ 0001:00004b54       _mpi_add_int               32605b54 f   bignum.obj
+ 0001:00004b9d       _mpi_mul_mpi               32605b9d f   bignum.obj
+ 0001:00004ef8       _mpi_mul_int               32605ef8 f   bignum.obj
+ 0001:00004f27       _mpi_div_mpi               32605f27 f   bignum.obj
+ 0001:000053fb       _mpi_div_int               326063fb f   bignum.obj
+ 0001:00005447       _mpi_mod_mpi               32606447 f   bignum.obj
+ 0001:000054a8       _mpi_mod_int               326064a8 f   bignum.obj
+ 0001:00005545       _mpi_exp_mod               32606545 f   bignum.obj
+ 0001:00005af5       _JabberIqInit              32606af5 f   jabber_iq.obj
+ 0001:00005b1d       _JabberIqUninit            32606b1d f   jabber_iq.obj
+ 0001:00005b5c       _JabberIqFetchFunc         32606b5c f   jabber_iq.obj
+ 0001:00005c99       _JabberIqAdd               32606c99 f   jabber_iq.obj
+ 0001:00005d72       _JabberIqResultAuth        32606d72 f   jabber_iqid.obj
+ 0001:00005f15       _JabberIqResultRoster      32606f15 f   jabber_iqid.obj
+ 0001:00006500       _TlenIqResultVcard         32607500 f   jabber_iqid.obj
+ 0001:00006c81       _JabberIqResultSearch      32607c81 f   jabber_iqid.obj
+ 0001:000070bd       _GetConfigItem             326080bd f   jabber_iqid.obj
+ 0001:0000711a       _TlenIqResultTcfg          3260811a f   jabber_iqid.obj
+ 0001:000072f8       _TlenIqResultVersion       326082f8 f   jabber_iqid.obj
+ 0001:00007449       _TlenIqResultInfo          32608449 f   jabber_iqid.obj
+ 0001:00007514       _JabberListInit            32608514 f   jabber_list.obj
+ 0001:00007533       _JabberListUninit          32608533 f   jabber_list.obj
+ 0001:0000754e       _JabberListWipe            3260854e f   jabber_list.obj
+ 0001:000075be       _JabberListWipeSpecial     326085be f   jabber_list.obj
+ 0001:0000771e       _JabberListExist           3260871e f   jabber_list.obj
+ 0001:0000780d       _JabberListAdd             3260880d f   jabber_list.obj
+ 0001:0000790c       _JabberListRemove          3260890c f   jabber_list.obj
+ 0001:000079a6       _JabberListRemoveByIndex   326089a6 f   jabber_list.obj
+ 0001:00007a36       _JabberListAddResource     32608a36 f   jabber_list.obj
+ 0001:00007ab7       _JabberListRemoveResource  32608ab7 f   jabber_list.obj
+ 0001:00007ae7       _JabberListFindNext        32608ae7 f   jabber_list.obj
+ 0001:00007b40       _JabberListGetItemPtr      32608b40 f   jabber_list.obj
+ 0001:00007b8d       _JabberListFindItemPtrById2 32608b8d f   jabber_list.obj
+ 0001:00007c1b       _JabberListGetItemPtrFromIndex 32608c1b f   jabber_list.obj
+ 0001:00007c60       _JabberDBAddAuthRequest    32608c60 f   jabber_misc.obj
+ 0001:00007ddb       _JabberJIDFromHContact     32608ddb f   jabber_misc.obj
+ 0001:00007e3b       _JabberHContactFromJID     32608e3b f   jabber_misc.obj
+ 0001:00007f2b       _JabberDBCreateContact     32608f2b f   jabber_misc.obj
+ 0001:00008013       _JabberContactListCreateGroup 32609013 f   jabber_misc.obj
+ 0001:0000819e       _JabberForkThread          3260919e f   jabber_misc.obj
+ 0001:00008239       _TlenLoadOptions           32609239 f   jabber_opt.obj
+ 0001:0000854d       _TlenOptionsInit           3260954d f   jabber_opt.obj
+ 0001:000085de       _TlenAccMgrUIDlgProc@16    326095de f   jabber_opt.obj
+ 0001:0000a89e       _TlenGetCaps               3260b89e f   jabber_svc.obj
+ 0001:0000a8f2       _TlenGetName               3260b8f2 f   jabber_svc.obj
+ 0001:0000a90d       _TlenGetIcon               3260b90d f   jabber_svc.obj
+ 0001:0000a92b       _TlenRunSearch             3260b92b f   jabber_svc.obj
+ 0001:0000a9b0       _TlenResetSearchQuery      3260b9b0 f   jabber_svc.obj
+ 0001:0000a9ef       _TlenBasicSearch           3260b9ef f   jabber_svc.obj
+ 0001:0000aa61       _TlenSearchByEmail         3260ba61 f   jabber_svc.obj
+ 0001:0000aac3       _TlenSearchByName          3260bac3 f   jabber_svc.obj
+ 0001:0000ab9e       _TlenCreateAdvSearchUI     3260bb9e f   jabber_svc.obj
+ 0001:0000abbb       _TlenSearchAdvanced        3260bbbb f   jabber_svc.obj
+ 0001:0000ac01       _TlenAddToList             3260bc01 f   jabber_svc.obj
+ 0001:0000ad77       _TlenAddToListByEvent      3260bd77 f   jabber_svc.obj
+ 0001:0000ae3f       _TlenAuthAllow             3260be3f f   jabber_svc.obj
+ 0001:0000afa5       _TlenAuthDeny              3260bfa5 f   jabber_svc.obj
+ 0001:0000b089       _TlenSetStatus             3260c089 f   jabber_svc.obj
+ 0001:0000b259       _TlenGetStatus             3260c259 f   jabber_svc.obj
+ 0001:0000b261       _TlenSetAwayMsg            3260c261 f   jabber_svc.obj
+ 0001:0000b361       _JabberGetInfo             3260c361 f   jabber_svc.obj
+ 0001:0000b44d       _TlenSetApparentMode       3260c44d f   jabber_svc.obj
+ 0001:0000b5e8       _TlenSendAlert             3260c5e8 f   jabber_svc.obj
+ 0001:0000b652       _TlenSendMessage           3260c652 f   jabber_svc.obj
+ 0001:0000b9f0       _TlenGetAwayMsg            3260c9f0 f   jabber_svc.obj
+ 0001:0000bb34       _TlenFileAllow             3260cb34 f   jabber_svc.obj
+ 0001:0000bbb7       _TlenFileDeny              3260cbb7 f   jabber_svc.obj
+ 0001:0000bc06       _TlenFileCancel            3260cc06 f   jabber_svc.obj
+ 0001:0000bc77       _TlenSendFile              3260cc77 f   jabber_svc.obj
+ 0001:0000be8f       _TlenRecvMessage           3260ce8f f   jabber_svc.obj
+ 0001:0000bec4       _TlenRecvFile              3260cec4 f   jabber_svc.obj
+ 0001:0000bef9       _JabberDbSettingChanged    3260cef9 f   jabber_svc.obj
+ 0001:0000c46a       _JabberContactDeleted      3260d46a f   jabber_svc.obj
+ 0001:0000c543       _TlenUserIsTyping          3260d543 f   jabber_svc.obj
+ 0001:0000c5d6       _TlenGetMyAvatar           3260d5d6 f   jabber_svc.obj
+ 0001:0000c600       _TlenSetMyAvatar           3260d600 f   jabber_svc.obj
+ 0001:0000c761       _TlenGetAvatarCaps         3260d761 f   jabber_svc.obj
+ 0001:0000c7b8       _TlenOnEvent               3260d7b8 f   jabber_svc.obj
+ 0001:0000c83e       _TlenAccMgrUI              3260d83e f   jabber_svc.obj
+ 0001:0000c85d       _TlenInitServicesVTbl      3260d85d f   jabber_svc.obj
+ 0001:0000cb9a       _JabberServerThread        3260db9a f   jabber_thread.obj
+ 0001:00010b46       _HookEventObj_Ex           32611b46 f   jabber_util.obj
+ 0001:00010ba3       _CreateServiceFunction_Ex  32611ba3 f   jabber_util.obj
+ 0001:00010c00       _UnhookEvents_Ex           32611c00 f   jabber_util.obj
+ 0001:00010c50       _JabberSerialInit          32611c50 f   jabber_util.obj
+ 0001:00010c6b       _JabberSerialUninit        32611c6b f   jabber_util.obj
+ 0001:00010c7c       _JabberSerialNext          32611c7c f   jabber_util.obj
+ 0001:00010ca8       _JabberLog                 32611ca8 f   jabber_util.obj
+ 0001:00010dba       _JabberSend                32611dba f   jabber_util.obj
+ 0001:00010e8b       _JabberResourceFromJID     32611e8b f   jabber_util.obj
+ 0001:00010f06       _JabberNickFromJID         32611f06 f   jabber_util.obj
+ 0001:00010f6a       _JabberLoginFromJID        32611f6a f   jabber_util.obj
+ 0001:00010fbf       _JabberLocalNickFromJID    32611fbf f   jabber_util.obj
+ 0001:00010fe3       _JabberSha1                32611fe3 f   jabber_util.obj
+ 0001:00011068       _TlenSha1                  32612068 f   jabber_util.obj
+ 0001:000110dd       _TlenPasswordHash          326120dd f   jabber_util.obj
+ 0001:00011160       _TlenUrlEncode             32612160 f   jabber_util.obj
+ 0001:0001121f       _TlenUrlDecode             3261221f f   jabber_util.obj
+ 0001:0001135a       _TlenGroupDecode           3261235a f   jabber_util.obj
+ 0001:00011384       _TlenGroupEncode           32612384 f   jabber_util.obj
+ 0001:000113c6       _JabberTextEncode          326123c6 f   jabber_util.obj
+ 0001:000113db       _JabberTextDecode          326123db f   jabber_util.obj
+ 0001:000113fe       _TlenTimeToUTC             326123fe f   jabber_util.obj
+ 0001:0001140f       _JabberIsoToUnixTime       3261240f f   jabber_util.obj
+ 0001:00011578       _JabberSendPresenceTo      32612578 f   jabber_util.obj
+ 0001:000119da       _JabberSendPresence        326129da f   jabber_util.obj
+ 0001:00011a2d       _JabberStringAppend        32612a2d f   jabber_util.obj
+ 0001:00011ace       _JabberGetPictureType      32612ace f   jabber_util.obj
+ 0001:00011b3c       _JabberWsInit              32612b3c f   jabber_ws.obj
+ 0001:00011c46       _JabberWsUninit            32612c46 f   jabber_ws.obj
+ 0001:00011c94       _JabberWsConnect           32612c94 f   jabber_ws.obj
+ 0001:00011cd2       _JabberWsSend              32612cd2 f   jabber_ws.obj
+ 0001:00011d3d       _JabberWsRecv              32612d3d f   jabber_ws.obj
+ 0001:00011db0       _JabberWsSendAES           32612db0 f   jabber_ws.obj
+ 0001:00011eca       _JabberWsRecvAES           32612eca f   jabber_ws.obj
+ 0001:00011f9e       _JabberXmlInitState        32612f9e f   jabber_xml.obj
+ 0001:00011fde       _JabberXmlDestroyState     32612fde f   jabber_xml.obj
+ 0001:00012087       _JabberXmlSetCallback      32613087 f   jabber_xml.obj
+ 0001:000120f6       _JabberXmlParse            326130f6 f   jabber_xml.obj
+ 0001:000127c6       _JabberXmlGetAttrValue     326137c6 f   jabber_xml.obj
+ 0001:00012824       _JabberXmlGetChild         32613824 f   jabber_xml.obj
+ 0001:00012837       _JabberXmlGetNthChild      32613837 f   jabber_xml.obj
+ 0001:000128f7       _JabberXmlFreeNode         326138f7 f   jabber_xml.obj
+ 0001:000129a8       _JabberXmlAddAttr          326139a8 f   jabber_xml.obj
+ 0001:00012a14       _DllMain@12                32613a14 f   tlen.obj
+ 0001:00012a23       _MirandaPluginInfoEx       32613a23 f   tlen.obj
+ 0001:00012a77       _MirandaPluginInterfaces   32613a77 f   tlen.obj
+ 0001:00012a7d       _TlenContactMenuHandleRequestAuth 32613a7d f   tlen.obj
+ 0001:00012aed       _TlenContactMenuHandleGrantAuth 32613aed f   tlen.obj
+ 0001:00012b5d       _TlenContactMenuHandleSendPicture 32613b5d f   tlen.obj
+ 0001:00012bca       _TlenMenuHandleInbox       32613bca f   tlen.obj
+ 0001:00012dc5       _TlenOnModulesLoaded       32613dc5 f   tlen.obj
+ 0001:00012fe2       _TlenPreShutdown           32613fe2 f   tlen.obj
+ 0001:00012ff9       _Load                      32613ff9 f   tlen.obj
+ 0001:00013eba       _Unload                    32614eba f   tlen.obj
+ 0001:00013ecd       _TlenAdvSearchDlgProc@16   32614ecd f   tlen_advsearch.obj
+ 0001:00013fe2       _TlenAdvSearchCreateQuery  32614fe2 f   tlen_advsearch.obj
+ 0001:000141d1       _TlenGetAvatarFileName     326151d1 f   tlen_avatar.obj
+ 0001:00014307       _TlenProcessAvatarNode     32615307 f   tlen_avatar.obj
+ 0001:000144c5       _TlenProcessPresenceAvatar 326154c5 f   tlen_avatar.obj
+ 0001:000144fc       _TlenGetAvatar             326154fc f   tlen_avatar.obj
+ 0001:00014b70       _TlenRemoveAvatar          32615b70 f   tlen_avatar.obj
+ 0001:00014c73       _TlenUploadAvatar          32615c73 f   tlen_avatar.obj
+ 0001:00014e46       _TlenFileCancelAll         32615e46 f   tlen_file.obj
+ 0001:00014f02       _TlenFileCreateFT          32615f02 f   tlen_file.obj
+ 0001:00014f3a       _TlenProcessF              32615f3a f   tlen_file.obj
+ 0001:000167c5       _TlenMUCInit               326177c5 f   tlen_muc.obj
+ 0001:00016cfb       _TlenMUCRecvInvitation     32617cfb f   tlen_muc.obj
+ 0001:00017041       _TlenMUCRecvPresence       32618041 f   tlen_muc.obj
+ 0001:00017154       _TlenMUCRecvMessage        32618154 f   tlen_muc.obj
+ 0001:0001730b       _TlenMUCRecvTopic          3261830b f   tlen_muc.obj
+ 0001:00017359       _TlenMUCRecvError          32618359 f   tlen_muc.obj
+ 0001:000178c1       _TlenMUCCreateWindow       326188c1 f   tlen_muc.obj
+ 0001:000179be       _TlenIqResultChatGroups    326189be f   tlen_muc.obj
+ 0001:00017ba1       _TlenIqResultChatRooms     32618ba1 f   tlen_muc.obj
+ 0001:00017d69       _TlenIqResultUserRooms     32618d69 f   tlen_muc.obj
+ 0001:00017e79       _TlenIqResultUserNicks     32618e79 f   tlen_muc.obj
+ 0001:00017f62       _TlenIqResultChatRoomUsers 32618f62 f   tlen_muc.obj
+ 0001:0001810f       _TlenIqResultRoomSearch    3261910f f   tlen_muc.obj
+ 0001:000181b2       _TlenIqResultRoomInfo      326191b2 f   tlen_muc.obj
+ 0001:00018539       _TlenMUCMenuHandleMUC      32619539 f   tlen_muc.obj
+ 0001:00018565       _TlenMUCMenuHandleChats    32619565 f   tlen_muc.obj
+ 0001:000185b0       _TlenMUCContactMenuHandleMUC 326195b0 f   tlen_muc.obj
+ 0001:0001865f       _TlenNewFileReceiveThread  3261965f f   tlen_p2p_new.obj
+ 0001:000189d4       _TlenNewFileSendThread     326199d4 f   tlen_p2p_new.obj
+ 0001:00018b39       _TlenBindUDPSocket         32619b39 f   tlen_p2p_new.obj
+ 0001:00018c4c       _TlenProcessP2P            32619c4c f   tlen_p2p_new.obj
+ 0001:00019143       _TlenP2PFreeFileTransfer   3261a143 f   tlen_p2p_old.obj
+ 0001:000191fb       _TlenP2PPacketCreate       3261a1fb f   tlen_p2p_old.obj
+ 0001:00019242       _TlenP2PPacketFree         3261a242 f   tlen_p2p_old.obj
+ 0001:00019264       _TlenP2PPacketSetType      3261a264 f   tlen_p2p_old.obj
+ 0001:00019274       _TlenP2PPacketSetLen       3261a274 f   tlen_p2p_old.obj
+ 0001:00019284       _TlenP2PPacketPackDword    3261a284 f   tlen_p2p_old.obj
+ 0001:000192ab       _TlenP2PPacketPackBuffer   3261a2ab f   tlen_p2p_old.obj
+ 0001:000192e0       _TlenP2PPacketSend         3261a2e0 f   tlen_p2p_old.obj
+ 0001:00019385       _TlenP2PPacketReceive      3261a385 f   tlen_p2p_old.obj
+ 0001:00019464       _TlenP2PEstablishOutgoingConnection 3261a464 f   tlen_p2p_old.obj
+ 0001:000195b8       _TlenP2PEstablishIncomingConnection 3261a5b8 f   tlen_p2p_old.obj
+ 0001:000197be       _TlenP2PListen             3261a7be f   tlen_p2p_old.obj
+ 0001:0001a1c2       _TlenUserInfoInit          3261b1c2 f   tlen_userinfo.obj
+ 0001:0001ad39       _TlenVoiceReceiveThread    3261bd39 f   tlen_voice.obj
+ 0001:0001bb07       _TlenVoiceSendingThread    3261cb07 f   tlen_voice.obj
+ 0001:0001bf91       _TlenVoiceCancelAll        3261cf91 f   tlen_voice.obj
+ 0001:0001c05e       _TlenVoiceContactMenuHandleVoice 3261d05e f   tlen_voice.obj
+ 0001:0001c14c       _TlenVoiceIsInUse          3261d14c f   tlen_voice.obj
+ 0001:0001c170       _TlenVoiceStart            3261d170 f   tlen_voice.obj
+ 0001:0001c8bf       _TlenVoiceAccept           3261d8bf f   tlen_voice.obj
+ 0001:0001cd35       _TlenVoiceBuildInDeviceList 3261dd35 f   tlen_voice.obj
+ 0001:0001ce03       _TlenVoiceBuildOutDeviceList 3261de03 f   tlen_voice.obj
+ 0001:0001ced2       _WSAGetLastError@0         3261ded2 f   wsock32:WSOCK32.dll
+ 0001:0001ced8       _htonl@4                   3261ded8 f   wsock32:WSOCK32.dll
+ 0001:0001cede       _closesocket@4             3261dede f   wsock32:WSOCK32.dll
+ 0001:0001cee4       _sendto@24                 3261dee4 f   wsock32:WSOCK32.dll
+ 0001:0001ceea       _inet_ntoa@4               3261deea f   wsock32:WSOCK32.dll
+ 0001:0001cef0       _recvfrom@24               3261def0 f   wsock32:WSOCK32.dll
+ 0001:0001cef6       _htons@4                   3261def6 f   wsock32:WSOCK32.dll
+ 0001:0001cefc       _inet_addr@4               3261defc f   wsock32:WSOCK32.dll
+ 0001:0001cf02       _ntohs@4                   3261df02 f   wsock32:WSOCK32.dll
+ 0001:0001cf08       _gethostbyname@4           3261df08 f   wsock32:WSOCK32.dll
+ 0001:0001cf0e       _gethostname@8             3261df0e f   wsock32:WSOCK32.dll
+ 0001:0001cf14       _getsockname@12            3261df14 f   wsock32:WSOCK32.dll
+ 0001:0001cf1a       _bind@12                   3261df1a f   wsock32:WSOCK32.dll
+ 0001:0001cf20       _socket@12                 3261df20 f   wsock32:WSOCK32.dll
+ 0001:0001cf26       _memset                    3261df26 f   MSVCRT:MSVCRT.dll
+ 0001:0001cf2c       _memcpy                    3261df2c f   MSVCRT:MSVCRT.dll
+ 0001:0001cf40       __ftol                     3261df40 f   MSVCRT:MSVCRT.dll
+ 0001:0001cf46       _fabs                      3261df46 f   MSVCRT:MSVCRT.dll
+ 0001:0001cf4c       _abs                       3261df4c f   MSVCRT:MSVCRT.dll
+ 0001:0001cf52       _strlen                    3261df52 f   MSVCRT:MSVCRT.dll
+ 0001:0001cf58       _strcmp                    3261df58 f   MSVCRT:MSVCRT.dll
+ 0001:0001cf5e       _strcpy                    3261df5e f   MSVCRT:MSVCRT.dll
+ 0001:0001cf70       __chkstk                   3261df70 f   MSVCRT:chkstk.obj
+ 0001:0001cf70       __alloca_probe             3261df70 f   MSVCRT:chkstk.obj
+ 0001:0001cfa0       _strcat                    3261dfa0 f   MSVCRT:MSVCRT.dll
+ 0001:0001cfa6       _memcmp                    3261dfa6 f   MSVCRT:MSVCRT.dll
+ 0001:0001cfac       _log10                     3261dfac f   MSVCRT:MSVCRT.dll
+ 0001:0001cfb2       __CRT_INIT@12              3261dfb2 f   MSVCRT:crtdll.obj
+ 0001:0001d05d       __DllMainCRTStartup@12     3261e05d f   MSVCRT:crtdll.obj
+ 0001:0001d0fa       __initterm                 3261e0fa f   MSVCRT:MSVCRT.dll
+ 0002:00000000       __imp__BitBlt@36           3261f000     gdi32:GDI32.dll
+ 0002:00000004       __imp__SelectObject@8      3261f004     gdi32:GDI32.dll
+ 0002:00000008       __imp__CreateCompatibleDC@4 3261f008     gdi32:GDI32.dll
+ 0002:0000000c       __imp__CreateDIBitmap@24   3261f00c     gdi32:GDI32.dll
+ 0002:00000010       __imp__CreateDCW@16        3261f010     gdi32:GDI32.dll
+ 0002:00000014       __imp__DeleteDC@4          3261f014     gdi32:GDI32.dll
+ 0002:00000018       \177GDI32_NULL_THUNK_DATA  3261f018     gdi32:GDI32.dll
+ 0002:0000001c       __imp__SetEvent@4          3261f01c     kernel32:KERNEL32.dll
+ 0002:00000020       __imp__Sleep@4             3261f020     kernel32:KERNEL32.dll
+ 0002:00000024       __imp__SleepEx@8           3261f024     kernel32:KERNEL32.dll
+ 0002:00000028       __imp__CopyFileA@12        3261f028     kernel32:KERNEL32.dll
+ 0002:0000002c       __imp__QueueUserAPC@12     3261f02c     kernel32:KERNEL32.dll
+ 0002:00000030       __imp__GetVersionExW@4     3261f030     kernel32:KERNEL32.dll
+ 0002:00000034       __imp__GetDateFormatA@24   3261f034     kernel32:KERNEL32.dll
+ 0002:00000038       __imp__GetTimeFormatA@24   3261f038     kernel32:KERNEL32.dll
+ 0002:0000003c       __imp__CreateEventW@16     3261f03c     kernel32:KERNEL32.dll
+ 0002:00000040       __imp__DuplicateHandle@28  3261f040     kernel32:KERNEL32.dll
+ 0002:00000044       __imp__GetCurrentThread@0  3261f044     kernel32:KERNEL32.dll
+ 0002:00000048       __imp__GetCurrentProcess@0 3261f048     kernel32:KERNEL32.dll
+ 0002:0000004c       __imp__GetModuleFileNameA@12 3261f04c     kernel32:KERNEL32.dll
+ 0002:00000050       __imp__DeleteFileA@4       3261f050     kernel32:KERNEL32.dll
+ 0002:00000054       __imp__GetLocalTime@4      3261f054     kernel32:KERNEL32.dll
+ 0002:00000058       __imp__SetThreadPriority@8 3261f058     kernel32:KERNEL32.dll
+ 0002:0000005c       __imp__CreateThread@24     3261f05c     kernel32:KERNEL32.dll
+ 0002:00000060       __imp__WaitForSingleObject@8 3261f060     kernel32:KERNEL32.dll
+ 0002:00000064       __imp__CloseHandle@4       3261f064     kernel32:KERNEL32.dll
+ 0002:00000068       __imp__EnterCriticalSection@4 3261f068     kernel32:KERNEL32.dll
+ 0002:0000006c       __imp__LeaveCriticalSection@4 3261f06c     kernel32:KERNEL32.dll
+ 0002:00000070       __imp__DeleteCriticalSection@4 3261f070     kernel32:KERNEL32.dll
+ 0002:00000074       __imp__CreateDirectoryA@8  3261f074     kernel32:KERNEL32.dll
+ 0002:00000078       __imp__InitializeCriticalSection@4 3261f078     kernel32:KERNEL32.dll
+ 0002:0000007c       \177KERNEL32_NULL_THUNK_DATA 3261f07c     kernel32:KERNEL32.dll
+ 0002:00000080       __imp___adjust_fdiv        3261f080     MSVCRT:MSVCRT.dll
+ 0002:00000084       __imp__log10               3261f084     MSVCRT:MSVCRT.dll
+ 0002:00000088       __imp__read                3261f088     MSVCRT:MSVCRT.dll
+ 0002:00000088       __imp___read               3261f088     MSVCRT:MSVCRT.dll
+ 0002:0000008c       __imp___open               3261f08c     MSVCRT:MSVCRT.dll
+ 0002:0000008c       __imp__open                3261f08c     MSVCRT:MSVCRT.dll
+ 0002:00000090       __imp___write              3261f090     MSVCRT:MSVCRT.dll
+ 0002:00000094       __imp___close              3261f094     MSVCRT:MSVCRT.dll
+ 0002:00000094       __imp__close               3261f094     MSVCRT:MSVCRT.dll
+ 0002:00000098       __imp__toupper             3261f098     MSVCRT:MSVCRT.dll
+ 0002:0000009c       __imp__srand               3261f09c     MSVCRT:MSVCRT.dll
+ 0002:000000a0       __imp__fopen               3261f0a0     MSVCRT:MSVCRT.dll
+ 0002:000000a4       __imp__fprintf             3261f0a4     MSVCRT:MSVCRT.dll
+ 0002:000000a8       __imp__fclose              3261f0a8     MSVCRT:MSVCRT.dll
+ 0002:000000ac       __imp__memcmp              3261f0ac     MSVCRT:MSVCRT.dll
+ 0002:000000b0       __imp___strnicmp           3261f0b0     MSVCRT:MSVCRT.dll
+ 0002:000000b4       __imp___tzset              3261f0b4     MSVCRT:MSVCRT.dll
+ 0002:000000b8       __imp__mktime              3261f0b8     MSVCRT:MSVCRT.dll
+ 0002:000000bc       __imp___timezone           3261f0bc     MSVCRT:MSVCRT.dll
+ 0002:000000c0       __imp__gmtime              3261f0c0     MSVCRT:MSVCRT.dll
+ 0002:000000c4       __imp____mb_cur_max        3261f0c4     MSVCRT:MSVCRT.dll
+ 0002:000000c8       __imp___isctype            3261f0c8     MSVCRT:MSVCRT.dll
+ 0002:000000cc       __imp___pctype             3261f0cc     MSVCRT:MSVCRT.dll
+ 0002:000000d0       __imp__sscanf              3261f0d0     MSVCRT:MSVCRT.dll
+ 0002:000000d4       __imp___vsnprintf          3261f0d4     MSVCRT:MSVCRT.dll
+ 0002:000000d8       __imp__atol                3261f0d8     MSVCRT:MSVCRT.dll
+ 0002:000000dc       __imp__strcat              3261f0dc     MSVCRT:MSVCRT.dll
+ 0002:000000e0       __imp__strstr              3261f0e0     MSVCRT:MSVCRT.dll
+ 0002:000000e4       __imp___strcmpi            3261f0e4     MSVCRT:MSVCRT.dll
+ 0002:000000e4       __imp__strcmpi             3261f0e4     MSVCRT:MSVCRT.dll
+ 0002:000000e8       __imp__stricmp             3261f0e8     MSVCRT:MSVCRT.dll
+ 0002:000000e8       __imp___stricmp            3261f0e8     MSVCRT:MSVCRT.dll
+ 0002:000000ec       __imp__itoa                3261f0ec     MSVCRT:MSVCRT.dll
+ 0002:000000ec       __imp___itoa               3261f0ec     MSVCRT:MSVCRT.dll
+ 0002:000000f0       __imp___initterm           3261f0f0     MSVCRT:MSVCRT.dll
+ 0002:000000f4       __imp___stat               3261f0f4     MSVCRT:MSVCRT.dll
+ 0002:000000f8       __imp__strrchr             3261f0f8     MSVCRT:MSVCRT.dll
+ 0002:000000fc       __imp___beginthread        3261f0fc     MSVCRT:MSVCRT.dll
+ 0002:00000100       __imp__strncpy             3261f100     MSVCRT:MSVCRT.dll
+ 0002:00000104       __imp__strlwr              3261f104     MSVCRT:MSVCRT.dll
+ 0002:00000104       __imp___strlwr             3261f104     MSVCRT:MSVCRT.dll
+ 0002:00000108       __imp__strchr              3261f108     MSVCRT:MSVCRT.dll
+ 0002:0000010c       __imp__strncmp             3261f10c     MSVCRT:MSVCRT.dll
+ 0002:00000110       __imp__strcpy              3261f110     MSVCRT:MSVCRT.dll
+ 0002:00000114       __imp__atoi                3261f114     MSVCRT:MSVCRT.dll
+ 0002:00000118       __imp__strcmp              3261f118     MSVCRT:MSVCRT.dll
+ 0002:0000011c       __imp___snprintf           3261f11c     MSVCRT:MSVCRT.dll
+ 0002:00000120       __imp__time                3261f120     MSVCRT:MSVCRT.dll
+ 0002:00000124       __imp__memmove             3261f124     MSVCRT:MSVCRT.dll
+ 0002:00000128       __imp___filelength         3261f128     MSVCRT:MSVCRT.dll
+ 0002:00000128       __imp__filelength          3261f128     MSVCRT:MSVCRT.dll
+ 0002:0000012c       __imp__rand                3261f12c     MSVCRT:MSVCRT.dll
+ 0002:00000130       __imp__fwrite              3261f130     MSVCRT:MSVCRT.dll
+ 0002:00000134       __imp__sprintf             3261f134     MSVCRT:MSVCRT.dll
+ 0002:00000138       __imp__strlen              3261f138     MSVCRT:MSVCRT.dll
+ 0002:0000013c       __imp__realloc             3261f13c     MSVCRT:MSVCRT.dll
+ 0002:00000140       __imp__abs                 3261f140     MSVCRT:MSVCRT.dll
+ 0002:00000144       __imp__fabs                3261f144     MSVCRT:MSVCRT.dll
+ 0002:00000148       __imp___ftol               3261f148     MSVCRT:MSVCRT.dll
+ 0002:0000014c       __imp__memcpy              3261f14c     MSVCRT:MSVCRT.dll
+ 0002:00000150       __imp__free                3261f150     MSVCRT:MSVCRT.dll
+ 0002:00000154       __imp__malloc              3261f154     MSVCRT:MSVCRT.dll
+ 0002:00000158       __imp__memset              3261f158     MSVCRT:MSVCRT.dll
+ 0002:0000015c       \177MSVCRT_NULL_THUNK_DATA 3261f15c     MSVCRT:MSVCRT.dll
+ 0002:00000160       __imp__GetDC@4             3261f160     user32:USER32.dll
+ 0002:00000164       __imp__GetDlgItemInt@16    3261f164     user32:USER32.dll
+ 0002:00000168       __imp__SetDlgItemInt@16    3261f168     user32:USER32.dll
+ 0002:0000016c       __imp__EnableWindow@8      3261f16c     user32:USER32.dll
+ 0002:00000170       __imp__CopyIcon@4          3261f170     user32:USER32.dll
+ 0002:00000174       __imp__CreateDialogParamW@20 3261f174     user32:USER32.dll
+ 0002:00000178       __imp__DialogBoxParamW@20  3261f178     user32:USER32.dll
+ 0002:0000017c       __imp__EndDialog@8         3261f17c     user32:USER32.dll
+ 0002:00000180       __imp__DestroyWindow@4     3261f180     user32:USER32.dll
+ 0002:00000184       __imp__LoadIconW@8         3261f184     user32:USER32.dll
+ 0002:00000188       __imp__SetFocus@4          3261f188     user32:USER32.dll
+ 0002:0000018c       __imp__SendMessageA@16     3261f18c     user32:USER32.dll
+ 0002:00000190       __imp__PostThreadMessageW@16 3261f190     user32:USER32.dll
+ 0002:00000194       __imp__GetMessageW@16      3261f194     user32:USER32.dll
+ 0002:00000198       __imp__SetTimer@16         3261f198     user32:USER32.dll
+ 0002:0000019c       __imp__ReleaseDC@8         3261f19c     user32:USER32.dll
+ 0002:000001a0       __imp__MessageBoxA@16      3261f1a0     user32:USER32.dll
+ 0002:000001a4       __imp__MessageBoxW@16      3261f1a4     user32:USER32.dll
+ 0002:000001a8       __imp__IsDlgButtonChecked@8 3261f1a8     user32:USER32.dll
+ 0002:000001ac       __imp__GetDlgItemTextA@16  3261f1ac     user32:USER32.dll
+ 0002:000001b0       __imp__GetDlgItem@8        3261f1b0     user32:USER32.dll
+ 0002:000001b4       __imp__CheckDlgButton@12   3261f1b4     user32:USER32.dll
+ 0002:000001b8       __imp__SetDlgItemTextA@12  3261f1b8     user32:USER32.dll
+ 0002:000001bc       __imp__SetDlgItemTextW@12  3261f1bc     user32:USER32.dll
+ 0002:000001c0       __imp__SetWindowLongW@12   3261f1c0     user32:USER32.dll
+ 0002:000001c4       __imp__GetFocus@0          3261f1c4     user32:USER32.dll
+ 0002:000001c8       __imp__SendMessageW@16     3261f1c8     user32:USER32.dll
+ 0002:000001cc       __imp__GetParent@4         3261f1cc     user32:USER32.dll
+ 0002:000001d0       __imp__GetWindowLongW@8    3261f1d0     user32:USER32.dll
+ 0002:000001d4       __imp__CallWindowProcW@20  3261f1d4     user32:USER32.dll
+ 0002:000001d8       __imp__SendDlgItemMessageW@20 3261f1d8     user32:USER32.dll
+ 0002:000001dc       \177USER32_NULL_THUNK_DATA 3261f1dc     user32:USER32.dll
+ 0002:000001e0       __imp__waveInClose@4       3261f1e0     winmm:WINMM.dll
+ 0002:000001e4       __imp__waveInStart@4       3261f1e4     winmm:WINMM.dll
+ 0002:000001e8       __imp__waveInAddBuffer@12  3261f1e8     winmm:WINMM.dll
+ 0002:000001ec       __imp__waveInPrepareHeader@12 3261f1ec     winmm:WINMM.dll
+ 0002:000001f0       __imp__waveInOpen@24       3261f1f0     winmm:WINMM.dll
+ 0002:000001f4       __imp__waveInGetDevCapsW@12 3261f1f4     winmm:WINMM.dll
+ 0002:000001f8       __imp__waveInGetNumDevs@0  3261f1f8     winmm:WINMM.dll
+ 0002:000001fc       __imp__waveInUnprepareHeader@12 3261f1fc     winmm:WINMM.dll
+ 0002:00000200       __imp__waveOutClose@4      3261f200     winmm:WINMM.dll
+ 0002:00000204       __imp__waveOutUnprepareHeader@12 3261f204     winmm:WINMM.dll
+ 0002:00000208       __imp__waveOutWrite@12     3261f208     winmm:WINMM.dll
+ 0002:0000020c       __imp__waveOutPrepareHeader@12 3261f20c     winmm:WINMM.dll
+ 0002:00000210       __imp__waveOutOpen@24      3261f210     winmm:WINMM.dll
+ 0002:00000214       __imp__waveOutGetDevCapsW@12 3261f214     winmm:WINMM.dll
+ 0002:00000218       __imp__waveOutGetNumDevs@0 3261f218     winmm:WINMM.dll
+ 0002:0000021c       \177WINMM_NULL_THUNK_DATA  3261f21c     winmm:WINMM.dll
+ 0002:00000220       __imp__WSAGetLastError@0   3261f220     wsock32:WSOCK32.dll
+ 0002:00000224       __imp__htonl@4             3261f224     wsock32:WSOCK32.dll
+ 0002:00000228       __imp__closesocket@4       3261f228     wsock32:WSOCK32.dll
+ 0002:0000022c       __imp__sendto@24           3261f22c     wsock32:WSOCK32.dll
+ 0002:00000230       __imp__inet_ntoa@4         3261f230     wsock32:WSOCK32.dll
+ 0002:00000234       __imp__recvfrom@24         3261f234     wsock32:WSOCK32.dll
+ 0002:00000238       __imp__htons@4             3261f238     wsock32:WSOCK32.dll
+ 0002:0000023c       __imp__inet_addr@4         3261f23c     wsock32:WSOCK32.dll
+ 0002:00000240       __imp__ntohs@4             3261f240     wsock32:WSOCK32.dll
+ 0002:00000244       __imp__gethostbyname@4     3261f244     wsock32:WSOCK32.dll
+ 0002:00000248       __imp__gethostname@8       3261f248     wsock32:WSOCK32.dll
+ 0002:0000024c       __imp__getsockname@12      3261f24c     wsock32:WSOCK32.dll
+ 0002:00000250       __imp__bind@12             3261f250     wsock32:WSOCK32.dll
+ 0002:00000254       __imp__socket@12           3261f254     wsock32:WSOCK32.dll
+ 0002:00000258       \177WSOCK32_NULL_THUNK_DATA 3261f258     wsock32:WSOCK32.dll
+ 0002:00000280       __real@8@400e8000000000000000 3261f280     gsm_long.obj
+ 0002:00000288       __real@8@00000000000000000000 3261f288     gsm_long.obj
+ 0002:00000290       __real@4@400e8000000000000000 3261f290     gsm_lpc.obj
+ 0002:00000294       __real@4@00000000000000000000 3261f294     gsm_lpc.obj
+ 0002:000006c0       __real@8@40009666666666666800 3261f6c0     tlen_voice.obj
+ 0002:000006c8       __real@8@40018000000000000000 3261f6c8     tlen_voice.obj
+ 0002:000006d0       __real@4@3ff58000000000000000 3261f6d0     tlen_voice.obj
+ 0002:000006d4       __IMPORT_DESCRIPTOR_KERNEL32 3261f6d4     kernel32:KERNEL32.dll
+ 0002:000006e8       __IMPORT_DESCRIPTOR_USER32 3261f6e8     user32:USER32.dll
+ 0002:000006fc       __IMPORT_DESCRIPTOR_GDI32  3261f6fc     gdi32:GDI32.dll
+ 0002:00000710       __IMPORT_DESCRIPTOR_WSOCK32 3261f710     wsock32:WSOCK32.dll
+ 0002:00000724       __IMPORT_DESCRIPTOR_WINMM  3261f724     winmm:WINMM.dll
+ 0002:00000738       __IMPORT_DESCRIPTOR_MSVCRT 3261f738     MSVCRT:MSVCRT.dll
+ 0002:0000074c       __NULL_IMPORT_DESCRIPTOR   3261f74c     kernel32:KERNEL32.dll
+ 0003:00000000       ___xc_a                    32621000     MSVCRT:cinitexe.obj
+ 0003:00000004       ___xc_z                    32621004     MSVCRT:cinitexe.obj
+ 0003:00000008       ___xi_a                    32621008     MSVCRT:cinitexe.obj
+ 0003:0000000c       ___xi_z                    3262100c     MSVCRT:cinitexe.obj
+ 0003:00000010       ??_C@_04LDEB@?$CF02X?$AA@  32621010     bignum.obj
+ 0003:00000018       ??_C@_04DCMN@?$CFs?$CFs?$AA@ 32621018     bignum.obj
+ 0003:00000020       ??_C@_0BD@IFFL@Proto?1BroadcastAck?$AA@ 32621020     jabber_iqid.obj
+ 0003:00000034       ??_C@_0BE@GPDC@Tlen?5Authentication?$AA@ 32621034     jabber_iqid.obj
+ 0003:00000048       ??_C@_09EHED@?$CFs?5?$CFs?$EA?$CFs?4?$AA@ 32621048     jabber_iqid.obj
+ 0003:00000054       ??_C@_1DE@IMOK@?$AAA?$AAu?$AAt?$AAh?$AAe?$AAn?$AAt?$AAi?$AAc?$AAa?$AAt?$AAi?$AAo?$AAn?$AA?5?$AAf?$AAa?$AAi?$AAl?$AAe@ 32621054     jabber_iqid.obj
+ 0003:00000088       ??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ 32621088     jabber_iqid.obj
+ 0003:000000a4       ??_C@_04FCEB@?$DM?1s?$DO?$AA@ 326210a4     jabber_iqid.obj
+ 0003:000000ac       ??_C@_05COLM@error?$AA@    326210ac     jabber_iqid.obj
+ 0003:000000b4       ??_C@_0DJ@FBNO@?$DMiq?5to?$DN?8tcfg?8?5type?$DN?8get?8?5id?$DN?8Tcf@ 326210b4     jabber_iqid.obj
+ 0003:000000f0       ??_C@_0EF@JECA@?$DMiq?5type?$DN?8get?8?5id?$DN?8GetRoster?8?$DO?$DMq@ 326210f0     jabber_iqid.obj
+ 0003:00000138       ??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ 32621138     jabber_iqid.obj
+ 0003:00000150       ??_C@_0BI@PLGC@DB?1Contact?1WriteSetting?$AA@ 32621150     jabber_iqid.obj
+ 0003:00000168       ??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ 32621168     jabber_iqid.obj
+ 0003:00000180       ??_C@_04LMAM@Nick?$AA@     32621180     jabber_iqid.obj
+ 0003:00000188       ??_C@_06NMEN@result?$AA@   32621188     jabber_iqid.obj
+ 0003:00000190       ??_C@_04PIKN@type?$AA@     32621190     jabber_iqid.obj
+ 0003:00000198       ??_C@_0BJ@IGCO@DB?1Contact?1DeleteSetting?$AA@ 32621198     jabber_iqid.obj
+ 0003:000001b4       ??_C@_05GGEJ@Group?$AA@    326211b4     jabber_iqid.obj
+ 0003:000001bc       ??_C@_05GCOD@group?$AA@    326211bc     jabber_iqid.obj
+ 0003:000001c4       ??_C@_08GNFE@MyHandle?$AA@ 326211c4     jabber_iqid.obj
+ 0003:000001d0       ??_C@_04OPJK@name?$AA@     326211d0     jabber_iqid.obj
+ 0003:000001d8       ??_C@_04GLLG@from?$AA@     326211d8     jabber_iqid.obj
+ 0003:000001e0       ??_C@_02LJIJ@to?$AA@       326211e0     jabber_iqid.obj
+ 0003:000001e4       ??_C@_04LBKE@both?$AA@     326211e4     jabber_iqid.obj
+ 0003:000001ec       ??_C@_06IOLI@Status?$AA@   326211ec     jabber_iqid.obj
+ 0003:000001f4       ??_C@_06JIKN@remove?$AA@   326211f4     jabber_iqid.obj
+ 0003:000001fc       ??_C@_0N@CJOK@subscription?$AA@ 326211fc     jabber_iqid.obj
+ 0003:0000020c       ??_C@_03HCJC@jid?$AA@      3262120c     jabber_iqid.obj
+ 0003:00000210       ??_C@_04MPOO@item?$AA@     32621210     jabber_iqid.obj
+ 0003:00000218       ??_C@_05NNBH@CList?$AA@    32621218     jabber_iqid.obj
+ 0003:00000220       ??_C@_0BP@EJBC@Status?5changed?5via?5THREADSTART?$AA@ 32621220     jabber_iqid.obj
+ 0003:00000240       ??_C@_0BF@CGG@CList?1ModifyMenuItem?$AA@ 32621240     jabber_iqid.obj
+ 0003:00000258       ??_C@_0BC@ICEO@DB?1Contact?1Delete?$AA@ 32621258     jabber_iqid.obj
+ 0003:0000026c       ??_C@_0BO@JLOJ@Syncing?5roster?3?5deleting?50x?$CFx?$AA@ 3262126c     jabber_iqid.obj
+ 0003:0000028c       ??_C@_0BE@LDI@DB?1Contact?1FindNext?$AA@ 3262128c     jabber_iqid.obj
+ 0003:000002a0       ??_C@_0DH@GIJ@Syncing?5roster?3?5preparing?5to?5del@ 326212a0     jabber_iqid.obj
+ 0003:000002d8       ??_C@_0BK@HFIO@Proto?1GetContactBaseProto?$AA@ 326212d8     jabber_iqid.obj
+ 0003:000002f4       ??_C@_0BF@ODDI@DB?1Contact?1FindFirst?$AA@ 326212f4     jabber_iqid.obj
+ 0003:0000030c       ??_C@_0L@EKFF@RosterSync?$AA@ 3262130c     jabber_iqid.obj
+ 0003:00000318       ??_C@_0N@IOKO@AvatarFormat?$AA@ 32621318     jabber_iqid.obj
+ 0003:00000328       ??_C@_0BH@DPHJ@Setting?5hash?5?$FL?$CFs?$FN?5?$DN?5?$CFs?$AA@ 32621328     jabber_iqid.obj
+ 0003:00000340       ??_C@_0L@POM@AvatarHash?$AA@ 32621340     jabber_iqid.obj
+ 0003:0000034c       ??_C@_0BB@INA@jabber?3iq?3roster?$AA@ 3262134c     jabber_iqid.obj
+ 0003:00000360       ??_C@_05GJOJ@xmlns?$AA@    32621360     jabber_iqid.obj
+ 0003:00000368       ??_C@_05PBDF@query?$AA@    32621368     jabber_iqid.obj
+ 0003:00000370       ??_C@_0N@OEII@PublicStatus?$AA@ 32621370     jabber_iqid.obj
+ 0003:00000380       ??_C@_01KBCC@v?$AA@        32621380     jabber_iqid.obj
+ 0003:00000384       ??_C@_09BPFM@VoiceChat?$AA@ 32621384     jabber_iqid.obj
+ 0003:00000390       ??_C@_01KCMF@g?$AA@        32621390     jabber_iqid.obj
+ 0003:00000394       ??_C@_0L@BFLA@LookingFor?$AA@ 32621394     jabber_iqid.obj
+ 0003:000003a0       ??_C@_01LHO@r?$AA@         326213a0     jabber_iqid.obj
+ 0003:000003a4       ??_C@_0L@IHOC@Occupation?$AA@ 326213a4     jabber_iqid.obj
+ 0003:000003b0       ??_C@_01PGLG@j?$AA@        326213b0     jabber_iqid.obj
+ 0003:000003b4       ??_C@_06POLE@School?$AA@   326213b4     jabber_iqid.obj
+ 0003:000003bc       ??_C@_01PHOL@e?$AA@        326213bc     jabber_iqid.obj
+ 0003:000003c0       ??_C@_06BBDA@Gender?$AA@   326213c0     jabber_iqid.obj
+ 0003:000003c8       ??_C@_01KBOJ@s?$AA@        326213c8     jabber_iqid.obj
+ 0003:000003cc       ??_C@_03DOPF@Age?$AA@      326213cc     jabber_iqid.obj
+ 0003:000003d0       ??_C@_01KCAO@b?$AA@        326213d0     jabber_iqid.obj
+ 0003:000003d4       ??_C@_04NBCE@City?$AA@     326213d4     jabber_iqid.obj
+ 0003:000003dc       ??_C@_01IJJ@c?$AA@         326213dc     jabber_iqid.obj
+ 0003:000003e0       ??_C@_06BOPE@e?9mail?$AA@  326213e0     jabber_iqid.obj
+ 0003:000003e8       ??_C@_05JKH@email?$AA@     326213e8     jabber_iqid.obj
+ 0003:000003f0       ??_C@_04BGEO@nick?$AA@     326213f0     jabber_iqid.obj
+ 0003:000003f8       ??_C@_08MBCL@LastName?$AA@ 326213f8     jabber_iqid.obj
+ 0003:00000404       ??_C@_04ONL@last?$AA@      32621404     jabber_iqid.obj
+ 0003:0000040c       ??_C@_09CJDC@FirstName?$AA@ 3262140c     jabber_iqid.obj
+ 0003:00000418       ??_C@_05KELB@first?$AA@    32621418     jabber_iqid.obj
+ 0003:00000420       ??_C@_09ONOL@LoginName?$AA@ 32621420     jabber_iqid.obj
+ 0003:0000042c       ??_C@_05FNBL@?$CFs?$EA?$CFs?$AA@ 3262142c     jabber_iqid.obj
+ 0003:00000434       ??_C@_0M@IBOM@LoginServer?$AA@ 32621434     jabber_iqid.obj
+ 0003:00000440       ??_C@_04OKNP@mim_?$AA@     32621440     jabber_iqid.obj
+ 0003:00000448       ??_C@_02IBHF@id?$AA@       32621448     jabber_iqid.obj
+ 0003:0000044c       ??_C@_04PHMF@POST?$AA@     3262144c     jabber_iqid.obj
+ 0003:00000454       ??_C@_06IM@method?$AA@     32621454     jabber_iqid.obj
+ 0003:0000045c       ??_C@_0O@COAM@avatar?9remove?$AA@ 3262145c     jabber_iqid.obj
+ 0003:0000046c       ??_C@_0O@GALA@avatar?9upload?$AA@ 3262146c     jabber_iqid.obj
+ 0003:0000047c       ??_C@_0L@BPMN@avatar?9get?$AA@ 3262147c     jabber_iqid.obj
+ 0003:00000488       ??_C@_07CKGN@compose?$AA@  32621488     jabber_iqid.obj
+ 0003:00000490       ??_C@_05FLFF@login?$AA@    32621490     jabber_iqid.obj
+ 0003:00000498       ??_C@_05BBHA@index?$AA@    32621498     jabber_iqid.obj
+ 0003:000004a0       ??_C@_03MBOC@msg?$AA@      326214a0     jabber_iqid.obj
+ 0003:000004a4       ??_C@_04PIEA@base?$AA@     326214a4     jabber_iqid.obj
+ 0003:000004ac       ??_C@_09EHD@mini?9mail?$AA@ 326214ac     jabber_iqid.obj
+ 0003:000004b8       ??_C@_06DLKF@MirVer?$AA@   326214b8     jabber_iqid.obj
+ 0003:000004c0       ??_C@_02KBP@os?$AA@        326214c0     jabber_iqid.obj
+ 0003:000004c4       ??_C@_07BPOH@version?$AA@  326214c4     jabber_iqid.obj
+ 0003:000004cc       ??_C@_0BB@KFCN@Tlen?5Protocol?5?$CFs?$AA@ 326214cc     jabber_iqid.obj
+ 0003:000004e0       ??_C@_0N@ECPE@DB?1Event?1Add?$AA@ 326214e0     jabber_misc.obj
+ 0003:000004f0       ??_C@_06OCEO@Hidden?$AA@   326214f0     jabber_misc.obj
+ 0003:000004f8       ??_C@_0BD@POEG@Proto?1AddToContact?$AA@ 326214f8     jabber_misc.obj
+ 0003:0000050c       ??_C@_0P@HDHJ@DB?1Contact?1Add?$AA@ 3262150c     jabber_misc.obj
+ 0003:0000051c       ??_C@_09ELKP@NotOnList?$AA@ 3262151c     jabber_misc.obj
+ 0003:00000528       ??_C@_0BC@NJGA@CLUI?1GroupCreated?$AA@ 32621528     jabber_misc.obj
+ 0003:0000053c       ??_C@_0M@PPFM@CListGroups?$AA@ 3262153c     jabber_misc.obj
+ 0003:00000548       ??_C@_0BD@FOLM@Miranda?1Thread?1Pop?$AA@ 32621548     jabber_misc.obj
+ 0003:0000055c       ??_C@_0BE@EEML@Miranda?1Thread?1Push?$AA@ 3262155c     jabber_misc.obj
+ 0003:000005a0       ??_C@_1BM@HAKI@?$AAN?$AAo?$AAt?$AAi?$AAf?$AAi?$AAc?$AAa?$AAt?$AAi?$AAo?$AAn?$AAs?$AA?$AA@ 326215a0     jabber_opt.obj
+ 0003:000005bc       ??_C@_1BC@HHMK@?$AAA?$AAd?$AAv?$AAa?$AAn?$AAc?$AAe?$AAd?$AA?$AA@ 326215bc     jabber_opt.obj
+ 0003:000005d0       ??_C@_1BI@LLCB@?$AAV?$AAo?$AAi?$AAc?$AAe?$AA?5?$AAC?$AAh?$AAa?$AAt?$AAs?$AA?$AA@ 326215d0     jabber_opt.obj
+ 0003:000005e8       ??_C@_1BA@DPLO@?$AAG?$AAe?$AAn?$AAe?$AAr?$AAa?$AAl?$AA?$AA@ 326215e8     jabber_opt.obj
+ 0003:000005f8       ??_C@_09BDIE@LogAlerts?$AA@ 326215f8     jabber_opt.obj
+ 0003:00000604       ??_C@_08KGPM@UseNudge?$AA@ 32621604     jabber_opt.obj
+ 0003:00000610       ??_C@_0O@OPHO@EnableVersion?$AA@ 32621610     jabber_opt.obj
+ 0003:00000620       ??_C@_0O@MNOB@EnableAvatars?$AA@ 32621620     jabber_opt.obj
+ 0003:00000630       ??_C@_0BA@CKKI@VoiceChatPolicy?$AA@ 32621630     jabber_opt.obj
+ 0003:00000640       ??_C@_0BA@FJHD@GroupChatPolicy?$AA@ 32621640     jabber_opt.obj
+ 0003:00000650       ??_C@_0BF@FDOK@IgnoreAdvertisements?$AA@ 32621650     jabber_opt.obj
+ 0003:00000668       ??_C@_0BF@CODL@OfflineMessageOption?$AA@ 32621668     jabber_opt.obj
+ 0003:00000680       ??_C@_0BE@EHOD@LeaveOfflineMessage?$AA@ 32621680     jabber_opt.obj
+ 0003:00000694       ??_C@_0BD@MMNL@OfflineAsInvisible?$AA@ 32621694     jabber_opt.obj
+ 0003:000006a8       ??_C@_0M@NGFL@AlertPolicy?$AA@ 326216a8     jabber_opt.obj
+ 0003:000006b4       ??_C@_09GDHD@Reconnect?$AA@ 326216b4     jabber_opt.obj
+ 0003:000006c0       ??_C@_0O@CIMH@UseEncryption?$AA@ 326216c0     jabber_opt.obj
+ 0003:000006d0       ??_C@_0M@CNIC@Opt?1AddPage?$AA@ 326216d0     jabber_opt.obj
+ 0003:000006dc       ??_C@_1BA@DEPM@?$AAN?$AAe?$AAt?$AAw?$AAo?$AAr?$AAk?$AA?$AA@ 326216dc     jabber_opt.obj
+ 0003:000006ec       ??_C@_1JM@BOLK@?$AAT?$AAh?$AAe?$AAs?$AAe?$AA?5?$AAc?$AAh?$AAa?$AAn?$AAg?$AAe?$AAs?$AA?5?$AAw?$AAi?$AAl?$AAl?$AA?5?$AAt@ 326216ec     jabber_opt.obj
+ 0003:00000788       ??_C@_1CK@NMED@?$AAT?$AAl?$AAe?$AAn?$AA?5?$AAP?$AAr?$AAo?$AAt?$AAo?$AAc?$AAo?$AAl?$AA?5?$AAO?$AAp?$AAt?$AAi?$AAo?$AAn@ 32621788     jabber_opt.obj
+ 0003:000007b4       ??_C@_0BG@PBIB@DB?1Crypt?1EncodeString?$AA@ 326217b4     jabber_opt.obj
+ 0003:000007cc       ??_C@_0N@BEAN@SavePassword?$AA@ 326217cc     jabber_opt.obj
+ 0003:000007dc       ??_C@_0BG@PHIF@DB?1Crypt?1DecodeString?$AA@ 326217dc     jabber_opt.obj
+ 0003:000007f4       ??_C@_08NKKK@Password?$AA@ 326217f4     jabber_opt.obj
+ 0003:00000800       ??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@ 32621800     jabber_opt.obj
+ 0003:0000081c       ??_C@_0O@EHKK@Utils?1OpenURL?$AA@ 3262181c     jabber_opt.obj
+ 0003:0000082c       ??_C@_0BE@BMBE@http?3?1?1reg?4tlen?4pl?1?$AA@ 3262182c     jabber_opt.obj
+ 0003:00000840       ??_C@_08GFMP@?$CC?$CG?8?1?3?$DM?$DO?$EA?$AA@ 32621840     jabber_opt.obj
+ 0003:0000084c       ??_C@_1BE@HOLM@?$AAI?$AAn?$AAv?$AAi?$AAs?$AAi?$AAb?$AAl?$AAe?$AA?$AA@ 3262184c     jabber_opt.obj
+ 0003:00000860       ??_C@_1BM@HGPL@?$AAF?$AAr?$AAe?$AAe?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAc?$AAh?$AAa?$AAt?$AA?$AA@ 32621860     jabber_opt.obj
+ 0003:0000087c       ??_C@_17BKGP@?$AAD?$AAN?$AAD?$AA?$AA@ 3262187c     jabber_opt.obj
+ 0003:00000884       ??_C@_15BPBN@?$AAN?$AAA?$AA?$AA@ 32621884     jabber_opt.obj
+ 0003:0000088c       ??_C@_19IOEA@?$AAA?$AAw?$AAa?$AAy?$AA?$AA@ 3262188c     jabber_opt.obj
+ 0003:00000898       ??_C@_1O@EDPB@?$AAO?$AAn?$AAl?$AAi?$AAn?$AAe?$AA?$AA@ 32621898     jabber_opt.obj
+ 0003:000008a8       ??_C@_1BO@CMOF@?$AA?$DM?$AAL?$AAa?$AAs?$AAt?$AA?5?$AAm?$AAe?$AAs?$AAs?$AAa?$AAg?$AAe?$AA?$DO?$AA?$AA@ 326218a8     jabber_opt.obj
+ 0003:000008c8       ??_C@_1CM@HHOO@?$AAI?$AAg?$AAn?$AAo?$AAr?$AAe?$AA?5?$AAa?$AAl?$AAl?$AA?5?$AAi?$AAn?$AAv?$AAi?$AAt?$AAa?$AAt?$AAi?$AAo@ 326218c8     jabber_opt.obj
+ 0003:000008f4       ??_C@_1FM@IIPM@?$AAI?$AAg?$AAn?$AAo?$AAr?$AAe?$AA?5?$AAi?$AAn?$AAv?$AAi?$AAt?$AAa?$AAt?$AAi?$AAo?$AAn?$AAs?$AA?5?$AAf@ 326218f4     jabber_opt.obj
+ 0003:00000950       ??_C@_1CO@LCF@?$AAA?$AAc?$AAc?$AAe?$AAp?$AAt?$AA?5?$AAa?$AAl?$AAl?$AA?5?$AAi?$AAn?$AAv?$AAi?$AAt?$AAa?$AAt?$AAi?$AAo@ 32621950     jabber_opt.obj
+ 0003:00000980       ??_C@_1FI@HENN@?$AAA?$AAc?$AAc?$AAe?$AAp?$AAt?$AA?5?$AAi?$AAn?$AAv?$AAi?$AAt?$AAa?$AAt?$AAi?$AAo?$AAn?$AAs?$AA?5?$AAf@ 32621980     jabber_opt.obj
+ 0003:000009d8       ??_C@_1BM@GOL@?$AAA?$AAl?$AAw?$AAa?$AAy?$AAs?$AA?5?$AAa?$AAs?$AAk?$AA?5?$AAm?$AAe?$AA?$AA@ 326219d8     jabber_opt.obj
+ 0003:000009f4       ??_C@_1CE@IMI@?$AAI?$AAg?$AAn?$AAo?$AAr?$AAe?$AA?5?$AAa?$AAl?$AAl?$AA?5?$AAa?$AAl?$AAe?$AAr?$AAt?$AAs?$AA?$AA@ 326219f4     jabber_opt.obj
+ 0003:00000a18       ??_C@_1FC@JGEG@?$AAI?$AAg?$AAn?$AAo?$AAr?$AAe?$AA?5?$AAa?$AAl?$AAe?$AAr?$AAt?$AAs?$AA?5?$AAf?$AAr?$AAo?$AAm?$AA?5?$AAu@ 32621a18     jabber_opt.obj
+ 0003:00000a6c       ??_C@_1CE@PANB@?$AAA?$AAc?$AAc?$AAe?$AAp?$AAt?$AA?5?$AAa?$AAl?$AAl?$AA?5?$AAa?$AAl?$AAe?$AAr?$AAt?$AAs?$AA?$AA@ 32621a6c     jabber_opt.obj
+ 0003:00000a90       ??_C@_0P@OODI@VoiceDeviceOut?$AA@ 32621a90     jabber_opt.obj
+ 0003:00000aa0       ??_C@_0O@EBHE@VoiceDeviceIn?$AA@ 32621aa0     jabber_opt.obj
+ 0003:00000ab0       ??_C@_0BC@EIFA@FileProxyPassword?$AA@ 32621ab0     jabber_opt.obj
+ 0003:00000ac4       ??_C@_0BC@CBEM@FileProxyUsername?$AA@ 32621ac4     jabber_opt.obj
+ 0003:00000ad8       ??_C@_0O@MHC@FileProxyPort?$AA@ 32621ad8     jabber_opt.obj
+ 0003:00000ae8       ??_C@_0O@GFGJ@FileProxyHost?$AA@ 32621ae8     jabber_opt.obj
+ 0003:00000af8       ??_C@_0O@HKJF@FileProxyType?$AA@ 32621af8     jabber_opt.obj
+ 0003:00000b08       ??_C@_1O@DIAG@?$AAS?$AAO?$AAC?$AAK?$AAS?$AA5?$AA?$AA@ 32621b08     jabber_opt.obj
+ 0003:00000b18       ??_C@_1O@GKBA@?$AAS?$AAO?$AAC?$AAK?$AAS?$AA4?$AA?$AA@ 32621b18     jabber_opt.obj
+ 0003:00000b28       ??_C@_1BG@GDIB@?$AAF?$AAo?$AAr?$AAw?$AAa?$AAr?$AAd?$AAi?$AAn?$AAg?$AA?$AA@ 32621b28     jabber_opt.obj
+ 0003:00000b40       ??_C@_0O@EJJI@FileProxyAuth?$AA@ 32621b40     jabber_opt.obj
+ 0003:00000b50       ??_C@_0N@BODO@UseFileProxy?$AA@ 32621b50     jabber_opt.obj
+ 0003:00000b60       ??_C@_0BC@FEOM@VisibilitySupport?$AA@ 32621b60     jabber_opt.obj
+ 0003:00000b74       ??_C@_09LNJJ@KeepAlive?$AA@ 32621b74     jabber_opt.obj
+ 0003:00000b80       ??_C@_0L@DDEI@ManualPort?$AA@ 32621b80     jabber_opt.obj
+ 0003:00000b8c       ??_C@_1BG@KPOA@?$AAs?$AA1?$AA?4?$AAt?$AAl?$AAe?$AAn?$AA?4?$AAp?$AAl?$AA?$AA@ 32621b8c     jabber_opt.obj
+ 0003:00000ba4       ??_C@_0L@FKFD@ManualHost?$AA@ 32621ba4     jabber_opt.obj
+ 0003:00000bb0       ??_C@_1BA@MDJN@?$AAt?$AAl?$AAe?$AAn?$AA?4?$AAp?$AAl?$AA?$AA@ 32621bb0     jabber_opt.obj
+ 0003:00000bc0       ??_C@_0BJ@GNEH@LangPack?1TranslateDialog?$AA@ 32621bc0     jabber_opt.obj
+ 0003:00000bdc       ??_C@_0BD@JHKD@MailPopupDelayMode?$AA@ 32621bdc     jabber_opt.obj
+ 0003:00000bf0       ??_C@_0P@ECBA@MailPopupDelay?$AA@ 32621bf0     jabber_opt.obj
+ 0003:00000c00       ??_C@_0O@KDHG@MailPopupText?$AA@ 32621c00     jabber_opt.obj
+ 0003:00000c10       ??_C@_0O@CNMO@MailPopupBack?$AA@ 32621c10     jabber_opt.obj
+ 0003:00000c20       ??_C@_0BB@GMOL@MailPopupEnabled?$AA@ 32621c20     jabber_opt.obj
+ 0003:00000c34       ??_C@_0CD@JKGL@From?3?5test?$EAtest?4test?6Subject?3?5te@ 32621c34     jabber_opt.obj
+ 0003:00000c58       ??_C@_07FONL@?$CFs?5mail?$AA@ 32621c58     jabber_opt.obj
+ 0003:00000c60       ??_C@_0P@PNGM@PopUp?1AddPopUp?$AA@ 32621c60     jabber_opt.obj
+ 0003:00000c70       ??_C@_0BB@OBDC@PopUp?1AddPopUpEx?$AA@ 32621c70     jabber_opt.obj
+ 0003:00000c84       ??_C@_0L@JOGO@Tlen?5login?$AA@ 32621c84     jabber_svc.obj
+ 0003:00000c90       ??_C@_0FO@CDMM@?$DMiq?5type?$DN?8get?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@ 32621c90     jabber_svc.obj
+ 0003:00000cf0       ??_C@_0FF@CLOP@?$DMiq?5type?$DN?8get?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@ 32621cf0     jabber_svc.obj
+ 0003:00000d48       ??_C@_09OBPM@?$DMi?$DO?$CFs?$DM?1i?$DO?$AA@ 32621d48     jabber_svc.obj
+ 0003:00000d54       ??_C@_0BC@PCJB@?$DMemail?$DO?$CFs?$DM?1email?$DO?$AA@ 32621d54     jabber_svc.obj
+ 0003:00000d68       ??_C@_0BA@FEGG@?$DMlast?$DO?$CFs?$DM?1last?$DO?$AA@ 32621d68     jabber_svc.obj
+ 0003:00000d78       ??_C@_0BC@DPIJ@?$DMfirst?$DO?$CFs?$DM?1first?$DO?$AA@ 32621d78     jabber_svc.obj
+ 0003:00000d8c       ??_C@_0BA@NNDG@?$DMnick?$DO?$CFs?$DM?1nick?$DO?$AA@ 32621d8c     jabber_svc.obj
+ 0003:00000d9c       ??_C@_0N@BBFJ@DB?1Event?1Get?$AA@ 32621d9c     jabber_svc.obj
+ 0003:00000dac       ??_C@_0BF@MNII@DB?1Event?1GetBlobSize?$AA@ 32621dac     jabber_svc.obj
+ 0003:00000dc4       ??_C@_0CI@OMLA@Try?5adding?5contact?5automatically@ 32621dc4     jabber_svc.obj
+ 0003:00000dec       ??_C@_07MAJI@AutoAdd?$AA@  32621dec     jabber_svc.obj
+ 0003:00000df4       ??_C@_0CG@PEGH@?$DMpresence?5to?$DN?8?$CFs?8?5type?$DN?8subscrib@ 32621df4     jabber_svc.obj
+ 0003:00000e1c       ??_C@_0GD@PFCM@?$DMiq?5type?$DN?8set?8?$DO?$DMquery?5xmlns?$DN?8jab@ 32621e1c     jabber_svc.obj
+ 0003:00000e80       ??_C@_0CI@JMMB@?$DMpresence?5to?$DN?8?$CFs?8?5type?$DN?8unsubscr@ 32621e80     jabber_svc.obj
+ 0003:00000ea8       ??_C@_0BD@OCFE@Netlib?1CloseHandle?$AA@ 32621ea8     jabber_svc.obj
+ 0003:00000ebc       ??_C@_0CH@GNDM@SetAwayMsg?5called?0?5wParam?$DN?$CFd?5lPa@ 32621ebc     jabber_svc.obj
+ 0003:00000ee4       ??_C@_0FM@GGCG@?$DMiq?5type?$DN?8get?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@ 32621ee4     jabber_svc.obj
+ 0003:00000f40       ??_C@_0FF@KAMC@?$DMiq?5type?$DN?8get?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@ 32621f40     jabber_svc.obj
+ 0003:00000f98       ??_C@_0DE@FNAM@?$DMpresence?5to?$DN?8?$CFs?8?$DO?$DMshow?$DOavailabl@ 32621f98     jabber_svc.obj
+ 0003:00000fcc       ??_C@_0CF@JOOO@?$DMpresence?5to?$DN?8?$CFs?8?5type?$DN?8invisibl@ 32621fcc     jabber_svc.obj
+ 0003:00000ff4       ??_C@_0N@CJDI@ApparentMode?$AA@ 32621ff4     jabber_svc.obj
+ 0003:00001004       ??_C@_0BE@COME@?$DMm?5tp?$DN?8a?8?5to?$DN?8?$CFs?8?1?$DO?$AA@ 32622004     jabber_svc.obj
+ 0003:00001018       ??_C@_0GL@LNLA@?$DMmessage?5to?$DN?8?$CFs?8?5type?$DN?8?$CFs?8?5id?$DN?8m@ 32622018     jabber_svc.obj
+ 0003:00001084       ??_C@_0DH@FCCL@?$DMm?5to?$DN?8?$CFs?8?$DO?$DMb?5n?$DN?86?8?5s?$DN?810?8?5f?$DN?80?8@ 32622084     jabber_svc.obj
+ 0003:000010bc       ??_C@_0DF@MLLC@?$DMmessage?5to?$DN?8?$CFs?8?5type?$DN?8?$CFs?8?$DO?$DMbody@ 326220bc     jabber_svc.obj
+ 0003:000010f4       ??_C@_0IB@ENPC@?$DMmessage?5to?$DN?8?$CFs?8?5type?$DN?8?$CFs?8?5id?$DN?8m@ 326220f4     jabber_svc.obj
+ 0003:00001178       ??_C@_06CCAA@MsgAck?$AA@   32622178     jabber_svc.obj
+ 0003:00001180       ??_C@_04FLKK@chat?$AA@     32622180     jabber_svc.obj
+ 0003:00001188       ??_C@_08DPEB@privchat?$AA@ 32622188     jabber_svc.obj
+ 0003:00001194       ??_C@_05LMFM@bChat?$AA@    32622194     jabber_svc.obj
+ 0003:0000119c       ??_C@_09FDIC@groupchat?$AA@ 3262219c     jabber_svc.obj
+ 0003:000011a8       ??_C@_0CP@INH@?$DMmessage?5to?$DN?8?$CFs?8?5type?$DN?8?$CFs?8?5crc?$DN?8@ 326221a8     jabber_svc.obj
+ 0003:000011d8       ??_C@_03DCIF@pic?$AA@      326221d8     jabber_svc.obj
+ 0003:000011dc       ??_C@_07PMPL@?$DMimage?$DO?$AA@ 326221dc     jabber_svc.obj
+ 0003:000011e4       ??_C@_07CDLC@?$DMalert?$DO?$AA@ 326221e4     jabber_svc.obj
+ 0003:000011ec       ??_C@_0BP@IFC@?$DMf?5t?$DN?8?$CFs?8?5i?$DN?8?$CFs?8?5e?$DN?85?8?5v?$DN?81?8?1?$DO?$AA@ 326221ec     jabber_svc.obj
+ 0003:0000120c       ??_C@_0EM@DAPA@?$DMiq?5to?$DN?8?$CFs?8?$DO?$DMquery?5xmlns?$DN?8p2p?8?$DO?$DM@ 3262220c     jabber_svc.obj
+ 0003:00001258       ??_C@_0BJ@LDJC@?$DMf?5i?$DN?8?$CFs?8?5e?$DN?84?8?5t?$DN?8?$CFs?8?1?$DO?$AA@ 32622258     jabber_svc.obj
+ 0003:00001274       ??_C@_0CN@CBGE@ft?9?$DOs?5is?5now?5NULL?0?5ft?9?$DOstate?5is?5@ 32622274     jabber_svc.obj
+ 0003:000012a4       ??_C@_0BD@DINM@Closing?5ft?9?$DOs?5?$DN?5?$CFd?$AA@ 326222a4     jabber_svc.obj
+ 0003:000012b8       ??_C@_0BG@CFHL@Invoking?5FileCancel?$CI?$CJ?$AA@ 326222b8     jabber_svc.obj
+ 0003:000012d0       ??_C@_0CN@NFMN@?$DMf?5t?$DN?8?$CFs?8?5e?$DN?81?8?5i?$DN?8?$CFs?8?5c?$DN?8?$CFd?8?5s?$DN@ 326222d0     jabber_svc.obj
+ 0003:00001300       ??_C@_0DD@DHDE@?$DMf?5t?$DN?8?$CFs?8?5n?$DN?8?$CFs?8?5e?$DN?81?8?5i?$DN?8?$CFs?8?5c?$DN@ 32622300     jabber_svc.obj
+ 0003:00001334       ??_C@_0FL@JEAB@?$DMiq?5to?$DN?8?$CFs?8?$DO?$DMquery?5xmlns?$DN?8p2p?8?$DO?$DM@ 32622334     jabber_svc.obj
+ 0003:00001390       ??_C@_02MECO@?$CFd?$AA@    32622390     jabber_svc.obj
+ 0003:00001394       ??_C@_0BM@LPAN@?8?$CFs?8?5is?5an?5invalid?5filename?$AA@ 32622394     jabber_svc.obj
+ 0003:000013b0       ??_C@_0N@BJOD@?1RecvMessage?$AA@ 326223b0     jabber_svc.obj
+ 0003:000013c0       ??_C@_0BC@DBCN@Proto?1RecvMessage?$AA@ 326223c0     jabber_svc.obj
+ 0003:000013d4       ??_C@_09KKHM@?1RecvFile?$AA@ 326223d4     jabber_svc.obj
+ 0003:000013e0       ??_C@_0P@PJIN@Proto?1RecvFile?$AA@ 326223e0     jabber_svc.obj
+ 0003:000013f0       ??_C@_0FH@JNDC@?$DMiq?5type?$DN?8set?8?$DO?$DMquery?5xmlns?$DN?8jab@ 326223f0     jabber_svc.obj
+ 0003:00001448       ??_C@_0CF@PIBP@?$DMpresence?5to?$DN?8?$CFs?8?5type?$DN?8subscrib@ 32622448     jabber_svc.obj
+ 0003:00001470       ??_C@_0P@BOGB@jid?$DN?$CFs?5nick?$DN?$CFs?$AA@ 32622470     jabber_svc.obj
+ 0003:00001480       ??_C@_0BL@BDCD@Add?5?$CFs?5permanently?5to?5list?$AA@ 32622480     jabber_svc.obj
+ 0003:0000149c       ??_C@_0P@PPEK@Nick?5set?5to?5?$CFs?$AA@ 3262249c     jabber_svc.obj
+ 0003:000014ac       ??_C@_0BM@DJCK@CList?1GetContactDisplayName?$AA@ 326224ac     jabber_svc.obj
+ 0003:000014c8       ??_C@_0GO@KJBN@?$DMiq?5type?$DN?8set?8?$DO?$DMquery?5xmlns?$DN?8jab@ 326224c8     jabber_svc.obj
+ 0003:00001538       ??_C@_0BA@GD@Group?5set?5to?5?$CFs?$AA@ 32622538     jabber_svc.obj
+ 0003:00001548       ??_C@_0FN@FPGF@?$DMiq?5type?$DN?8set?8?$DO?$DMquery?5xmlns?$DN?8jab@ 32622548     jabber_svc.obj
+ 0003:000015a8       ??_C@_0BF@JDFO@Group?5set?5to?5nothing?$AA@ 326225a8     jabber_svc.obj
+ 0003:000015c0       ??_C@_0BE@EHMG@?$DMm?5tp?$DN?8u?8?5to?$DN?8?$CFs?8?1?$DO?$AA@ 326225c0     jabber_svc.obj
+ 0003:000015d4       ??_C@_0BE@CKCM@?$DMm?5tp?$DN?8t?8?5to?$DN?8?$CFs?8?1?$DO?$AA@ 326225d4     jabber_svc.obj
+ 0003:000015e8       ??_C@_0BA@HIMO@?1CreateAccMgrUI?$AA@ 326225e8     jabber_svc.obj
+ 0003:000015f8       ??_C@_0L@DIGM@?1GetStatus?$AA@ 326225f8     jabber_svc.obj
+ 0003:00001604       ??_C@_0N@GIKM@?1GetMyAvatar?$AA@ 32622604     jabber_svc.obj
+ 0003:00001614       ??_C@_0N@GKGP@?1SetMyAvatar?$AA@ 32622614     jabber_svc.obj
+ 0003:00001624       ??_C@_0P@BKBG@?1GetAvatarCaps?$AA@ 32622624     jabber_svc.obj
+ 0003:00001634       ??_C@_0L@GEBG@?1SendNudge?$AA@ 32622634     jabber_svc.obj
+ 0003:00001640       ??_C@_0BG@FCPI@?1GetAvatarInformation?$AA@ 32622640     jabber_svc.obj
+ 0003:00001658       ??_C@_08FCE@?1GetName?$AA@ 32622658     jabber_svc.obj
+ 0003:00001664       ??_C@_0BF@CNLL@Exiting?5ServerThread?$AA@ 32622664     jabber_thread.obj
+ 0003:0000167c       ??_C@_0BK@DNBM@Thread?5ended?3?5server?$DN?8?$CFs?8?$AA@ 3262267c     jabber_thread.obj
+ 0003:00001698       ??_C@_0CA@LBMO@Thread?5ended?0?5connection?5failed?$AA@ 32622698     jabber_thread.obj
+ 0003:000016b8       ??_C@_0DG@HPPI@Cannot?5reallocate?5more?5network?5b@ 326226b8     jabber_thread.obj
+ 0003:000016f0       ??_C@_0EG@CPAF@Unknown?5state?3?5bytesParsed?$DN?$CFd?0?5d@ 326226f0     jabber_thread.obj
+ 0003:00001738       ??_C@_0CF@LEOM@Increasing?5network?5buffer?5size?5t@ 32622738     jabber_thread.obj
+ 0003:00001760       ??_C@_0BB@HAFD@bytesParsed?5?$DN?5?$CFd?$AA@ 32622760     jabber_thread.obj
+ 0003:00001774       ??_C@_07OCNP@RECV?3?$CFs?$AA@ 32622774     jabber_thread.obj
+ 0003:0000177c       ??_C@_0BI@HMLD@Entering?5main?5recv?5loop?$AA@ 3262277c     jabber_thread.obj
+ 0003:00001794       ??_C@_09NDA@?$DMs?5v?$DN?83?8?$DO?$AA@ 32622794     jabber_thread.obj
+ 0003:000017a0       ??_C@_0BN@LFIL@?$DMs?5s?$DN?81?8?5v?$DN?89?8?5t?$DN?806000106?8?$DO?$AA@ 326227a0     jabber_thread.obj
+ 0003:000017c0       ??_C@_0BP@BBBE@Reconnecting?5to?5the?5network?4?4?4?$AA@ 326227c0     jabber_thread.obj
+ 0003:000017e0       ??_C@_0DF@IGAC@Sleeping?5?$CFd?5seconds?5before?5autom@ 326227e0     jabber_thread.obj
+ 0003:00001818       ??_C@_0BH@GFAF@Connection?5failed?5?$CI?$CFd?$CJ?$AA@ 32622818     jabber_thread.obj
+ 0003:00001830       ??_C@_0BN@LCM@Thread?5server?$DN?8?$CFs?8?5port?$DN?8?$CFd?8?$AA@ 32622830     jabber_thread.obj
+ 0003:00001850       ??_C@_0DB@IKHJ@Thread?5ended?0?5network?5buffer?5can@ 32622850     jabber_thread.obj
+ 0003:00001884       ??_C@_0CJ@HFJJ@Thread?5ended?0?5password?5is?5not?5co@ 32622884     jabber_thread.obj
+ 0003:000018b0       ??_C@_0DD@KPAN@Thread?5ended?0?5password?5request?5d@ 326228b0     jabber_thread.obj
+ 0003:000018e4       ??_C@_0CN@FPOL@Thread?5ended?0?5login?5server?5is?5no@ 326228e4     jabber_thread.obj
+ 0003:00001914       ??_C@_0CL@BOLK@Thread?5ended?0?5login?5name?5is?5not?5@ 32622914     jabber_thread.obj
+ 0003:00001940       ??_C@_0CP@EPHB@Thread?5ended?0?5another?5normal?5thr@ 32622940     jabber_thread.obj
+ 0003:00001970       ??_C@_0P@PMJI@Thread?5started?$AA@ 32622970     jabber_thread.obj
+ 0003:00001980       ??_C@_05JKGE@?$CFs?5?$CFs?$AA@ 32622980     jabber_thread.obj
+ 0003:00001988       ??_C@_0BD@NICK@Enter?5password?5for?$AA@ 32622988     jabber_thread.obj
+ 0003:0000199c       ??_C@_0BK@HPJP@?$DMcipher?5k1?$DN?8?$CFs?8?5k2?$DN?8?$CFs?8?1?$DO?$AA@ 3262299c     jabber_thread.obj
+ 0003:000019b8       ??_C@_02PFHF@k3?$AA@       326229b8     jabber_thread.obj
+ 0003:000019bc       ??_C@_02FPOC@k2?$AA@       326229bc     jabber_thread.obj
+ 0003:000019c0       ??_C@_02KAFL@k1?$AA@       326229c0     jabber_thread.obj
+ 0003:000019c4       ??_C@_01FBAH@1?$AA@        326229c4     jabber_thread.obj
+ 0003:000019c8       ??_C@_01JAP@i?$AA@         326229c8     jabber_thread.obj
+ 0003:000019cc       ??_C@_0IH@BBAP@?$DMiq?5type?$DN?8set?8?5id?$DN?8mim_?$CFd?8?$DO?$DMquer@ 326229cc     jabber_thread.obj
+ 0003:00001a54       ??_C@_0BI@OCCN@Jabber?5Connection?5Error?$AA@ 32622a54     jabber_thread.obj
+ 0003:00001a6c       ??_C@_0N@DDKD@stream?3error?$AA@ 32622a6c     jabber_thread.obj
+ 0003:00001a7c       ??_C@_0HI@MJEA@Invalid?5top?9level?5tag?5?$CIonly?5?$DMmes@ 32622a7c     jabber_thread.obj
+ 0003:00001af4       ??_C@_06KLJ@cipher?$AA@    32622af4     jabber_thread.obj
+ 0003:00001afc       ??_C@_06JBCA@avatar?$AA@   32622afc     jabber_thread.obj
+ 0003:00001b04       ??_C@_01FOFA@p?$AA@        32622b04     jabber_thread.obj
+ 0003:00001b08       ??_C@_01FMOK@n?$AA@        32622b08     jabber_thread.obj
+ 0003:00001b0c       ??_C@_01KDFD@m?$AA@        32622b0c     jabber_thread.obj
+ 0003:00001b10       ??_C@_01LLF@w?$AA@         32622b10     jabber_thread.obj
+ 0003:00001b14       ??_C@_01IFC@f?$AA@         32622b14     jabber_thread.obj
+ 0003:00001b18       ??_C@_02CIMO@iq?$AA@       32622b18     jabber_thread.obj
+ 0003:00001b1c       ??_C@_08PJFJ@presence?$AA@ 32622b1c     jabber_thread.obj
+ 0003:00001b28       ??_C@_07NPGL@message?$AA@  32622b28     jabber_thread.obj
+ 0003:00001b30       ??_C@_0BE@GDII@?$DMcipher?5type?$DN?8ok?8?1?$DO?$AA@ 32622b30     jabber_thread.obj
+ 0003:00001b44       ??_C@_01FNLH@a?$AA@        32622b44     jabber_thread.obj
+ 0003:00001b48       ??_C@_05GPDL@token?$AA@    32622b48     jabber_thread.obj
+ 0003:00001b50       ??_C@_07KIAB@offline?$AA@  32622b50     jabber_thread.obj
+ 0003:00001b58       ??_C@_0BA@LPGA@Proto?1ChainRecv?$AA@ 32622b58     jabber_thread.obj
+ 0003:00001b68       ??_C@_0BC@PNLP@DB?1Event?1FindLast?$AA@ 32622b68     jabber_thread.obj
+ 0003:00001b7c       ??_C@_0BG@FMFI@Proto?1ContactIsTyping?$AA@ 32622b7c     jabber_thread.obj
+ 0003:00001b94       ??_C@_09IJNK@composing?$AA@ 32622b94     jabber_thread.obj
+ 0003:00001ba0       ??_C@_0FB@KMAI@?$DMmessage?5to?$DN?8?$CFs?8?$DO?$DMx?5xmlns?$DN?8jabbe@ 32622ba0     jabber_thread.obj
+ 0003:00001bf4       ??_C@_09EEFM@delivered?$AA@ 32622bf4     jabber_thread.obj
+ 0003:00001c00       ??_C@_0P@JKJA@jabber?3x?3event?$AA@ 32622c00     jabber_thread.obj
+ 0003:00001c10       ??_C@_05JMPA@stamp?$AA@    32622c10     jabber_thread.obj
+ 0003:00001c18       ??_C@_0P@ECLD@jabber?3x?3delay?$AA@ 32622c18     jabber_thread.obj
+ 0003:00001c28       ??_C@_01KOI@x?$AA@         32622c28     jabber_thread.obj
+ 0003:00001c2c       ??_C@_06OEJ@?$CFs?$AN?6?$CFs?$AA@ 32622c2c     jabber_thread.obj
+ 0003:00001c34       ??_C@_07BGGH@subject?$AA@  32622c34     jabber_thread.obj
+ 0003:00001c3c       ??_C@_04NIOK@body?$AA@     32622c3c     jabber_thread.obj
+ 0003:00001c44       ??_C@_0DB@FKMD@?$DMmessage?5type?$DN?8pic?8?5to?$DN?8?$CFs?8?5crc_@ 32622c44     jabber_thread.obj
+ 0003:00001c78       ??_C@_02LELH@ps?$AA@       32622c78     jabber_thread.obj
+ 0003:00001c7c       ??_C@_02NKKN@st?$AA@       32622c7c     jabber_thread.obj
+ 0003:00001c80       ??_C@_02MMAH@rt?$AA@       32622c80     jabber_thread.obj
+ 0003:00001c84       ??_C@_03BNG@crc?$AA@       32622c84     jabber_thread.obj
+ 0003:00001c88       ??_C@_05CBAD@crc_c?$AA@    32622c88     jabber_thread.obj
+ 0003:00001c90       ??_C@_03GHGA@pid?$AA@      32622c90     jabber_thread.obj
+ 0003:00001c94       ??_C@_04LLHI@size?$AA@     32622c94     jabber_thread.obj
+ 0003:00001c9c       ??_C@_03NEIN@idt?$AA@      32622c9c     jabber_thread.obj
+ 0003:00001ca0       ??_C@_0M@KLOL@b73?$EAtlen?4pl?$AA@ 32622ca0     jabber_thread.obj
+ 0003:00001cac       ??_C@_0CJ@PILD@?$CFs?5?$CI?$CFs?$CJ?5online?0?5set?5contact?5stat@ 32622cac     jabber_thread.obj
+ 0003:00001cd8       ??_C@_0FM@OLIA@?$DMmessage?5to?$DN?8?$CFs?8?5type?$DN?8iq?8?$DO?$DMiq?5t@ 32622cd8     jabber_thread.obj
+ 0003:00001d34       ??_C@_0EP@IAIE@?$DMiq?5type?$DN?8get?8?5id?$DN?8mim_?$CFd?8?$DO?$DMquer@ 32622d34     jabber_thread.obj
+ 0003:00001d84       ??_C@_03GPAF@dnd?$AA@      32622d84     jabber_thread.obj
+ 0003:00001d88       ??_C@_02PNLN@xa?$AA@       32622d88     jabber_thread.obj
+ 0003:00001d8c       ??_C@_04EKMD@away?$AA@     32622d8c     jabber_thread.obj
+ 0003:00001d94       ??_C@_04DDJJ@show?$AA@     32622d94     jabber_thread.obj
+ 0003:00001d9c       ??_C@_0DK@PBCP@Receive?5presence?5online?5from?5?$CFs?5@ 32622d9c     jabber_thread.obj
+ 0003:00001dd8       ??_C@_0L@PCJP@subscribed?$AA@ 32622dd8     jabber_thread.obj
+ 0003:00001de4       ??_C@_0BP@IEHI@?$CFs?5?$CI?$CFs?$CJ?5requests?5authorization?$AA@ 32622de4     jabber_thread.obj
+ 0003:00001e04       ??_C@_09ODAA@subscribe?$AA@ 32622e04     jabber_thread.obj
+ 0003:00001e10       ??_C@_0CF@HNKJ@?$CFs?5offline?0?5set?5contact?5status?5t@ 32622e10     jabber_thread.obj
+ 0003:00001e38       ??_C@_0O@OJLM@ShowTransport?$AA@ 32622e38     jabber_thread.obj
+ 0003:00001e48       ??_C@_09LNIP@StatusMsg?$AA@ 32622e48     jabber_thread.obj
+ 0003:00001e54       ??_C@_06DKLM@status?$AA@   32622e54     jabber_thread.obj
+ 0003:00001e5c       ??_C@_0DL@LDFJ@Receive?5presence?5offline?5from?5?$CFs@ 32622e5c     jabber_thread.obj
+ 0003:00001e98       ??_C@_0M@IHLO@unavailable?$AA@ 32622e98     jabber_thread.obj
+ 0003:00001ea4       ??_C@_09MLLO@available?$AA@ 32622ea4     jabber_thread.obj
+ 0003:00001eb0       ??_C@_01KPCI@8?$AA@        32622eb0     jabber_thread.obj
+ 0003:00001eb4       ??_C@_01KOHF@7?$AA@        32622eb4     jabber_thread.obj
+ 0003:00001eb8       ??_C@_01EOC@6?$AA@         32622eb8     jabber_thread.obj
+ 0003:00001ebc       ??_C@_01PLFL@5?$AA@        32622ebc     jabber_thread.obj
+ 0003:00001ec0       ??_C@_01FBMM@4?$AA@        32622ec0     jabber_thread.obj
+ 0003:00001ec4       ??_C@_01ECJ@3?$AA@         32622ec4     jabber_thread.obj
+ 0003:00001ec8       ??_C@_01KOLO@2?$AA@        32622ec8     jabber_thread.obj
+ 0003:00001ecc       ??_C@_02KCDM@?$EAc?$AA@    32622ecc     jabber_thread.obj
+ 0003:00001ed0       ??_C@_04KFCH@tcfg?$AA@     32622ed0     jabber_thread.obj
+ 0003:00001ed8       ??_C@_0P@BIMC@jabber?3iq?3info?$AA@ 32622ed8     jabber_thread.obj
+ 0003:00001ee8       ??_C@_0BC@NOHM@jabber?3iq?3version?$AA@ 32622ee8     jabber_thread.obj
+ 0003:00001efc       ??_C@_03LOOF@get?$AA@      32622efc     jabber_thread.obj
+ 0003:00001f00       ??_C@_0CP@CLHC@Roster?5push?5for?5jid?$DN?$CFs?0?5set?5subs@ 32622f00     jabber_thread.obj
+ 0003:00001f30       ??_C@_04KIKH@none?$AA@     32622f30     jabber_thread.obj
+ 0003:00001f38       ??_C@_0CN@OLFG@?$DMiq?1?$DO?5Got?5roster?5push?0?5query?5has@ 32622f38     jabber_thread.obj
+ 0003:00001f68       ??_C@_03NHNF@set?$AA@      32622f68     jabber_thread.obj
+ 0003:00001f6c       ??_C@_03CKOL@p2p?$AA@      32622f6c     jabber_thread.obj
+ 0003:00001f70       ??_C@_0BO@IBHF@Handling?5iq?5request?5for?5id?$DN?$CFd?$AA@ 32622f70     jabber_thread.obj
+ 0003:00001f90       ??_C@_0JF@MBPO@?$DMmessage?5to?$DN?8?$CFs?8?5type?$DN?8iq?8?$DO?$DMiq?5t@ 32622f90     jabber_thread.obj
+ 0003:00002028       ??_C@_01KMMP@?$CJ?$AA@     32623028     jabber_thread.obj
+ 0003:0000202c       ??_C@_09CDOA@?5?$CITlen?5v?4?$AA@ 3262302c     jabber_thread.obj
+ 0003:00002038       ??_C@_0BO@HNHJ@Miranda?1System?1GetVersionText?$AA@ 32623038     jabber_thread.obj
+ 0003:00002058       ??_C@_0M@FMHA@Miranda?5IM?5?$AA@ 32623058     jabber_thread.obj
+ 0003:00002064       ??_C@_07PKLL@Windows?$AA@  32623064     jabber_thread.obj
+ 0003:0000206c       ??_C@_0L@BMJC@Windows?5ME?$AA@ 3262306c     jabber_thread.obj
+ 0003:00002078       ??_C@_0L@FJEF@Windows?598?$AA@ 32623078     jabber_thread.obj
+ 0003:00002084       ??_C@_0L@NDG@Windows?595?$AA@ 32623084     jabber_thread.obj
+ 0003:00002090       ??_C@_0L@CEIK@Windows?5NT?$AA@ 32623090     jabber_thread.obj
+ 0003:0000209c       ??_C@_0N@CDPP@Windows?52000?$AA@ 3262309c     jabber_thread.obj
+ 0003:000020ac       ??_C@_0L@JDIA@Windows?5XP?$AA@ 326230ac     jabber_thread.obj
+ 0003:000020b8       ??_C@_0BE@CBAK@Windows?5Server?52003?$AA@ 326230b8     jabber_thread.obj
+ 0003:000020cc       ??_C@_07KGID@1?48?40?40?$AA@ 326230cc     jabber_thread.obj
+ 0003:000020d4       ??_C@_06LJOI@?$AN?6?$AN?6?$CFs?$AA@ 326230d4     jabber_thread.obj
+ 0003:000020dc       ??_C@_06FACN@?$AN?6?$CFs?3?5?$AA@ 326230dc     jabber_thread.obj
+ 0003:000020e4       ??_C@_06KKPA@E?9mail?$AA@  326230e4     jabber_thread.obj
+ 0003:000020ec       ??_C@_02DILL@?$CFs?$AA@    326230ec     jabber_thread.obj
+ 0003:000020f0       ??_C@_08NAFD@?$CFs?$AN?6?$CFs?3?5?$AA@ 326230f0     jabber_thread.obj
+ 0003:000020fc       ??_C@_0M@KDJE@Web?5message?$AA@ 326230fc     jabber_thread.obj
+ 0003:00002108       ??_C@_04MBPE@From?$AA@     32623108     jabber_thread.obj
+ 0003:00002110       ??_C@_0BA@CFJN@?$CFs?5Web?5Messages?$AA@ 32623110     jabber_thread.obj
+ 0003:00002120       ??_C@_0BD@IKEP@Private?5conference?$AA@ 32623120     jabber_thread.obj
+ 0003:00002134       ??_C@_03BJKC@inv?$AA@      32623134     jabber_thread.obj
+ 0003:00002138       ??_C@_0BB@LENC@Skin?1Sounds?1Play?$AA@ 32623138     jabber_thread.obj
+ 0003:0000214c       ??_C@_0BA@NMMF@TlenAlertNotify?$AA@ 3262314c     jabber_thread.obj
+ 0003:0000215c       ??_C@_0BM@CNHA@An?5alert?5has?5been?5received?4?$AA@ 3262315c     jabber_thread.obj
+ 0003:00002178       ??_C@_01FOJL@u?$AA@        32623178     jabber_thread.obj
+ 0003:0000217c       ??_C@_01PEAM@t?$AA@        3262317c     jabber_thread.obj
+ 0003:00002180       ??_C@_02BBKE@tp?$AA@       32623180     jabber_thread.obj
+ 0003:00002184       ??_C@_0P@DCBH@TlenMailNotify?$AA@ 32623184     jabber_thread.obj
+ 0003:00002194       ??_C@_06HNNJ@?$CFs?3?5?$CFs?$AA@ 32623194     jabber_thread.obj
+ 0003:0000219c       ??_C@_07MEND@Subject?$AA@  3262319c     jabber_thread.obj
+ 0003:000021a4       ??_C@_07OEOL@?$CFs?3?5?$CFs?6?$AA@ 326231a4     jabber_thread.obj
+ 0003:000021ac       ??_C@_05LELA@?$CFs?1?$CFs?$AA@ 326231ac     jabber_thread.obj
+ 0003:000021b4       ??_C@_04KGFE@kick?$AA@     326231b4     jabber_thread.obj
+ 0003:000021bc       ??_C@_01FPMG@z?$AA@        326231bc     jabber_thread.obj
+ 0003:000021c0       ??_C@_01FDLN@?1?$AA@       326231c0     jabber_thread.obj
+ 0003:000021c4       ??_C@_0BA@GHLJ@TlenVoiceNotify?$AA@ 326231c4     jabber_thread.obj
+ 0003:000021d4       ??_C@_0BI@IAJP@Exiting?5KeepAliveThread?$AA@ 326231d4     jabber_thread.obj
+ 0003:000021ec       ??_C@_03LDML@?5?7?5?$AA@   326231ec     jabber_thread.obj
+ 0003:000021f0       ??_C@_0O@OEJB@Netlib?1Select?$AA@ 326231f0     jabber_thread.obj
+ 0003:00002244       ??_C@_0L@CMGK@Netlib?1Log?$AA@ 32623244     jabber_util.obj
+ 0003:00002250       ??_C@_04GKDJ@?$FL?$CFs?$FN?$AA@ 32623250     jabber_util.obj
+ 0003:00002258       ??_C@_04CBAG@TLEN?$AA@     32623258     jabber_util.obj
+ 0003:00002260       ??_C@_07PCFF@SEND?3?$CFs?$AA@ 32623260     jabber_util.obj
+ 0003:00002268       ??_C@_04OBKB@?$CF02x?$AA@  32623268     jabber_util.obj
+ 0003:00002270       ??_C@_08GCIO@?$CF08x?$CF08x?$AA@ 32623270     jabber_util.obj
+ 0003:0000227c       ??_C@_06OAHP@?$CF?$CF?$CF02X?$AA@ 3262327c     jabber_util.obj
+ 0003:00002284       ??_C@_08CJMH@?$CF?$CG?$CL?3?8?$DM?$DO?$CC?$AA@ 32623284     jabber_util.obj
+ 0003:00002290       ??_C@_03MANP@?$CF2x?$AA@   32623290     jabber_util.obj
+ 0003:00002294       ??_C@_08BEBH@?$CFd?3?$CFd?3?$CFd?$AA@ 32623294     jabber_util.obj
+ 0003:000022a0       ??_C@_0CL@HAFG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$CFs?$CFs?$DM@ 326232a0     jabber_util.obj
+ 0003:000022cc       ??_C@_0DO@DKPG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$DMstat@ 326232cc     jabber_util.obj
+ 0003:0000230c       ??_C@_0CG@OPDC@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$CFs?$CFs?$DM?1pres@ 3262330c     jabber_util.obj
+ 0003:00002334       ??_C@_0DJ@ODJJ@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$DMstatus?$DO?$CFs@ 32623334     jabber_util.obj
+ 0003:00002370       ??_C@_06OOEJ@?$CFdate?$CF?$AA@ 32623370     jabber_util.obj
+ 0003:00002378       ??_C@_06CFEF@?$CFtime?$CF?$AA@ 32623378     jabber_util.obj
+ 0003:00002380       ??_C@_06CHCB@SRAway?$AA@   32623380     jabber_util.obj
+ 0003:00002388       ??_C@_0L@PHDP@InvDefault?$AA@ 32623388     jabber_util.obj
+ 0003:00002394       ??_C@_0BA@NCII@FreeChatDefault?$AA@ 32623394     jabber_util.obj
+ 0003:000023a4       ??_C@_0L@CLFC@DndDefault?$AA@ 326233a4     jabber_util.obj
+ 0003:000023b0       ??_C@_09MFFI@NaDefault?$AA@ 326233b0     jabber_util.obj
+ 0003:000023bc       ??_C@_0M@LG@AwayDefault?$AA@ 326233bc     jabber_util.obj
+ 0003:000023c8       ??_C@_09LOKN@OnDefault?$AA@ 326233c8     jabber_util.obj
+ 0003:000023d4       ??_C@_09HDMF@invisible?$AA@ 326233d4     jabber_util.obj
+ 0003:000023e0       ??_C@_08LOMK@?5to?$DN?8?$CFs?8?$AA@ 326233e0     jabber_util.obj
+ 0003:000023ec       ??_C@_02IHJM@?$PP?X?$AA@   326233ec     jabber_util.obj
+ 0003:000023f0       ??_C@_02HGED@BM?$AA@       326233f0     jabber_util.obj
+ 0003:000023f4       ??_C@_04JKCC@?$IJPNG?$AA@  326233f4     jabber_util.obj
+ 0003:000023fc       ??_C@_05FECE@GIF89?$AA@    326233fc     jabber_util.obj
+ 0003:00002404       ??_C@_0BH@EIPI@Netlib?1SetUserSettings?$AA@ 32623404     jabber_ws.obj
+ 0003:0000241c       ??_C@_07LFML@?$CFsSOCKS?$AA@ 3262341c     jabber_ws.obj
+ 0003:00002424       ??_C@_0BE@JCJA@Netlib?1RegisterUser?$AA@ 32623424     jabber_ws.obj
+ 0003:00002438       ??_C@_0L@DLBA@connection?$AA@ 32623438     jabber_ws.obj
+ 0003:00002444       ??_C@_0BG@JEKK@Netlib?1OpenConnection?$AA@ 32623444     jabber_ws.obj
+ 0003:0000245c       ??_C@_0BP@PBNN@Netlib_Send?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ 3262345c     jabber_ws.obj
+ 0003:0000247c       ??_C@_0M@EFDJ@Netlib?1Send?$AA@ 3262347c     jabber_ws.obj
+ 0003:00002488       ??_C@_0BN@OHML@Connection?5closed?5gracefully?$AA@ 32623488     jabber_ws.obj
+ 0003:000024a8       ??_C@_0BP@PJEJ@Netlib_Recv?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ 326234a8     jabber_ws.obj
+ 0003:000024c8       ??_C@_0M@GFGB@Netlib?1Recv?$AA@ 326234c8     jabber_ws.obj
+ 0003:000024d4       ??_C@_0BB@OHBC@Sending?5?$CFd?5bytes?$AA@ 326234d4     jabber_ws.obj
+ 0003:000024e8       ??_C@_04NGIK@?$DPxml?$AA@  326234e8     jabber_xml.obj
+ 0003:000024f0       _pluginInfoEx              326234f0     tlen.obj
+ 0003:00002528       ??_C@_0BI@IFLJ@http?3?1?1mtlen?4berlios?4de?$AA@ 32623528     tlen.obj
+ 0003:00002540       ??_C@_0DC@DAIH@?$CIc?$CJ?52002?92008?5Santithorn?5Bunchua@ 32623540     tlen.obj
+ 0003:00002574       ??_C@_0BL@DIDF@the_leech?$EAusers?4berlios?4de?$AA@ 32623574     tlen.obj
+ 0003:00002590       ??_C@_0DF@OHJP@Santithorn?5Bunchua?0?5Adam?5Strzele@ 32623590     tlen.obj
+ 0003:000025c8       ??_C@_0DK@GNMM@Tlen?5protocol?5plugin?5for?5Miranda@ 326235c8     tlen.obj
+ 0003:00002604       ??_C@_0O@FLMK@Tlen?5Protocol?$AA@ 32623604     tlen.obj
+ 0003:00002614       ??_C@_1KA@GFEM@?$AAT?$AAh?$AAe?$AA?5?$AAT?$AAl?$AAe?$AAn?$AA?5?$AAp?$AAr?$AAo?$AAt?$AAo?$AAc?$AAo?$AAl?$AA?5?$AAp?$AAl@ 32623614     tlen.obj
+ 0003:000026b4       ??_C@_1CK@DAAJ@?$AAT?$AAl?$AAe?$AAn?$AA?5?$AAP?$AAr?$AAo?$AAt?$AAo?$AAc?$AAo?$AAl?$AA?5?$AAP?$AAl?$AAu?$AAg?$AAi?$AAn@ 326236b4     tlen.obj
+ 0003:000026e0       ??_C@_0FE@FHPI@?$DMmessage?5type?$DN?8pic?8?5to?$DN?8the_leec@ 326236e0     tlen.obj
+ 0003:00002734       ??_C@_0BF@NKN@http?3?1?1poczta?4o2?4pl?1?$AA@ 32623734     tlen.obj
+ 0003:0000274c       ??_C@_0BAB@GGCC@?$DMhtml?$DO?$DMhead?$DO?$DM?1head?$DO?$DMbody?5OnLoad?$DN@ 3262374c     tlen.obj
+ 0003:00002850       ??_C@_02IAAH@wt?$AA@       32623850     tlen.obj
+ 0003:00002854       ??_C@_0P@CLNP@openinbox?4html?$AA@ 32623854     tlen.obj
+ 0003:00002864       ??_C@_04DKBA@?2?$CFs?2?$AA@ 32623864     tlen.obj
+ 0003:0000286c       ??_C@_0BC@NJGE@DB?1GetProfilePath?$AA@ 3262386c     tlen.obj
+ 0003:00002880       ??_C@_0BE@MHKM@UserInfo?1Initialise?$AA@ 32623880     tlen.obj
+ 0003:00002894       ??_C@_0L@OJOO@Voice?5chat?$AA@ 32623894     tlen.obj
+ 0003:000028a0       ??_C@_05PJFK@Alert?$AA@    326238a0     tlen.obj
+ 0003:000028a8       ??_C@_0BD@CNOA@Skin?1Sounds?1AddNew?$AA@ 326238a8     tlen.obj
+ 0003:000028bc       ??_C@_0O@KEJH@Incoming?5mail?$AA@ 326238bc     tlen.obj
+ 0003:000028cc       ??_C@_0BF@DKCJ@Proto?1RegisterModule?$AA@ 326238cc     tlen.obj
+ 0003:000028e4       ??_C@_07NCOA@Unicode?$AA@  326238e4     tlen.obj
+ 0003:000028ec       ??_C@_0BH@FHMP@Miranda?1System?1GetUTFI?$AA@ 326238ec     tlen.obj
+ 0003:00002904       ??_C@_0BI@FOPF@Miranda?1System?1GetSHA1I?$AA@ 32623904     tlen.obj
+ 0003:0000291c       ??_C@_0BH@CHLF@Miranda?1System?1GetMD5I?$AA@ 3262391c     tlen.obj
+ 0003:00002934       ??_C@_0BG@FJFA@Miranda?1System?1GetMMI?$AA@ 32623934     tlen.obj
+ 0003:0000294c       ??_C@_0BE@HMGE@Skin2?1Icons?1AddIcon?$AA@ 3262394c     tlen.obj
+ 0003:00002960       ??_C@_19JAHN@?$AAT?$AAl?$AAe?$AAn?$AA?$AA@ 32623960     tlen.obj
+ 0003:0000296c       ??_C@_05FCKF@?$CFs_?$CFs?$AA@ 3262396c     tlen.obj
+ 0003:00002974       ??_C@_07JKL@SPEAKER?$AA@   32623974     tlen.obj
+ 0003:0000297c       ??_C@_0L@IAIB@MICROPHONE?$AA@ 3262397c     tlen.obj
+ 0003:00002988       ??_C@_05DMCN@VOICE?$AA@    32623988     tlen.obj
+ 0003:00002990       ??_C@_07GCFD@REQUEST?$AA@  32623990     tlen.obj
+ 0003:00002998       ??_C@_05DLPA@GRANT?$AA@    32623998     tlen.obj
+ 0003:000029a0       ??_C@_05CJDN@CHATS?$AA@    326239a0     tlen.obj
+ 0003:000029a8       ??_C@_03NJCG@MUC?$AA@      326239a8     tlen.obj
+ 0003:000029ac       ??_C@_04ELMM@MAIL?$AA@     326239ac     tlen.obj
+ 0003:000029b4       ??_C@_05NFEE@PROTO?$AA@    326239b4     tlen.obj
+ 0003:000029bc       ??_C@_1BA@BBKP@?$AAS?$AAp?$AAe?$AAa?$AAk?$AAe?$AAr?$AA?$AA@ 326239bc     tlen.obj
+ 0003:000029cc       ??_C@_1BG@MKBH@?$AAM?$AAi?$AAc?$AAr?$AAo?$AAp?$AAh?$AAo?$AAn?$AAe?$AA?$AA@ 326239cc     tlen.obj
+ 0003:000029e4       ??_C@_1BG@PEAC@?$AAV?$AAo?$AAi?$AAc?$AAe?$AA?5?$AAc?$AAh?$AAa?$AAt?$AA?$AA@ 326239e4     tlen.obj
+ 0003:000029fc       ??_C@_1CM@CHLO@?$AAR?$AAe?$AAq?$AAu?$AAe?$AAs?$AAt?$AA?5?$AAa?$AAu?$AAt?$AAh?$AAo?$AAr?$AAi?$AAz?$AAa?$AAt?$AAi?$AAo@ 326239fc     tlen.obj
+ 0003:00002a28       ??_C@_1CI@DFCB@?$AAG?$AAr?$AAa?$AAn?$AAt?$AA?5?$AAa?$AAu?$AAt?$AAh?$AAo?$AAr?$AAi?$AAz?$AAa?$AAt?$AAi?$AAo?$AAn?$AA?$AA@ 32623a28     tlen.obj
+ 0003:00002a50       ??_C@_1BG@DLPE@?$AAT?$AAl?$AAe?$AAn?$AA?5?$AAc?$AAh?$AAa?$AAt?$AAs?$AA?$AA@ 32623a50     tlen.obj
+ 0003:00002a68       ??_C@_1BI@PPEG@?$AAG?$AAr?$AAo?$AAu?$AAp?$AA?5?$AAc?$AAh?$AAa?$AAt?$AAs?$AA?$AA@ 32623a68     tlen.obj
+ 0003:00002a80       ??_C@_19KBAK@?$AAM?$AAa?$AAi?$AAl?$AA?$AA@ 32623a80     tlen.obj
+ 0003:00002a8c       ??_C@_1BM@ILLJ@?$AAP?$AAr?$AAo?$AAt?$AAo?$AAc?$AAo?$AAl?$AA?5?$AAi?$AAc?$AAo?$AAn?$AA?$AA@ 32623a8c     tlen.obj
+ 0003:00002aa8       ??_C@_0BE@MOM@Skin2?1Icons?1GetIcon?$AA@ 32623aa8     tlen.obj
+ 0003:00002abc       ??_C@_0L@DIBD@s1?4tlen?4pl?$AA@ 32623abc     tlen.obj
+ 0003:00002ac8       ??_C@_07HCE@tlen?4pl?$AA@  32623ac8     tlen.obj
+ 0003:00002ad0       ??_C@_0BJ@PEDN@Miranda?1System?1PShutdown?$AA@ 32623ad0     tlen.obj
+ 0003:00002aec       ??_C@_0BD@BJPA@Skin2?1IconsChanged?$AA@ 32623aec     tlen.obj
+ 0003:00002b00       ??_C@_0BN@BBKH@Miranda?1System?1ModulesLoaded?$AA@ 32623b00     tlen.obj
+ 0003:00002b20       ??_C@_0BK@FOAO@CList?1PreBuildContactMenu?$AA@ 32623b20     tlen.obj
+ 0003:00002b3c       ??_C@_0BD@PHPO@DB?1Contact?1Deleted?$AA@ 32623b3c     tlen.obj
+ 0003:00002b50       ??_C@_0BK@GNNH@DB?1Contact?1SettingChanged?$AA@ 32623b50     tlen.obj
+ 0003:00002b6c       ??_C@_0P@JLBI@Opt?1Initialise?$AA@ 32623b6c     tlen.obj
+ 0003:00002b7c       ??_C@_05LFDB@Nudge?$AA@    32623b7c     tlen.obj
+ 0003:00002b84       ??_C@_0BI@EHMA@Skin2?1Icons?1ReleaseIcon?$AA@ 32623b84     tlen.obj
+ 0003:00002b9c       ??_C@_0BD@JJLD@SRFile?1SendCommand?$AA@ 32623b9c     tlen.obj
+ 0003:00002bb0       ??_C@_05CNCC@?$CGFile?$AA@ 32623bb0     tlen.obj
+ 0003:00002bb8       ??_C@_0BA@GFNK@Skin?1Icons?1Load?$AA@ 32623bb8     tlen.obj
+ 0003:00002bc8       ??_C@_0N@LLJI@Send?5picture?$AA@ 32623bc8     tlen.obj
+ 0003:00002bd8       ??_C@_0P@MFKA@?$CFs?1SendPicture?$AA@ 32623bd8     tlen.obj
+ 0003:00002be8       ??_C@_0BE@FAFD@Grant?5authorization?$AA@ 32623be8     tlen.obj
+ 0003:00002bfc       ??_C@_0N@FBAI@?$CFs?1GrantAuth?$AA@ 32623bfc     tlen.obj
+ 0003:00002c0c       ??_C@_0BG@ICHE@Request?5authorization?$AA@ 32623c0c     tlen.obj
+ 0003:00002c24       ??_C@_0P@OBOH@?$CFs?1RequestAuth?$AA@ 32623c24     tlen.obj
+ 0003:00002c34       ??_C@_0L@EDKM@Voice?5Chat?$AA@ 32623c34     tlen.obj
+ 0003:00002c40       ??_C@_0BE@LCEH@?$CFs?1ContactMenuVoice?$AA@ 32623c40     tlen.obj
+ 0003:00002c54       ??_C@_0BJ@GIEG@CList?1AddContactMenuItem?$AA@ 32623c54     tlen.obj
+ 0003:00002c70       ??_C@_0BC@PDGE@?$CFs?1ContactMenuMUC?$AA@ 32623c70     tlen.obj
+ 0003:00002c84       ??_C@_0L@KEJH@Tlen?5Inbox?$AA@ 32623c84     tlen.obj
+ 0003:00002c90       ??_C@_0BB@PPFD@?$CFs?1MainMenuInbox?$AA@ 32623c90     tlen.obj
+ 0003:00002ca4       ??_C@_0BG@KCGH@Multi?9User?5Conference?$AA@ 32623ca4     tlen.obj
+ 0003:00002cbc       ??_C@_0P@PLDI@?$CFs?1MainMenuMUC?$AA@ 32623cbc     tlen.obj
+ 0003:00002ccc       ??_C@_0L@IDCD@Tlen?5Chats?$AA@ 32623ccc     tlen.obj
+ 0003:00002cd8       ??_C@_0BB@NIOH@?$CFs?1MainMenuChats?$AA@ 32623cd8     tlen.obj
+ 0003:00002cec       ??_C@_0BG@ECNA@CList?1AddMainMenuItem?$AA@ 32623cec     tlen.obj
+ 0003:00002d04       ??_C@_01FNHM@d?$AA@        32623d04     tlen_advsearch.obj
+ 0003:00002d08       ??_C@_0M@CFON@?$DM?$CFs?$DO?$CFs?$DM?1?$CFs?$DO?$AA@ 32623d08     tlen_advsearch.obj
+ 0003:00002d14       ??_C@_0M@JHIP@?$DM?$CFs?$DO?$CFd?$DM?1?$CFs?$DO?$AA@ 32623d14     tlen_advsearch.obj
+ 0003:00002d20       ??_C@_0N@DJFC@?$CFs_avatar?4?$CFs?$AA@ 32623d20     tlen_avatar.obj
+ 0003:00002d30       ??_C@_05OGKG@?$CFs?4?$CFs?$AA@ 32623d30     tlen_avatar.obj
+ 0003:00002d38       ??_C@_03EEHM@jpg?$AA@      32623d38     tlen_avatar.obj
+ 0003:00002d3c       ??_C@_03LHKJ@ico?$AA@      32623d3c     tlen_avatar.obj
+ 0003:00002d40       ??_C@_03LLKB@bmp?$AA@      32623d40     tlen_avatar.obj
+ 0003:00002d44       ??_C@_03KNEF@gif?$AA@      32623d44     tlen_avatar.obj
+ 0003:00002d48       ??_C@_03PJIM@png?$AA@      32623d48     tlen_avatar.obj
+ 0003:00002d4c       ??_C@_03JDIA@md5?$AA@      32623d4c     tlen_avatar.obj
+ 0003:00002d50       ??_C@_04OJFH@File?$AA@     32623d50     tlen_avatar.obj
+ 0003:00002d58       ??_C@_0N@ECGN@ContactPhoto?$AA@ 32623d58     tlen_avatar.obj
+ 0003:00002d68       ??_C@_0BN@JINL@Netlib?1FreeHttpRequestStruct?$AA@ 32623d68     tlen_avatar.obj
+ 0003:00002d88       ??_C@_09KNDH@image?1bmp?$AA@ 32623d88     tlen_avatar.obj
+ 0003:00002d94       ??_C@_09LLND@image?1gif?$AA@ 32623d94     tlen_avatar.obj
+ 0003:00002da0       ??_C@_09FCOK@image?1jpg?$AA@ 32623da0     tlen_avatar.obj
+ 0003:00002dac       ??_C@_0L@JAMC@image?1jpeg?$AA@ 32623dac     tlen_avatar.obj
+ 0003:00002db8       ??_C@_0M@LALM@image?1x?9png?$AA@ 32623db8     tlen_avatar.obj
+ 0003:00002dc4       ??_C@_09OPBK@image?1png?$AA@ 32623dc4     tlen_avatar.obj
+ 0003:00002dd0       ??_C@_0N@HKBC@Content?9Type?$AA@ 32623dd0     tlen_avatar.obj
+ 0003:00002de0       ??_C@_0BH@GFMD@Netlib?1HttpTransaction?$AA@ 32623de0     tlen_avatar.obj
+ 0003:00002df8       ??_C@_02NGAF@wb?$AA@       32623df8     tlen_avatar.obj
+ 0003:00002dfc       ??_C@_0BB@GNHM@?$CF08x?$CF08x?$CF08x?$CF08x?$AA@ 32623dfc     tlen_avatar.obj
+ 0003:00002e10       ??_C@_08HJMC@?$FOaccess?$FO?$AA@ 32623e10     tlen_avatar.obj
+ 0003:00002e1c       ??_C@_07BPPH@?$FOtoken?$FO?$AA@ 32623e1c     tlen_avatar.obj
+ 0003:00002e24       ??_C@_06LLEI@?$FOtype?$FO?$AA@ 32623e24     tlen_avatar.obj
+ 0003:00002e2c       ??_C@_07IPMD@?$FOlogin?$FO?$AA@ 32623e2c     tlen_avatar.obj
+ 0003:00002e34       ??_C@_0P@NPBJ@?$AN?6?9?9AaB03x?9?9?$AN?6?$AA@ 32623e34     tlen_avatar.obj
+ 0003:00002e44       ??_C@_0CF@DNCL@multipart?1form?9data?$DL?5boundary?$DNAa@ 32623e44     tlen_avatar.obj
+ 0003:00002e6c       ??_C@_0GM@HAIN@?9?9AaB03x?$AN?6Content?9Disposition?3?5f@ 32623e6c     tlen_avatar.obj
+ 0003:00002ed8       ??_C@_0BC@GNJA@freeing?5ft?5struct?$AA@ 32623ed8     tlen_file.obj
+ 0003:00002eec       ??_C@_0BC@GDOL@?$DMf?5e?$DN?84?8?5t?$DN?8?$CFs?8?1?$DO?$AA@ 32623eec     tlen_file.obj
+ 0003:00002f00       ??_C@_0BC@EIHO@sending?5chainrecv?$AA@ 32623f00     tlen_file.obj
+ 0003:00002f14       ??_C@_08KBMI@?$CFd?5Files?$AA@ 32623f14     tlen_file.obj
+ 0003:00002f20       ??_C@_06JGFL@1?5File?$AA@  32623f20     tlen_file.obj
+ 0003:00002f28       ??_C@_0CM@ENML@Thread?5ended?3?5type?$DNfile_receive?5@ 32623f28     tlen_file.obj
+ 0003:00002f54       ??_C@_0BJ@EFIH@?$DMf?5t?$DN?8?$CFs?8?5i?$DN?8?$CFs?8?5e?$DN?88?8?1?$DO?$AA@ 32623f54     tlen_file.obj
+ 0003:00002f70       ??_C@_0BB@NFGI@Finish?5all?5files?$AA@ 32623f70     tlen_file.obj
+ 0003:00002f84       ??_C@_0CH@MMNC@Waiting?5for?5the?5file?5to?5be?5recei@ 32623f84     tlen_file.obj
+ 0003:00002fac       ??_C@_0CH@PODA@?$DMf?5t?$DN?8?$CFs?8?5i?$DN?8?$CFs?8?5e?$DN?87?8?5a?$DN?8?$CFs?8?5p?$DN@ 32623fac     tlen_file.obj
+ 0003:00002fd4       ??_C@_0CI@OFJJ@Connection?5failed?5?9?5receiving?5as@ 32623fd4     tlen_file.obj
+ 0003:00002ffc       ??_C@_0BL@CMPD@Entering?5file?5receive?5loop?$AA@ 32623ffc     tlen_file.obj
+ 0003:00003018       ??_C@_0DI@NLKJ@Thread?5started?3?5type?$DNfile_receiv@ 32624018     tlen_file.obj
+ 0003:00003050       ??_C@_0BI@CBPP@ft?9?$DOs?5is?5restored?5to?5?$CFd?$AA@ 32624050     tlen_file.obj
+ 0003:00003068       ??_C@_0EC@KHJJ@Closing?5connection?5for?5this?5file@ 32624068     tlen_file.obj
+ 0003:000030ac       ??_C@_0EG@JOAE@Entering?5send?5loop?5for?5this?5file@ 326240ac     tlen_file.obj
+ 0003:000030f4       ??_C@_0BM@NHEE@Set?5ft?9?$DOs?5to?5?$CFd?5?$CIsaving?5?$CFd?$CJ?$AA@ 326240f4     tlen_file.obj
+ 0003:00003110       ??_C@_0CN@LBDP@File?5received?0?5advancing?5to?5the?5@ 32624110     tlen_file.obj
+ 0003:00003140       ??_C@_0BH@NICG@Finishing?5this?5file?4?4?4?$AA@ 32624140     tlen_file.obj
+ 0003:00003158       ??_C@_0BC@JKLG@Receiving?5data?4?4?4?$AA@ 32624158     tlen_file.obj
+ 0003:0000316c       ??_C@_0BH@HIOC@Change?5to?5FT_RECEIVING?$AA@ 3262416c     tlen_file.obj
+ 0003:00003184       ??_C@_0BE@CLDE@Saving?5to?5?$FL?$CFs?$FN?5?$FL?$CFd?$FN?$AA@ 32624184     tlen_file.obj
+ 0003:00003198       ??_C@_01PCFE@?2?$AA@       32624198     tlen_file.obj
+ 0003:0000319c       ??_C@_0BK@NHDK@Change?5to?5FT_INITIALIZING?$AA@ 3262419c     tlen_file.obj
+ 0003:000031b8       ??_C@_0BN@PODG@Thread?5ended?3?5type?$DNfile_send?$AA@ 326241b8     tlen_file.obj
+ 0003:000031d8       ??_C@_0BE@NAKP@Finish?5successfully?$AA@ 326241d8     tlen_file.obj
+ 0003:000031ec       ??_C@_0BD@FGGL@Finish?5with?5errors?$AA@ 326241ec     tlen_file.obj
+ 0003:00003200       ??_C@_0ED@MCPA@Cannot?5allocate?5port?5to?5bind?5for@ 32624200     tlen_file.obj
+ 0003:00003244       ??_C@_0CO@DACA@Closing?5connection?5for?5this?5file@ 32624244     tlen_file.obj
+ 0003:00003274       ??_C@_0CP@CNGK@Entering?5send?5loop?5for?5this?5file@ 32624274     tlen_file.obj
+ 0003:000032a4       ??_C@_0BF@IPEE@Sending?5as?5client?4?4?4?$AA@ 326242a4     tlen_file.obj
+ 0003:000032bc       ??_C@_0O@IMLC@ft?9?$DOs?5is?5NULL?$AA@ 326242bc     tlen_file.obj
+ 0003:000032cc       ??_C@_0CD@JFMN@Waiting?5for?5the?5file?5to?5be?5sent?4@ 326242cc     tlen_file.obj
+ 0003:000032f0       ??_C@_0CH@OLME@?$DMf?5t?$DN?8?$CFs?8?5i?$DN?8?$CFs?8?5e?$DN?86?8?5a?$DN?8?$CFs?8?5p?$DN@ 326242f0     tlen_file.obj
+ 0003:00003318       ??_C@_0CE@EBIB@Thread?5started?3?5type?$DNtlen_file_s@ 32624318     tlen_file.obj
+ 0003:0000333c       ??_C@_0CJ@DHKG@File?5sent?0?5advancing?5to?5the?5next@ 3262433c     tlen_file.obj
+ 0003:00003368       ??_C@_0BF@OBPO@Sending?5file?5data?4?4?4?$AA@ 32624368     tlen_file.obj
+ 0003:00003380       ??_C@_0BG@HDBK@File?5cannot?5be?5opened?$AA@ 32624380     tlen_file.obj
+ 0003:00003398       ??_C@_0BC@ONAN@Sending?5?$FL?$CFs?$FN?5?$FL?$CFd?$FN?$AA@ 32624398     tlen_file.obj
+ 0003:000033ac       ??_C@_0CN@BCNE@Requested?5file?5?$CI?$CD?$CFd?$CJ?5is?5invalid?5@ 326243ac     tlen_file.obj
+ 0003:000033dc       ??_C@_0BO@OHDI@FT_INITIALIZING?3?5recv?5type?5?$CFd?$AA@ 326243dc     tlen_file.obj
+ 0003:000033fc       ??_C@_0BJ@CBAI@FT_INITIALIZING?3?5recv?5?$CFd?$AA@ 326243fc     tlen_file.obj
+ 0003:00003418       ??_C@_0BD@GL@MUCC?1OutgoingEvent?$AA@ 32624418     tlen_muc.obj
+ 0003:0000342c       ??_C@_0CK@BKPH@?$DMp?5to?$DN?8?$CFs?8?$DO?$DMx?$DO?$DMi?5i?$DN?8?$CFs?8?5a?$DN?8?$CFd?8?5?1@ 3262442c     tlen_muc.obj
+ 0003:00003458       ??_C@_0CI@DGJD@?$DMp?5to?$DN?8?$CFs?8?$DO?$DMx?$DO?$DMi?5i?$DN?8?$CFs?8?5a?$DN?80?8?1?$DO?$DM@ 32624458     tlen_muc.obj
+ 0003:00003480       ??_C@_0DI@DCFC@?$DMp?5to?$DN?8?$CFs?8?$DO?$DMx?$DO?$DMi?5i?$DN?8?$CFs?8?5a?$DN?84?8?5ex@ 32624480     tlen_muc.obj
+ 0003:000034b8       ??_C@_0DE@MEOP@?$DMp?5to?$DN?8c?8?5tp?$DN?8c?8?5id?$DN?8mim_?$CFd?8?5x?$DN?8@ 326244b8     tlen_muc.obj
+ 0003:000034ec       ??_C@_0DO@LMFE@?$DMp?5to?$DN?8c?8?5tp?$DN?8c?8?5id?$DN?8mim_?$CFd?8?5x?$DN?8@ 326244ec     tlen_muc.obj
+ 0003:0000352c       ??_C@_0BG@PBCA@?$DMp?5to?$DN?8?$CFs?8?5type?$DN?8d?8?1?$DO?$AA@ 3262452c     tlen_muc.obj
+ 0003:00003544       ??_C@_0BC@HAJP@SRMsg?1SendCommand?$AA@ 32624544     tlen_muc.obj
+ 0003:00003558       ??_C@_0BP@HLEI@?$DMp?5to?$DN?8c?8?5tp?$DN?8c?8?5id?$DN?8mim_?$CFd?8?1?$DO?$AA@ 32624558     tlen_muc.obj
+ 0003:00003578       ??_C@_0L@HOEC@MUCC?1Event?$AA@ 32624578     tlen_muc.obj
+ 0003:00003584       ??_C@_0BP@BGN@Miranda?1Contact?1GetContactInfo?$AA@ 32624584     tlen_muc.obj
+ 0003:000035a4       ??_C@_0CC@OCEB@You?5have?5been?5kicked?4?5Reason?3?5?$CFs@ 326245a4     tlen_muc.obj
+ 0003:000035c8       ??_C@_0BI@GEGM@Unknown?5error?5code?5?3?5?$CFd?$AA@ 326245c8     tlen_muc.obj
+ 0003:000035e0       ??_C@_0DH@BBKF@Anonymous?5nicknames?5are?5not?5allo@ 326245e0     tlen_muc.obj
+ 0003:00003618       ??_C@_0CJ@OPNN@You?5cannot?5join?5more?5than?5?$CFs?5cha@ 32624618     tlen_muc.obj
+ 0003:00003644       ??_C@_0CL@MBHC@You?5cannot?5create?5more?5than?5?$CFs?5c@ 32624644     tlen_muc.obj
+ 0003:00003670       ??_C@_0CM@BNEG@You?5cannot?5register?5more?5than?5?$CFs@ 32624670     tlen_muc.obj
+ 0003:0000369c       ??_C@_03EBLA@num?$AA@      3262469c     tlen_muc.obj
+ 0003:000036a0       ??_C@_0EF@LBBH@Nickname?5already?5in?5use?0?5please?5@ 326246a0     tlen_muc.obj
+ 0003:000036e8       ??_C@_04KHAP@free?$AA@     326246e8     tlen_muc.obj
+ 0003:000036f0       ??_C@_0CF@OLCD@Nickname?5?8?$CFs?8?5is?5already?5registe@ 326246f0     tlen_muc.obj
+ 0003:00003718       ??_C@_0CA@JNCI@Chat?5room?5with?5already?5created?4?$AA@ 32624718     tlen_muc.obj
+ 0003:00003738       ??_C@_0DM@KKDJ@You?5cannot?5send?5any?5message?5unle@ 32624738     tlen_muc.obj
+ 0003:00003774       ??_C@_0EA@NHNK@This?5is?5a?5private?5chat?5room?5and?5@ 32624774     tlen_muc.obj
+ 0003:000037b4       ??_C@_0BF@CFAF@Chat?5room?5not?5found?4?$AA@ 326247b4     tlen_muc.obj
+ 0003:000037cc       ??_C@_0DI@EDEP@You?5cannot?5join?5this?5chat?5room?0?5@ 326247cc     tlen_muc.obj
+ 0003:00003804       ??_C@_04KKCM@code?$AA@     32624804     tlen_muc.obj
+ 0003:0000380c       ??_C@_0DB@LPOI@?$DMm?5to?$DN?8?$CFs?8?$DO?$DMx?$DO?$DMinv?5to?$DN?8?$CFs?8?$DO?$DMr?$DO?$DM?1@ 3262480c     tlen_muc.obj
+ 0003:00003840       ??_C@_0N@JCIP@?$DMp?5to?$DN?8?$CFs?8?1?$DO?$AA@ 32624840     tlen_muc.obj
+ 0003:00003850       ??_C@_0CC@DEJE@?$DMp?5to?$DN?8?$CFs?8?$DO?$DMs?$DOunavailable?$DM?1s?$DO?$DM?1p@ 32624850     tlen_muc.obj
+ 0003:00003874       ??_C@_0DH@JKDJ@?$DMm?5to?$DN?8?$CFs?8?$DO?$DMb?5n?$DN?8?$CFd?8?5s?$DN?8?$CFd?8?5f?$DN?8?$CF@ 32624874     tlen_muc.obj
+ 0003:000038ac       ??_C@_0CF@FDCN@?$DMm?5to?$DN?8?$CFs?8?$DO?$DMsubject?$DO?$CFs?$DM?1subject?$DO@ 326248ac     tlen_muc.obj
+ 0003:000038d4       ??_C@_0BO@HIHI@?$DMiq?5to?$DN?8c?8?5type?$DN?8?$CFd?8?5p?$DN?8?$CFs?8?1?$DO?$AA@ 326248d4     tlen_muc.obj
+ 0003:000038f4       ??_C@_0BP@KCGP@?$DMiq?5to?$DN?8?$CFs?8?5type?$DN?8?$CFd?8?5k?$DN?8?$CFd?8?1?$DO?$AA@ 326248f4     tlen_muc.obj
+ 0003:00003914       ??_C@_0BO@LAC@?$DMiq?5to?$DN?8c?8?5type?$DN?8?$CFd?8?5n?$DN?8?$CFs?8?1?$DO?$AA@ 32624914     tlen_muc.obj
+ 0003:00003934       ??_C@_0CE@HIDM@?$DMiq?5to?$DN?8c?8?5type?$DN?8?$CFd?8?5n?$DN?8?$CFs?8?5k?$DN?8u@ 32624934     tlen_muc.obj
+ 0003:00003958       ??_C@_0CF@IOLE@?$DMiq?5to?$DN?8c?8?5type?$DN?8?$CFd?8?5p?$DN?8?$CFs?8?5n?$DN?8?$CF@ 32624958     tlen_muc.obj
+ 0003:00003980       ??_C@_0BH@BPKP@?$DMiq?5to?$DN?8c?8?5type?$DN?8?$CFd?8?1?$DO?$AA@ 32624980     tlen_muc.obj
+ 0003:00003998       ??_C@_0CF@DEDL@?$DMiq?5to?$DN?8c?8?5type?$DN?83?8?5n?$DN?8?$CFs?8?5id?$DN?8?$CF@ 32624998     tlen_muc.obj
+ 0003:000039c0       ??_C@_06DEKK@mim_?$CFd?$AA@ 326249c0     tlen_muc.obj
+ 0003:000039c8       ??_C@_05DLON@hello?$AA@    326249c8     tlen_muc.obj
+ 0003:000039d0       ??_C@_0P@HJGC@MUCC?1NewWindow?$AA@ 326249d0     tlen_muc.obj
+ 0003:000039e0       ??_C@_0BB@BIFE@MUCC?1QueryResult?$AA@ 326249e0     tlen_muc.obj
+ 0003:000039f4       ??_C@_01JME@l?$AA@         326249f4     tlen_muc.obj
+ 0003:000039f8       ??_C@_01PLJA@0?$AA@        326249f8     tlen_muc.obj
+ 0003:000039fc       ??_C@_02BIOC@cn?$AA@       326249fc     tlen_muc.obj
+ 0003:00003a00       ??_C@_0BL@FHGJ@?$DMp?5to?$DN?8c?8?5tp?$DN?8c?8?5id?$DN?8?$CFs?8?1?$DO?$AA@ 32624a00     tlen_muc.obj
+ 0003:00003a1c       ??_C@_0BJ@BJHC@P2P?5receive?5thread?5ended?$AA@ 32624a1c     tlen_p2p_new.obj
+ 0003:00003a38       ??_C@_01BJG@?6?$AA@        32624a38     tlen_p2p_new.obj
+ 0003:00003a3c       ??_C@_08DNLE@?6?$HMSEND?5?$HM?$AA@ 32624a3c     tlen_p2p_new.obj
+ 0003:00003a48       ??_C@_05GPCA@?$CF02X?9?$AA@ 32624a48     tlen_p2p_new.obj
+ 0003:00003a50       ??_C@_0BM@JALB@?6?$HMRECV?5?$CFd?5bytes?5from?5?$CFs?3?$CFd?$HM?$AA@ 32624a50     tlen_p2p_new.obj
+ 0003:00003a6c       ??_C@_02JNFB@at?$AA@       32624a6c     tlen_p2p_new.obj
+ 0003:00003a70       ??_C@_03ECDD@UDP?$AA@      32624a70     tlen_p2p_new.obj
+ 0003:00003a74       ??_C@_07HDIA@START?3?6?$AA@ 32624a74     tlen_p2p_new.obj
+ 0003:00003a7c       ??_C@_0O@BNNC@tlen_recv?4dxx?$AA@ 32624a7c     tlen_p2p_new.obj
+ 0003:00003a8c       ??_C@_0BL@MHF@P2P?5receive?5thread?5started?$AA@ 32624a8c     tlen_p2p_new.obj
+ 0003:00003aa8       ??_C@_05NJEG@?5?5?$CFs?6?$AA@ 32624aa8     tlen_p2p_new.obj
+ 0003:00003ab0       ??_C@_0CI@FJAN@?$CF04d?9?$CF02d?9?$CF02d?5?$CF02d?3?$CF02d?3?$CF02d?0?$CF0@ 32624ab0     tlen_p2p_new.obj
+ 0003:00003ad8       ??_C@_04NLOI@INFO?$AA@     32624ad8     tlen_p2p_new.obj
+ 0003:00003ae0       ??_C@_0BG@OKPP@P2P?5send?5thread?5ended?$AA@ 32624ae0     tlen_p2p_new.obj
+ 0003:00003af8       ??_C@_0BB@ICG@?$HMsend?3?5?$CFd?5?$CFs?5?$CFd?$HM?$AA@ 32624af8     tlen_p2p_new.obj
+ 0003:00003b0c       ??_C@_0O@HJMC@tlen_send?4dxx?$AA@ 32624b0c     tlen_p2p_new.obj
+ 0003:00003b1c       ??_C@_06BGOF@START?3?$AA@  32624b1c     tlen_p2p_new.obj
+ 0003:00003b24       ??_C@_0O@IPPJ@tlen_send?4gxx?$AA@ 32624b24     tlen_p2p_new.obj
+ 0003:00003b34       ??_C@_0BI@LDOC@P2P?5send?5thread?5started?$AA@ 32624b34     tlen_p2p_new.obj
+ 0003:00003b4c       ??_C@_0BK@BDKN@UDP?5socket?5bound?5to?5?$CFs?3?$CFd?$AA@ 32624b4c     tlen_p2p_new.obj
+ 0003:00003b68       ??_C@_0M@EGHG@?$CFu?4?$CFu?4?$CFu?4?$CFu?$AA@ 32624b68     tlen_p2p_new.obj
+ 0003:00003b74       ??_C@_0BD@BFNN@Binding?5UDP?5socket?$AA@ 32624b74     tlen_p2p_new.obj
+ 0003:00003b88       ??_C@_08KHCB@step?5?$DN?54?$AA@ 32624b88     tlen_p2p_new.obj
+ 0003:00003b94       ??_C@_0GI@FOBC@?$DMiq?5to?$DN?8?$CFs?8?$DO?$DMquery?5xmlns?$DN?8p2p?8?$DO?$DM@ 32624b94     tlen_p2p_new.obj
+ 0003:00003bfc       ??_C@_02ELAO@pp?$AA@       32624bfc     tlen_p2p_new.obj
+ 0003:00003c00       ??_C@_02EIOJ@pa?$AA@       32624c00     tlen_p2p_new.obj
+ 0003:00003c04       ??_C@_08FIFD@step?5?$DN?52?$AA@ 32624c04     tlen_p2p_new.obj
+ 0003:00003c10       ??_C@_0GO@KKGF@?$DMiq?5to?$DN?8?$CFs?8?$DO?$DMquery?5xmlns?$DN?8p2p?8?$DO?$DM@ 32624c10     tlen_p2p_new.obj
+ 0003:00003c80       ??_C@_09GEEL@file_send?$AA@ 32624c80     tlen_p2p_new.obj
+ 0003:00003c8c       ??_C@_02HNCL@iv?$AA@       32624c8c     tlen_p2p_new.obj
+ 0003:00003c90       ??_C@_02BICJ@ck?$AA@       32624c90     tlen_p2p_new.obj
+ 0003:00003c94       ??_C@_01FMCB@k?$AA@        32624c94     tlen_p2p_new.obj
+ 0003:00003c98       ??_C@_02IPKM@mi?$AA@       32624c98     tlen_p2p_new.obj
+ 0003:00003c9c       ??_C@_04CKHH@DCNG?$AA@     32624c9c     tlen_p2p_new.obj
+ 0003:00003ca4       ??_C@_0LH@FNNN@?$DMiq?5to?$DN?8?$CFs?8?$DO?$DMquery?5xmlns?$DN?8p2p?8?$DO?$DM@ 32624ca4     tlen_p2p_new.obj
+ 0003:00003d5c       ??_C@_08JBLF@84273372?$AA@ 32624d5c     tlen_p2p_new.obj
+ 0003:00003d68       ??_C@_0BF@NBOI@?$CFs?5file?$CIs?$CJ?0?5?$CFs?5bytes?$AA@ 32624d68     tlen_p2p_new.obj
+ 0003:00003d80       ??_C@_02CNME@dc?$AA@       32624d80     tlen_p2p_new.obj
+ 0003:00003d84       ??_C@_04EFFC@dcng?$AA@     32624d84     tlen_p2p_new.obj
+ 0003:00003d8c       ??_C@_02MDEI@vs?$AA@       32624d8c     tlen_p2p_new.obj
+ 0003:00003d90       ??_C@_02KJOB@fs?$AA@       32624d90     tlen_p2p_new.obj
+ 0003:00003d94       ??_C@_08NBNM@?$CF08X?$CFs?$CFd?$AA@ 32624d94     tlen_p2p_old.obj
+ 0003:00003da0       ??_C@_0CC@KCOG@Establishing?5outgoing?5connection@ 32624da0     tlen_p2p_old.obj
+ 0003:00003dc4       ??_C@_0BA@JJCP@listening?5on?5?$CFd?$AA@ 32624dc4     tlen_p2p_old.obj
+ 0003:00003dd4       ??_C@_0BA@GLLO@Netlib?1BindPort?$AA@ 32624dd4     tlen_p2p_old.obj
+ 0003:00003de4       ??_C@_0BL@FHBN@Calling?5MS_NETLIB_BINDPORT?$AA@ 32624de4     tlen_p2p_old.obj
+ 0003:00003e00       ??_C@_0CN@MAFD@Closing?5connection?5for?5this?5file@ 32624e00     tlen_p2p_old.obj
+ 0003:00003e30       ??_C@_0BK@NJPE@SOCKS5?5negotiation?5failed?$AA@ 32624e30     tlen_p2p_old.obj
+ 0003:00003e4c       ??_C@_0BP@FOKB@Send?5failed?5?$CI?$CFd?$CJ?0?5thread?5ended?$AA@ 32624e4c     tlen_p2p_old.obj
+ 0003:00003e6c       ??_C@_0BO@JHMG@SOCKS5?5sub?9negotiation?5failed?$AA@ 32624e6c     tlen_p2p_old.obj
+ 0003:00003e8c       ??_C@_0CF@FAEI@Connection?5failed?5?$CI?$CFd?$CJ?0?5thread?5e@ 32624e8c     tlen_p2p_old.obj
+ 0003:00003eb8       _tlenFieldGender           32624eb8     tlen_userinfo.obj
+ 0003:00003ed0       _tlenFieldLookfor          32624ed0     tlen_userinfo.obj
+ 0003:00003f00       _tlenFieldStatus           32624f00     tlen_userinfo.obj
+ 0003:00003f20       _tlenFieldOccupation       32624f20     tlen_userinfo.obj
+ 0003:00003f88       _tlenFieldPlan             32624f88     tlen_userinfo.obj
+ 0003:00003fc0       ??_C@_1CO@EPEJ@?$AAW?$AAa?$AAi?$AAt?$AAi?$AAn?$AAg?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAs?$AAu?$AAg?$AAg?$AAe?$AAs?$AAt?$AAi@ 32624fc0     tlen_userinfo.obj
+ 0003:00003ff0       ??_C@_1DO@GABO@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAo?$AAn?$AA?5?$AAa?$AA?5@ 32624ff0     tlen_userinfo.obj
+ 0003:00004030       ??_C@_1DI@HILD@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@ 32625030     tlen_userinfo.obj
+ 0003:00004068       ??_C@_1DA@KMLL@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAk?$AAe?$AA?5?$AAa?$AA?5?$AAw@ 32625068     tlen_userinfo.obj
+ 0003:00004098       ??_C@_1DK@NIBP@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@ 32625098     tlen_userinfo.obj
+ 0003:000040d4       ??_C@_1DA@HABI@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAd?$AAo?$AAw?$AAn?$AAt@ 326250d4     tlen_userinfo.obj
+ 0003:00004104       ??_C@_1M@PIIK@?$AAO?$AAt?$AAh?$AAe?$AAr?$AA?$AA@ 32625104     tlen_userinfo.obj
+ 0003:00004110       ??_C@_1O@LKAE@?$AAD?$AAo?$AAc?$AAt?$AAo?$AAr?$AA?$AA@ 32625110     tlen_userinfo.obj
+ 0003:00004120       ??_C@_1BA@DNL@?$AAT?$AAe?$AAa?$AAc?$AAh?$AAe?$AAr?$AA?$AA@ 32625120     tlen_userinfo.obj
+ 0003:00004130       ??_C@_1BI@JIMD@?$AAH?$AAo?$AAu?$AAs?$AAe?$AAk?$AAe?$AAe?$AAp?$AAe?$AAr?$AA?$AA@ 32625130     tlen_userinfo.obj
+ 0003:00004148       ??_C@_1BE@HIIK@?$AAP?$AAe?$AAn?$AAs?$AAi?$AAo?$AAn?$AAe?$AAr?$AA?$AA@ 32625148     tlen_userinfo.obj
+ 0003:0000415c       ??_C@_1BG@HDHN@?$AAU?$AAn?$AAe?$AAm?$AAp?$AAl?$AAo?$AAy?$AAe?$AAd?$AA?$AA@ 3262515c     tlen_userinfo.obj
+ 0003:00004174       ??_C@_1M@FBAA@?$AAC?$AAl?$AAe?$AAr?$AAk?$AA?$AA@ 32625174     tlen_userinfo.obj
+ 0003:00004180       ??_C@_1BG@JMK@?$AAS?$AAp?$AAe?$AAc?$AAi?$AAa?$AAl?$AAi?$AAs?$AAt?$AA?$AA@ 32625180     tlen_userinfo.obj
+ 0003:00004198       ??_C@_1BA@EDMP@?$AAM?$AAa?$AAn?$AAa?$AAg?$AAe?$AAr?$AA?$AA@ 32625198     tlen_userinfo.obj
+ 0003:000041a8       ??_C@_1O@CHEJ@?$AAF?$AAa?$AAr?$AAm?$AAe?$AAr?$AA?$AA@ 326251a8     tlen_userinfo.obj
+ 0003:000041b8       ??_C@_1CA@DGFF@?$AAC?$AAo?$AAl?$AAl?$AAe?$AAg?$AAe?$AA?5?$AAs?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@ 326251b8     tlen_userinfo.obj
+ 0003:000041d8       ??_C@_1BA@KJGO@?$AAS?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@ 326251d8     tlen_userinfo.obj
+ 0003:000041e8       ??_C@_1BE@HBAJ@?$AAA?$AAv?$AAa?$AAi?$AAl?$AAa?$AAb?$AAl?$AAe?$AA?$AA@ 326251e8     tlen_userinfo.obj
+ 0003:000041fc       ??_C@_17BICM@?$AAA?$AAl?$AAl?$AA?$AA@ 326251fc     tlen_userinfo.obj
+ 0003:00004204       ??_C@_1BA@NIAL@?$AAN?$AAo?$AAt?$AAh?$AAi?$AAn?$AAg?$AA?$AA@ 32625204     tlen_userinfo.obj
+ 0003:00004214       ??_C@_19FBLE@?$AAL?$AAo?$AAv?$AAe?$AA?$AA@ 32625214     tlen_userinfo.obj
+ 0003:00004220       ??_C@_1BM@JAOE@?$AAF?$AAl?$AAi?$AAr?$AAt?$AA?1?$AAr?$AAo?$AAm?$AAa?$AAn?$AAc?$AAe?$AA?$AA@ 32625220     tlen_userinfo.obj
+ 0003:0000423c       ??_C@_1BG@HEKK@?$AAF?$AAr?$AAi?$AAe?$AAn?$AAd?$AAs?$AAh?$AAi?$AAp?$AA?$AA@ 3262523c     tlen_userinfo.obj
+ 0003:00004254       ??_C@_1CC@ODLD@?$AAS?$AAo?$AAm?$AAe?$AAb?$AAo?$AAd?$AAy?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAl?$AAk?$AA?$AA@ 32625254     tlen_userinfo.obj
+ 0003:00004278       ??_C@_1O@ELC@?$AAF?$AAe?$AAm?$AAa?$AAl?$AAe?$AA?$AA@ 32625278     tlen_userinfo.obj
+ 0003:00004288       ??_C@_19EDBJ@?$AAM?$AAa?$AAl?$AAe?$AA?$AA@ 32625288     tlen_userinfo.obj
+ 0003:00004294       ??_C@_0BB@OEEL@UserInfo?1AddPage?$AA@ 32625294     tlen_userinfo.obj
+ 0003:000042a8       ??_C@_07JPGB@Account?$AA@  326252a8     tlen_userinfo.obj
+ 0003:000042b0       ??_C@_0BH@BMEL@Proto?1IsProtocolLoaded?$AA@ 326252b0     tlen_userinfo.obj
+ 0003:000042c8       ??_C@_0O@IPOG@?$DM?1query?$DO?$DM?1iq?$DO?$AA@ 326252c8     tlen_userinfo.obj
+ 0003:000042d8       ??_C@_09GKP@?$DMv?$DO?$CFd?$DM?1v?$DO?$AA@ 326252d8     tlen_userinfo.obj
+ 0003:000042e4       ??_C@_09LAGL@?$DMg?$DO?$CFd?$DM?1g?$DO?$AA@ 326252e4     tlen_userinfo.obj
+ 0003:000042f0       ??_C@_0EI@GNHC@?$DMiq?5type?$DN?8set?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@ 326252f0     tlen_userinfo.obj
+ 0003:00004338       ??_C@_1BM@MBDI@?$AAn?$AAo?$AAt?$AA?5?$AAo?$AAn?$AA?5?$AAr?$AAo?$AAs?$AAt?$AAe?$AAr?$AA?$AA@ 32625338     tlen_userinfo.obj
+ 0003:00004354       ??_C@_15GGJF@?$AAt?$AAo?$AA?$AA@ 32625354     tlen_userinfo.obj
+ 0003:0000435c       ??_C@_19LELL@?$AAf?$AAr?$AAo?$AAm?$AA?$AA@ 3262535c     tlen_userinfo.obj
+ 0003:00004368       ??_C@_19ENPD@?$AAb?$AAo?$AAt?$AAh?$AA?$AA@ 32625368     tlen_userinfo.obj
+ 0003:00004374       ??_C@_19JPFO@?$AAn?$AAo?$AAn?$AAe?$AA?$AA@ 32625374     tlen_userinfo.obj
+ 0003:000043c4       ??_C@_1BI@LPHK@?$AA?4?$AA?4?$AA?4?$AAE?$AAr?$AAr?$AAo?$AAr?$AA?4?$AA?4?$AA?4?$AA?$AA@ 326253c4     tlen_voice.obj
+ 0003:000043dc       ??_C@_1BO@LFEK@?$AA?4?$AA?4?$AA?4?$AAF?$AAi?$AAn?$AAi?$AAs?$AAh?$AAe?$AAd?$AA?4?$AA?4?$AA?4?$AA?$AA@ 326253dc     tlen_voice.obj
+ 0003:000043fc       ??_C@_0CH@FGBA@?$DMv?5t?$DN?8?$CFs?8?5i?$DN?8?$CFs?8?5e?$DN?87?8?5a?$DN?8?$CFs?8?5p?$DN@ 326253fc     tlen_voice.obj
+ 0003:00004424       ??_C@_1DK@CHIL@?$AA?4?$AA?4?$AA?4?$AAW?$AAa?$AAi?$AAt?$AAi?$AAn?$AAg?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAc?$AAo?$AAn?$AAn?$AAe@ 32625424     tlen_voice.obj
+ 0003:00004460       ??_C@_1CC@CDEO@?$AA?4?$AA?4?$AA?4?$AAC?$AAo?$AAn?$AAn?$AAe?$AAc?$AAt?$AAi?$AAn?$AAg?$AA?4?$AA?4?$AA?4?$AA?$AA@ 32625460     tlen_voice.obj
+ 0003:00004484       ??_C@_0BK@MAGB@TlenVoiceStart?5FAILED?5?$CD2?$CB?$AA@ 32625484     tlen_voice.obj
+ 0003:000044a0       ??_C@_0BE@HLBB@TlenVoiceRStart?5OK?$CB?$AA@ 326254a0     tlen_voice.obj
+ 0003:000044b4       ??_C@_0BK@JLOF@TlenVoiceStart?5FAILED?5?$CFd?$CB?$AA@ 326254b4     tlen_voice.obj
+ 0003:000044d0       ??_C@_0BO@PNKF@Recording?5device?5ID?5?$CD?$CFu?3?5?$CFs?$AN?6?$AA@ 326254d0     tlen_voice.obj
+ 0003:000044f0       ??_C@_0BK@OEMO@recording?5thread?5ended?4?4?4?$AA@ 326254f0     tlen_voice.obj
+ 0003:0000450c       ??_C@_0BD@HGIF@?$DM?9?5TlenVoiceFreeVc?$AA@ 3262550c     tlen_voice.obj
+ 0003:00004520       ??_C@_0BD@GCEN@?9?$DO?5TlenVoiceFreeVc?$AA@ 32625520     tlen_voice.obj
+ 0003:00004534       ??_C@_09HLBN@?$CFs?5?$CFd?5?$CFd?5?$AA@ 32625534     tlen_voice.obj
+ 0003:00004540       ??_C@_0BA@FDGN@?5Unknown?5codec?5?$AA@ 32625540     tlen_voice.obj
+ 0003:00004550       ??_C@_0BF@EBIO@?$CB?$CB?5Skipping?5frame?5?$CB?$CB?$AA@ 32625550     tlen_voice.obj
+ 0003:00004568       ??_C@_04HHNC@?5OK?5?$AA@   32625568     tlen_voice.obj
+ 0003:00004570       ??_C@_0BB@NMB@?5Unknown?5packet?5?$AA@ 32625570     tlen_voice.obj
+ 0003:00004584       ??_C@_0BD@NBHN@TlenVoiceStart?5OK?$CB?$AA@ 32625584     tlen_voice.obj
+ 0003:00004598       ??_C@_0BH@OELG@TlenVoiceStart?5FAILED?$CB?$AA@ 32625598     tlen_voice.obj
+ 0003:000045b0       ??_C@_0BN@MJGN@Playback?5device?5ID?5?$CD?$CFu?3?5?$CFs?$AN?6?$AA@ 326255b0     tlen_voice.obj
+ 0003:000045d0       ??_C@_0BO@JLOP@Thread?5ended?3?5type?$DNvoice_send?$AA@ 326255d0     tlen_voice.obj
+ 0003:000045f0       ??_C@_1BK@OCHC@?$AA?4?$AA?4?$AA?4?$AAD?$AAe?$AAn?$AAi?$AAe?$AAd?$AA?4?$AA?4?$AA?4?$AA?$AA@ 326255f0     tlen_voice.obj
+ 0003:0000460c       ??_C@_0BJ@HICO@?$DMv?5t?$DN?8?$CFs?8?5i?$DN?8?$CFs?8?5e?$DN?88?8?1?$DO?$AA@ 3262560c     tlen_voice.obj
+ 0003:00004628       ??_C@_0N@LDFM@Finish?5voice?$AA@ 32625628     tlen_voice.obj
+ 0003:00004638       ??_C@_0CJ@NBAC@Waiting?5for?5the?5voice?5data?5to?5be@ 32625638     tlen_voice.obj
+ 0003:00004664       ??_C@_0CH@EDOE@?$DMv?5t?$DN?8?$CFs?8?5i?$DN?8?$CFs?8?5e?$DN?86?8?5a?$DN?8?$CFs?8?5p?$DN@ 32625664     tlen_voice.obj
+ 0003:0000468c       ??_C@_0CA@OEBH@Thread?5started?3?5type?$DNvoice_send?$AA@ 3262568c     tlen_voice.obj
+ 0003:000046ac       ??_C@_0BG@CKCO@freeing?5?$CIV?$CJ?5ft?5struct?$AA@ 326256ac     tlen_voice.obj
+ 0003:000046c4       ??_C@_0BP@EMAL@?$DMv?5t?$DN?8?$CFs?8?5e?$DN?81?8?5i?$DN?8?$CFs?8?5v?$DN?81?8?1?$DO?$AA@ 326256c4     tlen_voice.obj
+ 0003:000046e4       ??_C@_1BE@FBJM@?$AA?4?$AA?4?$AA?4?$AA?$DP?$AA?$DP?$AA?$DP?$AA?4?$AA?4?$AA?4?$AA?$AA@ 326256e4     tlen_voice.obj
+ 0003:000046f8       ??_C@_1CG@NCHG@?$AA4?$AA4?$AA1?$AA0?$AA0?$AA?5?$AAH?$AAz?$AA?5?$AA?1?$AA?5?$AA7?$AA2?$AA?5?$AAk?$AAb?$AAp?$AAs?$AA?$AA@ 326256f8     tlen_voice.obj
+ 0003:00004720       ??_C@_1CK@CJED@?$AA2?$AA2?$AA0?$AA5?$AA0?$AA?5?$AAH?$AAz?$AA?5?$AA?1?$AA?5?$AA3?$AA6?$AA?4?$AA8?$AA?5?$AAk?$AAb?$AAp?$AAs@ 32625720     tlen_voice.obj
+ 0003:0000474c       ??_C@_1CK@BJKM@?$AA1?$AA1?$AA0?$AA2?$AA5?$AA?5?$AAH?$AAz?$AA?5?$AA?1?$AA?5?$AA1?$AA9?$AA?4?$AA1?$AA?5?$AAk?$AAb?$AAp?$AAs@ 3262574c     tlen_voice.obj
+ 0003:00004778       ??_C@_1CI@MBGJ@?$AA8?$AA0?$AA0?$AA0?$AA?5?$AAH?$AAz?$AA?5?$AA?1?$AA?5?$AA1?$AA3?$AA?4?$AA8?$AA?5?$AAk?$AAb?$AAp?$AAs?$AA?$AA@ 32625778     tlen_voice.obj
+ 0003:000047a0       ??_C@_09PMKM@?$CF?41f?5kB?1s?$AA@ 326257a0     tlen_voice.obj
+ 0003:000047ac       ??_C@_1BA@FHJ@?$AAD?$AAI?$AAS?$AAP?$AAL?$AAA?$AAY?$AA?$AA@ 326257ac     tlen_voice.obj
+ 0003:000047bc       ??_C@_0BP@HHBC@?$DMv?5t?$DN?8?$CFs?8?5i?$DN?8?$CFs?8?5e?$DN?85?8?5v?$DN?81?8?1?$DO?$AA@ 326257bc     tlen_voice.obj
+ 0003:000047dc       ??_C@_0BK@GEK@?$DMv?5t?$DN?8?$CFs?8?5i?$DN?8?$CFs?8?5e?$DN?84?8?5?1?$DO?$AA@ 326257dc     tlen_voice.obj
+ 0003:000047f8       ??_C@_1BA@HMKN@?$AAD?$AAe?$AAf?$AAa?$AAu?$AAl?$AAt?$AA?$AA@ 326257f8     tlen_voice.obj
+ 0003:00007a40       ??_C@_00A@?$AA@            32628a40     bignum.obj
+ 0003:00007bcc       _isMIrandaUnicode          32628bcc     tlen.obj
+ 0003:00007bd0       ??_C@_11A@?$AA?$AA@        32628bd0     tlen_advsearch.obj
+ 0003:00007da0       _utfi                      32628da0     <common>
+ 0003:00007dc0       _md5i                      32628dc0     <common>
+ 0003:00007de0       _sha1i                     32628de0     <common>
+ 0003:00007e00       _tlenIcons                 32628e00     <common>
+ 0003:00007e24       _hMainThread               32628e24     <common>
+ 0003:00007e40       _mmi                       32628e40     <common>
+ 0003:00007e7c       _hInst                     32628e7c     <common>
+ 0003:00007e80       _pluginLink                32628e80     <common>
+ 0003:00007ea0       _mutex                     32628ea0     <common>
+ 0003:00007eb8       __adjust_fdiv              32628eb8     <common>
+ 0003:00007ebc       ___onexitend               32628ebc     <common>
+ 0003:00007ec0       ___onexitbegin             32628ec0     <common>
+ 0003:00007ec4       __pRawDllMain              32628ec4     <common>
+
+ entry point at        0001:0001d05d
+
+ Static symbols
+
+ 0001:0001b007       _TlenVoiceRecordingStart   3261c007 f   tlen_voice.obj
+ 0001:0001b276       _TlenVoiceRecordingThreadProc@4 3261c276 f   tlen_voice.obj
+ 0001:0001b330       _TlenVoiceCreateVC         3261c330 f   tlen_voice.obj
+ 0001:0001b362       _TlenVoiceFreeVc           3261c362 f   tlen_voice.obj
+ 0001:0001b4aa       _TlenVoiceReceivingConnection 3261c4aa f   tlen_voice.obj
+ 0001:0001b5d5       _TlenVoiceReceiveParse     3261c5d5 f   tlen_voice.obj
+ 0001:0001b90e       _TlenVoicePlaybackStart    3261c90e f   tlen_voice.obj
+ 0001:0001bab4       _TlenVoicePlaybackCallback@20 3261cab4 f   tlen_voice.obj
+ 0001:0001bae0       _TlenVoiceCrypt            3261cae0 f   tlen_voice.obj
+ 0001:0001be33       _TlenVoiceSendParse        3261ce33 f   tlen_voice.obj
+ 0001:0001c1a7       _TlenVoiceDlgThread        3261d1a7 f   tlen_voice.obj
+ 0001:0001c1d9       _TlenVoiceDlgProc@16       3261d1d9 f   tlen_voice.obj
+ 0001:0001c67d       _TranslateDialogDefault    3261d67d f   tlen_voice.obj
+ 0001:0001c6af       _TlenVoiceInitVUMeters     3261d6af f   tlen_voice.obj
+ 0001:0001c849       _TlenVoiceMakeBitmap       3261d849 f   tlen_voice.obj
+ 0001:0001cb51       _TlenVoiceAcceptDlgThread  3261db51 f   tlen_voice.obj
+ 0001:0001cc06       _TlenVoiceAcceptDlgProc@16 3261dc06 f   tlen_voice.obj
+ 0001:0001cc8e       _getDisplayName            3261dc8e f   tlen_voice.obj
+ 0001:0001a29d       _TlenUserInfoDlgProc@16    3261b29d f   tlen_userinfo.obj
+ 0001:0001abb8       _InitComboBox              3261bbb8 f   tlen_userinfo.obj
+ 0001:0001ac34       _FetchField                3261bc34 f   tlen_userinfo.obj
+ 0001:0001acc2       _FetchCombo                3261bcc2 f   tlen_userinfo.obj
+ 0001:0001c67d       _TranslateDialogDefault    3261d67d f   tlen_voice.obj
+ 0001:00019b0e       _TlenP2PBindSocks4         3261ab0e f   tlen_p2p_old.obj
+ 0001:00019cd8       _TlenFileBindSocks4Thread  3261acd8 f   tlen_p2p_old.obj
+ 0001:00019d5d       _TlenP2PBindSocks5         3261ad5d f   tlen_p2p_old.obj
+ 0001:0001a146       _TlenFileBindSocks5Thread  3261b146 f   tlen_p2p_old.obj
+ 0001:00018900       _logInfo                   32619900 f   tlen_p2p_new.obj
+ 0001:000167de       _TlenMUCHandleEvent        326177de f   tlen_muc.obj
+ 0001:00016caa       _isSelf                    32617caa f   tlen_muc.obj
+ 0001:00016f36       _getDisplayName            32617f36 f   tlen_muc.obj
+ 0001:000172d2       _stringToHex               326182d2 f   tlen_muc.obj
+ 0001:000175ba       _TlenMUCSendInvitation     326185ba f   tlen_muc.obj
+ 0001:000175e4       _TlenMUCSendPresence       326185e4 f   tlen_muc.obj
+ 0001:000176e7       _TlenMUCSendMessage        326186e7 f   tlen_muc.obj
+ 0001:0001776e       _TlenMUCSendTopic          3261876e f   tlen_muc.obj
+ 0001:000177ca       _TlenMUCSendQuery          326187ca f   tlen_muc.obj
+ 0001:00017b2f       _TlenMUCFreeQueryResult    32618b2f f   tlen_muc.obj
+ 0001:00018263       _TlenMUCQueryContacts      32619263 f   tlen_muc.obj
+ 0001:00018296       _TlenMUCCSendQueryResultThread 32619296 f   tlen_muc.obj
+ 0001:000155b6       _TlenFileReceiveThread     326165b6 f   tlen_file.obj
+ 0001:00015871       _TlenFileReceivingConnection 32616871 f   tlen_file.obj
+ 0001:000159d0       _TlenFileReceiveParse      326169d0 f   tlen_file.obj
+ 0001:00015ddc       _TlenFileSendingThread     32616ddc f   tlen_file.obj
+ 0001:00016220       _TlenFileSendingConnection 32617220 f   tlen_file.obj
+ 0001:0001637f       _TlenFileSendParse         3261737f f   tlen_file.obj
+ 0001:000143dd       _RemoveAvatar              326153dd f   tlen_avatar.obj
+ 0001:0001453a       _TlenGetAvatarThread       3261553a f   tlen_avatar.obj
+ 0001:000147c2       _SetAvatar                 326157c2 f   tlen_avatar.obj
+ 0001:000149c2       _replaceTokens             326159c2 f   tlen_avatar.obj
+ 0001:00014c00       _TlenRemoveAvatarRequestThread 32615c00 f   tlen_avatar.obj
+ 0001:00014dc2       _TlenUploadAvatarRequestThread 32615dc2 f   tlen_avatar.obj
+ 0001:00013f63       _InitComboBox              32614f63 f   tlen_advsearch.obj
+ 0001:00014143       _FetchField                32615143 f   tlen_advsearch.obj
+ 0001:0001acc2       _FetchCombo                3261bcc2 f   tlen_userinfo.obj
+ 0001:0001c67d       _TranslateDialogDefault    3261d67d f   tlen_voice.obj
+ 0001:0001313f       _TlenRegisterIcons         3261413f f   tlen.obj
+ 0001:000133a2       _GetIconName               326143a2 f   tlen.obj
+ 0001:00013409       _GetIconDescription        32614409 f   tlen.obj
+ 0001:0001346c       _TlenLoadIcons             3261446c f   tlen.obj
+ 0001:000134bb       _tlenProtoInit             326144bb f   tlen.obj
+ 0001:000136d4       _TlenIconsChanged          326146d4 f   tlen.obj
+ 0001:000137c5       _TlenReleaseIcons          326147c5 f   tlen.obj
+ 0001:00013805       _TlenPrebuildContactMenu   32614805 f   tlen.obj
+ 0001:000139d5       _initMenuItems             326149d5 f   tlen.obj
+ 0001:00013e1d       _tlenProtoUninit           32614e1d f   tlen.obj
+ 0001:00012357       _JabberXmlProcessElem      32613357 f   jabber_xml.obj
+ 0001:000125e5       _JabberXmlParseAttr        326135e5 f   jabber_xml.obj
+ 0001:000128a1       _JabberXmlRemoveChild      326138a1 f   jabber_xml.obj
+ 0001:0000d9a2       _JabberDummyApcFunc@4      3260e9a2 f   jabber_thread.obj
+ 0001:0000d9a5       _JabberPasswordCreateDialogApcProc@4 3260e9a5 f   jabber_thread.obj
+ 0001:0000d9c4       _JabberPasswordDlgProc@16  3260e9c4 f   jabber_thread.obj
+ 0001:0000da66       _JabberProcessStreamOpening 3260ea66 f   jabber_thread.obj
+ 0001:0000dccf       _TlenSendAuth              3260eccf f   jabber_thread.obj
+ 0001:0000dd81       _JabberProcessStreamClosing 3260ed81 f   jabber_thread.obj
+ 0001:0000ddfb       _JabberProcessProtocol     3260edfb f   jabber_thread.obj
+ 0001:0000df79       _TlenProcessCipher         3260ef79 f   jabber_thread.obj
+ 0001:0000dfb8       _TlenProcessAvatar         3260efb8 f   jabber_thread.obj
+ 0001:0000e013       _JabberProcessMessage      3260f013 f   jabber_thread.obj
+ 0001:0000e731       _TranslateDialogDefault    3260f731 f   jabber_thread.obj
+ 0001:0000e763       _JabberProcessPresence     3260f763 f   jabber_thread.obj
+ 0001:0000eeb0       _JabberProcessIq           3260feb0 f   jabber_thread.obj
+ 0001:0000f831       _TlenProcessIqGetVersion   32610831 f   jabber_thread.obj
+ 0001:0000fabb       _TlenProcessW              32610abb f   jabber_thread.obj
+ 0001:0000fca1       _TlenProcessM              32610ca1 f   jabber_thread.obj
+ 0001:0001012b       _TlenProcessN              3261112b f   jabber_thread.obj
+ 0001:0001027d       _TlenMailPopup             3261127d f   jabber_thread.obj
+ 0001:0001043f       _TlenProcessP              3261143f f   jabber_thread.obj
+ 0001:000106e6       _TlenProcessV              326116e6 f   jabber_thread.obj
+ 0001:00010ab4       _JabberKeepAliveThread     32611ab4 f   jabber_thread.obj
+ 0001:0000ac25       _AddToListByJID            3260bc25 f   jabber_svc.obj
+ 0001:0000b1bb       _TlenConnect               3260c1bb f   jabber_svc.obj
+ 0001:0000b920       _JabberSendMessageAckThread 3260c920 f   jabber_svc.obj
+ 0001:0000b986       _TlenSendMessageFailedThread 3260c986 f   jabber_svc.obj
+ 0001:0000ba19       _TlenGetAwayMsgThread      3260ca19 f   jabber_svc.obj
+ 0001:0000c433       _settingToChar             3260d433 f   jabber_svc.obj
+ 0001:0000c6e5       _TlenChangeAvatarDlgProc@16 3260d6e5 f   jabber_svc.obj
+ 0001:0001c67d       _TranslateDialogDefault    3261d67d f   tlen_voice.obj
+ 0001:0000caa2       _TlenGetAvatarInfo         3260daa2 f   jabber_svc.obj
+ 0001:00008a2b       _JabberValidateUsernameWndProc@16 32609a2b f   jabber_opt.obj
+ 0001:00008a7b       _TlenBasicOptDlgProc@16    32609a7b f   jabber_opt.obj
+ 0001:000094ba       _ApplyChanges              3260a4ba f   jabber_opt.obj
+ 0001:000094d3       _MarkChanges               3260a4d3 f   jabber_opt.obj
+ 0001:000094f8       _TlenVoiceOptDlgProc@16    3260a4f8 f   jabber_opt.obj
+ 0001:0000975c       _TlenAdvOptDlgProc@16      3260a75c f   jabber_opt.obj
+ 0001:0000a3a7       _TranslateDialogDefault    3260b3a7 f   jabber_opt.obj
+ 0001:0000a3d9       _TlenPopupsDlgProc@16      3260b3d9 f   jabber_opt.obj
+ 0001:0000a7e8       _MailPopupPreview          3260b7e8 f   jabber_opt.obj
+ 0001:00008076       _JabberContactListCreateClistGroup 32609076 f   jabber_misc.obj
+ 0001:000081f5       _forkthread_r              326091f5 f   jabber_misc.obj
+ 0001:0000765b       _JabberListFreeItemInternal 3260865b f   jabber_list.obj
+ 0001:00005bc6       _JabberIqRemove            32606bc6 f   jabber_iq.obj
+ 0001:00005c30       _JabberIqExpire            32606c30 f   jabber_iq.obj
+ 0001:000042a1       _mpi_get_digit             326052a1 f   bignum.obj
+ 0001:0000440b       _mpi_write_hlp             3260540b f   bignum.obj
+ 0001:00004a3f       _mpi_sub_hlp               32605a3f f   bignum.obj
+ 0001:00004cab       _mpi_mul_hlp               32605cab f   bignum.obj
+ 0001:000059a3       _mpi_montg_init            326069a3 f   bignum.obj
+ 0001:000059e8       _mpi_montmul               326069e8 f   bignum.obj
+ 0001:00005ac3       _mpi_montred               32606ac3 f   bignum.obj
+ 0001:00001ea1       _aes_gen_tables            32602ea1 f   aes.obj
+ 0001:000015cb       _dequantizeLARs            326025cb f   gsm_short.obj
+ 0001:000016a9       _interpolateLARs_0_12      326026a9 f   gsm_short.obj
+ 0001:000016e6       _interpolateLARs_13_26     326026e6 f   gsm_short.obj
+ 0001:00001714       _interpolateLARs_27_39     32602714 f   gsm_short.obj
+ 0001:00001751       _interpolateLARs_40_159    32602751 f   gsm_short.obj
+ 0001:0000176c       _LARToR                    3260276c f   gsm_short.obj
+ 0001:000017b1       _shortTermAnalysisFilter   326027b1 f   gsm_short.obj
+ 0001:00001912       _shortTermSynthesisFilter  32602912 f   gsm_short.obj
+ 0001:00001216       _weightingFilter           32602216 f   gsm_rpe.obj
+ 0001:0000128b       _gridSelection             3260228b f   gsm_rpe.obj
+ 0001:000012f8       _gridPositioning           326022f8 f   gsm_rpe.obj
+ 0001:00001325       _APCMQuantization          32602325 f   gsm_rpe.obj
+ 0001:000013d8       _APCMXmaxcToExpMant        326023d8 f   gsm_rpe.obj
+ 0001:00001417       _APCMDequantization        32602417 f   gsm_rpe.obj
+ 0001:00000e15       _autocorrelation           32601e15 f   gsm_lpc.obj
+ 0001:00000e8d       _schur                     32601e8d f   gsm_lpc.obj
+ 0001:00000f3c       _rToLAR                    32601f3c f   gsm_lpc.obj
+ 0001:00000f7f       _quantizeLARs              32601f7f f   gsm_lpc.obj
+ 0001:00000b22       _longTermLTPCalculation    32601b22 f   gsm_long.obj
+ 0001:00000c68       _longTermAnalysisFilter    32601c68 f   gsm_long.obj
+ 0001:00000d20       _longTermSynthesisFilter   32601d20 f   gsm_long.obj

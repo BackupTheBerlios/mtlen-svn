@@ -39,46 +39,55 @@ END
 // Dialog
 //
 
+IDD_ACCMGRUI DIALOGEX 0, 0, 186, 134
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "Username:",IDC_STATIC,0,14,38,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_USERNAME,65,14,115,12,ES_AUTOHSCROLL
+    LTEXT           "Password:",IDC_STATIC,0,30,38,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_PASSWORD,65,30,115,12,ES_PASSWORD | ES_AUTOHSCROLL
+    CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,65,46,115,10
+    CONTROL         "Create new account",IDC_REGISTERACCOUNT,"Hyperlink",
+                    0x0,0,62,100,8
+END
+
+
 IDD_OPTIONS_BASIC DIALOGEX 0, 0, 304, 200
 STYLE DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Tlen",IDC_TLEN,0,0,304,42
-    LTEXT           "Username:",IDC_STATIC,14,12,52,8
+    LTEXT           "Username:",IDC_STATIC,8,12,52,8
     EDITTEXT        IDC_EDIT_USERNAME,70,10,86,12,ES_AUTOHSCROLL
-    CONTROL         "Create a new account",IDC_REGISTERACCOUNT,"Hyperlink",
+    CONTROL         "Create new account",IDC_REGISTERACCOUNT,"Hyperlink",
                     0x0,170,12,100,8
-    LTEXT           "Password:",IDC_STATIC,14,26,52,8
+    LTEXT           "Password:",IDC_STATIC,8,26,52,8
     EDITTEXT        IDC_EDIT_PASSWORD,70,24,86,12,ES_PASSWORD |
                     ES_AUTOHSCROLL
     CONTROL         "Save password",IDC_SAVEPASSWORD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,170,26,100,10
     GROUPBOX        "Options",IDC_SIMPLE,0,44,304,141
     CONTROL         "Automatically reconnect after unintentional disconnection",
-                    IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    56,239,10
+                    IDC_RECONNECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8, 56,239,10
     CONTROL         "Leave status message after disconnection",
                     IDC_OFFLINE_MESSAGE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,14,68,168,10
+                    WS_TABSTOP,8,68,168,10
     COMBOBOX        IDC_OFFLINE_MESSAGE_OPTION,190,67,75,140,
                     CBS_DROPDOWNLIST | WS_TABSTOP
     CONTROL         "Ignore advertisements",
-                    IDC_IGNORE_ADVERTISEMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    80,250,10
+                    IDC_IGNORE_ADVERTISEMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8, 80,250,10
     CONTROL         "Automatically delete contacts not in my roster",
-                    IDC_ROSTER_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,
-                    92,250,10
+                    IDC_ROSTER_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8, 92,250,10
     CONTROL         "Show offline users with status messages as invisible in contact list",
-                    IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,104,250,10
+                    IDC_SHOW_OFFLINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP, 8,104,250,10
     CONTROL         "Enable avatars",
-                    IDC_AVATARS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,116,250,10
+                    IDC_AVATARS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP, 8,116,250,10
     CONTROL         "Send and receive client version information",
-                    IDC_VERSIONINFO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,128,250,10
-    LTEXT           "Alert policy",IDC_STATIC,14,140,70,8
+                    IDC_VERSIONINFO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP, 8,128,250,10
+    LTEXT           "Alert policy",IDC_STATIC,8,140,70,8
     COMBOBOX        IDC_ALERT_POLICY,95,139,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
     CONTROL         "Use Nudge plugin",
@@ -87,7 +96,7 @@ BEGIN
     CONTROL         "Log alerts as messages",
                     IDC_LOG_ALERTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     150,153,130,10
-    LTEXT           "Group chat policy",IDC_STATIC,14,168,70,8
+    LTEXT           "Group chat policy",IDC_STATIC,8,168,70,8
     COMBOBOX        IDC_MUC_POLICY,95,166,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
 END
@@ -99,13 +108,13 @@ EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Voice Chats",IDC_STATIC,0,0,304,57
-    LTEXT           "Voice chat policy",IDC_STATIC,14,12,70,8
+    LTEXT           "Voice chat policy",IDC_STATIC,8,12,70,8
     COMBOBOX        IDC_VOICE_POLICY,95,10,190,100,
                     CBS_DROPDOWNLIST | WS_TABSTOP
-	LTEXT           "Recording device:",IDC_STATIC,14,26,105,8
+	LTEXT           "Recording device:",IDC_STATIC,8,26,105,8
     COMBOBOX        IDC_VOICE_DEVICE_IN,120,24,110,100,CBS_DROPDOWNLIST |
                     WS_TABSTOP
-    LTEXT           "Playback device:",IDC_STATIC,14,40,105,8
+    LTEXT           "Playback device:",IDC_STATIC,8,40,105,8
     COMBOBOX        IDC_VOICE_DEVICE_OUT,120,38,110,100,CBS_DROPDOWNLIST |
                     WS_TABSTOP
 END
@@ -116,30 +125,30 @@ EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Expert Options",IDC_STATIC,0,0,304,74
-    LTEXT           "Login server:",IDC_STATIC,14,18,75,8
+    LTEXT           "Login server:",IDC_STATIC,8,18,75,8
     EDITTEXT        IDC_EDIT_LOGIN_SERVER,90,16,90,12,ES_AUTOHSCROLL
-    LTEXT           "Connection Host:",IDC_STATIC,14,32,75,8
+    LTEXT           "Connection Host:",IDC_STATIC,8,32,75,8
     EDITTEXT        IDC_HOST,90,30,90,12,ES_AUTOHSCROLL | WS_DISABLED
     LTEXT           "Port:",IDC_STATIC,194,32,35,8
     EDITTEXT        IDC_HOSTPORT,230,30,26,12,ES_AUTOHSCROLL | ES_NUMBER |
                     WS_DISABLED
     CONTROL         "Keep connection alive",IDC_KEEPALIVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,14,47,250,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,47,250,10
     CONTROL         "Enable encryption",IDC_USE_SSL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,14,60,250,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,60,250,10
 		    
     CONTROL         "Enable Always Visible and Never Visible",
                     IDC_VISIBILITY_SUPPORT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE |
-                    WS_TABSTOP,14,60,250,10
+                    WS_TABSTOP,8,60,250,10
 
     GROUPBOX        "P2P Connections",IDC_STATIC,0,100,304,98
     CONTROL         "Use proxy for incoming connections",IDC_FILE_USE_PROXY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,114,271,10
-    LTEXT           "Proxy type:",IDC_FILE_PROXY_TYPE_LABEL,16,130,48,8,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,114,271,10
+    LTEXT           "Proxy type:",IDC_FILE_PROXY_TYPE_LABEL,10,130,48,8,
                     WS_DISABLED
     COMBOBOX        IDC_FILE_PROXY_TYPE,68,128,80,48,CBS_DROPDOWNLIST |
                     WS_DISABLED | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Proxy server:",IDC_FILE_PROXY_HOST_LABEL,16,145,48,8,
+    LTEXT           "Proxy server:",IDC_FILE_PROXY_HOST_LABEL,10,145,48,8,
                     WS_DISABLED
     EDITTEXT        IDC_FILE_PROXY_HOST,68,143,80,12,ES_AUTOHSCROLL |
                     WS_DISABLED | WS_GROUP
@@ -148,9 +157,9 @@ BEGIN
     EDITTEXT        IDC_FILE_PROXY_PORT,204,143,30,12,ES_AUTOHSCROLL |
                     ES_NUMBER | WS_DISABLED
     CONTROL         "Proxy requires authorization",IDC_FILE_PROXY_USE_AUTH,
-                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,14,
+                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,8,
                     160,271,10
-    LTEXT           "Username:",IDC_FILE_PROXY_USER_LABEL,16,176,47,8,
+    LTEXT           "Username:",IDC_FILE_PROXY_USER_LABEL,10,176,47,8,
                     WS_DISABLED
     EDITTEXT        IDC_FILE_PROXY_USER,68,175,80,12,ES_AUTOHSCROLL |
                     WS_DISABLED
@@ -166,23 +175,24 @@ IDD_OPTIONS_POPUPS DIALOG DISCARDABLE  0, 0, 304, 143
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Mail Notification",IDC_STATIC,0,10,304,120
+
+    GROUPBOX        "Mail Notification",IDC_STATIC,0,0,304,110
     CONTROL         "Enable incoming mail notification",IDC_ENABLEPOPUP,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,23,26,267,10
-    GROUPBOX        "Delay",IDC_STATIC,160,46,137,55
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,12,267,10
+    GROUPBOX        "Colours",IDC_STATIC,8,26,140,55
+    LTEXT           "Background",IDC_STATIC,47,43,95,8
+    LTEXT           "Text",IDC_STATIC,47,62,96,8
+    CONTROL         "",IDC_COLORBKG,"ColourPicker",WS_TABSTOP,17,41,24,12
+    CONTROL         "",IDC_COLORTXT,"ColourPicker",WS_TABSTOP,17,59,24,12
+    GROUPBOX        "Delay",IDC_STATIC,157,26,140,55
     CONTROL         "&From PopUp plugin",IDC_DELAY_POPUP,"Button",
-                    BS_AUTORADIOBUTTON,167,60,125,10
+                    BS_AUTORADIOBUTTON,164,40,125,10
     CONTROL         "&Custom",IDC_DELAY_CUSTOM,"Button",BS_AUTORADIOBUTTON,
-                    167,73,98,10
+                    164,53,98,10
+    EDITTEXT        IDC_DELAY,267,51,21,14,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "P&ermanent",IDC_DELAY_PERMANENT,"Button",
-                    BS_AUTORADIOBUTTON,167,87,123,10
-    EDITTEXT        IDC_DELAY,270,71,21,14,ES_AUTOHSCROLL | ES_NUMBER
-    GROUPBOX        "Colours",IDC_STATIC,15,46,137,55
-    LTEXT           "Background",IDC_STATIC,53,63,95,8
-    LTEXT           "Text",IDC_STATIC,53,82,96,8
-    CONTROL         "",IDC_COLORBKG,"ColourPicker",WS_TABSTOP,23,61,24,12
-    CONTROL         "",IDC_COLORTXT,"ColourPicker",WS_TABSTOP,23,79,24,12
-    PUSHBUTTON      "Preview",IDC_PREVIEW,132,112,50,14
+                    BS_AUTORADIOBUTTON,164,67,123,10
+    PUSHBUTTON      "Preview",IDC_PREVIEW,119,90,70,14
 END
 
 IDD_PASSWORD DIALOG DISCARDABLE  0, 0, 151, 63

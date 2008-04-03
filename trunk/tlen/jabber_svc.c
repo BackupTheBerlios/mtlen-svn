@@ -33,12 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_avatar.h"
 #include "tlen_file.h"
 
-char *searchJID = NULL;
-static int searchID;
-static int searchIndex = 0;
-static char *searchQuery = NULL;
-static int searchQueryLen = 0;
-
 extern int TlenOnModulesLoaded(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int TlenOptionsInit(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int TlenPreShutdown(void *ptr, WPARAM wParam, LPARAM lParam);
@@ -77,27 +71,27 @@ HICON TlenGetIcon(PROTO_INTERFACE *ptr, int iconIndex)
 int TlenRunSearch(TlenProtocol *proto) {
 	int iqId = 0;
 	if (!proto->jabberOnline) return 0;
-	if (searchQuery != NULL && searchIndex < 10) {
-		iqId = searchID;
+	if (proto->searchQuery != NULL && proto->searchIndex < 10) {
+		iqId = proto->searchID;
 		JabberIqAdd(proto, iqId, IQ_PROC_GETSEARCH, JabberIqResultSearch);
-		if (searchIndex == 0) {
-			JabberSend(proto, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>%s</query></iq>", iqId, searchQuery);
+		if (proto->searchIndex == 0) {
+			JabberSend(proto, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>%s</query></iq>", iqId, proto->searchQuery);
 		} else {
-			JabberSend(proto, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>%s<f>%d</f></query></iq>", iqId, searchQuery, searchIndex * TLEN_MAX_SEARCH_RESULTS_PER_PAGE);
+			JabberSend(proto, "<iq type='get' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:search'>%s<f>%d</f></query></iq>", iqId, proto->searchQuery, proto->searchIndex * TLEN_MAX_SEARCH_RESULTS_PER_PAGE);
 		}
-		searchIndex ++;
+		proto->searchIndex ++;
 	}
 	return iqId;
 }
 
 void TlenResetSearchQuery(TlenProtocol *proto) {
-	if (searchQuery != NULL) {
-		mir_free(searchQuery);
-		searchQuery = NULL;
+	if (proto->searchQuery != NULL) {
+		mir_free(proto->searchQuery);
+		proto->searchQuery = NULL;
 	}
-	searchQueryLen = 0;
-	searchIndex = 0;
-	searchID = JabberSerialNext(proto);
+	proto->searchQueryLen = 0;
+	proto->searchIndex = 0;
+	proto->searchID = JabberSerialNext(proto);
 }
 
 HANDLE TlenBasicSearch(PROTO_INTERFACE *ptr, const char *id)
@@ -108,9 +102,9 @@ HANDLE TlenBasicSearch(PROTO_INTERFACE *ptr, const char *id)
 	if (!proto->jabberOnline) return 0;
 	if (id == NULL) return 0;
 	if ((jid=JabberTextEncode(id)) != NULL) {
-		searchJID = mir_strdup(id);
+		proto->searchJID = mir_strdup(id);
 		TlenResetSearchQuery(proto);
-		JabberStringAppend(&searchQuery, &searchQueryLen, "<i>%s</i>", jid);
+		JabberStringAppend(&proto->searchQuery, &proto->searchQueryLen, "<i>%s</i>", jid);
 		iqId = TlenRunSearch(proto);
 		mir_free(jid);
 	}
@@ -128,7 +122,7 @@ HANDLE TlenSearchByEmail(PROTO_INTERFACE *ptr, const char* email)
 
 	if ((emailEnc=JabberTextEncode(email)) != NULL) {
 		TlenResetSearchQuery(proto);
-		JabberStringAppend(&searchQuery, &searchQueryLen, "<email>%s</email>", emailEnc);
+		JabberStringAppend(&proto->searchQuery, &proto->searchQueryLen, "<email>%s</email>", emailEnc);
 		iqId = TlenRunSearch(proto);
 		mir_free(emailEnc);
 	}
@@ -147,19 +141,19 @@ HANDLE TlenSearchByName(PROTO_INTERFACE *ptr, const char* nick, const char* firs
 
 	if (nick != NULL && nick[0] != '\0') {
 		if ((p=JabberTextEncode(nick)) != NULL) {
-			JabberStringAppend(&searchQuery, &searchQueryLen, "<nick>%s</nick>", p);
+			JabberStringAppend(&proto->searchQuery, &proto->searchQueryLen, "<nick>%s</nick>", p);
 			mir_free(p);
 		}
 	}
 	if (firstName != NULL && firstName[0] != '\0') {
 		if ((p=JabberTextEncode(firstName)) != NULL) {
-			JabberStringAppend(&searchQuery, &searchQueryLen, "<first>%s</first>", p);
+			JabberStringAppend(&proto->searchQuery, &proto->searchQueryLen, "<first>%s</first>", p);
 			mir_free(p);
 		}
 	}
 	if (lastName != NULL && lastName[0] != '\0') {
 		if ((p=JabberTextEncode(lastName)) != NULL) {
-			JabberStringAppend(&searchQuery, &searchQueryLen, "<last>%s</last>", p);
+			JabberStringAppend(&proto->searchQuery, &proto->searchQueryLen, "<last>%s</last>", p);
 			mir_free(p);
 		}
 	}
@@ -181,7 +175,7 @@ HWND TlenSearchAdvanced(PROTO_INTERFACE *ptr, HWND owner)
 
 	TlenResetSearchQuery(proto);
 	iqId = JabberSerialNext(proto);
-	if ((searchQuery = TlenAdvSearchCreateQuery(owner, iqId)) != NULL) {
+	if ((proto->searchQuery = TlenAdvSearchCreateQuery(owner, iqId)) != NULL) {
 		iqId = TlenRunSearch(proto);
 	}
 	return (HWND)iqId;
@@ -229,15 +223,11 @@ static HANDLE AddToListByJID(TlenProtocol *proto, const char *newJid, DWORD flag
 HANDLE TlenAddToList(PROTO_INTERFACE *ptr, int flags, PROTOSEARCHRESULT *psr)
 {
 	HANDLE hContact;
-	char *jid;
     TlenProtocol *proto = (TlenProtocol *)ptr;
     JABBER_SEARCH_RESULT *jsr = (JABBER_SEARCH_RESULT*)psr;
 	if (jsr->hdr.cbSize != sizeof(JABBER_SEARCH_RESULT))
 		return (int) NULL;
-	if ((jid=JabberUtf8Encode(jsr->jid)) == NULL)
-		return (int) NULL;
-	hContact = AddToListByJID(proto, jid, flags);	// wParam is flag e.g. PALF_TEMPORARY
-	mir_free(jid);
+	hContact = AddToListByJID(proto, jsr->jid, flags);	// wParam is flag e.g. PALF_TEMPORARY
 	return hContact;
 }
 
@@ -886,6 +876,18 @@ int TlenRecvFile(PROTO_INTERFACE *ptr, HANDLE hContact, PROTORECVFILE* evt)
 	return CallService( MS_PROTO_RECVFILE, 0, ( LPARAM )&ccs );
 }
 
+
+static char* settingToChar( DBCONTACTWRITESETTING* cws )
+{
+	switch( cws->value.type ) {
+	case DBVT_ASCIIZ:
+			return mir_strdup( cws->value.pszVal );
+	case DBVT_UTF8:
+    		return mir_utf8decode(mir_strdup(cws->value.pszVal), NULL);
+	}
+	return NULL;
+}
+
 int JabberDbSettingChanged(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	DBCONTACTWRITESETTING *cws = (DBCONTACTWRITESETTING *) lParam;
@@ -923,13 +925,8 @@ int JabberDbSettingChanged(void *ptr, WPARAM wParam, LPARAM lParam)
 						if (cws->value.type==DBVT_DELETED && item->group!=NULL) {
 							JabberLog(proto, "Group set to nothing");
 							JabberSend(proto, "<iq type='set'><query xmlns='jabber:iq:roster'><item name='%s' jid='%s'></item></query></iq>", nick, item->jid);
-						} else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL) {
-							char *newGroup;
-							if (cws->value.type==DBVT_UTF8) {
-								newGroup = JabberUtf8Decode(cws->value.pszVal);
-							} else {
-								newGroup = mir_strdup(cws->value.pszVal);
-							}
+						} else if (cws->value.pszVal != NULL) {
+							char *newGroup = settingToChar(cws);
 							if (item->group==NULL || strcmp(newGroup, item->group)) {
 								JabberLog(proto, "Group set to %s", newGroup);
 								if ((group=TlenGroupEncode(newGroup)) != NULL) {
@@ -937,7 +934,7 @@ int JabberDbSettingChanged(void *ptr, WPARAM wParam, LPARAM lParam)
 									mir_free(group);
 								}
 							}
-							if (newGroup != NULL) mir_free(newGroup);
+							mir_free(newGroup);
 						}
 						mir_free(nick);
 					}
@@ -960,12 +957,8 @@ int JabberDbSettingChanged(void *ptr, WPARAM wParam, LPARAM lParam)
 				if ((item=JabberListGetItemPtr(proto, LIST_ROSTER, dbv.pszVal)) != NULL) {
 					if (cws->value.type == DBVT_DELETED) {
 						newNick = mir_strdup((char *) CallService(MS_CLIST_GETCONTACTDISPLAYNAME, (WPARAM) hContact, GCDNF_NOMYHANDLE));
-					} else if ((cws->value.type==DBVT_ASCIIZ || cws->value.type==DBVT_UTF8) && cws->value.pszVal!=NULL) {
-						if (cws->value.type==DBVT_UTF8) {
-							newNick = JabberUtf8Decode(cws->value.pszVal);
-						} else {
-							newNick = mir_strdup(cws->value.pszVal);
-						}
+					} else if (cws->value.pszVal!=NULL) {
+                        newNick = settingToChar(cws);
 					} else {
 						newNick = NULL;
 					}
@@ -1196,16 +1189,46 @@ int TlenOnEvent( PROTO_INTERFACE *ptr, PROTOEVENTTYPE eventType, WPARAM wParam, 
 	return 1;
 }
 
+// PSS_ADDED
+int TlenAuthRecv(PROTO_INTERFACE *ptr,  HANDLE hContact, PROTORECVEVENT* evt )
+{
+	return 1;
+}
+
+// PSS_AUTHREQUEST
+int TlenAuthRequest(PROTO_INTERFACE *ptr,  HANDLE hContact, const char* szMessage )
+{	
+	return 1;
+}
+
+HANDLE TlenChangeInfo(PROTO_INTERFACE *ptr,   int iInfoType, void* pInfoData )
+{
+	return NULL;
+}
+
+int TlenRecvContacts(PROTO_INTERFACE *ptr,   HANDLE hContact, PROTORECVEVENT* evt)
+{
+	return 1;
+}
+
+
+extern BOOL CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+
+int TlenAccMgrUI(void *ptr, WPARAM wParam, LPARAM lParam)
+{
+	return (int) CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_ACCMGRUI), (HWND)lParam, TlenAccMgrUIDlgProc, (LPARAM) ptr);
+}
+
 void TlenInitServicesVTbl(TlenProtocol *proto) {
 	char s[128];
     proto->iface.vtbl = (PROTO_INTERFACE_VTBL*) mir_alloc(sizeof(PROTO_INTERFACE_VTBL));
     proto->iface.vtbl->AddToList = TlenAddToList;
     proto->iface.vtbl->AddToListByEvent = TlenAddToListByEvent;
     proto->iface.vtbl->AuthDeny = TlenAuthDeny;
-    proto->iface.vtbl->AuthRecv = NULL;
-    proto->iface.vtbl->AuthRequest = NULL;
+    proto->iface.vtbl->AuthRecv = TlenAuthRecv;
+    proto->iface.vtbl->AuthRequest = TlenAuthRequest;
     proto->iface.vtbl->Authorize = TlenAuthAllow;
-    proto->iface.vtbl->ChangeInfo = NULL;
+    proto->iface.vtbl->ChangeInfo = TlenChangeInfo;
     proto->iface.vtbl->FileAllow = TlenFileAllow;
     proto->iface.vtbl->FileCancel = TlenFileCancel;
     proto->iface.vtbl->FileDeny = TlenFileDeny;
@@ -1216,7 +1239,7 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
     proto->iface.vtbl->SearchAdvanced = TlenSearchAdvanced;
     proto->iface.vtbl->CreateExtendedSearchUI = TlenCreateAdvSearchUI;
     
-    proto->iface.vtbl->RecvContacts = NULL;
+    proto->iface.vtbl->RecvContacts = TlenRecvContacts;
     proto->iface.vtbl->RecvFile = TlenRecvFile;
     proto->iface.vtbl->RecvMsg = TlenRecvMessage;
     proto->iface.vtbl->RecvUrl = NULL;
@@ -1263,5 +1286,9 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
     sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETSTATUS);
 	CreateServiceFunction_Ex(s, proto, TlenGetStatus);
 
+    sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_CREATEACCMGRUI);
+	CreateServiceFunction_Ex(s, proto, TlenAccMgrUI);
+    
+    
 }
 

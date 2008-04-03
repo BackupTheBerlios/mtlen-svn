@@ -1,0 +1,749 @@
+	TITLE	E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_iq.c
+	.386P
+include listing.inc
+if @Version gt 510
+.model FLAT
+else
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT DWORD USE32 PUBLIC 'BSS'
+_BSS	ENDS
+_TLS	SEGMENT DWORD USE32 PUBLIC 'TLS'
+_TLS	ENDS
+;	COMDAT ??_C@_0BG@FJFA@Miranda?1System?1GetMMI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@DNA@Miranda?1System?1GetLI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@FHMP@Miranda?1System?1GetUTFI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@DCOH@Miranda?1Thread?1Fork?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@IENN@Miranda?1Thread?1ForkEx?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@FGIN@Miranda?1SysTerm?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@LIGC@Utils?1AddToWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BL@PEAI@Utils?1RemoveFromWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@GMNB@Utils?1FindWindowInList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BM@NOMI@Utils?1BroadcastToWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0CB@CFCA@Utils?1BroadcastToWindowListAsync@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@MDKL@Utils?1SaveWindowPos?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@GALP@Utils?1RestoreWindowPos?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@CHLF@Miranda?1System?1GetMD5I?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@FOPF@Miranda?1System?1GetSHA1I?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@OCFE@Netlib?1CloseHandle?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@EFDJ@Netlib?1Send?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@GFGB@Netlib?1Recv?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@CMGK@Netlib?1Log?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BM@GDOO@Netlib?1InitSecurityProvider?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BP@JINJ@Netlib?1DestroySecurityProvider?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BK@CBFG@Netlib?1NtlmCreateResponse?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@COCL@Proto?1EnumAccounts?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@CCNI@Proto?1GetAccount?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@IFFL@Proto?1BroadcastAck?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@MGBG@DB?1Event?1GetText?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0DA@FLKM@C?3?2MirandaDev?2miranda_svn2?2inclu@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@IGCO@DB?1Contact?1DeleteSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@PLGC@DB?1Contact?1WriteSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@GNEH@LangPack?1TranslateDialog?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@GFNK@Skin?1Icons?1Load?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@BLFF@Skin?1Icons?1LoadProto?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@CNOA@Skin?1Sounds?1AddNew?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@LENC@Skin?1Sounds?1Play?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0P@PNGM@PopUp?1AddPopUp?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@OBDC@PopUp?1AddPopUpEx?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@CGKI@PopUp?1AddPopUpW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@HIHP@PopUp?1GetContact?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@CCHD@PopUp?1GetPluginData?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@HKEA@PopUp?1IsSecondLineShown?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@KGOE@PopUp?1Changetext?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BC@LAPD@PopUp?1ChangetextW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0N@KOPP@PopUp?1Change?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BC@BGJ@PopUp?1ShowMessage?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@NFFE@PopUp?1ShowMessageW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@MAHO@PopUp?1AddPopupClass?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT _DBGetContactSettingByte_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingWord_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingDword_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingString_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBFreeVariant
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberIqInit
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberIqUninit
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberIqRemove
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberIqExpire
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberIqFetchFunc
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberIqAdd
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+FLAT	GROUP _DATA, CONST, _BSS
+	ASSUME	CS: FLAT, DS: FLAT, SS: FLAT
+endif
+PUBLIC	_JabberIqInit
+EXTRN	__imp__InitializeCriticalSection@4:NEAR
+;	COMDAT _JabberIqInit
+_TEXT	SEGMENT
+_proto$ = 8
+_JabberIqInit PROC NEAR					; COMDAT
+
+; 28   : {
+
+  00000	56		 push	 esi
+
+; 29   : 	InitializeCriticalSection(&proto->csIqList);
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _proto$[esp]
+  00005	8d 86 44 01 00
+	00		 lea	 eax, DWORD PTR [esi+324]
+  0000b	50		 push	 eax
+  0000c	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__InitializeCriticalSection@4
+
+; 30   :     proto->iqList = NULL;
+
+  00012	33 c0		 xor	 eax, eax
+  00014	89 86 40 01 00
+	00		 mov	 DWORD PTR [esi+320], eax
+
+; 31   : 	proto->iqCount = 0;
+
+  0001a	89 86 38 01 00
+	00		 mov	 DWORD PTR [esi+312], eax
+
+; 32   : 	proto->iqAlloced = 0;
+
+  00020	89 86 3c 01 00
+	00		 mov	 DWORD PTR [esi+316], eax
+  00026	5e		 pop	 esi
+
+; 33   : }
+
+  00027	c3		 ret	 0
+_JabberIqInit ENDP
+_TEXT	ENDS
+PUBLIC	_JabberIqUninit
+EXTRN	__imp__DeleteCriticalSection@4:NEAR
+EXTRN	_mmi:BYTE
+;	COMDAT _JabberIqUninit
+_TEXT	SEGMENT
+_proto$ = 8
+_JabberIqUninit PROC NEAR				; COMDAT
+
+; 36   : {
+
+  00000	56		 push	 esi
+
+; 37   : 	if (proto->iqList) mir_free(proto->iqList);
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _proto$[esp]
+  00005	57		 push	 edi
+  00006	8b 86 40 01 00
+	00		 mov	 eax, DWORD PTR [esi+320]
+  0000c	8d be 40 01 00
+	00		 lea	 edi, DWORD PTR [esi+320]
+  00012	85 c0		 test	 eax, eax
+  00014	74 08		 je	 SHORT $L82911
+  00016	50		 push	 eax
+  00017	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  0001d	59		 pop	 ecx
+$L82911:
+
+; 38   : 	proto->iqList = NULL;
+; 39   : 	proto->iqCount = 0;
+
+  0001e	83 a6 38 01 00
+	00 00		 and	 DWORD PTR [esi+312], 0
+
+; 40   : 	proto->iqAlloced = 0;
+
+  00025	83 a6 3c 01 00
+	00 00		 and	 DWORD PTR [esi+316], 0
+  0002c	83 27 00	 and	 DWORD PTR [edi], 0
+
+; 41   : 	DeleteCriticalSection(&proto->csIqList);
+
+  0002f	81 c6 44 01 00
+	00		 add	 esi, 324		; 00000144H
+  00035	56		 push	 esi
+  00036	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__DeleteCriticalSection@4
+  0003c	5f		 pop	 edi
+  0003d	5e		 pop	 esi
+
+; 42   : }
+
+  0003e	c3		 ret	 0
+_JabberIqUninit ENDP
+_TEXT	ENDS
+PUBLIC	_JabberIqFetchFunc
+EXTRN	__imp__EnterCriticalSection@4:NEAR
+EXTRN	__imp__LeaveCriticalSection@4:NEAR
+;	COMDAT _JabberIqFetchFunc
+_TEXT	SEGMENT
+_proto$ = 8
+_iqId$ = 12
+_JabberIqFetchFunc PROC NEAR				; COMDAT
+
+; 72   : {
+
+  00000	53		 push	 ebx
+  00001	56		 push	 esi
+
+; 73   : 	int i;
+; 74   : 	JABBER_IQ_PFUNC res;
+; 75   : 
+; 76   : 	EnterCriticalSection(&proto->csIqList);
+
+  00002	8b 74 24 0c	 mov	 esi, DWORD PTR _proto$[esp+4]
+  00006	57		 push	 edi
+  00007	8d 9e 44 01 00
+	00		 lea	 ebx, DWORD PTR [esi+324]
+  0000d	53		 push	 ebx
+  0000e	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__EnterCriticalSection@4
+
+; 77   : 	JabberIqExpire(proto);
+
+  00014	56		 push	 esi
+  00015	e8 00 00 00 00	 call	 _JabberIqExpire
+
+; 78   : 	for (i=0; i<proto->iqCount && proto->iqList[i].iqId!=iqId; i++);
+
+  0001a	8b 86 38 01 00
+	00		 mov	 eax, DWORD PTR [esi+312]
+  00020	59		 pop	 ecx
+  00021	33 c9		 xor	 ecx, ecx
+  00023	85 c0		 test	 eax, eax
+  00025	7e 16		 jle	 SHORT $L82942
+
+; 73   : 	int i;
+; 74   : 	JABBER_IQ_PFUNC res;
+; 75   : 
+; 76   : 	EnterCriticalSection(&proto->csIqList);
+
+  00027	8b 96 40 01 00
+	00		 mov	 edx, DWORD PTR [esi+320]
+$L82940:
+
+; 78   : 	for (i=0; i<proto->iqCount && proto->iqList[i].iqId!=iqId; i++);
+
+  0002d	8b 3a		 mov	 edi, DWORD PTR [edx]
+  0002f	3b 7c 24 14	 cmp	 edi, DWORD PTR _iqId$[esp+8]
+  00033	74 08		 je	 SHORT $L82942
+  00035	41		 inc	 ecx
+  00036	83 c2 10	 add	 edx, 16			; 00000010H
+  00039	3b c8		 cmp	 ecx, eax
+  0003b	7c f0		 jl	 SHORT $L82940
+$L82942:
+
+; 79   : 	if (i < proto->iqCount) {
+
+  0003d	3b c8		 cmp	 ecx, eax
+  0003f	7d 1a		 jge	 SHORT $L82943
+
+; 80   : 		res = proto->iqList[i].func;
+
+  00041	8b 96 40 01 00
+	00		 mov	 edx, DWORD PTR [esi+320]
+  00047	8b c1		 mov	 eax, ecx
+  00049	c1 e0 04	 shl	 eax, 4
+
+; 81   : 		JabberIqRemove(proto, i);
+
+  0004c	51		 push	 ecx
+  0004d	56		 push	 esi
+  0004e	8b 7c 02 08	 mov	 edi, DWORD PTR [edx+eax+8]
+  00052	e8 00 00 00 00	 call	 _JabberIqRemove
+  00057	59		 pop	 ecx
+  00058	59		 pop	 ecx
+
+; 82   : 	}
+; 83   : 	else {
+
+  00059	eb 02		 jmp	 SHORT $L82944
+$L82943:
+
+; 84   : 		res = (JABBER_IQ_PFUNC) NULL;
+
+  0005b	33 ff		 xor	 edi, edi
+$L82944:
+
+; 85   : 	}
+; 86   : 	LeaveCriticalSection(&proto->csIqList);
+
+  0005d	53		 push	 ebx
+  0005e	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__LeaveCriticalSection@4
+
+; 87   : 	return res;
+
+  00064	8b c7		 mov	 eax, edi
+  00066	5f		 pop	 edi
+  00067	5e		 pop	 esi
+  00068	5b		 pop	 ebx
+
+; 88   : }
+
+  00069	c3		 ret	 0
+_JabberIqFetchFunc ENDP
+_TEXT	ENDS
+EXTRN	__imp__memmove:NEAR
+;	COMDAT _JabberIqRemove
+_TEXT	SEGMENT
+_proto$ = 8
+_index$ = 12
+_JabberIqRemove PROC NEAR				; COMDAT
+
+; 45   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	56		 push	 esi
+
+; 46   : 	EnterCriticalSection(&proto->csIqList);
+
+  00004	8b 75 08	 mov	 esi, DWORD PTR _proto$[ebp]
+  00007	57		 push	 edi
+  00008	8d 86 44 01 00
+	00		 lea	 eax, DWORD PTR [esi+324]
+  0000e	50		 push	 eax
+  0000f	89 45 08	 mov	 DWORD PTR 8+[ebp], eax
+  00012	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__EnterCriticalSection@4
+
+; 47   : 	if (index>=0 && index<proto->iqCount) {
+
+  00018	8b 45 0c	 mov	 eax, DWORD PTR _index$[ebp]
+  0001b	85 c0		 test	 eax, eax
+  0001d	7c 3e		 jl	 SHORT $L82919
+  0001f	8b be 38 01 00
+	00		 mov	 edi, DWORD PTR [esi+312]
+  00025	3b c7		 cmp	 eax, edi
+  00027	7d 34		 jge	 SHORT $L82919
+
+; 48   : 		memmove(proto->iqList+index, proto->iqList+index+1, sizeof(JABBER_IQ_FUNC)*(proto->iqCount-index-1));
+
+  00029	8d 48 01	 lea	 ecx, DWORD PTR [eax+1]
+  0002c	53		 push	 ebx
+  0002d	8b d9		 mov	 ebx, ecx
+  0002f	8b 96 40 01 00
+	00		 mov	 edx, DWORD PTR [esi+320]
+  00035	69 db ff ff ff
+	0f		 imul	 ebx, 268435455		; 0fffffffH
+  0003b	03 df		 add	 ebx, edi
+  0003d	c1 e1 04	 shl	 ecx, 4
+  00040	c1 e3 04	 shl	 ebx, 4
+  00043	c1 e0 04	 shl	 eax, 4
+  00046	03 ca		 add	 ecx, edx
+  00048	53		 push	 ebx
+  00049	03 c2		 add	 eax, edx
+  0004b	51		 push	 ecx
+  0004c	50		 push	 eax
+  0004d	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__memmove
+  00053	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 49   : 		proto->iqCount--;
+
+  00056	ff 8e 38 01 00
+	00		 dec	 DWORD PTR [esi+312]
+  0005c	5b		 pop	 ebx
+$L82919:
+
+; 50   : 	}
+; 51   : 	LeaveCriticalSection(&proto->csIqList);
+
+  0005d	ff 75 08	 push	 DWORD PTR 8+[ebp]
+  00060	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__LeaveCriticalSection@4
+  00066	5f		 pop	 edi
+  00067	5e		 pop	 esi
+
+; 52   : }
+
+  00068	5d		 pop	 ebp
+  00069	c3		 ret	 0
+_JabberIqRemove ENDP
+_TEXT	ENDS
+EXTRN	__imp__time:NEAR
+;	COMDAT _JabberIqExpire
+_TEXT	SEGMENT
+_proto$ = 8
+_JabberIqExpire PROC NEAR				; COMDAT
+
+; 55   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	51		 push	 ecx
+  00004	53		 push	 ebx
+  00005	56		 push	 esi
+
+; 56   : 	int i;
+; 57   : 	time_t expire;
+; 58   : 
+; 59   : 	EnterCriticalSection(&proto->csIqList);
+
+  00006	8b 75 08	 mov	 esi, DWORD PTR _proto$[ebp]
+  00009	57		 push	 edi
+  0000a	8d 86 44 01 00
+	00		 lea	 eax, DWORD PTR [esi+324]
+  00010	50		 push	 eax
+  00011	89 45 fc	 mov	 DWORD PTR -4+[ebp], eax
+  00014	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__EnterCriticalSection@4
+
+; 60   : 	expire = time(NULL) - 120;	// 2 minute
+
+  0001a	33 db		 xor	 ebx, ebx
+  0001c	53		 push	 ebx
+  0001d	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__time
+  00023	8b f8		 mov	 edi, eax
+  00025	59		 pop	 ecx
+  00026	83 ef 78	 sub	 edi, 120		; 00000078H
+
+; 61   : 	i = 0;
+; 62   : 	while (i < proto->iqCount) {
+
+  00029	39 9e 38 01 00
+	00		 cmp	 DWORD PTR [esi+312], ebx
+  0002f	7e 2a		 jle	 SHORT $L82930
+
+; 56   : 	int i;
+; 57   : 	time_t expire;
+; 58   : 
+; 59   : 	EnterCriticalSection(&proto->csIqList);
+
+  00031	89 5d 08	 mov	 DWORD PTR 8+[ebp], ebx
+$L82929:
+
+; 63   : 		if (proto->iqList[i].requestTime < expire)
+
+  00034	8b 86 40 01 00
+	00		 mov	 eax, DWORD PTR [esi+320]
+  0003a	8b 4d 08	 mov	 ecx, DWORD PTR 8+[ebp]
+  0003d	39 7c 08 0c	 cmp	 DWORD PTR [eax+ecx+12], edi
+  00041	7d 0b		 jge	 SHORT $L82931
+
+; 64   : 			JabberIqRemove(proto, i);
+
+  00043	53		 push	 ebx
+  00044	56		 push	 esi
+  00045	e8 00 00 00 00	 call	 _JabberIqRemove
+  0004a	59		 pop	 ecx
+  0004b	59		 pop	 ecx
+
+; 65   : 		else
+
+  0004c	eb 05		 jmp	 SHORT $L82932
+$L82931:
+
+; 66   : 			i++;
+
+  0004e	43		 inc	 ebx
+  0004f	83 45 08 10	 add	 DWORD PTR 8+[ebp], 16	; 00000010H
+$L82932:
+
+; 61   : 	i = 0;
+; 62   : 	while (i < proto->iqCount) {
+
+  00053	3b 9e 38 01 00
+	00		 cmp	 ebx, DWORD PTR [esi+312]
+  00059	7c d9		 jl	 SHORT $L82929
+$L82930:
+
+; 67   : 	}
+; 68   : 	LeaveCriticalSection(&proto->csIqList);
+
+  0005b	ff 75 fc	 push	 DWORD PTR -4+[ebp]
+  0005e	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__LeaveCriticalSection@4
+  00064	5f		 pop	 edi
+  00065	5e		 pop	 esi
+  00066	5b		 pop	 ebx
+
+; 69   : }
+
+  00067	c9		 leave
+  00068	c3		 ret	 0
+_JabberIqExpire ENDP
+_TEXT	ENDS
+PUBLIC	_JabberIqAdd
+;	COMDAT _JabberIqAdd
+_TEXT	SEGMENT
+_proto$ = 8
+_iqId$ = 12
+_procId$ = 16
+_func$ = 20
+_JabberIqAdd PROC NEAR					; COMDAT
+
+; 91   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	53		 push	 ebx
+  00004	56		 push	 esi
+
+; 92   : 	int i;
+; 93   : 
+; 94   : 	EnterCriticalSection(&proto->csIqList);
+
+  00005	8b 75 08	 mov	 esi, DWORD PTR _proto$[ebp]
+  00008	57		 push	 edi
+  00009	8d 86 44 01 00
+	00		 lea	 eax, DWORD PTR [esi+324]
+  0000f	50		 push	 eax
+  00010	89 45 08	 mov	 DWORD PTR 8+[ebp], eax
+  00013	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__EnterCriticalSection@4
+
+; 95   : 	if (procId == IQ_PROC_NONE)
+
+  00019	8b 55 10	 mov	 edx, DWORD PTR _procId$[ebp]
+  0001c	85 d2		 test	 edx, edx
+  0001e	75 0a		 jne	 SHORT $L82957
+
+; 96   : 		i = proto->iqCount;
+
+  00020	8b 86 38 01 00
+	00		 mov	 eax, DWORD PTR [esi+312]
+  00026	8b d8		 mov	 ebx, eax
+
+; 97   : 	else
+
+  00028	eb 21		 jmp	 SHORT $L82961
+$L82957:
+
+; 98   : 		for (i=0; i<proto->iqCount && proto->iqList[i].procId!=procId; i++);
+
+  0002a	8b 86 38 01 00
+	00		 mov	 eax, DWORD PTR [esi+312]
+  00030	33 db		 xor	 ebx, ebx
+  00032	85 c0		 test	 eax, eax
+  00034	7e 15		 jle	 SHORT $L82961
+  00036	8b 8e 40 01 00
+	00		 mov	 ecx, DWORD PTR [esi+320]
+  0003c	83 c1 04	 add	 ecx, 4
+$L82959:
+  0003f	39 11		 cmp	 DWORD PTR [ecx], edx
+  00041	74 08		 je	 SHORT $L82961
+  00043	43		 inc	 ebx
+  00044	83 c1 10	 add	 ecx, 16			; 00000010H
+  00047	3b d8		 cmp	 ebx, eax
+  00049	7c f4		 jl	 SHORT $L82959
+$L82961:
+
+; 99   : 
+; 100  : 	if (i>=proto->iqCount && proto->iqCount>=proto->iqAlloced) {
+
+  0004b	3b d8		 cmp	 ebx, eax
+  0004d	7c 2c		 jl	 SHORT $L82962
+  0004f	3b 86 3c 01 00
+	00		 cmp	 eax, DWORD PTR [esi+316]
+  00055	8d 8e 3c 01 00
+	00		 lea	 ecx, DWORD PTR [esi+316]
+  0005b	7c 1e		 jl	 SHORT $L82962
+
+; 101  : 		proto->iqAlloced = proto->iqCount + 8;
+
+  0005d	83 c0 08	 add	 eax, 8
+
+; 102  : 		proto->iqList = mir_realloc(proto->iqList, sizeof(JABBER_IQ_FUNC)*proto->iqAlloced);
+
+  00060	8d be 40 01 00
+	00		 lea	 edi, DWORD PTR [esi+320]
+  00066	89 01		 mov	 DWORD PTR [ecx], eax
+  00068	c1 e0 04	 shl	 eax, 4
+  0006b	50		 push	 eax
+  0006c	ff 37		 push	 DWORD PTR [edi]
+  0006e	ff 15 08 00 00
+	00		 call	 DWORD PTR _mmi+8
+  00074	8b 55 10	 mov	 edx, DWORD PTR _procId$[ebp]
+  00077	59		 pop	 ecx
+  00078	59		 pop	 ecx
+  00079	89 07		 mov	 DWORD PTR [edi], eax
+$L82962:
+
+; 103  : 	}
+; 104  : 
+; 105  : 	if (proto->iqList != NULL) {
+
+  0007b	8b 86 40 01 00
+	00		 mov	 eax, DWORD PTR [esi+320]
+  00081	85 c0		 test	 eax, eax
+  00083	74 46		 je	 SHORT $L82967
+
+; 106  : 		proto->iqList[i].iqId = iqId;
+
+  00085	8b 4d 0c	 mov	 ecx, DWORD PTR _iqId$[ebp]
+  00088	8b fb		 mov	 edi, ebx
+  0008a	c1 e7 04	 shl	 edi, 4
+
+; 107  : 		proto->iqList[i].procId = procId;
+; 108  : 		proto->iqList[i].func = func;
+; 109  : 		proto->iqList[i].requestTime = time(NULL);
+
+  0008d	6a 00		 push	 0
+  0008f	89 0c 38	 mov	 DWORD PTR [eax+edi], ecx
+  00092	8b 86 40 01 00
+	00		 mov	 eax, DWORD PTR [esi+320]
+  00098	8b 4d 14	 mov	 ecx, DWORD PTR _func$[ebp]
+  0009b	89 54 38 04	 mov	 DWORD PTR [eax+edi+4], edx
+  0009f	8b 86 40 01 00
+	00		 mov	 eax, DWORD PTR [esi+320]
+  000a5	89 4c 38 08	 mov	 DWORD PTR [eax+edi+8], ecx
+  000a9	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__time
+  000af	59		 pop	 ecx
+  000b0	8b 8e 40 01 00
+	00		 mov	 ecx, DWORD PTR [esi+320]
+  000b6	89 44 39 0c	 mov	 DWORD PTR [ecx+edi+12], eax
+
+; 110  : 		if (i == proto->iqCount) proto->iqCount++;
+
+  000ba	8b 86 38 01 00
+	00		 mov	 eax, DWORD PTR [esi+312]
+  000c0	3b d8		 cmp	 ebx, eax
+  000c2	75 07		 jne	 SHORT $L82967
+  000c4	40		 inc	 eax
+  000c5	89 86 38 01 00
+	00		 mov	 DWORD PTR [esi+312], eax
+$L82967:
+
+; 111  : 	}
+; 112  : 	LeaveCriticalSection(&proto->csIqList);
+
+  000cb	ff 75 08	 push	 DWORD PTR 8+[ebp]
+  000ce	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__LeaveCriticalSection@4
+  000d4	5f		 pop	 edi
+  000d5	5e		 pop	 esi
+  000d6	5b		 pop	 ebx
+
+; 113  : }
+
+  000d7	5d		 pop	 ebp
+  000d8	c3		 ret	 0
+_JabberIqAdd ENDP
+_TEXT	ENDS
+END

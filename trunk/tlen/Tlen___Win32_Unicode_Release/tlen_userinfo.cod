@@ -1,0 +1,2751 @@
+	TITLE	E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\tlen_userinfo.c
+	.386P
+include listing.inc
+if @Version gt 510
+.model FLAT
+else
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT DWORD USE32 PUBLIC 'BSS'
+_BSS	ENDS
+_TLS	SEGMENT DWORD USE32 PUBLIC 'TLS'
+_TLS	ENDS
+;	COMDAT ??_C@_0BG@FJFA@Miranda?1System?1GetMMI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@DNA@Miranda?1System?1GetLI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@FHMP@Miranda?1System?1GetUTFI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@DCOH@Miranda?1Thread?1Fork?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@IENN@Miranda?1Thread?1ForkEx?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@FGIN@Miranda?1SysTerm?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@LIGC@Utils?1AddToWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BL@PEAI@Utils?1RemoveFromWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@GMNB@Utils?1FindWindowInList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BM@NOMI@Utils?1BroadcastToWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0CB@CFCA@Utils?1BroadcastToWindowListAsync@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@MDKL@Utils?1SaveWindowPos?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@GALP@Utils?1RestoreWindowPos?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@CHLF@Miranda?1System?1GetMD5I?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@FOPF@Miranda?1System?1GetSHA1I?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@OCFE@Netlib?1CloseHandle?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@EFDJ@Netlib?1Send?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@GFGB@Netlib?1Recv?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@CMGK@Netlib?1Log?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BM@GDOO@Netlib?1InitSecurityProvider?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BP@JINJ@Netlib?1DestroySecurityProvider?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BK@CBFG@Netlib?1NtlmCreateResponse?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@COCL@Proto?1EnumAccounts?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@CCNI@Proto?1GetAccount?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@IFFL@Proto?1BroadcastAck?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@MGBG@DB?1Event?1GetText?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0DA@FLKM@C?3?2MirandaDev?2miranda_svn2?2inclu@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@IGCO@DB?1Contact?1DeleteSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@PLGC@DB?1Contact?1WriteSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@GNEH@LangPack?1TranslateDialog?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@GFNK@Skin?1Icons?1Load?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@BLFF@Skin?1Icons?1LoadProto?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@CNOA@Skin?1Sounds?1AddNew?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@LENC@Skin?1Sounds?1Play?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0P@PNGM@PopUp?1AddPopUp?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@OBDC@PopUp?1AddPopUpEx?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@CGKI@PopUp?1AddPopUpW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@HIHP@PopUp?1GetContact?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@CCHD@PopUp?1GetPluginData?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@HKEA@PopUp?1IsSecondLineShown?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@KGOE@PopUp?1Changetext?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BC@LAPD@PopUp?1ChangetextW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0N@KOPP@PopUp?1Change?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BC@BGJ@PopUp?1ShowMessage?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@NFFE@PopUp?1ShowMessageW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@MAHO@PopUp?1AddPopupClass?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_19EDBJ@?$AAM?$AAa?$AAl?$AAe?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1O@ELC@?$AAF?$AAe?$AAm?$AAa?$AAl?$AAe?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1CC@ODLD@?$AAS?$AAo?$AAm?$AAe?$AAb?$AAo?$AAd?$AAy?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAl?$AAk?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BG@HEKK@?$AAF?$AAr?$AAi?$AAe?$AAn?$AAd?$AAs?$AAh?$AAi?$AAp?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BM@JAOE@?$AAF?$AAl?$AAi?$AAr?$AAt?$AA?1?$AAr?$AAo?$AAm?$AAa?$AAn?$AAc?$AAe?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_19FBLE@?$AAL?$AAo?$AAv?$AAe?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BA@NIAL@?$AAN?$AAo?$AAt?$AAh?$AAi?$AAn?$AAg?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_17BICM@?$AAA?$AAl?$AAl?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BE@HBAJ@?$AAA?$AAv?$AAa?$AAi?$AAl?$AAa?$AAb?$AAl?$AAe?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BM@HGPL@?$AAF?$AAr?$AAe?$AAe?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAc?$AAh?$AAa?$AAt?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BA@KJGO@?$AAS?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1CA@DGFF@?$AAC?$AAo?$AAl?$AAl?$AAe?$AAg?$AAe?$AA?5?$AAs?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1O@CHEJ@?$AAF?$AAa?$AAr?$AAm?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BA@EDMP@?$AAM?$AAa?$AAn?$AAa?$AAg?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BG@JMK@?$AAS?$AAp?$AAe?$AAc?$AAi?$AAa?$AAl?$AAi?$AAs?$AAt?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1M@FBAA@?$AAC?$AAl?$AAe?$AAr?$AAk?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BG@HDHN@?$AAU?$AAn?$AAe?$AAm?$AAp?$AAl?$AAo?$AAy?$AAe?$AAd?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BE@HIIK@?$AAP?$AAe?$AAn?$AAs?$AAi?$AAo?$AAn?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BI@JIMD@?$AAH?$AAo?$AAu?$AAs?$AAe?$AAk?$AAe?$AAe?$AAp?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BA@DNL@?$AAT?$AAe?$AAa?$AAc?$AAh?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1O@LKAE@?$AAD?$AAo?$AAc?$AAt?$AAo?$AAr?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1M@PIIK@?$AAO?$AAt?$AAh?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1DA@HABI@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAd?$AAo?$AAw?$AAn?$AAt@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1DK@NIBP@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1DA@KMLL@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAk?$AAe?$AA?5?$AAa?$AA?5?$AAw@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1DI@HILD@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1DO@GABO@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAo?$AAn?$AA?5?$AAa?$AA?5@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1CO@EPEJ@?$AAW?$AAa?$AAi?$AAt?$AAi?$AAn?$AAg?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAs?$AAu?$AAg?$AAg?$AAe?$AAs?$AAt?$AAi@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_00A@?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@CFON@?$DM?$CFs?$DO?$CFs?$DM?1?$CFs?$DO?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@JHIP@?$DM?$CFs?$DO?$CFd?$DM?1?$CFs?$DO?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@BMEL@Proto?1IsProtocolLoaded?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BK@HFIO@Proto?1GetContactBaseProto?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_07JPGB@Account?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@OEEL@UserInfo?1AddPage?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_11A@?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0FG@DDKF@E?3?2Documents?5and?5Settings?2piotr?2@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_09CJDC@FirstName?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_08MBCL@LastName?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04LMAM@Nick?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_06BOPE@e?9mail?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_03DOPF@Age?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04NBCE@City?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_06POLE@School?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_06BBDA@Gender?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@IHOC@Occupation?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@BFLA@LookingFor?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_09BPFM@VoiceChat?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0N@OEII@PublicStatus?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_03HCJC@jid?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_19ENPD@?$AAb?$AAo?$AAt?$AAh?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_15GGJF@?$AAt?$AAo?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_19LELL@?$AAf?$AAr?$AAo?$AAm?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_19JPFO@?$AAn?$AAo?$AAn?$AAe?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_1BM@MBDI@?$AAn?$AAo?$AAt?$AA?5?$AAo?$AAn?$AA?5?$AAr?$AAo?$AAs?$AAt?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0EI@GNHC@?$DMiq?5type?$DN?8set?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_05KELB@first?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04ONL@last?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04BGEO@nick?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_05JKH@email?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_01KBOJ@s?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_01KCAO@b?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_01IJJ@c?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_01PGLG@j?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_01PHOL@e?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_01LHO@r?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_09LAGL@?$DMg?$DO?$CFd?$DM?1g?$DO?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_09GKP@?$DMv?$DO?$CFd?$DM?1v?$DO?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0O@IPOG@?$DM?1query?$DO?$DM?1iq?$DO?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_02DILL@?$CFs?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT _DBGetContactSettingByte_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingWord_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingDword_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSetting_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingString_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBFreeVariant
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TranslateDialogDefault
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _InitComboBox
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _FetchField
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _FetchCombo
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TlenUserInfoInit
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TlenUserInfoDlgProc@16
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+FLAT	GROUP _DATA, CONST, _BSS
+	ASSUME	CS: FLAT, DS: FLAT, SS: FLAT
+endif
+PUBLIC	??_C@_19EDBJ@?$AAM?$AAa?$AAl?$AAe?$AA?$AA@	; `string'
+PUBLIC	??_C@_1O@ELC@?$AAF?$AAe?$AAm?$AAa?$AAl?$AAe?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1CC@ODLD@?$AAS?$AAo?$AAm?$AAe?$AAb?$AAo?$AAd?$AAy?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAl?$AAk?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BG@HEKK@?$AAF?$AAr?$AAi?$AAe?$AAn?$AAd?$AAs?$AAh?$AAi?$AAp?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BM@JAOE@?$AAF?$AAl?$AAi?$AAr?$AAt?$AA?1?$AAr?$AAo?$AAm?$AAa?$AAn?$AAc?$AAe?$AA?$AA@ ; `string'
+PUBLIC	??_C@_19FBLE@?$AAL?$AAo?$AAv?$AAe?$AA?$AA@	; `string'
+PUBLIC	??_C@_1BA@NIAL@?$AAN?$AAo?$AAt?$AAh?$AAi?$AAn?$AAg?$AA?$AA@ ; `string'
+PUBLIC	??_C@_17BICM@?$AAA?$AAl?$AAl?$AA?$AA@		; `string'
+PUBLIC	??_C@_1BE@HBAJ@?$AAA?$AAv?$AAa?$AAi?$AAl?$AAa?$AAb?$AAl?$AAe?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BM@HGPL@?$AAF?$AAr?$AAe?$AAe?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAc?$AAh?$AAa?$AAt?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BA@KJGO@?$AAS?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1CA@DGFF@?$AAC?$AAo?$AAl?$AAl?$AAe?$AAg?$AAe?$AA?5?$AAs?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1O@CHEJ@?$AAF?$AAa?$AAr?$AAm?$AAe?$AAr?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BA@EDMP@?$AAM?$AAa?$AAn?$AAa?$AAg?$AAe?$AAr?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BG@JMK@?$AAS?$AAp?$AAe?$AAc?$AAi?$AAa?$AAl?$AAi?$AAs?$AAt?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1M@FBAA@?$AAC?$AAl?$AAe?$AAr?$AAk?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BG@HDHN@?$AAU?$AAn?$AAe?$AAm?$AAp?$AAl?$AAo?$AAy?$AAe?$AAd?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BE@HIIK@?$AAP?$AAe?$AAn?$AAs?$AAi?$AAo?$AAn?$AAe?$AAr?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BI@JIMD@?$AAH?$AAo?$AAu?$AAs?$AAe?$AAk?$AAe?$AAe?$AAp?$AAe?$AAr?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1BA@DNL@?$AAT?$AAe?$AAa?$AAc?$AAh?$AAe?$AAr?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1O@LKAE@?$AAD?$AAo?$AAc?$AAt?$AAo?$AAr?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1M@PIIK@?$AAO?$AAt?$AAh?$AAe?$AAr?$AA?$AA@ ; `string'
+PUBLIC	??_C@_1DA@HABI@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAd?$AAo?$AAw?$AAn?$AAt@ ; `string'
+PUBLIC	??_C@_1DK@NIBP@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@ ; `string'
+PUBLIC	??_C@_1DA@KMLL@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAk?$AAe?$AA?5?$AAa?$AA?5?$AAw@ ; `string'
+PUBLIC	??_C@_1DI@HILD@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@ ; `string'
+PUBLIC	??_C@_1DO@GABO@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAo?$AAn?$AA?5?$AAa?$AA?5@ ; `string'
+PUBLIC	??_C@_1CO@EPEJ@?$AAW?$AAa?$AAi?$AAt?$AAi?$AAn?$AAg?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAs?$AAu?$AAg?$AAg?$AAe?$AAs?$AAt?$AAi@ ; `string'
+PUBLIC	_tlenFieldGender
+PUBLIC	_tlenFieldLookfor
+PUBLIC	_tlenFieldStatus
+PUBLIC	_tlenFieldOccupation
+PUBLIC	_tlenFieldPlan
+_DATA	SEGMENT
+_tlenFieldGender DD 01H
+	DD	FLAT:??_C@_19EDBJ@?$AAM?$AAa?$AAl?$AAe?$AA?$AA@
+	DD	02H
+	DD	FLAT:??_C@_1O@ELC@?$AAF?$AAe?$AAm?$AAa?$AAl?$AAe?$AA?$AA@
+	DD	00H
+	DD	00H
+_tlenFieldLookfor DD 01H
+	DD	FLAT:??_C@_1CC@ODLD@?$AAS?$AAo?$AAm?$AAe?$AAb?$AAo?$AAd?$AAy?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAl?$AAk?$AA?$AA@
+	DD	02H
+	DD	FLAT:??_C@_1BG@HEKK@?$AAF?$AAr?$AAi?$AAe?$AAn?$AAd?$AAs?$AAh?$AAi?$AAp?$AA?$AA@
+	DD	03H
+	DD	FLAT:??_C@_1BM@JAOE@?$AAF?$AAl?$AAi?$AAr?$AAt?$AA?1?$AAr?$AAo?$AAm?$AAa?$AAn?$AAc?$AAe?$AA?$AA@
+	DD	04H
+	DD	FLAT:??_C@_19FBLE@?$AAL?$AAo?$AAv?$AAe?$AA?$AA@
+	DD	05H
+	DD	FLAT:??_C@_1BA@NIAL@?$AAN?$AAo?$AAt?$AAh?$AAi?$AAn?$AAg?$AA?$AA@
+	DD	00H
+	DD	00H
+_tlenFieldStatus DD 01H
+	DD	FLAT:??_C@_17BICM@?$AAA?$AAl?$AAl?$AA?$AA@
+	DD	02H
+	DD	FLAT:??_C@_1BE@HBAJ@?$AAA?$AAv?$AAa?$AAi?$AAl?$AAa?$AAb?$AAl?$AAe?$AA?$AA@
+	DD	03H
+	DD	FLAT:??_C@_1BM@HGPL@?$AAF?$AAr?$AAe?$AAe?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAc?$AAh?$AAa?$AAt?$AA?$AA@
+	DD	00H
+	DD	00H
+_tlenFieldOccupation DD 01H
+	DD	FLAT:??_C@_1BA@KJGO@?$AAS?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@
+	DD	02H
+	DD	FLAT:??_C@_1CA@DGFF@?$AAC?$AAo?$AAl?$AAl?$AAe?$AAg?$AAe?$AA?5?$AAs?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@
+	DD	03H
+	DD	FLAT:??_C@_1O@CHEJ@?$AAF?$AAa?$AAr?$AAm?$AAe?$AAr?$AA?$AA@
+	DD	04H
+	DD	FLAT:??_C@_1BA@EDMP@?$AAM?$AAa?$AAn?$AAa?$AAg?$AAe?$AAr?$AA?$AA@
+	DD	05H
+	DD	FLAT:??_C@_1BG@JMK@?$AAS?$AAp?$AAe?$AAc?$AAi?$AAa?$AAl?$AAi?$AAs?$AAt?$AA?$AA@
+	DD	06H
+	DD	FLAT:??_C@_1M@FBAA@?$AAC?$AAl?$AAe?$AAr?$AAk?$AA?$AA@
+	DD	07H
+	DD	FLAT:??_C@_1BG@HDHN@?$AAU?$AAn?$AAe?$AAm?$AAp?$AAl?$AAo?$AAy?$AAe?$AAd?$AA?$AA@
+	DD	08H
+	DD	FLAT:??_C@_1BE@HIIK@?$AAP?$AAe?$AAn?$AAs?$AAi?$AAo?$AAn?$AAe?$AAr?$AA?$AA@
+	DD	09H
+	DD	FLAT:??_C@_1BI@JIMD@?$AAH?$AAo?$AAu?$AAs?$AAe?$AAk?$AAe?$AAe?$AAp?$AAe?$AAr?$AA?$AA@
+	DD	0aH
+	DD	FLAT:??_C@_1BA@DNL@?$AAT?$AAe?$AAa?$AAc?$AAh?$AAe?$AAr?$AA?$AA@
+	DD	0bH
+	DD	FLAT:??_C@_1O@LKAE@?$AAD?$AAo?$AAc?$AAt?$AAo?$AAr?$AA?$AA@
+	DD	0cH
+	DD	FLAT:??_C@_1M@PIIK@?$AAO?$AAt?$AAh?$AAe?$AAr?$AA?$AA@
+	DD	00H
+	DD	00H
+_tlenFieldPlan DD 01H
+	DD	FLAT:??_C@_1DA@HABI@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAd?$AAo?$AAw?$AAn?$AAt@
+	DD	02H
+	DD	FLAT:??_C@_1DK@NIBP@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@
+	DD	03H
+	DD	FLAT:??_C@_1DA@KMLL@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAk?$AAe?$AA?5?$AAa?$AA?5?$AAw@
+	DD	04H
+	DD	FLAT:??_C@_1DI@HILD@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@
+	DD	05H
+	DD	FLAT:??_C@_1DO@GABO@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAo?$AAn?$AA?5?$AAa?$AA?5@
+	DD	06H
+	DD	FLAT:??_C@_1CO@EPEJ@?$AAW?$AAa?$AAi?$AAt?$AAi?$AAn?$AAg?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAs?$AAu?$AAg?$AAg?$AAe?$AAs?$AAt?$AAi@
+	DD	00H
+	DD	00H
+_DATA	ENDS
+;	COMDAT ??_C@_19EDBJ@?$AAM?$AAa?$AAl?$AAe?$AA?$AA@
+_DATA	SEGMENT
+??_C@_19EDBJ@?$AAM?$AAa?$AAl?$AAe?$AA?$AA@ DB 'M', 00H, 'a', 00H, 'l', 00H
+	DB	'e', 00H, 00H, 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1O@ELC@?$AAF?$AAe?$AAm?$AAa?$AAl?$AAe?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1O@ELC@?$AAF?$AAe?$AAm?$AAa?$AAl?$AAe?$AA?$AA@ DB 'F', 00H, 'e', 00H
+	DB	'm', 00H, 'a', 00H, 'l', 00H, 'e', 00H, 00H, 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1CC@ODLD@?$AAS?$AAo?$AAm?$AAe?$AAb?$AAo?$AAd?$AAy?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAl?$AAk?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1CC@ODLD@?$AAS?$AAo?$AAm?$AAe?$AAb?$AAo?$AAd?$AAy?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAl?$AAk?$AA?$AA@ DB 'S'
+	DB	00H, 'o', 00H, 'm', 00H, 'e', 00H, 'b', 00H, 'o', 00H, 'd', 00H
+	DB	'y', 00H, ' ', 00H, 't', 00H, 'o', 00H, ' ', 00H, 't', 00H, 'a'
+	DB	00H, 'l', 00H, 'k', 00H, 00H, 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BG@HEKK@?$AAF?$AAr?$AAi?$AAe?$AAn?$AAd?$AAs?$AAh?$AAi?$AAp?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BG@HEKK@?$AAF?$AAr?$AAi?$AAe?$AAn?$AAd?$AAs?$AAh?$AAi?$AAp?$AA?$AA@ DB 'F'
+	DB	00H, 'r', 00H, 'i', 00H, 'e', 00H, 'n', 00H, 'd', 00H, 's', 00H
+	DB	'h', 00H, 'i', 00H, 'p', 00H, 00H, 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BM@JAOE@?$AAF?$AAl?$AAi?$AAr?$AAt?$AA?1?$AAr?$AAo?$AAm?$AAa?$AAn?$AAc?$AAe?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BM@JAOE@?$AAF?$AAl?$AAi?$AAr?$AAt?$AA?1?$AAr?$AAo?$AAm?$AAa?$AAn?$AAc?$AAe?$AA?$AA@ DB 'F'
+	DB	00H, 'l', 00H, 'i', 00H, 'r', 00H, 't', 00H, '/', 00H, 'r', 00H
+	DB	'o', 00H, 'm', 00H, 'a', 00H, 'n', 00H, 'c', 00H, 'e', 00H, 00H
+	DB	00H						; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_19FBLE@?$AAL?$AAo?$AAv?$AAe?$AA?$AA@
+_DATA	SEGMENT
+??_C@_19FBLE@?$AAL?$AAo?$AAv?$AAe?$AA?$AA@ DB 'L', 00H, 'o', 00H, 'v', 00H
+	DB	'e', 00H, 00H, 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BA@NIAL@?$AAN?$AAo?$AAt?$AAh?$AAi?$AAn?$AAg?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BA@NIAL@?$AAN?$AAo?$AAt?$AAh?$AAi?$AAn?$AAg?$AA?$AA@ DB 'N', 00H, 'o'
+	DB	00H, 't', 00H, 'h', 00H, 'i', 00H, 'n', 00H, 'g', 00H, 00H, 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_17BICM@?$AAA?$AAl?$AAl?$AA?$AA@
+_DATA	SEGMENT
+??_C@_17BICM@?$AAA?$AAl?$AAl?$AA?$AA@ DB 'A', 00H, 'l', 00H, 'l', 00H, 00H
+	DB	00H						; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BE@HBAJ@?$AAA?$AAv?$AAa?$AAi?$AAl?$AAa?$AAb?$AAl?$AAe?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BE@HBAJ@?$AAA?$AAv?$AAa?$AAi?$AAl?$AAa?$AAb?$AAl?$AAe?$AA?$AA@ DB 'A'
+	DB	00H, 'v', 00H, 'a', 00H, 'i', 00H, 'l', 00H, 'a', 00H, 'b', 00H
+	DB	'l', 00H, 'e', 00H, 00H, 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BM@HGPL@?$AAF?$AAr?$AAe?$AAe?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAc?$AAh?$AAa?$AAt?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BM@HGPL@?$AAF?$AAr?$AAe?$AAe?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAc?$AAh?$AAa?$AAt?$AA?$AA@ DB 'F'
+	DB	00H, 'r', 00H, 'e', 00H, 'e', 00H, ' ', 00H, 'f', 00H, 'o', 00H
+	DB	'r', 00H, ' ', 00H, 'c', 00H, 'h', 00H, 'a', 00H, 't', 00H, 00H
+	DB	00H						; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BA@KJGO@?$AAS?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BA@KJGO@?$AAS?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@ DB 'S', 00H, 't'
+	DB	00H, 'u', 00H, 'd', 00H, 'e', 00H, 'n', 00H, 't', 00H, 00H, 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1CA@DGFF@?$AAC?$AAo?$AAl?$AAl?$AAe?$AAg?$AAe?$AA?5?$AAs?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1CA@DGFF@?$AAC?$AAo?$AAl?$AAl?$AAe?$AAg?$AAe?$AA?5?$AAs?$AAt?$AAu?$AAd?$AAe?$AAn?$AAt?$AA?$AA@ DB 'C'
+	DB	00H, 'o', 00H, 'l', 00H, 'l', 00H, 'e', 00H, 'g', 00H, 'e', 00H
+	DB	' ', 00H, 's', 00H, 't', 00H, 'u', 00H, 'd', 00H, 'e', 00H, 'n'
+	DB	00H, 't', 00H, 00H, 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1O@CHEJ@?$AAF?$AAa?$AAr?$AAm?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1O@CHEJ@?$AAF?$AAa?$AAr?$AAm?$AAe?$AAr?$AA?$AA@ DB 'F', 00H, 'a', 00H
+	DB	'r', 00H, 'm', 00H, 'e', 00H, 'r', 00H, 00H, 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BA@EDMP@?$AAM?$AAa?$AAn?$AAa?$AAg?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BA@EDMP@?$AAM?$AAa?$AAn?$AAa?$AAg?$AAe?$AAr?$AA?$AA@ DB 'M', 00H, 'a'
+	DB	00H, 'n', 00H, 'a', 00H, 'g', 00H, 'e', 00H, 'r', 00H, 00H, 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BG@JMK@?$AAS?$AAp?$AAe?$AAc?$AAi?$AAa?$AAl?$AAi?$AAs?$AAt?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BG@JMK@?$AAS?$AAp?$AAe?$AAc?$AAi?$AAa?$AAl?$AAi?$AAs?$AAt?$AA?$AA@ DB 'S'
+	DB	00H, 'p', 00H, 'e', 00H, 'c', 00H, 'i', 00H, 'a', 00H, 'l', 00H
+	DB	'i', 00H, 's', 00H, 't', 00H, 00H, 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1M@FBAA@?$AAC?$AAl?$AAe?$AAr?$AAk?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1M@FBAA@?$AAC?$AAl?$AAe?$AAr?$AAk?$AA?$AA@ DB 'C', 00H, 'l', 00H, 'e'
+	DB	00H, 'r', 00H, 'k', 00H, 00H, 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BG@HDHN@?$AAU?$AAn?$AAe?$AAm?$AAp?$AAl?$AAo?$AAy?$AAe?$AAd?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BG@HDHN@?$AAU?$AAn?$AAe?$AAm?$AAp?$AAl?$AAo?$AAy?$AAe?$AAd?$AA?$AA@ DB 'U'
+	DB	00H, 'n', 00H, 'e', 00H, 'm', 00H, 'p', 00H, 'l', 00H, 'o', 00H
+	DB	'y', 00H, 'e', 00H, 'd', 00H, 00H, 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BE@HIIK@?$AAP?$AAe?$AAn?$AAs?$AAi?$AAo?$AAn?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BE@HIIK@?$AAP?$AAe?$AAn?$AAs?$AAi?$AAo?$AAn?$AAe?$AAr?$AA?$AA@ DB 'P'
+	DB	00H, 'e', 00H, 'n', 00H, 's', 00H, 'i', 00H, 'o', 00H, 'n', 00H
+	DB	'e', 00H, 'r', 00H, 00H, 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BI@JIMD@?$AAH?$AAo?$AAu?$AAs?$AAe?$AAk?$AAe?$AAe?$AAp?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BI@JIMD@?$AAH?$AAo?$AAu?$AAs?$AAe?$AAk?$AAe?$AAe?$AAp?$AAe?$AAr?$AA?$AA@ DB 'H'
+	DB	00H, 'o', 00H, 'u', 00H, 's', 00H, 'e', 00H, 'k', 00H, 'e', 00H
+	DB	'e', 00H, 'p', 00H, 'e', 00H, 'r', 00H, 00H, 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BA@DNL@?$AAT?$AAe?$AAa?$AAc?$AAh?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BA@DNL@?$AAT?$AAe?$AAa?$AAc?$AAh?$AAe?$AAr?$AA?$AA@ DB 'T', 00H, 'e'
+	DB	00H, 'a', 00H, 'c', 00H, 'h', 00H, 'e', 00H, 'r', 00H, 00H, 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1O@LKAE@?$AAD?$AAo?$AAc?$AAt?$AAo?$AAr?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1O@LKAE@?$AAD?$AAo?$AAc?$AAt?$AAo?$AAr?$AA?$AA@ DB 'D', 00H, 'o', 00H
+	DB	'c', 00H, 't', 00H, 'o', 00H, 'r', 00H, 00H, 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1M@PIIK@?$AAO?$AAt?$AAh?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1M@PIIK@?$AAO?$AAt?$AAh?$AAe?$AAr?$AA?$AA@ DB 'O', 00H, 't', 00H, 'h'
+	DB	00H, 'e', 00H, 'r', 00H, 00H, 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1DA@HABI@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAd?$AAo?$AAw?$AAn?$AAt@
+_DATA	SEGMENT
+??_C@_1DA@HABI@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAd?$AAo?$AAw?$AAn?$AAt@ DB 'I'
+	DB	00H, '''', 00H, 'd', 00H, ' ', 00H, 'l', 00H, 'i', 00H, 'k', 00H
+	DB	'e', 00H, ' ', 00H, 't', 00H, 'o', 00H, ' ', 00H, 'g', 00H, 'o'
+	DB	00H, ' ', 00H, 'd', 00H, 'o', 00H, 'w', 00H, 'n', 00H, 't', 00H
+	DB	'o', 00H, 'w', 00H, 'n', 00H, 00H, 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1DK@NIBP@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@
+_DATA	SEGMENT
+??_C@_1DK@NIBP@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@ DB 'I'
+	DB	00H, '''', 00H, 'd', 00H, ' ', 00H, 'l', 00H, 'i', 00H, 'k', 00H
+	DB	'e', 00H, ' ', 00H, 't', 00H, 'o', 00H, ' ', 00H, 'g', 00H, 'o'
+	DB	00H, ' ', 00H, 't', 00H, 'o', 00H, ' ', 00H, 't', 00H, 'h', 00H
+	DB	'e', 00H, ' ', 00H, 'c', 00H, 'i', 00H, 'n', 00H, 'e', 00H, 'm'
+	DB	00H, 'a', 00H, 00H, 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1DA@KMLL@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAk?$AAe?$AA?5?$AAa?$AA?5?$AAw@
+_DATA	SEGMENT
+??_C@_1DA@KMLL@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAa?$AAk?$AAe?$AA?5?$AAa?$AA?5?$AAw@ DB 'I'
+	DB	00H, '''', 00H, 'd', 00H, ' ', 00H, 'l', 00H, 'i', 00H, 'k', 00H
+	DB	'e', 00H, ' ', 00H, 't', 00H, 'o', 00H, ' ', 00H, 't', 00H, 'a'
+	DB	00H, 'k', 00H, 'e', 00H, ' ', 00H, 'a', 00H, ' ', 00H, 'w', 00H
+	DB	'a', 00H, 'l', 00H, 'k', 00H, 00H, 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1DI@HILD@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@
+_DATA	SEGMENT
+??_C@_1DI@HILD@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAt?$AAo?$AA?5?$AAt?$AAh@ DB 'I'
+	DB	00H, '''', 00H, 'd', 00H, ' ', 00H, 'l', 00H, 'i', 00H, 'k', 00H
+	DB	'e', 00H, ' ', 00H, 't', 00H, 'o', 00H, ' ', 00H, 'g', 00H, 'o'
+	DB	00H, ' ', 00H, 't', 00H, 'o', 00H, ' ', 00H, 't', 00H, 'h', 00H
+	DB	'e', 00H, ' ', 00H, 'd', 00H, 'i', 00H, 's', 00H, 'c', 00H, 'o'
+	DB	00H, 00H, 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1DO@GABO@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAo?$AAn?$AA?5?$AAa?$AA?5@
+_DATA	SEGMENT
+??_C@_1DO@GABO@?$AAI?$AA?8?$AAd?$AA?5?$AAl?$AAi?$AAk?$AAe?$AA?5?$AAt?$AAo?$AA?5?$AAg?$AAo?$AA?5?$AAo?$AAn?$AA?5?$AAa?$AA?5@ DB 'I'
+	DB	00H, '''', 00H, 'd', 00H, ' ', 00H, 'l', 00H, 'i', 00H, 'k', 00H
+	DB	'e', 00H, ' ', 00H, 't', 00H, 'o', 00H, ' ', 00H, 'g', 00H, 'o'
+	DB	00H, ' ', 00H, 'o', 00H, 'n', 00H, ' ', 00H, 'a', 00H, ' ', 00H
+	DB	'b', 00H, 'l', 00H, 'i', 00H, 'n', 00H, 'd', 00H, ' ', 00H, 'd'
+	DB	00H, 'a', 00H, 't', 00H, 'e', 00H, 00H, 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1CO@EPEJ@?$AAW?$AAa?$AAi?$AAt?$AAi?$AAn?$AAg?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAs?$AAu?$AAg?$AAg?$AAe?$AAs?$AAt?$AAi@
+_DATA	SEGMENT
+??_C@_1CO@EPEJ@?$AAW?$AAa?$AAi?$AAt?$AAi?$AAn?$AAg?$AA?5?$AAf?$AAo?$AAr?$AA?5?$AAs?$AAu?$AAg?$AAg?$AAe?$AAs?$AAt?$AAi@ DB 'W'
+	DB	00H, 'a', 00H, 'i', 00H, 't', 00H, 'i', 00H, 'n', 00H, 'g', 00H
+	DB	' ', 00H, 'f', 00H, 'o', 00H, 'r', 00H, ' ', 00H, 's', 00H, 'u'
+	DB	00H, 'g', 00H, 'g', 00H, 'e', 00H, 's', 00H, 't', 00H, 'i', 00H
+	DB	'o', 00H, 'n', 00H, 00H, 00H			; `string'
+_DATA	ENDS
+PUBLIC	_TlenUserInfoInit
+PUBLIC	??_C@_0BH@BMEL@Proto?1IsProtocolLoaded?$AA@	; `string'
+PUBLIC	??_C@_0BK@HFIO@Proto?1GetContactBaseProto?$AA@	; `string'
+PUBLIC	??_C@_07JPGB@Account?$AA@			; `string'
+PUBLIC	??_C@_0BB@OEEL@UserInfo?1AddPage?$AA@		; `string'
+EXTRN	_strcmp:NEAR
+EXTRN	_hInst:DWORD
+EXTRN	_JabberGetInfo:NEAR
+EXTRN	_pluginLink:DWORD
+;	COMDAT ??_C@_0BH@BMEL@Proto?1IsProtocolLoaded?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\tlen_userinfo.c
+_DATA	SEGMENT
+??_C@_0BH@BMEL@Proto?1IsProtocolLoaded?$AA@ DB 'Proto/IsProtocolLoaded', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BK@HFIO@Proto?1GetContactBaseProto?$AA@
+_DATA	SEGMENT
+??_C@_0BK@HFIO@Proto?1GetContactBaseProto?$AA@ DB 'Proto/GetContactBasePr'
+	DB	'oto', 00H					; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_07JPGB@Account?$AA@
+_DATA	SEGMENT
+??_C@_07JPGB@Account?$AA@ DB 'Account', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@OEEL@UserInfo?1AddPage?$AA@
+_DATA	SEGMENT
+??_C@_0BB@OEEL@UserInfo?1AddPage?$AA@ DB 'UserInfo/AddPage', 00H ; `string'
+_DATA	ENDS
+;	COMDAT _TlenUserInfoInit
+_TEXT	SEGMENT
+_ptr$ = 8
+_wParam$ = 12
+_lParam$ = 16
+_odp$ = -84
+_ccs$85208 = -16
+_TlenUserInfoInit PROC NEAR				; COMDAT
+
+; 132  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 54	 sub	 esp, 84			; 00000054H
+  00006	53		 push	 ebx
+  00007	56		 push	 esi
+
+; 133  : 	char *szProto;
+; 134  : 	HANDLE hContact;
+; 135  : 	OPTIONSDIALOGPAGE odp = {0};
+; 136  : 	TlenProtocol *proto = (TlenProtocol *)ptr;
+; 137  : 
+; 138  : 	if (!CallService(MS_PROTO_ISPROTOCOLLOADED, 0, (LPARAM) proto->iface.m_szModuleName))
+
+  00008	8b 75 08	 mov	 esi, DWORD PTR _ptr$[ebp]
+  0000b	57		 push	 edi
+  0000c	6a 10		 push	 16			; 00000010H
+  0000e	33 db		 xor	 ebx, ebx
+  00010	59		 pop	 ecx
+  00011	33 c0		 xor	 eax, eax
+  00013	ff 76 1c	 push	 DWORD PTR [esi+28]
+  00016	8d 7d b0	 lea	 edi, DWORD PTR _odp$[ebp+4]
+  00019	89 5d ac	 mov	 DWORD PTR _odp$[ebp], ebx
+  0001c	f3 ab		 rep stosd
+  0001e	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00023	53		 push	 ebx
+  00024	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@BMEL@Proto?1IsProtocolLoaded?$AA@ ; `string'
+  00029	ff 50 24	 call	 DWORD PTR [eax+36]
+  0002c	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0002f	85 c0		 test	 eax, eax
+
+; 139  : 		return 0;
+
+  00031	0f 84 9d 00 00
+	00		 je	 $L85207
+
+; 140  : 	hContact = (HANDLE) lParam;
+; 141  : 	szProto = (char *) CallService(MS_PROTO_GETCONTACTBASEPROTO, (WPARAM) hContact, 0);
+
+  00037	8b 7d 10	 mov	 edi, DWORD PTR _lParam$[ebp]
+  0003a	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0003f	53		 push	 ebx
+  00040	57		 push	 edi
+  00041	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BK@HFIO@Proto?1GetContactBaseProto?$AA@ ; `string'
+  00046	ff 50 24	 call	 DWORD PTR [eax+36]
+  00049	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 142  : 	if ((szProto!=NULL && !strcmp(szProto, proto->iface.m_szModuleName)) || !lParam) {
+
+  0004c	3b c3		 cmp	 eax, ebx
+  0004e	74 0f		 je	 SHORT $L85194
+  00050	ff 76 1c	 push	 DWORD PTR [esi+28]
+  00053	50		 push	 eax
+  00054	e8 00 00 00 00	 call	 _strcmp
+  00059	59		 pop	 ecx
+  0005a	85 c0		 test	 eax, eax
+  0005c	59		 pop	 ecx
+  0005d	74 04		 je	 SHORT $L85193
+$L85194:
+  0005f	3b fb		 cmp	 edi, ebx
+  00061	75 71		 jne	 SHORT $L85207
+$L85193:
+
+; 143  : 		odp.cbSize = sizeof(odp);
+; 144  : 		odp.hInstance = hInst;
+
+  00063	a1 00 00 00 00	 mov	 eax, DWORD PTR _hInst
+  00068	c7 45 ac 44 00
+	00 00		 mov	 DWORD PTR _odp$[ebp], 68 ; 00000044H
+  0006f	89 45 c0	 mov	 DWORD PTR _odp$[ebp+20], eax
+
+; 145  : 		odp.pfnDlgProc = TlenUserInfoDlgProc;
+; 146  : 		odp.position = -2000000000;
+; 147  : 		odp.pszTemplate = ((HANDLE)lParam!=NULL) ? MAKEINTRESOURCEA(IDD_USER_INFO):MAKEINTRESOURCEA(IDD_USER_VCARD);
+
+  00072	8b c7		 mov	 eax, edi
+  00074	f7 d8		 neg	 eax
+  00076	1b c0		 sbb	 eax, eax
+  00078	c7 45 b8 00 00
+	00 00		 mov	 DWORD PTR _odp$[ebp+12], OFFSET FLAT:_TlenUserInfoDlgProc@16
+  0007f	05 9c 00 00 00	 add	 eax, 156		; 0000009cH
+  00084	c7 45 b0 00 6c
+	ca 88		 mov	 DWORD PTR _odp$[ebp+4], -2000000000 ; 88ca6c00H
+  0008b	89 45 bc	 mov	 DWORD PTR _odp$[ebp+16], eax
+
+; 148  : 		odp.pszTitle = LPGEN("Account");
+; 149  :         odp.dwInitParam = (LPARAM)proto;
+; 150  : 		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
+
+  0008e	8d 45 ac	 lea	 eax, DWORD PTR _odp$[ebp]
+  00091	50		 push	 eax
+  00092	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00097	ff 75 0c	 push	 DWORD PTR _wParam$[ebp]
+  0009a	c7 45 b4 00 00
+	00 00		 mov	 DWORD PTR _odp$[ebp+8], OFFSET FLAT:??_C@_07JPGB@Account?$AA@ ; `string'
+  000a1	89 75 ec	 mov	 DWORD PTR _odp$[ebp+64], esi
+  000a4	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BB@OEEL@UserInfo?1AddPage?$AA@ ; `string'
+  000a9	ff 50 24	 call	 DWORD PTR [eax+36]
+  000ac	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 151  : 
+; 152  : 	}
+; 153  : 	if (!lParam && proto->jabberOnline) {
+
+  000af	3b fb		 cmp	 edi, ebx
+  000b1	75 21		 jne	 SHORT $L85207
+  000b3	39 9e 78 01 00
+	00		 cmp	 DWORD PTR [esi+376], ebx
+  000b9	74 19		 je	 SHORT $L85207
+
+; 154  : 		CCSDATA ccs = {0};
+
+  000bb	33 c0		 xor	 eax, eax
+  000bd	8d 7d f4	 lea	 edi, DWORD PTR _ccs$85208[ebp+4]
+  000c0	89 5d f0	 mov	 DWORD PTR _ccs$85208[ebp], ebx
+  000c3	ab		 stosd
+  000c4	ab		 stosd
+  000c5	ab		 stosd
+
+; 155  : 		JabberGetInfo(ptr, 0, (LPARAM) &ccs);
+
+  000c6	8d 45 f0	 lea	 eax, DWORD PTR _ccs$85208[ebp]
+  000c9	50		 push	 eax
+  000ca	53		 push	 ebx
+  000cb	56		 push	 esi
+  000cc	e8 00 00 00 00	 call	 _JabberGetInfo
+  000d1	83 c4 0c	 add	 esp, 12			; 0000000cH
+$L85207:
+  000d4	5f		 pop	 edi
+  000d5	5e		 pop	 esi
+
+; 156  : 	}
+; 157  : 	return 0;
+
+  000d6	33 c0		 xor	 eax, eax
+  000d8	5b		 pop	 ebx
+
+; 158  : }
+
+  000d9	c9		 leave
+  000da	c3		 ret	 0
+_TlenUserInfoInit ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@	; `string'
+PUBLIC	??_C@_11A@?$AA?$AA@				; `string'
+PUBLIC	??_C@_09CJDC@FirstName?$AA@			; `string'
+PUBLIC	??_C@_08MBCL@LastName?$AA@			; `string'
+PUBLIC	??_C@_04LMAM@Nick?$AA@				; `string'
+PUBLIC	??_C@_06BOPE@e?9mail?$AA@			; `string'
+PUBLIC	??_C@_03DOPF@Age?$AA@				; `string'
+PUBLIC	??_C@_04NBCE@City?$AA@				; `string'
+PUBLIC	??_C@_06POLE@School?$AA@			; `string'
+PUBLIC	??_C@_06BBDA@Gender?$AA@			; `string'
+PUBLIC	??_C@_0L@IHOC@Occupation?$AA@			; `string'
+PUBLIC	??_C@_0L@BFLA@LookingFor?$AA@			; `string'
+PUBLIC	??_C@_09BPFM@VoiceChat?$AA@			; `string'
+PUBLIC	??_C@_0N@OEII@PublicStatus?$AA@			; `string'
+PUBLIC	??_C@_03HCJC@jid?$AA@				; `string'
+PUBLIC	??_C@_19ENPD@?$AAb?$AAo?$AAt?$AAh?$AA?$AA@	; `string'
+PUBLIC	??_C@_15GGJF@?$AAt?$AAo?$AA?$AA@		; `string'
+PUBLIC	??_C@_19LELL@?$AAf?$AAr?$AAo?$AAm?$AA?$AA@	; `string'
+PUBLIC	??_C@_19JPFO@?$AAn?$AAo?$AAn?$AAe?$AA?$AA@	; `string'
+PUBLIC	??_C@_1BM@MBDI@?$AAn?$AAo?$AAt?$AA?5?$AAo?$AAn?$AA?5?$AAr?$AAo?$AAs?$AAt?$AAe?$AAr?$AA?$AA@ ; `string'
+PUBLIC	??_C@_0EI@GNHC@?$DMiq?5type?$DN?8set?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@ ; `string'
+PUBLIC	??_C@_05KELB@first?$AA@				; `string'
+PUBLIC	??_C@_04ONL@last?$AA@				; `string'
+PUBLIC	??_C@_04BGEO@nick?$AA@				; `string'
+PUBLIC	??_C@_05JKH@email?$AA@				; `string'
+PUBLIC	??_C@_01KBOJ@s?$AA@				; `string'
+PUBLIC	??_C@_01KCAO@b?$AA@				; `string'
+PUBLIC	??_C@_01IJJ@c?$AA@				; `string'
+PUBLIC	??_C@_01PGLG@j?$AA@				; `string'
+PUBLIC	??_C@_01PHOL@e?$AA@				; `string'
+PUBLIC	??_C@_01LHO@r?$AA@				; `string'
+PUBLIC	??_C@_09LAGL@?$DMg?$DO?$CFd?$DM?1g?$DO?$AA@	; `string'
+PUBLIC	??_C@_09GKP@?$DMv?$DO?$CFd?$DM?1v?$DO?$AA@	; `string'
+PUBLIC	??_C@_0O@IPOG@?$DM?1query?$DO?$DM?1iq?$DO?$AA@	; `string'
+PUBLIC	??_C@_02DILL@?$CFs?$AA@				; `string'
+PUBLIC	??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@	; `string'
+PUBLIC	??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@	; `string'
+PUBLIC	??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@	; `string'
+EXTRN	__imp__GetWindowLongW@8:NEAR
+EXTRN	__imp__SetWindowLongW@12:NEAR
+EXTRN	__imp__GetDlgItem@8:NEAR
+EXTRN	__imp__SetDlgItemInt@16:NEAR
+EXTRN	__imp__SetDlgItemTextA@12:NEAR
+EXTRN	__imp__SetDlgItemTextW@12:NEAR
+EXTRN	_mmi:BYTE
+EXTRN	__imp__CheckDlgButton@12:NEAR
+EXTRN	__imp__IsDlgButtonChecked@8:NEAR
+EXTRN	__imp__SendDlgItemMessageW@20:NEAR
+EXTRN	__imp__SetFocus@4:NEAR
+EXTRN	__imp__SendMessageW@16:NEAR
+EXTRN	_JabberSerialNext:NEAR
+EXTRN	_JabberSend:NEAR
+EXTRN	_JabberTextDecode:NEAR
+EXTRN	_JabberStringAppend:NEAR
+EXTRN	_JabberListGetItemPtr:NEAR
+;	COMDAT ??_C@_11A@?$AA?$AA@
+; File C:\MirandaDev\miranda_svn2\include\m_database.h
+_BSS	SEGMENT
+??_C@_11A@?$AA?$AA@ DW 01H DUP (?)			; `string'
+_BSS	ENDS
+;	COMDAT ??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@
+_DATA	SEGMENT
+??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ DB 'DB/Contact/GetSetting', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@
+_DATA	SEGMENT
+??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@ DB 'DB/Contact/GetSettingS'
+	DB	'tr', 00H					; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@
+_DATA	SEGMENT
+??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ DB 'DB/Contact/FreeVariant', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@
+_DATA	SEGMENT
+??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ DB 'LangPack/TranslateStrin'
+	DB	'g', 00H					; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_09CJDC@FirstName?$AA@
+_DATA	SEGMENT
+??_C@_09CJDC@FirstName?$AA@ DB 'FirstName', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_08MBCL@LastName?$AA@
+_DATA	SEGMENT
+??_C@_08MBCL@LastName?$AA@ DB 'LastName', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_04LMAM@Nick?$AA@
+_DATA	SEGMENT
+??_C@_04LMAM@Nick?$AA@ DB 'Nick', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_06BOPE@e?9mail?$AA@
+_DATA	SEGMENT
+??_C@_06BOPE@e?9mail?$AA@ DB 'e-mail', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_03DOPF@Age?$AA@
+_DATA	SEGMENT
+??_C@_03DOPF@Age?$AA@ DB 'Age', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_04NBCE@City?$AA@
+_DATA	SEGMENT
+??_C@_04NBCE@City?$AA@ DB 'City', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_06POLE@School?$AA@
+_DATA	SEGMENT
+??_C@_06POLE@School?$AA@ DB 'School', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_06BBDA@Gender?$AA@
+_DATA	SEGMENT
+??_C@_06BBDA@Gender?$AA@ DB 'Gender', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@IHOC@Occupation?$AA@
+_DATA	SEGMENT
+??_C@_0L@IHOC@Occupation?$AA@ DB 'Occupation', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@BFLA@LookingFor?$AA@
+_DATA	SEGMENT
+??_C@_0L@BFLA@LookingFor?$AA@ DB 'LookingFor', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_09BPFM@VoiceChat?$AA@
+_DATA	SEGMENT
+??_C@_09BPFM@VoiceChat?$AA@ DB 'VoiceChat', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0N@OEII@PublicStatus?$AA@
+_DATA	SEGMENT
+??_C@_0N@OEII@PublicStatus?$AA@ DB 'PublicStatus', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_03HCJC@jid?$AA@
+_DATA	SEGMENT
+??_C@_03HCJC@jid?$AA@ DB 'jid', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_19ENPD@?$AAb?$AAo?$AAt?$AAh?$AA?$AA@
+_DATA	SEGMENT
+??_C@_19ENPD@?$AAb?$AAo?$AAt?$AAh?$AA?$AA@ DB 'b', 00H, 'o', 00H, 't', 00H
+	DB	'h', 00H, 00H, 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_15GGJF@?$AAt?$AAo?$AA?$AA@
+_DATA	SEGMENT
+??_C@_15GGJF@?$AAt?$AAo?$AA?$AA@ DB 't', 00H, 'o', 00H, 00H, 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_19LELL@?$AAf?$AAr?$AAo?$AAm?$AA?$AA@
+_DATA	SEGMENT
+??_C@_19LELL@?$AAf?$AAr?$AAo?$AAm?$AA?$AA@ DB 'f', 00H, 'r', 00H, 'o', 00H
+	DB	'm', 00H, 00H, 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_19JPFO@?$AAn?$AAo?$AAn?$AAe?$AA?$AA@
+_DATA	SEGMENT
+??_C@_19JPFO@?$AAn?$AAo?$AAn?$AAe?$AA?$AA@ DB 'n', 00H, 'o', 00H, 'n', 00H
+	DB	'e', 00H, 00H, 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_1BM@MBDI@?$AAn?$AAo?$AAt?$AA?5?$AAo?$AAn?$AA?5?$AAr?$AAo?$AAs?$AAt?$AAe?$AAr?$AA?$AA@
+_DATA	SEGMENT
+??_C@_1BM@MBDI@?$AAn?$AAo?$AAt?$AA?5?$AAo?$AAn?$AA?5?$AAr?$AAo?$AAs?$AAt?$AAe?$AAr?$AA?$AA@ DB 'n'
+	DB	00H, 'o', 00H, 't', 00H, ' ', 00H, 'o', 00H, 'n', 00H, ' ', 00H
+	DB	'r', 00H, 'o', 00H, 's', 00H, 't', 00H, 'e', 00H, 'r', 00H, 00H
+	DB	00H						; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0EI@GNHC@?$DMiq?5type?$DN?8set?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@
+_DATA	SEGMENT
+??_C@_0EI@GNHC@?$DMiq?5type?$DN?8set?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@ DB '<'
+	DB	'iq type=''set'' id=''mim_%d'' to=''tuba''><query xmlns=''jabb'
+	DB	'er:iq:register''>', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_05KELB@first?$AA@
+_DATA	SEGMENT
+??_C@_05KELB@first?$AA@ DB 'first', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_04ONL@last?$AA@
+_DATA	SEGMENT
+??_C@_04ONL@last?$AA@ DB 'last', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_04BGEO@nick?$AA@
+_DATA	SEGMENT
+??_C@_04BGEO@nick?$AA@ DB 'nick', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_05JKH@email?$AA@
+_DATA	SEGMENT
+??_C@_05JKH@email?$AA@ DB 'email', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_01KBOJ@s?$AA@
+_DATA	SEGMENT
+??_C@_01KBOJ@s?$AA@ DB 's', 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_01KCAO@b?$AA@
+_DATA	SEGMENT
+??_C@_01KCAO@b?$AA@ DB 'b', 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_01IJJ@c?$AA@
+_DATA	SEGMENT
+??_C@_01IJJ@c?$AA@ DB 'c', 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_01PGLG@j?$AA@
+_DATA	SEGMENT
+??_C@_01PGLG@j?$AA@ DB 'j', 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_01PHOL@e?$AA@
+_DATA	SEGMENT
+??_C@_01PHOL@e?$AA@ DB 'e', 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_01LHO@r?$AA@
+_DATA	SEGMENT
+??_C@_01LHO@r?$AA@ DB 'r', 00H				; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_09LAGL@?$DMg?$DO?$CFd?$DM?1g?$DO?$AA@
+_DATA	SEGMENT
+??_C@_09LAGL@?$DMg?$DO?$CFd?$DM?1g?$DO?$AA@ DB '<g>%d</g>', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_09GKP@?$DMv?$DO?$CFd?$DM?1v?$DO?$AA@
+_DATA	SEGMENT
+??_C@_09GKP@?$DMv?$DO?$CFd?$DM?1v?$DO?$AA@ DB '<v>%d</v>', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0O@IPOG@?$DM?1query?$DO?$DM?1iq?$DO?$AA@
+_DATA	SEGMENT
+??_C@_0O@IPOG@?$DM?1query?$DO?$DM?1iq?$DO?$AA@ DB '</query></iq>', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_02DILL@?$CFs?$AA@
+_DATA	SEGMENT
+??_C@_02DILL@?$CFs?$AA@ DB '%s', 00H			; `string'
+_DATA	ENDS
+;	COMDAT _TlenUserInfoDlgProc@16
+_TEXT	SEGMENT
+_hwndDlg$ = 8
+_msg$ = 12
+_wParam$ = 16
+_lParam$ = 20
+_dbv$85235 = -12
+_jid$85236 = 20
+_str$85341 = 20
+_strSize$85343 = 8
+_cgs$85518 = -24
+_cgs$85529 = -24
+_cgs$85540 = -24
+_cgs$85551 = -24
+_cgs$85562 = -24
+_cgs$85572 = -24
+_cgs$85583 = -24
+_dbv$85593 = -36
+_cgs$85594 = -24
+_dbv$85602 = -36
+_cgs$85603 = -24
+_dbv$85610 = -36
+_cgs$85611 = -24
+_dbv$85618 = -36
+_cgs$85619 = -24
+_dbv$85626 = -36
+_cgs$85627 = -24
+_cgs$85635 = -24
+_TlenUserInfoDlgProc@16 PROC NEAR			; COMDAT
+
+; 167  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 24	 sub	 esp, 36			; 00000024H
+  00006	53		 push	 ebx
+
+; 168  :     TLENUSERINFODLGDATA *data = (TLENUSERINFODLGDATA *) GetWindowLong(hwndDlg, GWL_USERDATA);
+
+  00007	8b 5d 08	 mov	 ebx, DWORD PTR _hwndDlg$[ebp]
+  0000a	56		 push	 esi
+  0000b	57		 push	 edi
+  0000c	6a eb		 push	 -21			; ffffffebH
+  0000e	53		 push	 ebx
+  0000f	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__GetWindowLongW@8
+  00015	8b f8		 mov	 edi, eax
+
+; 169  : 	switch (msg) {
+
+  00017	8b 45 0c	 mov	 eax, DWORD PTR _msg$[ebp]
+  0001a	48		 dec	 eax
+  0001b	48		 dec	 eax
+  0001c	0f 84 e8 08 00
+	00		 je	 $L85361
+  00022	83 e8 4c	 sub	 eax, 76			; 0000004cH
+  00025	0f 84 b2 08 00
+	00		 je	 $L85315
+  0002b	2d c2 00 00 00	 sub	 eax, 194		; 000000c2H
+  00030	0f 84 3c 08 00
+	00		 je	 $L85229
+  00036	48		 dec	 eax
+  00037	0f 84 7d 06 00
+	00		 je	 $L85335
+  0003d	2d 53 03 00 00	 sub	 eax, 851		; 00000353H
+  00042	0f 85 ca 08 00
+	00		 jne	 $L85226
+
+; 182  : 	case WM_TLEN_REFRESH:
+; 183  : 		{
+; 184  : 			DBVARIANT dbv;
+; 185  : 			char *jid;
+; 186  : 			int i;
+; 187  : 			JABBER_LIST_ITEM *item;
+; 188  : 
+; 189  : 			SetDlgItemText(hwndDlg, IDC_INFO_JID, _T(""));
+
+  00048	8b 35 00 00 00
+	00		 mov	 esi, DWORD PTR __imp__SetDlgItemTextW@12
+  0004e	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  00053	68 ef 03 00 00	 push	 1007			; 000003efH
+  00058	53		 push	 ebx
+  00059	ff d6		 call	 esi
+
+; 190  : 			SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, _T(""));
+
+  0005b	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  00060	68 0f 04 00 00	 push	 1039			; 0000040fH
+  00065	53		 push	 ebx
+  00066	ff d6		 call	 esi
+
+; 191  : 			SetFocus(GetDlgItem(hwndDlg, IDC_STATIC));
+
+  00068	6a ff		 push	 -1
+  0006a	53		 push	 ebx
+  0006b	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__GetDlgItem@8
+  00071	50		 push	 eax
+  00072	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SetFocus@4
+
+; 192  : 
+; 193  : 			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "FirstName", &dbv)) {
+
+  00078	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  0007a	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  0007d	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85518[ebp+4], OFFSET FLAT:??_C@_09CJDC@FirstName?$AA@ ; `string'
+  00084	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  00087	c6 45 f4 fc	 mov	 BYTE PTR _dbv$85235[ebp], 252 ; 000000fcH
+  0008b	89 4d e8	 mov	 DWORD PTR _cgs$85518[ebp], ecx
+  0008e	8d 4d f4	 lea	 ecx, DWORD PTR _dbv$85235[ebp]
+  00091	89 4d f0	 mov	 DWORD PTR _cgs$85518[ebp+8], ecx
+  00094	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85518[ebp]
+  00097	51		 push	 ecx
+  00098	50		 push	 eax
+  00099	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0009e	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@ ; `string'
+  000a3	ff 50 24	 call	 DWORD PTR [eax+36]
+  000a6	83 c4 0c	 add	 esp, 12			; 0000000cH
+  000a9	85 c0		 test	 eax, eax
+  000ab	75 23		 jne	 SHORT $L85240
+
+; 194  : 				SetDlgItemText(hwndDlg, IDC_FIRSTNAME, dbv.ptszVal);
+
+  000ad	ff 75 f8	 push	 DWORD PTR _dbv$85235[ebp+4]
+  000b0	68 27 04 00 00	 push	 1063			; 00000427H
+  000b5	53		 push	 ebx
+  000b6	ff d6		 call	 esi
+
+; 195  : 				DBFreeVariant(&dbv);
+
+  000b8	8d 45 f4	 lea	 eax, DWORD PTR _dbv$85235[ebp]
+  000bb	50		 push	 eax
+  000bc	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  000c1	6a 00		 push	 0
+  000c3	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ ; `string'
+  000c8	ff 50 24	 call	 DWORD PTR [eax+36]
+  000cb	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 196  : 			} else SetDlgItemText(hwndDlg, IDC_FIRSTNAME, _T(""));
+
+  000ce	eb 0d		 jmp	 SHORT $L85243
+$L85240:
+  000d0	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  000d5	68 27 04 00 00	 push	 1063			; 00000427H
+  000da	53		 push	 ebx
+  000db	ff d6		 call	 esi
+$L85243:
+
+; 197  : 			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "LastName", &dbv)) {
+
+  000dd	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  000df	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  000e2	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85529[ebp+4], OFFSET FLAT:??_C@_08MBCL@LastName?$AA@ ; `string'
+  000e9	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  000ec	c6 45 f4 fc	 mov	 BYTE PTR _dbv$85235[ebp], 252 ; 000000fcH
+  000f0	89 4d e8	 mov	 DWORD PTR _cgs$85529[ebp], ecx
+  000f3	8d 4d f4	 lea	 ecx, DWORD PTR _dbv$85235[ebp]
+  000f6	89 4d f0	 mov	 DWORD PTR _cgs$85529[ebp+8], ecx
+  000f9	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85529[ebp]
+  000fc	51		 push	 ecx
+  000fd	50		 push	 eax
+  000fe	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00103	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@ ; `string'
+  00108	ff 50 24	 call	 DWORD PTR [eax+36]
+  0010b	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0010e	85 c0		 test	 eax, eax
+  00110	75 23		 jne	 SHORT $L85244
+
+; 198  : 				SetDlgItemText(hwndDlg, IDC_LASTNAME, dbv.ptszVal);
+
+  00112	ff 75 f8	 push	 DWORD PTR _dbv$85235[ebp+4]
+  00115	68 28 04 00 00	 push	 1064			; 00000428H
+  0011a	53		 push	 ebx
+  0011b	ff d6		 call	 esi
+
+; 199  : 				DBFreeVariant(&dbv);
+
+  0011d	8d 45 f4	 lea	 eax, DWORD PTR _dbv$85235[ebp]
+  00120	50		 push	 eax
+  00121	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00126	6a 00		 push	 0
+  00128	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ ; `string'
+  0012d	ff 50 24	 call	 DWORD PTR [eax+36]
+  00130	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 200  : 			} else SetDlgItemText(hwndDlg, IDC_LASTNAME, _T(""));
+
+  00133	eb 0d		 jmp	 SHORT $L85246
+$L85244:
+  00135	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  0013a	68 28 04 00 00	 push	 1064			; 00000428H
+  0013f	53		 push	 ebx
+  00140	ff d6		 call	 esi
+$L85246:
+
+; 201  : 			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "Nick", &dbv)) {
+
+  00142	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  00144	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  00147	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85540[ebp+4], OFFSET FLAT:??_C@_04LMAM@Nick?$AA@ ; `string'
+  0014e	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  00151	c6 45 f4 fc	 mov	 BYTE PTR _dbv$85235[ebp], 252 ; 000000fcH
+  00155	89 4d e8	 mov	 DWORD PTR _cgs$85540[ebp], ecx
+  00158	8d 4d f4	 lea	 ecx, DWORD PTR _dbv$85235[ebp]
+  0015b	89 4d f0	 mov	 DWORD PTR _cgs$85540[ebp+8], ecx
+  0015e	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85540[ebp]
+  00161	51		 push	 ecx
+  00162	50		 push	 eax
+  00163	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00168	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@ ; `string'
+  0016d	ff 50 24	 call	 DWORD PTR [eax+36]
+  00170	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00173	85 c0		 test	 eax, eax
+  00175	75 23		 jne	 SHORT $L85247
+
+; 202  : 				SetDlgItemText(hwndDlg, IDC_NICKNAME, dbv.ptszVal);
+
+  00177	ff 75 f8	 push	 DWORD PTR _dbv$85235[ebp+4]
+  0017a	68 26 04 00 00	 push	 1062			; 00000426H
+  0017f	53		 push	 ebx
+  00180	ff d6		 call	 esi
+
+; 203  : 				DBFreeVariant(&dbv);
+
+  00182	8d 45 f4	 lea	 eax, DWORD PTR _dbv$85235[ebp]
+  00185	50		 push	 eax
+  00186	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0018b	6a 00		 push	 0
+  0018d	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ ; `string'
+  00192	ff 50 24	 call	 DWORD PTR [eax+36]
+  00195	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 204  : 			} else SetDlgItemText(hwndDlg, IDC_NICKNAME, _T(""));
+
+  00198	eb 0d		 jmp	 SHORT $L85249
+$L85247:
+  0019a	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  0019f	68 26 04 00 00	 push	 1062			; 00000426H
+  001a4	53		 push	 ebx
+  001a5	ff d6		 call	 esi
+$L85249:
+
+; 205  : 			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "e-mail", &dbv)) {
+
+  001a7	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  001a9	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  001ac	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85551[ebp+4], OFFSET FLAT:??_C@_06BOPE@e?9mail?$AA@ ; `string'
+  001b3	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  001b6	c6 45 f4 fc	 mov	 BYTE PTR _dbv$85235[ebp], 252 ; 000000fcH
+  001ba	89 4d e8	 mov	 DWORD PTR _cgs$85551[ebp], ecx
+  001bd	8d 4d f4	 lea	 ecx, DWORD PTR _dbv$85235[ebp]
+  001c0	89 4d f0	 mov	 DWORD PTR _cgs$85551[ebp+8], ecx
+  001c3	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85551[ebp]
+  001c6	51		 push	 ecx
+  001c7	50		 push	 eax
+  001c8	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  001cd	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@ ; `string'
+  001d2	ff 50 24	 call	 DWORD PTR [eax+36]
+  001d5	83 c4 0c	 add	 esp, 12			; 0000000cH
+  001d8	85 c0		 test	 eax, eax
+  001da	75 23		 jne	 SHORT $L85250
+
+; 206  : 				SetDlgItemText(hwndDlg, IDC_EMAIL, dbv.ptszVal);
+
+  001dc	ff 75 f8	 push	 DWORD PTR _dbv$85235[ebp+4]
+  001df	68 31 04 00 00	 push	 1073			; 00000431H
+  001e4	53		 push	 ebx
+  001e5	ff d6		 call	 esi
+
+; 207  : 				DBFreeVariant(&dbv);
+
+  001e7	8d 45 f4	 lea	 eax, DWORD PTR _dbv$85235[ebp]
+  001ea	50		 push	 eax
+  001eb	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  001f0	6a 00		 push	 0
+  001f2	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ ; `string'
+  001f7	ff 50 24	 call	 DWORD PTR [eax+36]
+  001fa	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 208  : 			} else SetDlgItemText(hwndDlg, IDC_EMAIL, _T(""));
+
+  001fd	eb 0d		 jmp	 SHORT $L85252
+$L85250:
+  001ff	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  00204	68 31 04 00 00	 push	 1073			; 00000431H
+  00209	53		 push	 ebx
+  0020a	ff d6		 call	 esi
+$L85252:
+
+; 209  : 			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "Age", &dbv)) {
+
+  0020c	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  0020e	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  00211	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85562[ebp+4], OFFSET FLAT:??_C@_03DOPF@Age?$AA@ ; `string'
+  00218	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  0021b	89 4d e8	 mov	 DWORD PTR _cgs$85562[ebp], ecx
+  0021e	8d 4d f4	 lea	 ecx, DWORD PTR _dbv$85235[ebp]
+  00221	89 4d f0	 mov	 DWORD PTR _cgs$85562[ebp+8], ecx
+  00224	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85562[ebp]
+  00227	51		 push	 ecx
+  00228	50		 push	 eax
+  00229	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0022e	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ ; `string'
+  00233	ff 50 24	 call	 DWORD PTR [eax+36]
+  00236	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00239	85 c0		 test	 eax, eax
+  0023b	75 2a		 jne	 SHORT $L85253
+
+; 210  : 				SetDlgItemInt(hwndDlg, IDC_AGE, dbv.wVal, FALSE);
+
+  0023d	50		 push	 eax
+  0023e	0f b7 45 f8	 movzx	 eax, WORD PTR _dbv$85235[ebp+4]
+  00242	50		 push	 eax
+  00243	68 29 04 00 00	 push	 1065			; 00000429H
+  00248	53		 push	 ebx
+  00249	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SetDlgItemInt@16
+
+; 211  : 				DBFreeVariant(&dbv);
+
+  0024f	8d 45 f4	 lea	 eax, DWORD PTR _dbv$85235[ebp]
+  00252	50		 push	 eax
+  00253	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00258	6a 00		 push	 0
+  0025a	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ ; `string'
+  0025f	ff 50 24	 call	 DWORD PTR [eax+36]
+  00262	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 212  : 			} else SetDlgItemText(hwndDlg, IDC_AGE, _T(""));
+
+  00265	eb 0d		 jmp	 SHORT $L85255
+$L85253:
+  00267	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  0026c	68 29 04 00 00	 push	 1065			; 00000429H
+  00271	53		 push	 ebx
+  00272	ff d6		 call	 esi
+$L85255:
+
+; 213  : 			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "City", &dbv)) {
+
+  00274	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  00276	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  00279	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85572[ebp+4], OFFSET FLAT:??_C@_04NBCE@City?$AA@ ; `string'
+  00280	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  00283	c6 45 f4 fc	 mov	 BYTE PTR _dbv$85235[ebp], 252 ; 000000fcH
+  00287	89 4d e8	 mov	 DWORD PTR _cgs$85572[ebp], ecx
+  0028a	8d 4d f4	 lea	 ecx, DWORD PTR _dbv$85235[ebp]
+  0028d	89 4d f0	 mov	 DWORD PTR _cgs$85572[ebp+8], ecx
+  00290	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85572[ebp]
+  00293	51		 push	 ecx
+  00294	50		 push	 eax
+  00295	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0029a	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@ ; `string'
+  0029f	ff 50 24	 call	 DWORD PTR [eax+36]
+  002a2	83 c4 0c	 add	 esp, 12			; 0000000cH
+  002a5	85 c0		 test	 eax, eax
+  002a7	75 23		 jne	 SHORT $L85256
+
+; 214  : 				SetDlgItemText(hwndDlg, IDC_CITY, dbv.ptszVal);
+
+  002a9	ff 75 f8	 push	 DWORD PTR _dbv$85235[ebp+4]
+  002ac	68 24 04 00 00	 push	 1060			; 00000424H
+  002b1	53		 push	 ebx
+  002b2	ff d6		 call	 esi
+
+; 215  : 				DBFreeVariant(&dbv);
+
+  002b4	8d 45 f4	 lea	 eax, DWORD PTR _dbv$85235[ebp]
+  002b7	50		 push	 eax
+  002b8	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  002bd	6a 00		 push	 0
+  002bf	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ ; `string'
+  002c4	ff 50 24	 call	 DWORD PTR [eax+36]
+  002c7	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 216  : 			} else SetDlgItemText(hwndDlg, IDC_CITY, _T(""));
+
+  002ca	eb 0d		 jmp	 SHORT $L85258
+$L85256:
+  002cc	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  002d1	68 24 04 00 00	 push	 1060			; 00000424H
+  002d6	53		 push	 ebx
+  002d7	ff d6		 call	 esi
+$L85258:
+
+; 217  : 			if (!DBGetContactSettingTString(data->hContact, data->proto->iface.m_szModuleName, "School", &dbv)) {
+
+  002d9	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  002db	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  002de	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85583[ebp+4], OFFSET FLAT:??_C@_06POLE@School?$AA@ ; `string'
+  002e5	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  002e8	c6 45 f4 fc	 mov	 BYTE PTR _dbv$85235[ebp], 252 ; 000000fcH
+  002ec	89 4d e8	 mov	 DWORD PTR _cgs$85583[ebp], ecx
+  002ef	8d 4d f4	 lea	 ecx, DWORD PTR _dbv$85235[ebp]
+  002f2	89 4d f0	 mov	 DWORD PTR _cgs$85583[ebp+8], ecx
+  002f5	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85583[ebp]
+  002f8	51		 push	 ecx
+  002f9	50		 push	 eax
+  002fa	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  002ff	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@ ; `string'
+  00304	ff 50 24	 call	 DWORD PTR [eax+36]
+  00307	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0030a	85 c0		 test	 eax, eax
+  0030c	75 23		 jne	 SHORT $L85259
+
+; 218  : 				SetDlgItemText(hwndDlg, IDC_SCHOOL, dbv.ptszVal);
+
+  0030e	ff 75 f8	 push	 DWORD PTR _dbv$85235[ebp+4]
+  00311	68 83 04 00 00	 push	 1155			; 00000483H
+  00316	53		 push	 ebx
+  00317	ff d6		 call	 esi
+
+; 219  : 				DBFreeVariant(&dbv);
+
+  00319	8d 45 f4	 lea	 eax, DWORD PTR _dbv$85235[ebp]
+  0031c	50		 push	 eax
+  0031d	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00322	6a 00		 push	 0
+  00324	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ ; `string'
+  00329	ff 50 24	 call	 DWORD PTR [eax+36]
+  0032c	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 220  : 			} else SetDlgItemText(hwndDlg, IDC_SCHOOL, _T(""));
+
+  0032f	eb 0d		 jmp	 SHORT $L85261
+$L85259:
+  00331	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  00336	68 83 04 00 00	 push	 1155			; 00000483H
+  0033b	53		 push	 ebx
+  0033c	ff d6		 call	 esi
+$L85261:
+
+; 221  : 			switch (DBGetContactSettingByte(data->hContact, data->proto->iface.m_szModuleName, "Gender", '?')) {
+
+  0033e	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  00340	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  00343	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85594[ebp+4], OFFSET FLAT:??_C@_06BBDA@Gender?$AA@ ; `string'
+  0034a	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  0034d	89 4d e8	 mov	 DWORD PTR _cgs$85594[ebp], ecx
+  00350	8d 4d dc	 lea	 ecx, DWORD PTR _dbv$85593[ebp]
+  00353	89 4d f0	 mov	 DWORD PTR _cgs$85594[ebp+8], ecx
+  00356	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85594[ebp]
+  00359	51		 push	 ecx
+  0035a	50		 push	 eax
+  0035b	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00360	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ ; `string'
+  00365	ff 50 24	 call	 DWORD PTR [eax+36]
+  00368	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0036b	85 c0		 test	 eax, eax
+  0036d	75 0e		 jne	 SHORT $L85643
+  0036f	0f b6 45 e0	 movzx	 eax, BYTE PTR _dbv$85593[ebp+4]
+  00373	83 f8 46	 cmp	 eax, 70			; 00000046H
+  00376	74 3e		 je	 SHORT $L85270
+  00378	83 f8 4d	 cmp	 eax, 77			; 0000004dH
+  0037b	74 1c		 je	 SHORT $L85267
+$L85643:
+
+; 229  : 					break;
+; 230  : 				default:
+; 231  : 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 0, 0);
+
+  0037d	6a 00		 push	 0
+  0037f	6a 00		 push	 0
+  00381	68 4e 01 00 00	 push	 334			; 0000014eH
+  00386	68 48 04 00 00	 push	 1096			; 00000448H
+  0038b	53		 push	 ebx
+  0038c	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SendDlgItemMessageW@20
+
+; 232  : 					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, _T(""));
+
+  00392	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+
+; 233  : 					break;
+
+  00397	eb 4e		 jmp	 SHORT $L85644
+$L85267:
+
+; 222  : 				case 'M':
+; 223  : 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 1, 0);
+
+  00399	6a 00		 push	 0
+  0039b	6a 01		 push	 1
+  0039d	68 4e 01 00 00	 push	 334			; 0000014eH
+  003a2	68 48 04 00 00	 push	 1096			; 00000448H
+  003a7	53		 push	 ebx
+  003a8	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SendDlgItemMessageW@20
+
+; 224  : 					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, TranslateTS(tlenFieldGender[0].name));
+
+  003ae	ff 35 04 00 00
+	00		 push	 DWORD PTR _tlenFieldGender+4
+
+; 225  : 					break;
+
+  003b4	eb 1b		 jmp	 SHORT $L85645
+$L85270:
+
+; 226  : 				case 'F':
+; 227  : 					SendDlgItemMessage(hwndDlg, IDC_GENDER, CB_SETCURSEL, 2, 0);
+
+  003b6	6a 00		 push	 0
+  003b8	6a 02		 push	 2
+  003ba	68 4e 01 00 00	 push	 334			; 0000014eH
+  003bf	68 48 04 00 00	 push	 1096			; 00000448H
+  003c4	53		 push	 ebx
+  003c5	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SendDlgItemMessageW@20
+
+; 228  : 					SetDlgItemText(hwndDlg, IDC_GENDER_TEXT, TranslateTS(tlenFieldGender[1].name));
+
+  003cb	ff 35 0c 00 00
+	00		 push	 DWORD PTR _tlenFieldGender+12
+$L85645:
+  003d1	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  003d6	68 00 10 00 00	 push	 4096			; 00001000H
+  003db	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ ; `string'
+  003e0	ff 50 24	 call	 DWORD PTR [eax+36]
+  003e3	83 c4 0c	 add	 esp, 12			; 0000000cH
+  003e6	50		 push	 eax
+$L85644:
+  003e7	68 ab 04 00 00	 push	 1195			; 000004abH
+  003ec	53		 push	 ebx
+  003ed	ff d6		 call	 esi
+
+; 234  : 			}
+; 235  : 			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "Occupation", 0);
+
+  003ef	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  003f1	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  003f4	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85603[ebp+4], OFFSET FLAT:??_C@_0L@IHOC@Occupation?$AA@ ; `string'
+  003fb	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  003fe	89 4d e8	 mov	 DWORD PTR _cgs$85603[ebp], ecx
+  00401	8d 4d dc	 lea	 ecx, DWORD PTR _dbv$85602[ebp]
+  00404	89 4d f0	 mov	 DWORD PTR _cgs$85603[ebp+8], ecx
+  00407	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85603[ebp]
+  0040a	51		 push	 ecx
+  0040b	50		 push	 eax
+  0040c	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00411	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ ; `string'
+  00416	ff 50 24	 call	 DWORD PTR [eax+36]
+  00419	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0041c	85 c0		 test	 eax, eax
+  0041e	75 3b		 jne	 SHORT $L85275
+  00420	0f b7 45 e0	 movzx	 eax, WORD PTR _dbv$85602[ebp+4]
+
+; 236  : 			if (i>0 && i<13) {
+
+  00424	85 c0		 test	 eax, eax
+  00426	7e 33		 jle	 SHORT $L85275
+  00428	83 f8 0d	 cmp	 eax, 13			; 0000000dH
+  0042b	7d 2e		 jge	 SHORT $L85275
+
+; 237  : 				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, TranslateTS(tlenFieldOccupation[i-1].name));
+
+  0042d	ff 34 c5 fc ff
+	ff ff		 push	 DWORD PTR _tlenFieldOccupation[eax*8-4]
+  00434	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00439	68 00 10 00 00	 push	 4096			; 00001000H
+  0043e	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ ; `string'
+  00443	ff 50 24	 call	 DWORD PTR [eax+36]
+  00446	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00449	50		 push	 eax
+  0044a	68 af 04 00 00	 push	 1199			; 000004afH
+  0044f	53		 push	 ebx
+  00450	ff d6		 call	 esi
+
+; 238  : 				SendDlgItemMessage(hwndDlg, IDC_OCCUPATION, CB_SETCURSEL, i, 0);
+
+  00452	0f b7 45 e0	 movzx	 eax, WORD PTR _dbv$85602[ebp+4]
+  00456	6a 00		 push	 0
+  00458	50		 push	 eax
+
+; 239  : 			} else {
+
+  00459	eb 11		 jmp	 SHORT $L85646
+$L85275:
+
+; 240  : 				SetDlgItemText(hwndDlg, IDC_OCCUPATION_TEXT, _T(""));
+
+  0045b	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  00460	68 af 04 00 00	 push	 1199			; 000004afH
+  00465	53		 push	 ebx
+  00466	ff d6		 call	 esi
+
+; 241  : 				SendDlgItemMessage(hwndDlg, IDC_OCCUPATION, CB_SETCURSEL, 0, 0);
+
+  00468	6a 00		 push	 0
+  0046a	6a 00		 push	 0
+$L85646:
+  0046c	68 4e 01 00 00	 push	 334			; 0000014eH
+  00471	68 2a 04 00 00	 push	 1066			; 0000042aH
+  00476	53		 push	 ebx
+  00477	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SendDlgItemMessageW@20
+
+; 242  : 			}
+; 243  : 			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "LookingFor", 0);
+
+  0047d	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  0047f	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  00482	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85611[ebp+4], OFFSET FLAT:??_C@_0L@BFLA@LookingFor?$AA@ ; `string'
+  00489	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  0048c	89 4d e8	 mov	 DWORD PTR _cgs$85611[ebp], ecx
+  0048f	8d 4d dc	 lea	 ecx, DWORD PTR _dbv$85610[ebp]
+  00492	89 4d f0	 mov	 DWORD PTR _cgs$85611[ebp+8], ecx
+  00495	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85611[ebp]
+  00498	51		 push	 ecx
+  00499	50		 push	 eax
+  0049a	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0049f	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ ; `string'
+  004a4	ff 50 24	 call	 DWORD PTR [eax+36]
+  004a7	83 c4 0c	 add	 esp, 12			; 0000000cH
+  004aa	85 c0		 test	 eax, eax
+  004ac	75 3b		 jne	 SHORT $L85280
+  004ae	0f b7 45 e0	 movzx	 eax, WORD PTR _dbv$85610[ebp+4]
+
+; 244  : 			if (i>0 && i<6) {
+
+  004b2	85 c0		 test	 eax, eax
+  004b4	7e 33		 jle	 SHORT $L85280
+  004b6	83 f8 06	 cmp	 eax, 6
+  004b9	7d 2e		 jge	 SHORT $L85280
+
+; 245  : 				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, TranslateTS(tlenFieldLookfor[i-1].name));
+
+  004bb	ff 34 c5 fc ff
+	ff ff		 push	 DWORD PTR _tlenFieldLookfor[eax*8-4]
+  004c2	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  004c7	68 00 10 00 00	 push	 4096			; 00001000H
+  004cc	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ ; `string'
+  004d1	ff 50 24	 call	 DWORD PTR [eax+36]
+  004d4	83 c4 0c	 add	 esp, 12			; 0000000cH
+  004d7	50		 push	 eax
+  004d8	68 b0 04 00 00	 push	 1200			; 000004b0H
+  004dd	53		 push	 ebx
+  004de	ff d6		 call	 esi
+
+; 246  : 				SendDlgItemMessage(hwndDlg, IDC_LOOKFOR, CB_SETCURSEL, i, 0);
+
+  004e0	0f b7 45 e0	 movzx	 eax, WORD PTR _dbv$85610[ebp+4]
+  004e4	6a 00		 push	 0
+  004e6	50		 push	 eax
+
+; 247  : 			} else {
+
+  004e7	eb 11		 jmp	 SHORT $L85647
+$L85280:
+
+; 248  : 				SetDlgItemText(hwndDlg, IDC_LOOKFOR_TEXT, _T(""));
+
+  004e9	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_11A@?$AA?$AA@ ; `string'
+  004ee	68 b0 04 00 00	 push	 1200			; 000004b0H
+  004f3	53		 push	 ebx
+  004f4	ff d6		 call	 esi
+
+; 249  : 				SendDlgItemMessage(hwndDlg, IDC_LOOKFOR, CB_SETCURSEL, 0, 0);
+
+  004f6	6a 00		 push	 0
+  004f8	6a 00		 push	 0
+$L85647:
+  004fa	68 4e 01 00 00	 push	 334			; 0000014eH
+  004ff	68 82 04 00 00	 push	 1154			; 00000482H
+  00504	53		 push	 ebx
+  00505	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SendDlgItemMessageW@20
+
+; 250  : 			}
+; 251  : 			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "VoiceChat", 0);
+
+  0050b	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  0050d	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  00510	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85619[ebp+4], OFFSET FLAT:??_C@_09BPFM@VoiceChat?$AA@ ; `string'
+  00517	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  0051a	89 4d e8	 mov	 DWORD PTR _cgs$85619[ebp], ecx
+  0051d	8d 4d dc	 lea	 ecx, DWORD PTR _dbv$85618[ebp]
+  00520	89 4d f0	 mov	 DWORD PTR _cgs$85619[ebp+8], ecx
+  00523	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85619[ebp]
+  00526	51		 push	 ecx
+  00527	50		 push	 eax
+  00528	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0052d	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ ; `string'
+  00532	ff 50 24	 call	 DWORD PTR [eax+36]
+  00535	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00538	85 c0		 test	 eax, eax
+  0053a	74 04		 je	 SHORT $L85620
+  0053c	33 c0		 xor	 eax, eax
+  0053e	eb 04		 jmp	 SHORT $L85617
+$L85620:
+  00540	0f b7 45 e0	 movzx	 eax, WORD PTR _dbv$85618[ebp+4]
+$L85617:
+
+; 252  : 			CheckDlgButton(hwndDlg, IDC_VOICECONVERSATIONS, i);
+
+  00544	50		 push	 eax
+  00545	68 49 04 00 00	 push	 1097			; 00000449H
+  0054a	53		 push	 ebx
+  0054b	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__CheckDlgButton@12
+
+; 253  : 			i = DBGetContactSettingWord(data->hContact, data->proto->iface.m_szModuleName, "PublicStatus", 0);
+
+  00551	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  00553	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  00556	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85627[ebp+4], OFFSET FLAT:??_C@_0N@OEII@PublicStatus?$AA@ ; `string'
+  0055d	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  00560	89 4d e8	 mov	 DWORD PTR _cgs$85627[ebp], ecx
+  00563	8d 4d dc	 lea	 ecx, DWORD PTR _dbv$85626[ebp]
+  00566	89 4d f0	 mov	 DWORD PTR _cgs$85627[ebp+8], ecx
+  00569	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85627[ebp]
+  0056c	51		 push	 ecx
+  0056d	50		 push	 eax
+  0056e	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00573	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ ; `string'
+  00578	ff 50 24	 call	 DWORD PTR [eax+36]
+  0057b	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0057e	85 c0		 test	 eax, eax
+  00580	74 04		 je	 SHORT $L85628
+  00582	33 c0		 xor	 eax, eax
+  00584	eb 04		 jmp	 SHORT $L85625
+$L85628:
+  00586	0f b7 45 e0	 movzx	 eax, WORD PTR _dbv$85626[ebp+4]
+$L85625:
+
+; 254  : 			CheckDlgButton(hwndDlg, IDC_PUBLICSTATUS, i);
+
+  0058a	50		 push	 eax
+  0058b	68 4a 04 00 00	 push	 1098			; 0000044aH
+  00590	53		 push	 ebx
+  00591	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__CheckDlgButton@12
+
+; 255  : 			if (!DBGetContactSetting(data->hContact, data->proto->iface.m_szModuleName, "jid", &dbv)) {
+
+  00597	8b 0f		 mov	 ecx, DWORD PTR [edi]
+  00599	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  0059c	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _cgs$85635[ebp+4], OFFSET FLAT:??_C@_03HCJC@jid?$AA@ ; `string'
+  005a3	8b 49 1c	 mov	 ecx, DWORD PTR [ecx+28]
+  005a6	89 4d e8	 mov	 DWORD PTR _cgs$85635[ebp], ecx
+  005a9	8d 4d f4	 lea	 ecx, DWORD PTR _dbv$85235[ebp]
+  005ac	89 4d f0	 mov	 DWORD PTR _cgs$85635[ebp+8], ecx
+  005af	8d 4d e8	 lea	 ecx, DWORD PTR _cgs$85635[ebp]
+  005b2	51		 push	 ecx
+  005b3	50		 push	 eax
+  005b4	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  005b9	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ ; `string'
+  005be	ff 50 24	 call	 DWORD PTR [eax+36]
+  005c1	83 c4 0c	 add	 esp, 12			; 0000000cH
+  005c4	85 c0		 test	 eax, eax
+  005c6	0f 85 46 03 00
+	00		 jne	 $L85226
+
+; 256  : 				jid = JabberTextDecode(dbv.pszVal);
+
+  005cc	ff 75 f8	 push	 DWORD PTR _dbv$85235[ebp+4]
+  005cf	e8 00 00 00 00	 call	 _JabberTextDecode
+  005d4	59		 pop	 ecx
+  005d5	89 45 14	 mov	 DWORD PTR _jid$85236[ebp], eax
+
+; 257  : 				SetDlgItemTextA(hwndDlg, IDC_INFO_JID, jid);
+
+  005d8	50		 push	 eax
+  005d9	68 ef 03 00 00	 push	 1007			; 000003efH
+  005de	53		 push	 ebx
+  005df	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SetDlgItemTextA@12
+
+; 258  : 				mir_free(jid);
+
+  005e5	ff 75 14	 push	 DWORD PTR _jid$85236[ebp]
+  005e8	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+
+; 259  : 				jid = dbv.pszVal;
+; 260  : 				if (data->proto->jabberOnline) {
+
+  005ee	8b 07		 mov	 eax, DWORD PTR [edi]
+  005f0	59		 pop	 ecx
+  005f1	83 b8 78 01 00
+	00 00		 cmp	 DWORD PTR [eax+376], 0
+  005f8	0f 84 a1 00 00
+	00		 je	 $L85311
+
+; 261  : 					if ((item=JabberListGetItemPtr(data->proto, LIST_ROSTER, jid)) != NULL) {
+
+  005fe	ff 75 f8	 push	 DWORD PTR _dbv$85235[ebp+4]
+  00601	6a 00		 push	 0
+  00603	50		 push	 eax
+  00604	e8 00 00 00 00	 call	 _JabberListGetItemPtr
+  00609	8b f8		 mov	 edi, eax
+  0060b	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0060e	85 ff		 test	 edi, edi
+  00610	74 6a		 je	 SHORT $L85290
+
+; 262  : 						switch (item->subscription) {
+
+  00612	8b 47 14	 mov	 eax, DWORD PTR [edi+20]
+  00615	48		 dec	 eax
+  00616	74 1b		 je	 SHORT $L85299
+  00618	48		 dec	 eax
+  00619	74 11		 je	 SHORT $L85303
+  0061b	48		 dec	 eax
+  0061c	74 07		 je	 SHORT $L85295
+
+; 272  : 						default:
+; 273  : 							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("none"));
+
+  0061e	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_19JPFO@?$AAn?$AAo?$AAn?$AAe?$AA?$AA@ ; `string'
+
+; 274  : 							break;
+
+  00623	eb 13		 jmp	 SHORT $L85648
+$L85295:
+
+; 263  : 						case SUB_BOTH:
+; 264  : 							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("both"));
+
+  00625	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_19ENPD@?$AAb?$AAo?$AAt?$AAh?$AA?$AA@ ; `string'
+
+; 265  : 							break;
+
+  0062a	eb 0c		 jmp	 SHORT $L85648
+$L85303:
+
+; 268  : 							break;
+; 269  : 						case SUB_FROM:
+; 270  : 							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("from"));
+
+  0062c	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_19LELL@?$AAf?$AAr?$AAo?$AAm?$AA?$AA@ ; `string'
+
+; 271  : 							break;
+
+  00631	eb 05		 jmp	 SHORT $L85648
+$L85299:
+
+; 266  : 						case SUB_TO:
+; 267  : 							SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("to"));
+
+  00633	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_15GGJF@?$AAt?$AAo?$AA?$AA@ ; `string'
+$L85648:
+  00638	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0063d	68 00 10 00 00	 push	 4096			; 00001000H
+  00642	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ ; `string'
+  00647	ff 50 24	 call	 DWORD PTR [eax+36]
+  0064a	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0064d	50		 push	 eax
+  0064e	68 0f 04 00 00	 push	 1039			; 0000040fH
+  00653	53		 push	 ebx
+  00654	ff d6		 call	 esi
+
+; 275  : 						}
+; 276  : 						SetDlgItemTextA(hwndDlg, IDC_SOFTWARE, item->software);
+
+  00656	ff 77 1c	 push	 DWORD PTR [edi+28]
+  00659	8b 35 00 00 00
+	00		 mov	 esi, DWORD PTR __imp__SetDlgItemTextA@12
+  0065f	68 b4 04 00 00	 push	 1204			; 000004b4H
+  00664	53		 push	 ebx
+  00665	ff d6		 call	 esi
+
+; 277  : 						SetDlgItemTextA(hwndDlg, IDC_VERSION, item->version);
+
+  00667	ff 77 20	 push	 DWORD PTR [edi+32]
+  0066a	68 b5 04 00 00	 push	 1205			; 000004b5H
+  0066f	53		 push	 ebx
+  00670	ff d6		 call	 esi
+
+; 278  : 						SetDlgItemTextA(hwndDlg, IDC_SYSTEM, item->system);
+
+  00672	ff 77 24	 push	 DWORD PTR [edi+36]
+  00675	68 b6 04 00 00	 push	 1206			; 000004b6H
+
+; 279  : 					} else {
+
+  0067a	eb 20		 jmp	 SHORT $L85649
+$L85290:
+
+; 280  : 						SetDlgItemText(hwndDlg, IDC_SUBSCRIPTION, TranslateT("not on roster"));
+
+  0067c	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00681	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_1BM@MBDI@?$AAn?$AAo?$AAt?$AA?5?$AAo?$AAn?$AA?5?$AAr?$AAo?$AAs?$AAt?$AAe?$AAr?$AA?$AA@ ; `string'
+  00686	68 00 10 00 00	 push	 4096			; 00001000H
+  0068b	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ ; `string'
+  00690	ff 50 24	 call	 DWORD PTR [eax+36]
+  00693	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00696	50		 push	 eax
+  00697	68 0f 04 00 00	 push	 1039			; 0000040fH
+$L85649:
+  0069c	53		 push	 ebx
+  0069d	ff d6		 call	 esi
+$L85311:
+
+; 281  : 					}
+; 282  : 				}
+; 283  : 				DBFreeVariant(&dbv);
+
+  0069f	8d 45 f4	 lea	 eax, DWORD PTR _dbv$85235[ebp]
+  006a2	50		 push	 eax
+  006a3	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  006a8	6a 00		 push	 0
+  006aa	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ ; `string'
+  006af	ff 50 24	 call	 DWORD PTR [eax+36]
+  006b2	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 284  : 			}
+; 285  : 		}
+; 286  : 		break;
+
+  006b5	e9 58 02 00 00	 jmp	 $L85226
+$L85335:
+
+; 306  : 	case WM_COMMAND:
+; 307  : 		if (LOWORD(wParam)==IDC_SAVE && HIWORD(wParam)==BN_CLICKED) {
+
+  006ba	8b 45 10	 mov	 eax, DWORD PTR _wParam$[ebp]
+  006bd	66 3d ea 03	 cmp	 ax, 1002		; 000003eaH
+  006c1	0f 85 4b 02 00
+	00		 jne	 $L85226
+  006c7	c1 e8 10	 shr	 eax, 16			; 00000010H
+  006ca	66 85 c0	 test	 ax, ax
+  006cd	0f 85 3f 02 00
+	00		 jne	 $L85226
+
+; 308  : 			char *str = NULL;
+; 309  : 			int strSize;
+; 310  : 			JabberStringAppend(&str, &strSize, "<iq type='set' id='"JABBER_IQID"%d' to='tuba'><query xmlns='jabber:iq:register'>", JabberSerialNext(data->proto));
+
+  006d3	ff 37		 push	 DWORD PTR [edi]
+  006d5	83 65 14 00	 and	 DWORD PTR _str$85341[ebp], 0
+  006d9	e8 00 00 00 00	 call	 _JabberSerialNext
+  006de	50		 push	 eax
+  006df	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  006e2	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0EI@GNHC@?$DMiq?5type?$DN?8set?8?5id?$DN?8mim_?$CFd?8?5to?$DN?8t@ ; `string'
+  006e7	50		 push	 eax
+  006e8	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  006eb	50		 push	 eax
+  006ec	e8 00 00 00 00	 call	 _JabberStringAppend
+
+; 311  : 			FetchField(hwndDlg, IDC_FIRSTNAME, "first", &str, &strSize);
+
+  006f1	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  006f4	50		 push	 eax
+  006f5	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  006f8	50		 push	 eax
+  006f9	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_05KELB@first?$AA@ ; `string'
+  006fe	68 27 04 00 00	 push	 1063			; 00000427H
+  00703	53		 push	 ebx
+  00704	e8 00 00 00 00	 call	 _FetchField
+
+; 312  : 			FetchField(hwndDlg, IDC_LASTNAME, "last", &str, &strSize);
+
+  00709	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  0070c	50		 push	 eax
+  0070d	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  00710	50		 push	 eax
+  00711	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_04ONL@last?$AA@ ; `string'
+  00716	68 28 04 00 00	 push	 1064			; 00000428H
+  0071b	53		 push	 ebx
+  0071c	e8 00 00 00 00	 call	 _FetchField
+
+; 313  : 			FetchField(hwndDlg, IDC_NICKNAME, "nick", &str, &strSize);
+
+  00721	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  00724	50		 push	 eax
+  00725	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  00728	50		 push	 eax
+  00729	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_04BGEO@nick?$AA@ ; `string'
+  0072e	68 26 04 00 00	 push	 1062			; 00000426H
+  00733	53		 push	 ebx
+  00734	e8 00 00 00 00	 call	 _FetchField
+  00739	83 c4 50	 add	 esp, 80			; 00000050H
+
+; 314  : 			FetchField(hwndDlg, IDC_EMAIL, "email", &str, &strSize);
+
+  0073c	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  0073f	50		 push	 eax
+  00740	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  00743	50		 push	 eax
+  00744	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_05JKH@email?$AA@ ; `string'
+  00749	68 31 04 00 00	 push	 1073			; 00000431H
+  0074e	53		 push	 ebx
+  0074f	e8 00 00 00 00	 call	 _FetchField
+
+; 315  : 			FetchCombo(hwndDlg, IDC_GENDER, "s", &str, &strSize);
+
+  00754	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  00757	50		 push	 eax
+  00758	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  0075b	50		 push	 eax
+  0075c	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_01KBOJ@s?$AA@ ; `string'
+  00761	68 48 04 00 00	 push	 1096			; 00000448H
+  00766	53		 push	 ebx
+  00767	e8 00 00 00 00	 call	 _FetchCombo
+
+; 316  : 			FetchField(hwndDlg, IDC_AGE, "b", &str, &strSize);
+
+  0076c	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  0076f	50		 push	 eax
+  00770	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  00773	50		 push	 eax
+  00774	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_01KCAO@b?$AA@ ; `string'
+  00779	68 29 04 00 00	 push	 1065			; 00000429H
+  0077e	53		 push	 ebx
+  0077f	e8 00 00 00 00	 call	 _FetchField
+
+; 317  : 			FetchField(hwndDlg, IDC_CITY, "c", &str, &strSize);
+
+  00784	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  00787	50		 push	 eax
+  00788	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  0078b	50		 push	 eax
+  0078c	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_01IJJ@c?$AA@ ; `string'
+  00791	68 24 04 00 00	 push	 1060			; 00000424H
+  00796	53		 push	 ebx
+  00797	e8 00 00 00 00	 call	 _FetchField
+  0079c	83 c4 50	 add	 esp, 80			; 00000050H
+
+; 318  : 			FetchCombo(hwndDlg, IDC_OCCUPATION, "j", &str, &strSize);
+
+  0079f	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  007a2	50		 push	 eax
+  007a3	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  007a6	50		 push	 eax
+  007a7	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_01PGLG@j?$AA@ ; `string'
+  007ac	68 2a 04 00 00	 push	 1066			; 0000042aH
+  007b1	53		 push	 ebx
+  007b2	e8 00 00 00 00	 call	 _FetchCombo
+
+; 319  : 			FetchField(hwndDlg, IDC_SCHOOL, "e", &str, &strSize);
+
+  007b7	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  007ba	50		 push	 eax
+  007bb	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  007be	50		 push	 eax
+  007bf	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_01PHOL@e?$AA@ ; `string'
+  007c4	68 83 04 00 00	 push	 1155			; 00000483H
+  007c9	53		 push	 ebx
+  007ca	e8 00 00 00 00	 call	 _FetchField
+
+; 320  : 			FetchCombo(hwndDlg, IDC_LOOKFOR, "r", &str, &strSize);
+
+  007cf	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  007d2	50		 push	 eax
+  007d3	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  007d6	50		 push	 eax
+  007d7	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_01LHO@r?$AA@ ; `string'
+  007dc	68 82 04 00 00	 push	 1154			; 00000482H
+  007e1	53		 push	 ebx
+  007e2	e8 00 00 00 00	 call	 _FetchCombo
+
+; 321  : 			JabberStringAppend(&str, &strSize, "<g>%d</g>", IsDlgButtonChecked(hwndDlg, IDC_VOICECONVERSATIONS) ? 1 : 0);
+
+  007e7	8b 35 00 00 00
+	00		 mov	 esi, DWORD PTR __imp__IsDlgButtonChecked@8
+  007ed	83 c4 3c	 add	 esp, 60			; 0000003cH
+  007f0	68 49 04 00 00	 push	 1097			; 00000449H
+  007f5	53		 push	 ebx
+  007f6	ff d6		 call	 esi
+  007f8	f7 d8		 neg	 eax
+  007fa	1b c0		 sbb	 eax, eax
+  007fc	f7 d8		 neg	 eax
+  007fe	50		 push	 eax
+  007ff	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  00802	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_09LAGL@?$DMg?$DO?$CFd?$DM?1g?$DO?$AA@ ; `string'
+  00807	50		 push	 eax
+  00808	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  0080b	50		 push	 eax
+  0080c	e8 00 00 00 00	 call	 _JabberStringAppend
+  00811	83 c4 10	 add	 esp, 16			; 00000010H
+
+; 322  : 			JabberStringAppend(&str, &strSize, "<v>%d</v>", IsDlgButtonChecked(hwndDlg, IDC_PUBLICSTATUS) ? 1 : 0);
+
+  00814	68 4a 04 00 00	 push	 1098			; 0000044aH
+  00819	53		 push	 ebx
+  0081a	ff d6		 call	 esi
+  0081c	f7 d8		 neg	 eax
+  0081e	1b c0		 sbb	 eax, eax
+  00820	f7 d8		 neg	 eax
+  00822	50		 push	 eax
+  00823	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  00826	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_09GKP@?$DMv?$DO?$CFd?$DM?1v?$DO?$AA@ ; `string'
+  0082b	50		 push	 eax
+  0082c	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  0082f	50		 push	 eax
+  00830	e8 00 00 00 00	 call	 _JabberStringAppend
+
+; 323  : 			JabberStringAppend(&str, &strSize, "</query></iq>");
+
+  00835	8d 45 08	 lea	 eax, DWORD PTR _strSize$85343[ebp]
+  00838	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0O@IPOG@?$DM?1query?$DO?$DM?1iq?$DO?$AA@ ; `string'
+  0083d	50		 push	 eax
+  0083e	8d 45 14	 lea	 eax, DWORD PTR _str$85341[ebp]
+  00841	50		 push	 eax
+  00842	e8 00 00 00 00	 call	 _JabberStringAppend
+
+; 324  : 			JabberSend(data->proto, "%s", str);
+
+  00847	ff 75 14	 push	 DWORD PTR _str$85341[ebp]
+  0084a	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_02DILL@?$CFs?$AA@ ; `string'
+  0084f	ff 37		 push	 DWORD PTR [edi]
+  00851	e8 00 00 00 00	 call	 _JabberSend
+
+; 325  : 			mir_free(str);
+
+  00856	ff 75 14	 push	 DWORD PTR _str$85341[ebp]
+  00859	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+
+; 326  : 			JabberGetInfo((PROTO_INTERFACE *)data->proto, NULL, 0);
+
+  0085f	6a 00		 push	 0
+  00861	6a 00		 push	 0
+  00863	ff 37		 push	 DWORD PTR [edi]
+  00865	e8 00 00 00 00	 call	 _JabberGetInfo
+  0086a	83 c4 38	 add	 esp, 56			; 00000038H
+
+; 327  : 		}
+; 328  : 		break;
+
+  0086d	e9 a0 00 00 00	 jmp	 $L85226
+$L85229:
+
+; 170  : 	case WM_INITDIALOG:
+; 171  : 
+; 172  :         data = (TLENUSERINFODLGDATA*)mir_alloc(sizeof(TLENUSERINFODLGDATA));
+
+  00872	6a 08		 push	 8
+  00874	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  0087a	59		 pop	 ecx
+
+; 173  :         data->hContact = (HANDLE) lParam;
+
+  0087b	8b 4d 14	 mov	 ecx, DWORD PTR _lParam$[ebp]
+
+; 174  :         SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)data);
+
+  0087e	50		 push	 eax
+  0087f	6a eb		 push	 -21			; ffffffebH
+  00881	53		 push	 ebx
+  00882	89 48 04	 mov	 DWORD PTR [eax+4], ecx
+  00885	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SetWindowLongW@12
+
+; 175  : 		// lParam is hContact
+; 176  : 		TranslateDialogDefault(hwndDlg);
+
+  0088b	53		 push	 ebx
+  0088c	e8 00 00 00 00	 call	 _TranslateDialogDefault
+
+; 177  : 		InitComboBox(GetDlgItem(hwndDlg, IDC_GENDER), tlenFieldGender);
+
+  00891	8b 35 00 00 00
+	00		 mov	 esi, DWORD PTR __imp__GetDlgItem@8
+  00897	c7 04 24 00 00
+	00 00		 mov	 DWORD PTR [esp], OFFSET FLAT:_tlenFieldGender
+  0089e	68 48 04 00 00	 push	 1096			; 00000448H
+  008a3	53		 push	 ebx
+  008a4	ff d6		 call	 esi
+  008a6	50		 push	 eax
+  008a7	e8 00 00 00 00	 call	 _InitComboBox
+  008ac	59		 pop	 ecx
+  008ad	59		 pop	 ecx
+
+; 178  : 		InitComboBox(GetDlgItem(hwndDlg, IDC_OCCUPATION), tlenFieldOccupation);
+
+  008ae	68 00 00 00 00	 push	 OFFSET FLAT:_tlenFieldOccupation
+  008b3	68 2a 04 00 00	 push	 1066			; 0000042aH
+  008b8	53		 push	 ebx
+  008b9	ff d6		 call	 esi
+  008bb	50		 push	 eax
+  008bc	e8 00 00 00 00	 call	 _InitComboBox
+  008c1	59		 pop	 ecx
+  008c2	59		 pop	 ecx
+
+; 179  : 		InitComboBox(GetDlgItem(hwndDlg, IDC_LOOKFOR), tlenFieldLookfor);
+
+  008c3	68 00 00 00 00	 push	 OFFSET FLAT:_tlenFieldLookfor
+  008c8	68 82 04 00 00	 push	 1154			; 00000482H
+  008cd	53		 push	 ebx
+  008ce	ff d6		 call	 esi
+  008d0	50		 push	 eax
+  008d1	e8 00 00 00 00	 call	 _InitComboBox
+  008d6	59		 pop	 ecx
+  008d7	59		 pop	 ecx
+
+; 180  : 
+; 181  : 		return TRUE;
+
+  008d8	6a 01		 push	 1
+  008da	58		 pop	 eax
+  008db	eb 37		 jmp	 SHORT $L85222
+$L85315:
+
+; 287  : 	case WM_NOTIFY:
+; 288  : 		switch (((LPNMHDR)lParam)->idFrom) {
+
+  008dd	8b 45 14	 mov	 eax, DWORD PTR _lParam$[ebp]
+  008e0	33 d2		 xor	 edx, edx
+  008e2	39 50 04	 cmp	 DWORD PTR [eax+4], edx
+  008e5	75 2b		 jne	 SHORT $L85226
+
+; 289  : 		case 0:
+; 290  : 			switch (((LPNMHDR)lParam)->code) {
+
+  008e7	8b 48 08	 mov	 ecx, DWORD PTR [eax+8]
+  008ea	49		 dec	 ecx
+  008eb	74 18		 je	 SHORT $L85327
+  008ed	49		 dec	 ecx
+  008ee	75 22		 jne	 SHORT $L85226
+
+; 295  : 				}
+; 296  : 				break;
+; 297  : 			case PSN_PARAMCHANGED:
+; 298  : 				{
+; 299  : 					data->proto = ( TlenProtocol* )(( LPPSHNOTIFY )lParam )->lParam;
+
+  008f0	8b 40 0c	 mov	 eax, DWORD PTR [eax+12]
+
+; 300  : 					SendMessage(hwndDlg, WM_TLEN_REFRESH, 0, 0);
+
+  008f3	52		 push	 edx
+  008f4	89 07		 mov	 DWORD PTR [edi], eax
+$L85650:
+  008f6	52		 push	 edx
+  008f7	68 64 04 00 00	 push	 1124			; 00000464H
+  008fc	53		 push	 ebx
+  008fd	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__SendMessageW@16
+
+; 301  : 				}
+; 302  : 			}
+
+  00903	eb 0d		 jmp	 SHORT $L85226
+$L85327:
+
+; 291  : 			case PSN_INFOCHANGED:
+; 292  : 				{
+; 293  : 					HANDLE hContact = (HANDLE) ((LPPSHNOTIFY) lParam)->lParam;
+; 294  : 					SendMessage(hwndDlg, WM_TLEN_REFRESH, 0, (LPARAM) hContact);
+
+  00905	ff 70 0c	 push	 DWORD PTR [eax+12]
+
+; 303  : 			break;
+; 304  : 		}
+; 305  : 		break;
+
+  00908	eb ec		 jmp	 SHORT $L85650
+$L85361:
+
+; 329  :     case WM_DESTROY:
+; 330  :         mir_free(data);
+
+  0090a	57		 push	 edi
+  0090b	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  00911	59		 pop	 ecx
+$L85226:
+
+; 331  :         break;
+; 332  : 	}
+; 333  : 	return FALSE;
+
+  00912	33 c0		 xor	 eax, eax
+$L85222:
+  00914	5f		 pop	 edi
+  00915	5e		 pop	 esi
+  00916	5b		 pop	 ebx
+
+; 334  : }
+
+  00917	c9		 leave
+  00918	c2 10 00	 ret	 16			; 00000010H
+_TlenUserInfoDlgProc@16 ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_00A@?$AA@					; `string'
+EXTRN	__imp__SendMessageA@16:NEAR
+;	COMDAT ??_C@_00A@?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\tlen_userinfo.c
+_BSS	SEGMENT
+??_C@_00A@?$AA@ DB 01H DUP (?)				; `string'
+_BSS	ENDS
+;	COMDAT _InitComboBox
+_TEXT	SEGMENT
+_hwndCombo$ = 8
+_fieldMap$ = 12
+_InitComboBox PROC NEAR					; COMDAT
+
+; 81   : {
+
+  00000	53		 push	 ebx
+
+; 82   : 	int i, n;
+; 83   : 
+; 84   : 	n = SendMessageA(hwndCombo, CB_ADDSTRING, 0, (LPARAM) "");
+
+  00001	8b 5c 24 08	 mov	 ebx, DWORD PTR _hwndCombo$[esp]
+  00005	55		 push	 ebp
+  00006	56		 push	 esi
+  00007	8b 35 00 00 00
+	00		 mov	 esi, DWORD PTR __imp__SendMessageA@16
+  0000d	57		 push	 edi
+  0000e	33 ed		 xor	 ebp, ebp
+  00010	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_00A@?$AA@ ; `string'
+  00015	55		 push	 ebp
+  00016	68 43 01 00 00	 push	 323			; 00000143H
+  0001b	53		 push	 ebx
+  0001c	ff d6		 call	 esi
+  0001e	8b f8		 mov	 edi, eax
+
+; 85   : 	SendMessageA(hwndCombo, CB_SETITEMDATA, n, 0);
+
+  00020	55		 push	 ebp
+  00021	57		 push	 edi
+  00022	68 51 01 00 00	 push	 337			; 00000151H
+  00027	53		 push	 ebx
+  00028	ff d6		 call	 esi
+
+; 86   : 	SendMessageA(hwndCombo, CB_SETCURSEL, n, 0);
+
+  0002a	55		 push	 ebp
+  0002b	57		 push	 edi
+  0002c	68 4e 01 00 00	 push	 334			; 0000014eH
+  00031	53		 push	 ebx
+  00032	ff d6		 call	 esi
+
+; 87   : 	for(i=0;;i++) {
+; 88   : 		if (fieldMap[i].name == NULL)
+
+  00034	8b 7c 24 18	 mov	 edi, DWORD PTR _fieldMap$[esp+12]
+  00038	8b 47 04	 mov	 eax, DWORD PTR [edi+4]
+  0003b	3b c5		 cmp	 eax, ebp
+  0003d	74 38		 je	 SHORT $L85655
+
+; 91   : 		SendMessageA(hwndCombo, CB_SETITEMDATA, n, fieldMap[i].id);
+
+  0003f	8b ef		 mov	 ebp, edi
+$L85110:
+
+; 89   : 			break;
+; 90   : 		n = SendMessageA(hwndCombo, CB_ADDSTRING, 0, (LPARAM) Translate(fieldMap[i].name));
+
+  00041	50		 push	 eax
+  00042	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00047	6a 00		 push	 0
+  00049	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ ; `string'
+  0004e	ff 50 24	 call	 DWORD PTR [eax+36]
+  00051	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00054	50		 push	 eax
+  00055	6a 00		 push	 0
+  00057	68 43 01 00 00	 push	 323			; 00000143H
+  0005c	53		 push	 ebx
+  0005d	ff d6		 call	 esi
+
+; 91   : 		SendMessageA(hwndCombo, CB_SETITEMDATA, n, fieldMap[i].id);
+
+  0005f	ff 75 00	 push	 DWORD PTR [ebp]
+  00062	50		 push	 eax
+  00063	68 51 01 00 00	 push	 337			; 00000151H
+  00068	53		 push	 ebx
+  00069	ff d6		 call	 esi
+  0006b	8b 47 0c	 mov	 eax, DWORD PTR [edi+12]
+  0006e	83 c7 08	 add	 edi, 8
+  00071	85 c0		 test	 eax, eax
+  00073	8b ef		 mov	 ebp, edi
+  00075	75 ca		 jne	 SHORT $L85110
+$L85655:
+  00077	5f		 pop	 edi
+  00078	5e		 pop	 esi
+  00079	5d		 pop	 ebp
+  0007a	5b		 pop	 ebx
+
+; 92   : 	}
+; 93   : }
+
+  0007b	c3		 ret	 0
+_InitComboBox ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_0M@CFON@?$DM?$CFs?$DO?$CFs?$DM?1?$CFs?$DO?$AA@ ; `string'
+EXTRN	__imp__GetDlgItemTextA@16:NEAR
+EXTRN	_JabberTextEncode:NEAR
+;	COMDAT ??_C@_0M@CFON@?$DM?$CFs?$DO?$CFs?$DM?1?$CFs?$DO?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\tlen_userinfo.c
+_DATA	SEGMENT
+??_C@_0M@CFON@?$DM?$CFs?$DO?$CFs?$DM?1?$CFs?$DO?$AA@ DB '<%s>%s</%s>', 00H ; `string'
+_DATA	ENDS
+;	COMDAT _FetchField
+_TEXT	SEGMENT
+_hwndDlg$ = 8
+_idCtrl$ = 12
+_fieldName$ = 16
+_str$ = 20
+_strSize$ = 24
+_text$ = -512
+_FetchField PROC NEAR					; COMDAT
+
+; 96   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	81 ec 00 02 00
+	00		 sub	 esp, 512		; 00000200H
+  00009	53		 push	 ebx
+
+; 97   : 	char text[512];
+; 98   : 	char *localFieldName, *localText;
+; 99   : 
+; 100  : 	if (hwndDlg==NULL || fieldName==NULL || str==NULL || strSize==NULL)
+
+  0000a	33 db		 xor	 ebx, ebx
+  0000c	39 5d 08	 cmp	 DWORD PTR _hwndDlg$[ebp], ebx
+  0000f	56		 push	 esi
+  00010	74 78		 je	 SHORT $L85139
+  00012	39 5d 10	 cmp	 DWORD PTR _fieldName$[ebp], ebx
+  00015	74 73		 je	 SHORT $L85139
+  00017	39 5d 14	 cmp	 DWORD PTR _str$[ebp], ebx
+  0001a	74 6e		 je	 SHORT $L85139
+  0001c	39 5d 18	 cmp	 DWORD PTR _strSize$[ebp], ebx
+  0001f	74 69		 je	 SHORT $L85139
+
+; 101  : 		return;
+; 102  : 	GetDlgItemTextA(hwndDlg, idCtrl, text, sizeof(text));
+
+  00021	8d 85 00 fe ff
+	ff		 lea	 eax, DWORD PTR _text$[ebp]
+  00027	68 00 02 00 00	 push	 512			; 00000200H
+  0002c	50		 push	 eax
+  0002d	ff 75 0c	 push	 DWORD PTR _idCtrl$[ebp]
+  00030	ff 75 08	 push	 DWORD PTR _hwndDlg$[ebp]
+  00033	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__GetDlgItemTextA@16
+
+; 103  : 	if (text[0]) {
+
+  00039	38 9d 00 fe ff
+	ff		 cmp	 BYTE PTR _text$[ebp], bl
+  0003f	74 49		 je	 SHORT $L85139
+
+; 104  : 		if ((localFieldName=JabberTextEncode(fieldName)) != NULL) {
+
+  00041	ff 75 10	 push	 DWORD PTR _fieldName$[ebp]
+  00044	e8 00 00 00 00	 call	 _JabberTextEncode
+  00049	8b f0		 mov	 esi, eax
+  0004b	59		 pop	 ecx
+  0004c	3b f3		 cmp	 esi, ebx
+  0004e	74 3a		 je	 SHORT $L85139
+
+; 105  : 			if ((localText=JabberTextEncode(text)) != NULL) {
+
+  00050	8d 85 00 fe ff
+	ff		 lea	 eax, DWORD PTR _text$[ebp]
+  00056	57		 push	 edi
+  00057	50		 push	 eax
+  00058	e8 00 00 00 00	 call	 _JabberTextEncode
+  0005d	8b f8		 mov	 edi, eax
+  0005f	59		 pop	 ecx
+  00060	3b fb		 cmp	 edi, ebx
+  00062	74 1d		 je	 SHORT $L85144
+
+; 106  : 				JabberStringAppend(str, strSize, "<%s>%s</%s>", localFieldName, localText, localFieldName);
+
+  00064	56		 push	 esi
+  00065	57		 push	 edi
+  00066	56		 push	 esi
+  00067	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0M@CFON@?$DM?$CFs?$DO?$CFs?$DM?1?$CFs?$DO?$AA@ ; `string'
+  0006c	ff 75 18	 push	 DWORD PTR _strSize$[ebp]
+  0006f	ff 75 14	 push	 DWORD PTR _str$[ebp]
+  00072	e8 00 00 00 00	 call	 _JabberStringAppend
+
+; 107  : 				mir_free(localText);
+
+  00077	57		 push	 edi
+  00078	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  0007e	83 c4 1c	 add	 esp, 28			; 0000001cH
+$L85144:
+
+; 108  : 			}
+; 109  : 			mir_free(localFieldName);
+
+  00081	56		 push	 esi
+  00082	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  00088	59		 pop	 ecx
+  00089	5f		 pop	 edi
+$L85139:
+  0008a	5e		 pop	 esi
+  0008b	5b		 pop	 ebx
+
+; 110  : 		}
+; 111  : 	}
+; 112  : }
+
+  0008c	c9		 leave
+  0008d	c3		 ret	 0
+_FetchField ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_0M@JHIP@?$DM?$CFs?$DO?$CFd?$DM?1?$CFs?$DO?$AA@ ; `string'
+;	COMDAT ??_C@_0M@JHIP@?$DM?$CFs?$DO?$CFd?$DM?1?$CFs?$DO?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\tlen_userinfo.c
+_DATA	SEGMENT
+??_C@_0M@JHIP@?$DM?$CFs?$DO?$CFd?$DM?1?$CFs?$DO?$AA@ DB '<%s>%d</%s>', 00H ; `string'
+_DATA	ENDS
+;	COMDAT _FetchCombo
+_TEXT	SEGMENT
+_hwndDlg$ = 8
+_idCtrl$ = 12
+_fieldName$ = 16
+_str$ = 20
+_strSize$ = 24
+_FetchCombo PROC NEAR					; COMDAT
+
+; 115  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	53		 push	 ebx
+  00004	56		 push	 esi
+  00005	57		 push	 edi
+
+; 116  : 	int value;
+; 117  : 	char *localFieldName;
+; 118  : 
+; 119  : 	if (hwndDlg==NULL || fieldName==NULL || str==NULL || strSize==NULL)
+
+  00006	33 ff		 xor	 edi, edi
+  00008	39 7d 08	 cmp	 DWORD PTR _hwndDlg$[ebp], edi
+  0000b	74 65		 je	 SHORT $L85165
+  0000d	39 7d 10	 cmp	 DWORD PTR _fieldName$[ebp], edi
+  00010	74 60		 je	 SHORT $L85165
+  00012	39 7d 14	 cmp	 DWORD PTR _str$[ebp], edi
+  00015	74 5b		 je	 SHORT $L85165
+  00017	39 7d 18	 cmp	 DWORD PTR _strSize$[ebp], edi
+  0001a	74 56		 je	 SHORT $L85165
+
+; 120  : 		return;
+; 121  : 	value = (int) SendDlgItemMessage(hwndDlg, idCtrl, CB_GETITEMDATA, SendDlgItemMessage(hwndDlg, idCtrl, CB_GETCURSEL, 0, 0), 0);
+
+  0001c	57		 push	 edi
+  0001d	57		 push	 edi
+  0001e	8b 35 00 00 00
+	00		 mov	 esi, DWORD PTR __imp__SendDlgItemMessageW@20
+  00024	57		 push	 edi
+  00025	68 47 01 00 00	 push	 327			; 00000147H
+  0002a	ff 75 0c	 push	 DWORD PTR _idCtrl$[ebp]
+  0002d	ff 75 08	 push	 DWORD PTR _hwndDlg$[ebp]
+  00030	ff d6		 call	 esi
+  00032	50		 push	 eax
+  00033	68 50 01 00 00	 push	 336			; 00000150H
+  00038	ff 75 0c	 push	 DWORD PTR _idCtrl$[ebp]
+  0003b	ff 75 08	 push	 DWORD PTR _hwndDlg$[ebp]
+  0003e	ff d6		 call	 esi
+  00040	8b d8		 mov	 ebx, eax
+
+; 122  : 	if (value > 0) {
+
+  00042	3b df		 cmp	 ebx, edi
+  00044	7e 2c		 jle	 SHORT $L85165
+
+; 123  : 		if ((localFieldName=JabberTextEncode(fieldName)) != NULL) {
+
+  00046	ff 75 10	 push	 DWORD PTR _fieldName$[ebp]
+  00049	e8 00 00 00 00	 call	 _JabberTextEncode
+  0004e	8b f0		 mov	 esi, eax
+  00050	59		 pop	 ecx
+  00051	3b f7		 cmp	 esi, edi
+  00053	74 1d		 je	 SHORT $L85165
+
+; 124  : 			JabberStringAppend(str, strSize, "<%s>%d</%s>", localFieldName, value, localFieldName);
+
+  00055	56		 push	 esi
+  00056	53		 push	 ebx
+  00057	56		 push	 esi
+  00058	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0M@JHIP@?$DM?$CFs?$DO?$CFd?$DM?1?$CFs?$DO?$AA@ ; `string'
+  0005d	ff 75 18	 push	 DWORD PTR _strSize$[ebp]
+  00060	ff 75 14	 push	 DWORD PTR _str$[ebp]
+  00063	e8 00 00 00 00	 call	 _JabberStringAppend
+
+; 125  : 			mir_free(localFieldName);
+
+  00068	56		 push	 esi
+  00069	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  0006f	83 c4 1c	 add	 esp, 28			; 0000001cH
+$L85165:
+  00072	5f		 pop	 edi
+  00073	5e		 pop	 esi
+  00074	5b		 pop	 ebx
+
+; 126  : 		}
+; 127  : 	}
+; 128  : }
+
+  00075	5d		 pop	 ebp
+  00076	c3		 ret	 0
+_FetchCombo ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_0BJ@GNEH@LangPack?1TranslateDialog?$AA@	; `string'
+;	COMDAT ??_C@_0BJ@GNEH@LangPack?1TranslateDialog?$AA@
+; File C:\MirandaDev\miranda_svn2\include\m_langpack.h
+_DATA	SEGMENT
+??_C@_0BJ@GNEH@LangPack?1TranslateDialog?$AA@ DB 'LangPack/TranslateDialo'
+	DB	'g', 00H					; `string'
+_DATA	ENDS
+;	COMDAT _TranslateDialogDefault
+_TEXT	SEGMENT
+_hwndDlg$ = 8
+_lptd$ = -16
+_TranslateDialogDefault PROC NEAR			; COMDAT
+
+; 81   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 10	 sub	 esp, 16			; 00000010H
+
+; 82   : 	LANGPACKTRANSLATEDIALOG lptd;
+; 83   : 	lptd.cbSize=sizeof(lptd);
+; 84   : 	lptd.flags=0;
+; 85   : 	lptd.hwndDlg=hwndDlg;
+
+  00006	8b 4d 08	 mov	 ecx, DWORD PTR _hwndDlg$[ebp]
+  00009	33 c0		 xor	 eax, eax
+  0000b	89 4d f8	 mov	 DWORD PTR _lptd$[ebp+8], ecx
+
+; 86   : 	lptd.ignoreControls=NULL;
+; 87   : 	return CallService(MS_LANGPACK_TRANSLATEDIALOG,0,(LPARAM)&lptd);
+
+  0000e	8d 4d f0	 lea	 ecx, DWORD PTR _lptd$[ebp]
+  00011	51		 push	 ecx
+  00012	89 45 f4	 mov	 DWORD PTR _lptd$[ebp+4], eax
+  00015	89 45 fc	 mov	 DWORD PTR _lptd$[ebp+12], eax
+  00018	50		 push	 eax
+  00019	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0001e	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@GNEH@LangPack?1TranslateDialog?$AA@ ; `string'
+  00023	c7 45 f0 10 00
+	00 00		 mov	 DWORD PTR _lptd$[ebp], 16 ; 00000010H
+  0002a	ff 50 24	 call	 DWORD PTR [eax+36]
+  0002d	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 88   : }
+
+  00030	c9		 leave
+  00031	c3		 ret	 0
+_TranslateDialogDefault ENDP
+_TEXT	ENDS
+END

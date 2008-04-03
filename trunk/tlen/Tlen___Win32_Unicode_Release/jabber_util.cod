@@ -1,0 +1,4499 @@
+	TITLE	E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_util.c
+	.386P
+include listing.inc
+if @Version gt 510
+.model FLAT
+else
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT DWORD USE32 PUBLIC 'BSS'
+_BSS	ENDS
+_TLS	SEGMENT DWORD USE32 PUBLIC 'TLS'
+_TLS	ENDS
+;	COMDAT ??_C@_0BG@FJFA@Miranda?1System?1GetMMI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@DNA@Miranda?1System?1GetLI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@FHMP@Miranda?1System?1GetUTFI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@DCOH@Miranda?1Thread?1Fork?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@IENN@Miranda?1Thread?1ForkEx?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@FGIN@Miranda?1SysTerm?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@LIGC@Utils?1AddToWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BL@PEAI@Utils?1RemoveFromWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@GMNB@Utils?1FindWindowInList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BM@NOMI@Utils?1BroadcastToWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0CB@CFCA@Utils?1BroadcastToWindowListAsync@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@MDKL@Utils?1SaveWindowPos?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@GALP@Utils?1RestoreWindowPos?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@CHLF@Miranda?1System?1GetMD5I?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@FOPF@Miranda?1System?1GetSHA1I?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@OCFE@Netlib?1CloseHandle?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@EFDJ@Netlib?1Send?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@GFGB@Netlib?1Recv?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@CMGK@Netlib?1Log?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BM@GDOO@Netlib?1InitSecurityProvider?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BP@JINJ@Netlib?1DestroySecurityProvider?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BK@CBFG@Netlib?1NtlmCreateResponse?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@COCL@Proto?1EnumAccounts?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@CCNI@Proto?1GetAccount?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@IFFL@Proto?1BroadcastAck?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@MGBG@DB?1Event?1GetText?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0DA@FLKM@C?3?2MirandaDev?2miranda_svn2?2inclu@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@IGCO@DB?1Contact?1DeleteSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@PLGC@DB?1Contact?1WriteSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@GNEH@LangPack?1TranslateDialog?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@GFNK@Skin?1Icons?1Load?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@BLFF@Skin?1Icons?1LoadProto?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@CNOA@Skin?1Sounds?1AddNew?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@LENC@Skin?1Sounds?1Play?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0P@PNGM@PopUp?1AddPopUp?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@OBDC@PopUp?1AddPopUpEx?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@CGKI@PopUp?1AddPopUpW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@HIHP@PopUp?1GetContact?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@CCHD@PopUp?1GetPluginData?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@HKEA@PopUp?1IsSecondLineShown?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@KGOE@PopUp?1Changetext?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BC@LAPD@PopUp?1ChangetextW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0N@KOPP@PopUp?1Change?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BC@BGJ@PopUp?1ShowMessage?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@NFFE@PopUp?1ShowMessageW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@MAHO@PopUp?1AddPopupClass?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04CBAG@TLEN?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04GKDJ@?$FL?$CFs?$FN?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_07PCFF@SEND?3?$CFs?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04OBKB@?$CF02x?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_08GCIO@?$CF08x?$CF08x?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_08CJMH@?$CF?$CG?$CL?3?8?$DM?$DO?$CC?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_06OAHP@?$CF?$CF?$CF02X?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_03MANP@?$CF2x?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_08BEBH@?$CFd?3?$CFd?3?$CFd?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_08LOMK@?5to?$DN?8?$CFs?8?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_09MLLO@available?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04EKMD@away?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_02PNLN@xa?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_03GPAF@dnd?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04FLKK@chat?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_09HDMF@invisible?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@IHLO@unavailable?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0FE@HMGB@E?3?2Documents?5and?5Settings?2piotr?2@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@EHOD@LeaveOfflineMessage?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@CODL@OfflineMessageOption?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_09LOKN@OnDefault?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@LG@AwayDefault?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_09MFFI@NaDefault?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@CLFC@DndDefault?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@NCII@FreeChatDefault?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@PHDP@InvDefault?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_06CHCB@SRAway?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_06CFEF@?$CFtime?$CF?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_06OOEJ@?$CFdate?$CF?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_00A@?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0DJ@ODJJ@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$DMstatus?$DO?$CFs@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0CG@OPDC@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$CFs?$CFs?$DM?1pres@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0DO@DKPG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$DMstat@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0CL@HAFG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$CFs?$CFs?$DM@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_05FECE@GIF89?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_04JKCC@?$IJPNG?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_02HGED@BM?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_02IHJM@?$PP?X?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT _DBGetContactSettingByte_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingWord_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingDword_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSetting_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingString_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBFreeVariant
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _HookEventObj_Ex
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _CreateServiceFunction_Ex
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _UnhookEvents_Ex
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DestroyServices_Ex
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberSerialInit
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberSerialUninit
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberSerialNext
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberLog
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberSend
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberResourceFromJID
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberNickFromJID
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberLoginFromJID
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberLocalNickFromJID
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberSha1
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TlenSha1
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TlenPasswordHash
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TlenUrlEncode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TlenUrlDecode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TlenGroupDecode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TlenGroupEncode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberTextEncode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberTextDecode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberBase64Encode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberBase64Decode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _TlenTimeToUTC
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberIsoToUnixTime
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberSendPresenceTo
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberSendPresence
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberStringAppend
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberGetPictureType
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+FLAT	GROUP _DATA, CONST, _BSS
+	ASSUME	CS: FLAT, DS: FLAT, SS: FLAT
+endif
+_DATA	SEGMENT
+_b64table DB	'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123'
+	DB	'456789+/', 00H
+_DATA	ENDS
+PUBLIC	_HookEventObj_Ex
+EXTRN	_mmi:BYTE
+EXTRN	_pluginLink:DWORD
+;	COMDAT _HookEventObj_Ex
+_TEXT	SEGMENT
+_name$ = 8
+_proto$ = 12
+_hook$ = 16
+_HookEventObj_Ex PROC NEAR				; COMDAT
+
+; 31   : HANDLE HookEventObj_Ex(const char *name, TlenProtocol *proto, MIRANDAHOOKOBJ hook) {
+
+  00000	56		 push	 esi
+
+; 32   : 	proto->hookNum ++;
+
+  00001	8b 74 24 0c	 mov	 esi, DWORD PTR _proto$[esp]
+  00005	ff 86 14 01 00
+	00		 inc	 DWORD PTR [esi+276]
+  0000b	8b 86 14 01 00
+	00		 mov	 eax, DWORD PTR [esi+276]
+
+; 33   : 	proto->hHooks = (HANDLE *) mir_realloc(proto->hHooks, sizeof(HANDLE) * (proto->hookNum));
+
+  00011	c1 e0 02	 shl	 eax, 2
+  00014	50		 push	 eax
+  00015	ff b6 10 01 00
+	00		 push	 DWORD PTR [esi+272]
+  0001b	ff 15 08 00 00
+	00		 call	 DWORD PTR _mmi+8
+
+; 34   : 	proto->hHooks[proto->hookNum - 1] = HookEventObj(name, hook, proto);
+
+  00021	56		 push	 esi
+  00022	89 86 10 01 00
+	00		 mov	 DWORD PTR [esi+272], eax
+  00028	ff 74 24 1c	 push	 DWORD PTR _hook$[esp+12]
+  0002c	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00031	ff 74 24 18	 push	 DWORD PTR _name$[esp+16]
+  00035	ff 50 4c	 call	 DWORD PTR [eax+76]
+  00038	8b 8e 14 01 00
+	00		 mov	 ecx, DWORD PTR [esi+276]
+  0003e	8b 96 10 01 00
+	00		 mov	 edx, DWORD PTR [esi+272]
+  00044	83 c4 14	 add	 esp, 20			; 00000014H
+  00047	89 44 8a fc	 mov	 DWORD PTR [edx+ecx*4-4], eax
+
+; 35   : 	return proto->hHooks[proto->hookNum - 1] ;
+
+  0004b	8b 86 14 01 00
+	00		 mov	 eax, DWORD PTR [esi+276]
+  00051	8b 8e 10 01 00
+	00		 mov	 ecx, DWORD PTR [esi+272]
+  00057	5e		 pop	 esi
+  00058	8b 44 81 fc	 mov	 eax, DWORD PTR [ecx+eax*4-4]
+
+; 36   : }
+
+  0005c	c3		 ret	 0
+_HookEventObj_Ex ENDP
+_TEXT	ENDS
+PUBLIC	_CreateServiceFunction_Ex
+;	COMDAT _CreateServiceFunction_Ex
+_TEXT	SEGMENT
+_name$ = 8
+_proto$ = 12
+_service$ = 16
+_CreateServiceFunction_Ex PROC NEAR			; COMDAT
+
+; 38   : HANDLE CreateServiceFunction_Ex(const char *name, TlenProtocol *proto, MIRANDASERVICEOBJ service) {
+
+  00000	56		 push	 esi
+
+; 39   : 	proto->serviceNum++;
+
+  00001	8b 74 24 0c	 mov	 esi, DWORD PTR _proto$[esp]
+  00005	ff 86 0c 01 00
+	00		 inc	 DWORD PTR [esi+268]
+  0000b	8b 86 0c 01 00
+	00		 mov	 eax, DWORD PTR [esi+268]
+
+; 40   : 	proto->hServices = (HANDLE *) mir_realloc(proto->hServices, sizeof(HANDLE) * (proto->serviceNum));
+
+  00011	c1 e0 02	 shl	 eax, 2
+  00014	50		 push	 eax
+  00015	ff b6 08 01 00
+	00		 push	 DWORD PTR [esi+264]
+  0001b	ff 15 08 00 00
+	00		 call	 DWORD PTR _mmi+8
+
+; 41   : 	proto->hServices[proto->serviceNum - 1] = CreateServiceFunctionObj(name, service, proto);
+
+  00021	56		 push	 esi
+  00022	89 86 08 01 00
+	00		 mov	 DWORD PTR [esi+264], eax
+  00028	ff 74 24 1c	 push	 DWORD PTR _service$[esp+12]
+  0002c	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00031	ff 74 24 18	 push	 DWORD PTR _name$[esp+16]
+  00035	ff 50 54	 call	 DWORD PTR [eax+84]
+  00038	8b 8e 0c 01 00
+	00		 mov	 ecx, DWORD PTR [esi+268]
+  0003e	8b 96 08 01 00
+	00		 mov	 edx, DWORD PTR [esi+264]
+  00044	83 c4 14	 add	 esp, 20			; 00000014H
+  00047	89 44 8a fc	 mov	 DWORD PTR [edx+ecx*4-4], eax
+
+; 42   : 	return proto->hServices[proto->serviceNum - 1] ;
+
+  0004b	8b 86 0c 01 00
+	00		 mov	 eax, DWORD PTR [esi+268]
+  00051	8b 8e 08 01 00
+	00		 mov	 ecx, DWORD PTR [esi+264]
+  00057	5e		 pop	 esi
+  00058	8b 44 81 fc	 mov	 eax, DWORD PTR [ecx+eax*4-4]
+
+; 43   : }
+
+  0005c	c3		 ret	 0
+_CreateServiceFunction_Ex ENDP
+_TEXT	ENDS
+PUBLIC	_UnhookEvents_Ex
+;	COMDAT _UnhookEvents_Ex
+_TEXT	SEGMENT
+_proto$ = 8
+_UnhookEvents_Ex PROC NEAR				; COMDAT
+
+; 45   : void UnhookEvents_Ex(TlenProtocol *proto) {
+
+  00000	56		 push	 esi
+
+; 46   : 	unsigned int i;
+; 47   : 	for (i=0; i<proto->hookNum; ++i) {
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _proto$[esp]
+  00005	57		 push	 edi
+  00006	33 ff		 xor	 edi, edi
+  00008	39 be 14 01 00
+	00		 cmp	 DWORD PTR [esi+276], edi
+  0000e	76 20		 jbe	 SHORT $L82941
+$L82939:
+
+; 48   : 		if (proto->hHooks[i] != NULL) {
+
+  00010	8b 86 10 01 00
+	00		 mov	 eax, DWORD PTR [esi+272]
+  00016	8b 04 b8	 mov	 eax, DWORD PTR [eax+edi*4]
+  00019	85 c0		 test	 eax, eax
+  0001b	74 0a		 je	 SHORT $L82940
+
+; 49   : 			UnhookEvent(proto->hHooks[i]);
+
+  0001d	50		 push	 eax
+  0001e	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00023	ff 50 14	 call	 DWORD PTR [eax+20]
+  00026	59		 pop	 ecx
+$L82940:
+  00027	47		 inc	 edi
+  00028	3b be 14 01 00
+	00		 cmp	 edi, DWORD PTR [esi+276]
+  0002e	72 e0		 jb	 SHORT $L82939
+$L82941:
+
+; 50   : 		}
+; 51   : 	}
+; 52   : 	mir_free(proto->hHooks);
+
+  00030	ff b6 10 01 00
+	00		 push	 DWORD PTR [esi+272]
+  00036	8d be 10 01 00
+	00		 lea	 edi, DWORD PTR [esi+272]
+  0003c	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+
+; 53   : 	proto->hookNum = 0;
+; 54   : 	proto->hHooks = NULL;
+
+  00042	83 27 00	 and	 DWORD PTR [edi], 0
+  00045	83 a6 14 01 00
+	00 00		 and	 DWORD PTR [esi+276], 0
+  0004c	59		 pop	 ecx
+  0004d	5f		 pop	 edi
+  0004e	5e		 pop	 esi
+
+; 55   : }
+
+  0004f	c3		 ret	 0
+_UnhookEvents_Ex ENDP
+_TEXT	ENDS
+PUBLIC	_DestroyServices_Ex
+;	COMDAT _DestroyServices_Ex
+_TEXT	SEGMENT
+_proto$ = 8
+_DestroyServices_Ex PROC NEAR				; COMDAT
+
+; 57   : void DestroyServices_Ex(TlenProtocol *proto) {
+
+  00000	56		 push	 esi
+
+; 58   : 	unsigned int i;
+; 59   : 	for (i=0; i<proto->serviceNum; ++i) {
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _proto$[esp]
+  00005	57		 push	 edi
+  00006	33 ff		 xor	 edi, edi
+  00008	39 be 0c 01 00
+	00		 cmp	 DWORD PTR [esi+268], edi
+  0000e	76 20		 jbe	 SHORT $L82951
+$L82949:
+
+; 60   : 		if (proto->hServices[i] != NULL) {
+
+  00010	8b 86 08 01 00
+	00		 mov	 eax, DWORD PTR [esi+264]
+  00016	8b 04 b8	 mov	 eax, DWORD PTR [eax+edi*4]
+  00019	85 c0		 test	 eax, eax
+  0001b	74 0a		 je	 SHORT $L82950
+
+; 61   : 			DestroyServiceFunction(proto->hServices[i]);
+
+  0001d	50		 push	 eax
+  0001e	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00023	ff 50 20	 call	 DWORD PTR [eax+32]
+  00026	59		 pop	 ecx
+$L82950:
+  00027	47		 inc	 edi
+  00028	3b be 0c 01 00
+	00		 cmp	 edi, DWORD PTR [esi+268]
+  0002e	72 e0		 jb	 SHORT $L82949
+$L82951:
+
+; 62   : 		}
+; 63   : 	}
+; 64   : 	mir_free(proto->hServices);
+
+  00030	ff b6 08 01 00
+	00		 push	 DWORD PTR [esi+264]
+  00036	8d be 08 01 00
+	00		 lea	 edi, DWORD PTR [esi+264]
+  0003c	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+
+; 65   : 	proto->serviceNum = 0;
+; 66   : 	proto->hServices = NULL;
+
+  00042	83 27 00	 and	 DWORD PTR [edi], 0
+  00045	83 a6 0c 01 00
+	00 00		 and	 DWORD PTR [esi+268], 0
+  0004c	59		 pop	 ecx
+  0004d	5f		 pop	 edi
+  0004e	5e		 pop	 esi
+
+; 67   : }
+
+  0004f	c3		 ret	 0
+_DestroyServices_Ex ENDP
+_TEXT	ENDS
+PUBLIC	_JabberSerialInit
+EXTRN	__imp__InitializeCriticalSection@4:NEAR
+;	COMDAT _JabberSerialInit
+_TEXT	SEGMENT
+_proto$ = 8
+_JabberSerialInit PROC NEAR				; COMDAT
+
+; 70   : {
+
+  00000	56		 push	 esi
+
+; 71   : 	InitializeCriticalSection(&proto->csSerial);
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _proto$[esp]
+  00005	8d 86 5c 01 00
+	00		 lea	 eax, DWORD PTR [esi+348]
+  0000b	50		 push	 eax
+  0000c	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__InitializeCriticalSection@4
+
+; 72   : 	proto->serial = 0;
+
+  00012	83 a6 74 01 00
+	00 00		 and	 DWORD PTR [esi+372], 0
+  00019	5e		 pop	 esi
+
+; 73   : }
+
+  0001a	c3		 ret	 0
+_JabberSerialInit ENDP
+_TEXT	ENDS
+PUBLIC	_JabberSerialUninit
+EXTRN	__imp__DeleteCriticalSection@4:NEAR
+;	COMDAT _JabberSerialUninit
+_TEXT	SEGMENT
+_proto$ = 8
+_JabberSerialUninit PROC NEAR				; COMDAT
+
+; 77   : 	DeleteCriticalSection(&proto->csSerial);
+
+  00000	8b 44 24 04	 mov	 eax, DWORD PTR _proto$[esp-4]
+  00004	05 5c 01 00 00	 add	 eax, 348		; 0000015cH
+  00009	50		 push	 eax
+  0000a	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__DeleteCriticalSection@4
+
+; 78   : }
+
+  00010	c3		 ret	 0
+_JabberSerialUninit ENDP
+_TEXT	ENDS
+PUBLIC	_JabberSerialNext
+EXTRN	__imp__EnterCriticalSection@4:NEAR
+EXTRN	__imp__LeaveCriticalSection@4:NEAR
+;	COMDAT _JabberSerialNext
+_TEXT	SEGMENT
+_proto$ = 8
+_JabberSerialNext PROC NEAR				; COMDAT
+
+; 81   : {
+
+  00000	56		 push	 esi
+
+; 82   : 	unsigned int ret;
+; 83   : 
+; 84   : 	EnterCriticalSection(&proto->csSerial);
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _proto$[esp]
+  00005	57		 push	 edi
+  00006	8d be 5c 01 00
+	00		 lea	 edi, DWORD PTR [esi+348]
+  0000c	57		 push	 edi
+  0000d	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__EnterCriticalSection@4
+
+; 85   : 	ret = proto->serial;
+
+  00013	8d 86 74 01 00
+	00		 lea	 eax, DWORD PTR [esi+372]
+
+; 86   : 	proto->serial++;
+; 87   : 	LeaveCriticalSection(&proto->csSerial);
+
+  00019	57		 push	 edi
+  0001a	8b 30		 mov	 esi, DWORD PTR [eax]
+  0001c	8d 4e 01	 lea	 ecx, DWORD PTR [esi+1]
+  0001f	89 08		 mov	 DWORD PTR [eax], ecx
+  00021	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__LeaveCriticalSection@4
+
+; 88   : 	return ret;
+
+  00027	8b c6		 mov	 eax, esi
+  00029	5f		 pop	 edi
+  0002a	5e		 pop	 esi
+
+; 89   : }
+
+  0002b	c3		 ret	 0
+_JabberSerialNext ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_04CBAG@TLEN?$AA@				; `string'
+PUBLIC	??_C@_04GKDJ@?$FL?$CFs?$FN?$AA@			; `string'
+PUBLIC	_JabberLog
+PUBLIC	??_C@_0L@CMGK@Netlib?1Log?$AA@			; `string'
+EXTRN	_strlen:NEAR
+EXTRN	__imp__sprintf:NEAR
+EXTRN	__imp___vsnprintf:NEAR
+;	COMDAT ??_C@_0L@CMGK@Netlib?1Log?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_util.c
+_DATA	SEGMENT
+??_C@_0L@CMGK@Netlib?1Log?$AA@ DB 'Netlib/Log', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_04CBAG@TLEN?$AA@
+_DATA	SEGMENT
+??_C@_04CBAG@TLEN?$AA@ DB 'TLEN', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_04GKDJ@?$FL?$CFs?$FN?$AA@
+_DATA	SEGMENT
+??_C@_04GKDJ@?$FL?$CFs?$FN?$AA@ DB '[%s]', 00H		; `string'
+_DATA	ENDS
+;	COMDAT _JabberLog
+_TEXT	SEGMENT
+_proto$ = 8
+_fmt$ = 12
+_strsize$ = -4
+_JabberLog PROC NEAR					; COMDAT
+
+; 92   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	51		 push	 ecx
+  00004	53		 push	 ebx
+  00005	56		 push	 esi
+
+; 93   : #ifdef ENABLE_LOGGING
+; 94   : 	char *str;
+; 95   : 	va_list vararg;
+; 96   : 	int strsize;
+; 97   : 	char *text;
+; 98   : 	char *p, *q;
+; 99   : 	int extra;
+; 100  : 
+; 101  : 	va_start(vararg, fmt);
+; 102  : 	str = (char *) mir_alloc(strsize=2048);
+
+  00006	be 00 08 00 00	 mov	 esi, 2048		; 00000800H
+  0000b	57		 push	 edi
+  0000c	56		 push	 esi
+  0000d	89 75 fc	 mov	 DWORD PTR _strsize$[ebp], esi
+  00010	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00016	8b f8		 mov	 edi, eax
+
+; 103  : 	while (_vsnprintf(str, strsize, fmt, vararg) == -1)
+
+  00018	8d 45 10	 lea	 eax, DWORD PTR _fmt$[ebp+4]
+  0001b	8b 1d 00 00 00
+	00		 mov	 ebx, DWORD PTR __imp___vsnprintf
+  00021	50		 push	 eax
+  00022	ff 75 0c	 push	 DWORD PTR _fmt$[ebp]
+  00025	56		 push	 esi
+  00026	57		 push	 edi
+  00027	ff d3		 call	 ebx
+  00029	83 c4 14	 add	 esp, 20			; 00000014H
+$L83722:
+  0002c	83 f8 ff	 cmp	 eax, -1
+  0002f	75 21		 jne	 SHORT $L82983
+
+; 104  : 		str = (char *) mir_realloc(str, strsize+=2048);
+
+  00031	01 75 fc	 add	 DWORD PTR _strsize$[ebp], esi
+  00034	ff 75 fc	 push	 DWORD PTR _strsize$[ebp]
+  00037	57		 push	 edi
+  00038	ff 15 08 00 00
+	00		 call	 DWORD PTR _mmi+8
+  0003e	8b f8		 mov	 edi, eax
+  00040	8d 45 10	 lea	 eax, DWORD PTR _fmt$[ebp+4]
+  00043	50		 push	 eax
+  00044	ff 75 0c	 push	 DWORD PTR _fmt$[ebp]
+  00047	ff 75 fc	 push	 DWORD PTR _strsize$[ebp]
+  0004a	57		 push	 edi
+  0004b	ff d3		 call	 ebx
+  0004d	83 c4 18	 add	 esp, 24			; 00000018H
+  00050	eb da		 jmp	 SHORT $L83722
+$L82983:
+
+; 105  : 	va_end(vararg);
+; 106  : 
+; 107  : 	extra = 0;
+; 108  : 	for (p=str; *p!='\0'; p++)
+
+  00052	8a 07		 mov	 al, BYTE PTR [edi]
+  00054	33 f6		 xor	 esi, esi
+  00056	8b cf		 mov	 ecx, edi
+$L83723:
+  00058	84 c0		 test	 al, al
+  0005a	74 0f		 je	 SHORT $L82988
+
+; 109  : 		if (*p=='\n' || *p=='\r')
+
+  0005c	3c 0a		 cmp	 al, 10			; 0000000aH
+  0005e	74 04		 je	 SHORT $L82990
+  00060	3c 0d		 cmp	 al, 13			; 0000000dH
+  00062	75 01		 jne	 SHORT $L82987
+$L82990:
+
+; 110  : 			extra++;
+
+  00064	46		 inc	 esi
+$L82987:
+
+; 105  : 	va_end(vararg);
+; 106  : 
+; 107  : 	extra = 0;
+; 108  : 	for (p=str; *p!='\0'; p++)
+
+  00065	8a 41 01	 mov	 al, BYTE PTR [ecx+1]
+  00068	41		 inc	 ecx
+  00069	eb ed		 jmp	 SHORT $L83723
+$L82988:
+
+; 111  : 	text = (char *) mir_alloc(strlen("TLEN")+2+strlen(str)+2+extra);
+
+  0006b	57		 push	 edi
+  0006c	e8 00 00 00 00	 call	 _strlen
+  00071	8b d8		 mov	 ebx, eax
+  00073	c7 04 24 00 00
+	00 00		 mov	 DWORD PTR [esp], OFFSET FLAT:??_C@_04CBAG@TLEN?$AA@ ; `string'
+  0007a	e8 00 00 00 00	 call	 _strlen
+  0007f	03 f3		 add	 esi, ebx
+  00081	8d 44 30 04	 lea	 eax, DWORD PTR [eax+esi+4]
+  00085	50		 push	 eax
+  00086	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  0008c	8b d8		 mov	 ebx, eax
+
+; 112  : 	sprintf(text, "[%s]", "TLEN");
+
+  0008e	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_04CBAG@TLEN?$AA@ ; `string'
+  00093	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_04GKDJ@?$FL?$CFs?$FN?$AA@ ; `string'
+  00098	53		 push	 ebx
+  00099	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__sprintf
+
+; 113  : 	for (p=str,q=text+strlen(text); *p!='\0'; p++,q++) {
+
+  0009f	53		 push	 ebx
+  000a0	8b f7		 mov	 esi, edi
+  000a2	e8 00 00 00 00	 call	 _strlen
+  000a7	33 d2		 xor	 edx, edx
+  000a9	83 c4 18	 add	 esp, 24			; 00000018H
+  000ac	03 c3		 add	 eax, ebx
+  000ae	38 17		 cmp	 BYTE PTR [edi], dl
+  000b0	74 26		 je	 SHORT $L82996
+$L82994:
+
+; 114  : 		if (*p == '\r') {
+
+  000b2	8a 0e		 mov	 cl, BYTE PTR [esi]
+  000b4	80 f9 0d	 cmp	 cl, 13			; 0000000dH
+  000b7	75 09		 jne	 SHORT $L82997
+
+; 115  : 			*q = '\\';
+
+  000b9	c6 00 5c	 mov	 BYTE PTR [eax], 92	; 0000005cH
+  000bc	40		 inc	 eax
+
+; 116  : 			*(q+1) = 'r';
+
+  000bd	c6 00 72	 mov	 BYTE PTR [eax], 114	; 00000072H
+
+; 117  : 			q++;
+; 118  : 		}
+; 119  : 		else if (*p == '\n') {
+
+  000c0	eb 10		 jmp	 SHORT $L82995
+$L82997:
+  000c2	80 f9 0a	 cmp	 cl, 10			; 0000000aH
+  000c5	75 09		 jne	 SHORT $L82999
+
+; 120  : 			*q = '\\';
+
+  000c7	c6 00 5c	 mov	 BYTE PTR [eax], 92	; 0000005cH
+  000ca	40		 inc	 eax
+
+; 121  : 			*(q+1) = 'n';
+
+  000cb	c6 00 6e	 mov	 BYTE PTR [eax], 110	; 0000006eH
+
+; 122  : 			q++;
+; 123  : 		}
+; 124  : 		else
+
+  000ce	eb 02		 jmp	 SHORT $L82995
+$L82999:
+
+; 125  : 			*q = *p;
+
+  000d0	88 08		 mov	 BYTE PTR [eax], cl
+$L82995:
+
+; 113  : 	for (p=str,q=text+strlen(text); *p!='\0'; p++,q++) {
+
+  000d2	46		 inc	 esi
+  000d3	40		 inc	 eax
+  000d4	38 16		 cmp	 BYTE PTR [esi], dl
+  000d6	75 da		 jne	 SHORT $L82994
+$L82996:
+
+; 126  : 	}
+; 127  : 	*q = '\n';
+
+  000d8	c6 00 0a	 mov	 BYTE PTR [eax], 10	; 0000000aH
+
+; 128  : 	*(q+1) = '\0';
+
+  000db	88 50 01	 mov	 BYTE PTR [eax+1], dl
+
+; 129  : 	if (proto->hNetlibUser!=NULL) {
+
+  000de	8b 45 08	 mov	 eax, DWORD PTR _proto$[ebp]
+  000e1	8b 80 c0 00 00
+	00		 mov	 eax, DWORD PTR [eax+192]
+  000e7	3b c2		 cmp	 eax, edx
+  000e9	74 12		 je	 SHORT $L83002
+
+; 130  : 		CallService(MS_NETLIB_LOG, (WPARAM) proto->hNetlibUser, (LPARAM) text);
+
+  000eb	53		 push	 ebx
+  000ec	50		 push	 eax
+  000ed	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  000f2	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0L@CMGK@Netlib?1Log?$AA@ ; `string'
+  000f7	ff 50 24	 call	 DWORD PTR [eax+36]
+  000fa	83 c4 0c	 add	 esp, 12			; 0000000cH
+$L83002:
+
+; 131  : 	}
+; 132  : 	//OutputDebugString(text);
+; 133  : 	mir_free(text);
+
+  000fd	53		 push	 ebx
+  000fe	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+
+; 134  : 	mir_free(str);
+
+  00104	57		 push	 edi
+  00105	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  0010b	59		 pop	 ecx
+  0010c	59		 pop	 ecx
+  0010d	5f		 pop	 edi
+  0010e	5e		 pop	 esi
+  0010f	5b		 pop	 ebx
+
+; 135  : #endif
+; 136  : }
+
+  00110	c9		 leave
+  00111	c3		 ret	 0
+_JabberLog ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_07PCFF@SEND?3?$CFs?$AA@			; `string'
+PUBLIC	_JabberSend
+EXTRN	_JabberWsSend:NEAR
+EXTRN	_JabberWsSendAES:NEAR
+EXTRN	_mutex:BYTE
+;	COMDAT ??_C@_07PCFF@SEND?3?$CFs?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_util.c
+_DATA	SEGMENT
+??_C@_07PCFF@SEND?3?$CFs?$AA@ DB 'SEND:%s', 00H		; `string'
+_DATA	ENDS
+;	COMDAT _JabberSend
+_TEXT	SEGMENT
+_proto$ = 8
+_fmt$ = 12
+_size$ = -4
+_result$ = -8
+_JabberSend PROC NEAR					; COMDAT
+
+; 140  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	51		 push	 ecx
+  00004	51		 push	 ecx
+
+; 141  : 	char *str;
+; 142  : 	int size;
+; 143  : 	va_list vararg;
+; 144  : 	int result = 0;
+
+  00005	83 65 f8 00	 and	 DWORD PTR _result$[ebp], 0
+  00009	53		 push	 ebx
+  0000a	56		 push	 esi
+  0000b	57		 push	 edi
+
+; 145  : 
+; 146  : 	EnterCriticalSection(&mutex);
+
+  0000c	68 00 00 00 00	 push	 OFFSET FLAT:_mutex
+  00011	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__EnterCriticalSection@4
+
+; 147  : 
+; 148  : 	va_start(vararg,fmt);
+; 149  : 	size = 512;
+
+  00017	be 00 02 00 00	 mov	 esi, 512		; 00000200H
+
+; 150  : 	str = (char *) mir_alloc(size);
+
+  0001c	56		 push	 esi
+  0001d	89 75 fc	 mov	 DWORD PTR _size$[ebp], esi
+  00020	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00026	8b d8		 mov	 ebx, eax
+
+; 151  : 	while (_vsnprintf(str, size, fmt, vararg) == -1) {
+
+  00028	8d 45 10	 lea	 eax, DWORD PTR _fmt$[ebp+4]
+  0002b	8b 3d 00 00 00
+	00		 mov	 edi, DWORD PTR __imp___vsnprintf
+  00031	50		 push	 eax
+  00032	ff 75 0c	 push	 DWORD PTR _fmt$[ebp]
+  00035	56		 push	 esi
+  00036	53		 push	 ebx
+  00037	ff d7		 call	 edi
+  00039	83 c4 14	 add	 esp, 20			; 00000014H
+$L83728:
+  0003c	83 f8 ff	 cmp	 eax, -1
+  0003f	75 21		 jne	 SHORT $L83020
+
+; 152  : 		size += 512;
+
+  00041	01 75 fc	 add	 DWORD PTR _size$[ebp], esi
+
+; 153  : 		str = (char *) mir_realloc(str, size);
+
+  00044	ff 75 fc	 push	 DWORD PTR _size$[ebp]
+  00047	53		 push	 ebx
+  00048	ff 15 08 00 00
+	00		 call	 DWORD PTR _mmi+8
+  0004e	8b d8		 mov	 ebx, eax
+  00050	8d 45 10	 lea	 eax, DWORD PTR _fmt$[ebp+4]
+  00053	50		 push	 eax
+  00054	ff 75 0c	 push	 DWORD PTR _fmt$[ebp]
+  00057	ff 75 fc	 push	 DWORD PTR _size$[ebp]
+  0005a	53		 push	 ebx
+  0005b	ff d7		 call	 edi
+  0005d	83 c4 18	 add	 esp, 24			; 00000018H
+  00060	eb da		 jmp	 SHORT $L83728
+$L83020:
+
+; 154  : 	}
+; 155  : 	va_end(vararg);
+; 156  : 
+; 157  : 	JabberLog(proto, "SEND:%s", str);
+
+  00062	8b 75 08	 mov	 esi, DWORD PTR _proto$[ebp]
+  00065	53		 push	 ebx
+  00066	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_07PCFF@SEND?3?$CFs?$AA@ ; `string'
+  0006b	56		 push	 esi
+  0006c	e8 00 00 00 00	 call	 _JabberLog
+
+; 158  : 	size = strlen(str);
+
+  00071	53		 push	 ebx
+  00072	e8 00 00 00 00	 call	 _strlen
+
+; 159  :     if (proto->threadData != NULL) {
+
+  00077	8b 8e e0 00 00
+	00		 mov	 ecx, DWORD PTR [esi+224]
+  0007d	83 c4 10	 add	 esp, 16			; 00000010H
+  00080	85 c9		 test	 ecx, ecx
+  00082	74 32		 je	 SHORT $L83027
+
+; 160  :         if (proto->threadData->useAES) {
+
+  00084	83 b9 00 07 00
+	00 00		 cmp	 DWORD PTR [ecx+1792], 0
+  0008b	74 1b		 je	 SHORT $L83026
+
+; 161  :             result = JabberWsSendAES(proto, str, size, &proto->threadData->aes_out_context, proto->threadData->aes_out_iv);
+
+  0008d	8d 91 f0 06 00
+	00		 lea	 edx, DWORD PTR [ecx+1776]
+  00093	81 c1 dc 04 00
+	00		 add	 ecx, 1244		; 000004dcH
+  00099	52		 push	 edx
+  0009a	51		 push	 ecx
+  0009b	50		 push	 eax
+  0009c	53		 push	 ebx
+  0009d	56		 push	 esi
+  0009e	e8 00 00 00 00	 call	 _JabberWsSendAES
+  000a3	83 c4 14	 add	 esp, 20			; 00000014H
+
+; 162  :         } else {
+
+  000a6	eb 0b		 jmp	 SHORT $L83729
+$L83026:
+
+; 163  :             result = JabberWsSend(proto, str, size);
+
+  000a8	50		 push	 eax
+  000a9	53		 push	 ebx
+  000aa	56		 push	 esi
+  000ab	e8 00 00 00 00	 call	 _JabberWsSend
+  000b0	83 c4 0c	 add	 esp, 12			; 0000000cH
+$L83729:
+  000b3	89 45 f8	 mov	 DWORD PTR _result$[ebp], eax
+$L83027:
+
+; 164  :         }
+; 165  :     }
+; 166  : 	LeaveCriticalSection(&mutex);
+
+  000b6	68 00 00 00 00	 push	 OFFSET FLAT:_mutex
+  000bb	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__LeaveCriticalSection@4
+
+; 167  : 
+; 168  : 	mir_free(str);
+
+  000c1	53		 push	 ebx
+  000c2	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+
+; 169  : 	return result;
+
+  000c8	8b 45 f8	 mov	 eax, DWORD PTR _result$[ebp]
+  000cb	59		 pop	 ecx
+  000cc	5f		 pop	 edi
+  000cd	5e		 pop	 esi
+  000ce	5b		 pop	 ebx
+
+; 170  : }
+
+  000cf	c9		 leave
+  000d0	c3		 ret	 0
+_JabberSend ENDP
+_TEXT	ENDS
+PUBLIC	_JabberResourceFromJID
+EXTRN	__imp__strchr:NEAR
+EXTRN	__imp__strncpy:NEAR
+;	COMDAT _JabberResourceFromJID
+_TEXT	SEGMENT
+_jid$ = 8
+_nick$ = 8
+_JabberResourceFromJID PROC NEAR			; COMDAT
+
+; 174  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	53		 push	 ebx
+  00004	56		 push	 esi
+
+; 175  : 	char *p;
+; 176  : 	char *nick;
+; 177  : 
+; 178  : 	p=strchr(jid, '/');
+
+  00005	8b 75 08	 mov	 esi, DWORD PTR _jid$[ebp]
+  00008	57		 push	 edi
+  00009	6a 2f		 push	 47			; 0000002fH
+  0000b	56		 push	 esi
+  0000c	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__strchr
+  00012	59		 pop	 ecx
+
+; 179  : 	if (p != NULL && p[1]!='\0') {
+
+  00013	85 c0		 test	 eax, eax
+  00015	59		 pop	 ecx
+  00016	74 50		 je	 SHORT $L83034
+  00018	80 78 01 00	 cmp	 BYTE PTR [eax+1], 0
+  0001c	8d 78 01	 lea	 edi, DWORD PTR [eax+1]
+  0001f	74 47		 je	 SHORT $L83034
+
+; 180  : 		p++;
+; 181  : 		if ((nick=(char *) mir_alloc(1+strlen(jid)-(p-jid))) != NULL) {
+
+  00021	8b de		 mov	 ebx, esi
+  00023	56		 push	 esi
+  00024	2b df		 sub	 ebx, edi
+  00026	e8 00 00 00 00	 call	 _strlen
+  0002b	8d 44 18 01	 lea	 eax, DWORD PTR [eax+ebx+1]
+  0002f	50		 push	 eax
+  00030	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00036	59		 pop	 ecx
+  00037	89 45 08	 mov	 DWORD PTR _nick$[ebp], eax
+  0003a	85 c0		 test	 eax, eax
+  0003c	59		 pop	 ecx
+  0003d	74 34		 je	 SHORT $L83038
+
+; 182  : 			strncpy(nick, p, strlen(jid)-(p-jid));
+
+  0003f	56		 push	 esi
+  00040	e8 00 00 00 00	 call	 _strlen
+  00045	03 c3		 add	 eax, ebx
+  00047	50		 push	 eax
+  00048	57		 push	 edi
+  00049	ff 75 08	 push	 DWORD PTR _nick$[ebp]
+  0004c	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__strncpy
+
+; 183  : 			nick[strlen(jid)-(p-jid)] = '\0';
+
+  00052	56		 push	 esi
+  00053	e8 00 00 00 00	 call	 _strlen
+  00058	8b 4d 08	 mov	 ecx, DWORD PTR _nick$[ebp]
+  0005b	03 f0		 add	 esi, eax
+  0005d	2b cf		 sub	 ecx, edi
+  0005f	83 c4 14	 add	 esp, 20			; 00000014H
+  00062	80 24 31 00	 and	 BYTE PTR [ecx+esi], 0
+
+; 184  : 		}
+; 185  : 	}
+; 186  : 	else {
+
+  00066	eb 0b		 jmp	 SHORT $L83038
+$L83034:
+
+; 187  : 		nick = mir_strdup(jid);
+
+  00068	56		 push	 esi
+  00069	ff 15 14 00 00
+	00		 call	 DWORD PTR _mmi+20
+  0006f	59		 pop	 ecx
+  00070	89 45 08	 mov	 DWORD PTR _nick$[ebp], eax
+$L83038:
+
+; 188  : 	}
+; 189  : 
+; 190  : 	return nick;
+
+  00073	8b 45 08	 mov	 eax, DWORD PTR _nick$[ebp]
+  00076	5f		 pop	 edi
+  00077	5e		 pop	 esi
+  00078	5b		 pop	 ebx
+
+; 191  : }
+
+  00079	5d		 pop	 ebp
+  0007a	c3		 ret	 0
+_JabberResourceFromJID ENDP
+_TEXT	ENDS
+PUBLIC	_JabberNickFromJID
+;	COMDAT _JabberNickFromJID
+_TEXT	SEGMENT
+_jid$ = 8
+_JabberNickFromJID PROC NEAR				; COMDAT
+
+; 194  : {
+
+  00000	53		 push	 ebx
+
+; 195  : 	char *p;
+; 196  : 	char *nick;
+; 197  : 
+; 198  : 	if ((p=strchr(jid, '@')) == NULL)
+
+  00001	8b 5c 24 08	 mov	 ebx, DWORD PTR _jid$[esp]
+  00005	55		 push	 ebp
+  00006	56		 push	 esi
+  00007	57		 push	 edi
+  00008	8b 3d 00 00 00
+	00		 mov	 edi, DWORD PTR __imp__strchr
+  0000e	6a 40		 push	 64			; 00000040H
+  00010	53		 push	 ebx
+  00011	ff d7		 call	 edi
+  00013	8b f0		 mov	 esi, eax
+  00015	59		 pop	 ecx
+  00016	85 f6		 test	 esi, esi
+  00018	59		 pop	 ecx
+  00019	75 0d		 jne	 SHORT $L83732
+
+; 199  : 		p = strchr(jid, '/');
+
+  0001b	6a 2f		 push	 47			; 0000002fH
+  0001d	53		 push	 ebx
+  0001e	ff d7		 call	 edi
+  00020	8b f0		 mov	 esi, eax
+  00022	59		 pop	 ecx
+
+; 200  : 	if (p != NULL) {
+
+  00023	85 f6		 test	 esi, esi
+  00025	59		 pop	 ecx
+  00026	74 2b		 je	 SHORT $L83047
+$L83732:
+
+; 201  : 		if ((nick=(char *) mir_alloc((p-jid)+1)) != NULL) {
+
+  00028	8b fe		 mov	 edi, esi
+  0002a	2b fb		 sub	 edi, ebx
+  0002c	8d 47 01	 lea	 eax, DWORD PTR [edi+1]
+  0002f	50		 push	 eax
+  00030	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00036	8b e8		 mov	 ebp, eax
+  00038	59		 pop	 ecx
+  00039	85 ed		 test	 ebp, ebp
+  0003b	74 20		 je	 SHORT $L83051
+
+; 202  : 			strncpy(nick, jid, p-jid);
+
+  0003d	57		 push	 edi
+  0003e	53		 push	 ebx
+  0003f	55		 push	 ebp
+  00040	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__strncpy
+
+; 203  : 			nick[p-jid] = '\0';
+
+  00046	8b c5		 mov	 eax, ebp
+  00048	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0004b	2b c3		 sub	 eax, ebx
+  0004d	80 24 30 00	 and	 BYTE PTR [eax+esi], 0
+
+; 204  : 		}
+; 205  : 	}
+; 206  : 	else {
+
+  00051	eb 0a		 jmp	 SHORT $L83051
+$L83047:
+
+; 207  : 		nick = mir_strdup(jid);
+
+  00053	53		 push	 ebx
+  00054	ff 15 14 00 00
+	00		 call	 DWORD PTR _mmi+20
+  0005a	59		 pop	 ecx
+  0005b	8b e8		 mov	 ebp, eax
+$L83051:
+  0005d	5f		 pop	 edi
+
+; 208  : 	}
+; 209  : 
+; 210  : 	return nick;
+
+  0005e	8b c5		 mov	 eax, ebp
+  00060	5e		 pop	 esi
+  00061	5d		 pop	 ebp
+  00062	5b		 pop	 ebx
+
+; 211  : }
+
+  00063	c3		 ret	 0
+_JabberNickFromJID ENDP
+_TEXT	ENDS
+PUBLIC	_JabberLoginFromJID
+;	COMDAT _JabberLoginFromJID
+_TEXT	SEGMENT
+_jid$ = 8
+_JabberLoginFromJID PROC NEAR				; COMDAT
+
+; 214  : {
+
+  00000	53		 push	 ebx
+  00001	55		 push	 ebp
+
+; 215  : 	char *p;
+; 216  : 	char *nick;
+; 217  : 
+; 218  : 	p = strchr(jid, '/');
+
+  00002	8b 6c 24 0c	 mov	 ebp, DWORD PTR _jid$[esp+4]
+  00006	56		 push	 esi
+  00007	57		 push	 edi
+  00008	6a 2f		 push	 47			; 0000002fH
+  0000a	55		 push	 ebp
+  0000b	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__strchr
+  00011	8b d8		 mov	 ebx, eax
+  00013	59		 pop	 ecx
+
+; 219  : 	if (p != NULL) {
+
+  00014	85 db		 test	 ebx, ebx
+  00016	59		 pop	 ecx
+  00017	74 2b		 je	 SHORT $L83058
+
+; 220  : 		if ((nick=(char *) mir_alloc((p-jid)+1)) != NULL) {
+
+  00019	8b f3		 mov	 esi, ebx
+  0001b	2b f5		 sub	 esi, ebp
+  0001d	8d 46 01	 lea	 eax, DWORD PTR [esi+1]
+  00020	50		 push	 eax
+  00021	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00027	8b f8		 mov	 edi, eax
+  00029	59		 pop	 ecx
+  0002a	85 ff		 test	 edi, edi
+  0002c	74 20		 je	 SHORT $L83062
+
+; 221  : 			strncpy(nick, jid, p-jid);
+
+  0002e	56		 push	 esi
+  0002f	55		 push	 ebp
+  00030	57		 push	 edi
+  00031	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__strncpy
+
+; 222  : 			nick[p-jid] = '\0';
+
+  00037	8b c7		 mov	 eax, edi
+  00039	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0003c	2b c5		 sub	 eax, ebp
+  0003e	80 24 18 00	 and	 BYTE PTR [eax+ebx], 0
+
+; 223  : 		}
+; 224  : 	}
+; 225  : 	else {
+
+  00042	eb 0a		 jmp	 SHORT $L83062
+$L83058:
+
+; 226  : 		nick = mir_strdup(jid);
+
+  00044	55		 push	 ebp
+  00045	ff 15 14 00 00
+	00		 call	 DWORD PTR _mmi+20
+  0004b	59		 pop	 ecx
+  0004c	8b f8		 mov	 edi, eax
+$L83062:
+
+; 227  : 	}
+; 228  : 	return nick;
+
+  0004e	8b c7		 mov	 eax, edi
+  00050	5f		 pop	 edi
+  00051	5e		 pop	 esi
+  00052	5d		 pop	 ebp
+  00053	5b		 pop	 ebx
+
+; 229  : }
+
+  00054	c3		 ret	 0
+_JabberLoginFromJID ENDP
+_TEXT	ENDS
+PUBLIC	_JabberLocalNickFromJID
+PUBLIC	_JabberTextDecode
+;	COMDAT _JabberLocalNickFromJID
+_TEXT	SEGMENT
+_jid$ = 8
+_JabberLocalNickFromJID PROC NEAR			; COMDAT
+
+; 232  : {
+
+  00000	56		 push	 esi
+  00001	57		 push	 edi
+
+; 233  : 	char *p;
+; 234  : 	char *localNick;
+; 235  : 
+; 236  : 	p = JabberNickFromJID(jid);
+
+  00002	ff 74 24 0c	 push	 DWORD PTR _jid$[esp+4]
+  00006	e8 00 00 00 00	 call	 _JabberNickFromJID
+  0000b	8b f0		 mov	 esi, eax
+
+; 237  : 	localNick = JabberTextDecode(p);
+
+  0000d	56		 push	 esi
+  0000e	e8 00 00 00 00	 call	 _JabberTextDecode
+
+; 238  : 	mir_free(p);
+
+  00013	56		 push	 esi
+  00014	8b f8		 mov	 edi, eax
+  00016	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  0001c	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 239  : 	return localNick;
+
+  0001f	8b c7		 mov	 eax, edi
+  00021	5f		 pop	 edi
+  00022	5e		 pop	 esi
+
+; 240  : }
+
+  00023	c3		 ret	 0
+_JabberLocalNickFromJID ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_04OBKB@?$CF02x?$AA@			; `string'
+PUBLIC	_JabberSha1
+EXTRN	_sha1i:BYTE
+;	COMDAT ??_C@_04OBKB@?$CF02x?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_util.c
+_DATA	SEGMENT
+??_C@_04OBKB@?$CF02x?$AA@ DB '%02x', 00H		; `string'
+_DATA	ENDS
+;	COMDAT _JabberSha1
+_TEXT	SEGMENT
+_str$ = 8
+_sha$ = -372
+_digest$ = -20
+_JabberSha1 PROC NEAR					; COMDAT
+
+; 243  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	81 ec 74 01 00
+	00		 sub	 esp, 372		; 00000174H
+  00009	53		 push	 ebx
+  0000a	56		 push	 esi
+
+; 244  : 	mir_sha1_ctx sha;
+; 245  : 	mir_sha1_byte_t digest[20];
+; 246  : 	char* result;
+; 247  : 	int i;
+; 248  : 
+; 249  : 	if ( str == NULL )
+
+  0000b	33 f6		 xor	 esi, esi
+  0000d	39 75 08	 cmp	 DWORD PTR _str$[ebp], esi
+
+; 250  : 		return NULL;
+
+  00010	74 48		 je	 SHORT $L83741
+
+; 251  : 
+; 252  : 	mir_sha1_init( &sha );
+
+  00012	8d 85 8c fe ff
+	ff		 lea	 eax, DWORD PTR _sha$[ebp]
+  00018	50		 push	 eax
+  00019	ff 15 04 00 00
+	00		 call	 DWORD PTR _sha1i+4
+
+; 253  : 	mir_sha1_append( &sha, (mir_sha1_byte_t* )str, strlen( str ));
+
+  0001f	ff 75 08	 push	 DWORD PTR _str$[ebp]
+  00022	e8 00 00 00 00	 call	 _strlen
+  00027	50		 push	 eax
+  00028	8d 85 8c fe ff
+	ff		 lea	 eax, DWORD PTR _sha$[ebp]
+  0002e	ff 75 08	 push	 DWORD PTR _str$[ebp]
+  00031	50		 push	 eax
+  00032	ff 15 08 00 00
+	00		 call	 DWORD PTR _sha1i+8
+
+; 254  : 	mir_sha1_finish( &sha, digest );
+
+  00038	8d 45 ec	 lea	 eax, DWORD PTR _digest$[ebp]
+  0003b	50		 push	 eax
+  0003c	8d 85 8c fe ff
+	ff		 lea	 eax, DWORD PTR _sha$[ebp]
+  00042	50		 push	 eax
+  00043	ff 15 0c 00 00
+	00		 call	 DWORD PTR _sha1i+12
+
+; 255  : 	if ((result=(char *)mir_alloc(41)) == NULL)
+
+  00049	6a 29		 push	 41			; 00000029H
+  0004b	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00051	8b d8		 mov	 ebx, eax
+  00053	83 c4 20	 add	 esp, 32			; 00000020H
+  00056	3b de		 cmp	 ebx, esi
+  00058	75 04		 jne	 SHORT $L83081
+$L83741:
+
+; 256  : 		return NULL;
+
+  0005a	33 c0		 xor	 eax, eax
+  0005c	eb 23		 jmp	 SHORT $L83070
+$L83081:
+  0005e	57		 push	 edi
+
+; 257  : 	for (i=0; i<20; i++)
+
+  0005f	8b fb		 mov	 edi, ebx
+$L83083:
+
+; 258  : 		sprintf(result+(i<<1), "%02x", digest[i]);
+
+  00061	0f b6 44 35 ec	 movzx	 eax, BYTE PTR _digest$[ebp+esi]
+  00066	50		 push	 eax
+  00067	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_04OBKB@?$CF02x?$AA@ ; `string'
+  0006c	57		 push	 edi
+  0006d	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__sprintf
+  00073	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00076	46		 inc	 esi
+  00077	47		 inc	 edi
+  00078	47		 inc	 edi
+  00079	83 fe 14	 cmp	 esi, 20			; 00000014H
+  0007c	7c e3		 jl	 SHORT $L83083
+
+; 259  : 	return result;
+
+  0007e	8b c3		 mov	 eax, ebx
+  00080	5f		 pop	 edi
+$L83070:
+  00081	5e		 pop	 esi
+  00082	5b		 pop	 ebx
+
+; 260  : }
+
+  00083	c9		 leave
+  00084	c3		 ret	 0
+_JabberSha1 ENDP
+_TEXT	ENDS
+PUBLIC	_TlenSha1
+;	COMDAT _TlenSha1
+_TEXT	SEGMENT
+_str$ = 8
+_len$ = 12
+_sha$ = -372
+_digest$ = -20
+_TlenSha1 PROC NEAR					; COMDAT
+
+; 263  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	81 ec 74 01 00
+	00		 sub	 esp, 372		; 00000174H
+
+; 264  : 	mir_sha1_ctx sha;
+; 265  : 	mir_sha1_byte_t digest[20];
+; 266  : 	char* result;
+; 267  : 	int i;
+; 268  : 
+; 269  : 	if ( str == NULL )
+
+  00009	83 7d 08 00	 cmp	 DWORD PTR _str$[ebp], 0
+
+; 270  : 		return NULL;
+
+  0000d	74 40		 je	 SHORT $L83745
+
+; 271  : 
+; 272  : 	mir_sha1_init( &sha );
+
+  0000f	8d 85 8c fe ff
+	ff		 lea	 eax, DWORD PTR _sha$[ebp]
+  00015	50		 push	 eax
+  00016	ff 15 04 00 00
+	00		 call	 DWORD PTR _sha1i+4
+
+; 273  : 	mir_sha1_append( &sha, (mir_sha1_byte_t* )str, len);
+
+  0001c	ff 75 0c	 push	 DWORD PTR _len$[ebp]
+  0001f	8d 85 8c fe ff
+	ff		 lea	 eax, DWORD PTR _sha$[ebp]
+  00025	ff 75 08	 push	 DWORD PTR _str$[ebp]
+  00028	50		 push	 eax
+  00029	ff 15 08 00 00
+	00		 call	 DWORD PTR _sha1i+8
+
+; 274  : 	mir_sha1_finish( &sha, digest );
+
+  0002f	8d 45 ec	 lea	 eax, DWORD PTR _digest$[ebp]
+  00032	50		 push	 eax
+  00033	8d 85 8c fe ff
+	ff		 lea	 eax, DWORD PTR _sha$[ebp]
+  00039	50		 push	 eax
+  0003a	ff 15 0c 00 00
+	00		 call	 DWORD PTR _sha1i+12
+
+; 275  : 	if (( result=( char* )mir_alloc( 20 )) == NULL )
+
+  00040	6a 14		 push	 20			; 00000014H
+  00042	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00048	83 c4 1c	 add	 esp, 28			; 0000001cH
+  0004b	85 c0		 test	 eax, eax
+  0004d	75 04		 jne	 SHORT $L83102
+$L83745:
+
+; 276  : 		return NULL;
+
+  0004f	33 c0		 xor	 eax, eax
+
+; 279  : 	return result;
+; 280  : }
+
+  00051	c9		 leave
+  00052	c3		 ret	 0
+$L83102:
+  00053	56		 push	 esi
+
+; 277  : 	for (i=0; i<20; i++)
+
+  00054	33 c9		 xor	 ecx, ecx
+$L83104:
+
+; 278  : 		result[i]=digest[4*(i>>2)+(3-(i&0x3))];
+
+  00056	8b d1		 mov	 edx, ecx
+  00058	8b f1		 mov	 esi, ecx
+  0005a	c1 fa 02	 sar	 edx, 2
+  0005d	c1 e2 02	 shl	 edx, 2
+  00060	83 e6 03	 and	 esi, 3
+  00063	2b d6		 sub	 edx, esi
+  00065	8a 54 15 ef	 mov	 dl, BYTE PTR _digest$[ebp+edx+3]
+  00069	88 14 01	 mov	 BYTE PTR [ecx+eax], dl
+  0006c	41		 inc	 ecx
+  0006d	83 f9 14	 cmp	 ecx, 20			; 00000014H
+  00070	7c e4		 jl	 SHORT $L83104
+  00072	5e		 pop	 esi
+
+; 279  : 	return result;
+; 280  : }
+
+  00073	c9		 leave
+  00074	c3		 ret	 0
+_TlenSha1 ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_08GCIO@?$CF08x?$CF08x?$AA@		; `string'
+PUBLIC	_TlenPasswordHash
+;	COMDAT ??_C@_08GCIO@?$CF08x?$CF08x?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_util.c
+_DATA	SEGMENT
+??_C@_08GCIO@?$CF08x?$CF08x?$AA@ DB '%08x%08x', 00H	; `string'
+_DATA	ENDS
+;	COMDAT _TlenPasswordHash
+_TEXT	SEGMENT
+_str$ = 8
+_sum$ = -4
+_TlenPasswordHash PROC NEAR				; COMDAT
+
+; 283  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	51		 push	 ecx
+
+; 284  : 	int magic1 = 0x50305735, magic2 = 0x12345671, sum = 7;
+; 285  : 	char *p, *res;
+; 286  : 
+; 287  : 	if (str == NULL) return NULL;
+
+  00004	8b 45 08	 mov	 eax, DWORD PTR _str$[ebp]
+  00007	56		 push	 esi
+  00008	57		 push	 edi
+  00009	be 35 57 30 50	 mov	 esi, 1345345333		; 50305735H
+  0000e	85 c0		 test	 eax, eax
+  00010	bf 71 56 34 12	 mov	 edi, 305419889		; 12345671H
+  00015	c7 45 fc 07 00
+	00 00		 mov	 DWORD PTR _sum$[ebp], 7
+  0001c	74 61		 je	 SHORT $L83109
+$L83116:
+
+; 288  : 	for (p=(char *)str; *p!='\0'; p++) {
+
+  0001e	8b c8		 mov	 ecx, eax
+  00020	8a 00		 mov	 al, BYTE PTR [eax]
+  00022	53		 push	 ebx
+$L83749:
+  00023	84 c0		 test	 al, al
+  00025	74 31		 je	 SHORT $L83121
+
+; 289  : 		if (*p!=' ' && *p!='\t') {
+
+  00027	3c 20		 cmp	 al, 32			; 00000020H
+  00029	74 27		 je	 SHORT $L83120
+  0002b	3c 09		 cmp	 al, 9
+  0002d	74 23		 je	 SHORT $L83120
+
+; 290  : 			magic1 ^= (((magic1 & 0x3f) + sum) * ((char) *p)) + (magic1 << 8);
+
+  0002f	8b d6		 mov	 edx, esi
+  00031	8b de		 mov	 ebx, esi
+  00033	83 e2 3f	 and	 edx, 63			; 0000003fH
+  00036	03 55 fc	 add	 edx, DWORD PTR _sum$[ebp]
+  00039	0f be c0	 movsx	 eax, al
+  0003c	0f af d0	 imul	 edx, eax
+  0003f	c1 e3 08	 shl	 ebx, 8
+  00042	03 d3		 add	 edx, ebx
+  00044	33 f2		 xor	 esi, edx
+
+; 291  : 			magic2 += (magic2 << 8) ^ magic1;
+
+  00046	8b d7		 mov	 edx, edi
+  00048	c1 e2 08	 shl	 edx, 8
+  0004b	33 d6		 xor	 edx, esi
+  0004d	03 fa		 add	 edi, edx
+
+; 292  : 			sum += ((char) *p);
+
+  0004f	01 45 fc	 add	 DWORD PTR _sum$[ebp], eax
+$L83120:
+  00052	8a 41 01	 mov	 al, BYTE PTR [ecx+1]
+  00055	41		 inc	 ecx
+  00056	eb cb		 jmp	 SHORT $L83749
+$L83121:
+
+; 293  : 		}
+; 294  : 	}
+; 295  : 	magic1 &= 0x7fffffff;
+; 296  : 	magic2 &= 0x7fffffff;
+; 297  : 	res = (char *) mir_alloc(17);
+
+  00058	6a 11		 push	 17			; 00000011H
+  0005a	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00060	8b d8		 mov	 ebx, eax
+  00062	b8 ff ff ff 7f	 mov	 eax, 2147483647		; 7fffffffH
+  00067	23 f8		 and	 edi, eax
+  00069	23 f0		 and	 esi, eax
+
+; 298  : 	sprintf(res, "%08x%08x", magic1, magic2);
+
+  0006b	57		 push	 edi
+  0006c	56		 push	 esi
+  0006d	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_08GCIO@?$CF08x?$CF08x?$AA@ ; `string'
+  00072	53		 push	 ebx
+  00073	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__sprintf
+  00079	83 c4 14	 add	 esp, 20			; 00000014H
+
+; 299  : 	return res;
+
+  0007c	8b c3		 mov	 eax, ebx
+  0007e	5b		 pop	 ebx
+$L83109:
+  0007f	5f		 pop	 edi
+  00080	5e		 pop	 esi
+
+; 300  : }
+
+  00081	c9		 leave
+  00082	c3		 ret	 0
+_TlenPasswordHash ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_08CJMH@?$CF?$CG?$CL?3?8?$DM?$DO?$CC?$AA@	; `string'
+PUBLIC	??_C@_06OAHP@?$CF?$CF?$CF02X?$AA@		; `string'
+PUBLIC	_TlenUrlEncode
+;	COMDAT ??_C@_08CJMH@?$CF?$CG?$CL?3?8?$DM?$DO?$CC?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_util.c
+_DATA	SEGMENT
+??_C@_08CJMH@?$CF?$CG?$CL?3?8?$DM?$DO?$CC?$AA@ DB '%&+:''<>"', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_06OAHP@?$CF?$CF?$CF02X?$AA@
+_DATA	SEGMENT
+??_C@_06OAHP@?$CF?$CF?$CF02X?$AA@ DB '%%%02X', 00H	; `string'
+_DATA	ENDS
+;	COMDAT _TlenUrlEncode
+_TEXT	SEGMENT
+_str$ = 8
+_TlenUrlEncode PROC NEAR				; COMDAT
+
+; 303  : {
+
+  00000	56		 push	 esi
+
+; 304  : 	char *p, *q, *res;
+; 305  : 	unsigned char c;
+; 306  : 
+; 307  : 	if (str == NULL) return NULL;
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _str$[esp]
+  00005	85 f6		 test	 esi, esi
+  00007	75 04		 jne	 SHORT $L83135
+  00009	33 c0		 xor	 eax, eax
+  0000b	5e		 pop	 esi
+
+; 333  : }
+
+  0000c	c3		 ret	 0
+$L83135:
+  0000d	53		 push	 ebx
+  0000e	57		 push	 edi
+
+; 308  : 	res = (char *) mir_alloc(3*strlen(str) + 1);
+
+  0000f	56		 push	 esi
+  00010	e8 00 00 00 00	 call	 _strlen
+  00015	8d 44 40 01	 lea	 eax, DWORD PTR [eax+eax*2+1]
+  00019	50		 push	 eax
+  0001a	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00020	59		 pop	 ecx
+  00021	8b d8		 mov	 ebx, eax
+  00023	59		 pop	 ecx
+
+; 309  : 	for (p=(char *)str,q=res; *p!='\0'; p++,q++) {
+
+  00024	8b fb		 mov	 edi, ebx
+$L83753:
+  00026	80 3e 00	 cmp	 BYTE PTR [esi], 0
+  00029	0f 84 87 00 00
+	00		 je	 $L83141
+
+; 310  : 		if (*p == ' ') {
+
+  0002f	8a 06		 mov	 al, BYTE PTR [esi]
+  00031	3c 20		 cmp	 al, 32			; 00000020H
+  00033	75 05		 jne	 SHORT $L83754
+
+; 311  : 			*q = '+';
+
+  00035	c6 07 2b	 mov	 BYTE PTR [edi], 43	; 0000002bH
+
+; 312  : 		}
+; 313  : 		else if (*p<0x20 || *p>=0x7f || strchr("%&+:'<>\"", *p)!=NULL) {
+
+  00038	eb 75		 jmp	 SHORT $L83140
+$L83754:
+  0003a	7c 1f		 jl	 SHORT $L83146
+  0003c	3c 7f		 cmp	 al, 127			; 0000007fH
+  0003e	7d 1b		 jge	 SHORT $L83146
+  00040	0f be c0	 movsx	 eax, al
+  00043	50		 push	 eax
+  00044	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_08CJMH@?$CF?$CG?$CL?3?8?$DM?$DO?$CC?$AA@ ; `string'
+  00049	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__strchr
+  0004f	59		 pop	 ecx
+  00050	85 c0		 test	 eax, eax
+  00052	59		 pop	 ecx
+  00053	75 06		 jne	 SHORT $L83146
+
+; 326  : 		}
+; 327  : 		else {
+; 328  : 			*q = *p;
+
+  00055	8a 06		 mov	 al, BYTE PTR [esi]
+  00057	88 07		 mov	 BYTE PTR [edi], al
+  00059	eb 54		 jmp	 SHORT $L83140
+$L83146:
+
+; 314  : 			// Convert first from CP1252 to ISO8859-2
+; 315  : 			switch ((unsigned char) *p) {
+
+  0005b	8a 0e		 mov	 cl, BYTE PTR [esi]
+  0005d	0f b6 c1	 movzx	 eax, cl
+  00060	2d 8c 00 00 00	 sub	 eax, 140		; 0000008cH
+  00065	74 31		 je	 SHORT $L83155
+  00067	83 e8 03	 sub	 eax, 3
+  0006a	74 28		 je	 SHORT $L83157
+  0006c	83 e8 0d	 sub	 eax, 13			; 0000000dH
+  0006f	74 1f		 je	 SHORT $L83161
+  00071	83 e8 03	 sub	 eax, 3
+  00074	74 16		 je	 SHORT $L83163
+  00076	83 e8 06	 sub	 eax, 6
+  00079	74 0d		 je	 SHORT $L83153
+  0007b	83 e8 14	 sub	 eax, 20			; 00000014H
+  0007e	74 04		 je	 SHORT $L83159
+
+; 322  : 			default: c = (unsigned char) *p; break;
+
+  00080	8a c1		 mov	 al, cl
+  00082	eb 16		 jmp	 SHORT $L83150
+$L83159:
+
+; 319  : 			case 0xb9: c = (unsigned char) 0xb1; break;
+
+  00084	b0 b1		 mov	 al, 177			; 000000b1H
+  00086	eb 12		 jmp	 SHORT $L83150
+$L83153:
+
+; 316  : 			case 0xa5: c = (unsigned char) 0xa1; break;
+
+  00088	b0 a1		 mov	 al, 161			; 000000a1H
+  0008a	eb 0e		 jmp	 SHORT $L83150
+$L83163:
+
+; 321  : 			case 0x9f: c = (unsigned char) 0xbc; break;
+
+  0008c	b0 bc		 mov	 al, 188			; 000000bcH
+  0008e	eb 0a		 jmp	 SHORT $L83150
+$L83161:
+
+; 320  : 			case 0x9c: c = (unsigned char) 0xb6; break;
+
+  00090	b0 b6		 mov	 al, 182			; 000000b6H
+  00092	eb 06		 jmp	 SHORT $L83150
+$L83157:
+
+; 318  : 			case 0x8f: c = (unsigned char) 0xac; break;
+
+  00094	b0 ac		 mov	 al, 172			; 000000acH
+  00096	eb 02		 jmp	 SHORT $L83150
+$L83155:
+
+; 317  : 			case 0x8c: c = (unsigned char) 0xa6; break;
+
+  00098	b0 a6		 mov	 al, 166			; 000000a6H
+$L83150:
+
+; 323  : 			}
+; 324  : 			sprintf(q, "%%%02X", c);
+
+  0009a	0f b6 c0	 movzx	 eax, al
+  0009d	50		 push	 eax
+  0009e	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_06OAHP@?$CF?$CF?$CF02X?$AA@ ; `string'
+  000a3	57		 push	 edi
+  000a4	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__sprintf
+  000aa	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 325  : 			q += 2;
+
+  000ad	47		 inc	 edi
+  000ae	47		 inc	 edi
+$L83140:
+  000af	46		 inc	 esi
+  000b0	47		 inc	 edi
+  000b1	e9 70 ff ff ff	 jmp	 $L83753
+$L83141:
+
+; 329  : 		}
+; 330  : 	}
+; 331  : 	*q = '\0';
+
+  000b6	80 27 00	 and	 BYTE PTR [edi], 0
+
+; 332  : 	return res;
+
+  000b9	8b c3		 mov	 eax, ebx
+  000bb	5f		 pop	 edi
+  000bc	5b		 pop	 ebx
+  000bd	5e		 pop	 esi
+
+; 333  : }
+
+  000be	c3		 ret	 0
+_TlenUrlEncode ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_03MANP@?$CF2x?$AA@			; `string'
+PUBLIC	_TlenUrlDecode
+EXTRN	__imp___pctype:DWORD
+EXTRN	__imp___isctype:NEAR
+EXTRN	__imp____mb_cur_max:DWORD
+EXTRN	__imp__sscanf:NEAR
+;	COMDAT ??_C@_03MANP@?$CF2x?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_util.c
+_DATA	SEGMENT
+??_C@_03MANP@?$CF2x?$AA@ DB '%2x', 00H			; `string'
+_DATA	ENDS
+;	COMDAT _TlenUrlDecode
+_TEXT	SEGMENT
+_str$ = 8
+_code$ = -4
+_TlenUrlDecode PROC NEAR				; COMDAT
+
+; 336  : {
+
+  00000	51		 push	 ecx
+
+; 337  : 	char *p, *q;
+; 338  : 	unsigned int code;
+; 339  : 
+; 340  : 	if (str == NULL) return;
+
+  00001	8b 44 24 08	 mov	 eax, DWORD PTR _str$[esp]
+  00005	85 c0		 test	 eax, eax
+  00007	0f 84 2c 01 00
+	00		 je	 $L83171
+
+; 341  : 	for (p=q=str; *p!='\0'; p++,q++) {
+
+  0000d	80 38 00	 cmp	 BYTE PTR [eax], 0
+  00010	56		 push	 esi
+  00011	57		 push	 edi
+  00012	8b f8		 mov	 edi, eax
+  00014	8b f0		 mov	 esi, eax
+  00016	0f 84 18 01 00
+	00		 je	 $L83179
+  0001c	53		 push	 ebx
+  0001d	40		 inc	 eax
+  0001e	55		 push	 ebp
+  0001f	89 44 24 18	 mov	 DWORD PTR 8+[esp+16], eax
+  00023	bd 80 00 00 00	 mov	 ebp, 128		; 00000080H
+$L83177:
+
+; 342  : 		if (*p == '+') {
+
+  00028	8a 06		 mov	 al, BYTE PTR [esi]
+  0002a	3c 2b		 cmp	 al, 43			; 0000002bH
+  0002c	75 08		 jne	 SHORT $L83180
+
+; 343  : 			*q = ' ';
+
+  0002e	c6 07 20	 mov	 BYTE PTR [edi], 32	; 00000020H
+
+; 344  : 		}
+; 345  : 		else if (*p=='%' && *(p+1)!='\0' && isxdigit(*(p+1)) && *(p+2)!='\0' && isxdigit(*(p+2))) {
+
+  00031	e9 ed 00 00 00	 jmp	 $L83178
+$L83180:
+  00036	3c 25		 cmp	 al, 37			; 00000025H
+  00038	0f 85 e1 00 00
+	00		 jne	 $L83182
+  0003e	8b 44 24 18	 mov	 eax, DWORD PTR 8+[esp+16]
+  00042	8a 00		 mov	 al, BYTE PTR [eax]
+  00044	84 c0		 test	 al, al
+  00046	0f 84 d3 00 00
+	00		 je	 $L83182
+  0004c	8b 0d 00 00 00
+	00		 mov	 ecx, DWORD PTR __imp____mb_cur_max
+  00052	83 39 01	 cmp	 DWORD PTR [ecx], 1
+  00055	7e 0f		 jle	 SHORT $L83757
+  00057	0f be c0	 movsx	 eax, al
+  0005a	55		 push	 ebp
+  0005b	50		 push	 eax
+  0005c	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp___isctype
+  00062	59		 pop	 ecx
+  00063	59		 pop	 ecx
+  00064	eb 10		 jmp	 SHORT $L83758
+$L83757:
+  00066	8b 0d 00 00 00
+	00		 mov	 ecx, DWORD PTR __imp___pctype
+  0006c	0f be c0	 movsx	 eax, al
+  0006f	8b 09		 mov	 ecx, DWORD PTR [ecx]
+  00071	8a 04 41	 mov	 al, BYTE PTR [ecx+eax*2]
+  00074	23 c5		 and	 eax, ebp
+$L83758:
+  00076	85 c0		 test	 eax, eax
+  00078	0f 84 a1 00 00
+	00		 je	 $L83182
+  0007e	8a 46 02	 mov	 al, BYTE PTR [esi+2]
+  00081	8d 5e 02	 lea	 ebx, DWORD PTR [esi+2]
+  00084	84 c0		 test	 al, al
+  00086	0f 84 93 00 00
+	00		 je	 $L83182
+  0008c	8b 0d 00 00 00
+	00		 mov	 ecx, DWORD PTR __imp____mb_cur_max
+  00092	83 39 01	 cmp	 DWORD PTR [ecx], 1
+  00095	7e 0f		 jle	 SHORT $L83759
+  00097	0f be c0	 movsx	 eax, al
+  0009a	55		 push	 ebp
+  0009b	50		 push	 eax
+  0009c	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp___isctype
+  000a2	59		 pop	 ecx
+  000a3	59		 pop	 ecx
+  000a4	eb 10		 jmp	 SHORT $L83760
+$L83759:
+  000a6	8b 0d 00 00 00
+	00		 mov	 ecx, DWORD PTR __imp___pctype
+  000ac	0f be c0	 movsx	 eax, al
+  000af	8b 09		 mov	 ecx, DWORD PTR [ecx]
+  000b1	8a 04 41	 mov	 al, BYTE PTR [ecx+eax*2]
+  000b4	23 c5		 and	 eax, ebp
+$L83760:
+  000b6	85 c0		 test	 eax, eax
+  000b8	74 65		 je	 SHORT $L83182
+
+; 346  : 			sscanf(p+1, "%2x", &code);
+
+  000ba	8d 44 24 10	 lea	 eax, DWORD PTR _code$[esp+20]
+  000be	50		 push	 eax
+  000bf	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_03MANP@?$CF2x?$AA@ ; `string'
+  000c4	ff 74 24 20	 push	 DWORD PTR 8+[esp+24]
+  000c8	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__sscanf
+
+; 347  : 			*q = (char) code;
+
+  000ce	8a 44 24 1c	 mov	 al, BYTE PTR _code$[esp+32]
+  000d2	83 c4 0c	 add	 esp, 12			; 0000000cH
+  000d5	88 07		 mov	 BYTE PTR [edi], al
+
+; 348  : 			// Convert from ISO8859-2 to CP1252
+; 349  : 			switch ((unsigned char) *q) {
+
+  000d7	0f b6 c0	 movzx	 eax, al
+  000da	2d a1 00 00 00	 sub	 eax, 161		; 000000a1H
+  000df	74 32		 je	 SHORT $L83190
+  000e1	83 e8 05	 sub	 eax, 5
+  000e4	74 28		 je	 SHORT $L83192
+  000e6	83 e8 06	 sub	 eax, 6
+  000e9	74 1e		 je	 SHORT $L83194
+  000eb	83 e8 05	 sub	 eax, 5
+  000ee	74 14		 je	 SHORT $L83196
+  000f0	83 e8 05	 sub	 eax, 5
+  000f3	74 0a		 je	 SHORT $L83198
+  000f5	83 e8 06	 sub	 eax, 6
+  000f8	75 1c		 jne	 SHORT $L83187
+
+; 355  : 			case 0xbc: *q = (char) 0x9f; break;
+
+  000fa	c6 07 9f	 mov	 BYTE PTR [edi], -97	; ffffff9fH
+  000fd	eb 17		 jmp	 SHORT $L83187
+$L83198:
+
+; 354  : 			case 0xb6: *q = (char) 0x9c; break;
+
+  000ff	c6 07 9c	 mov	 BYTE PTR [edi], -100	; ffffff9cH
+  00102	eb 12		 jmp	 SHORT $L83187
+$L83196:
+
+; 353  : 			case 0xb1: *q = (char) 0xb9; break;
+
+  00104	c6 07 b9	 mov	 BYTE PTR [edi], -71	; ffffffb9H
+  00107	eb 0d		 jmp	 SHORT $L83187
+$L83194:
+
+; 352  : 			case 0xac: *q = (char) 0x8f; break;
+
+  00109	c6 07 8f	 mov	 BYTE PTR [edi], -113	; ffffff8fH
+  0010c	eb 08		 jmp	 SHORT $L83187
+$L83192:
+
+; 351  : 			case 0xa6: *q = (char) 0x8c; break;
+
+  0010e	c6 07 8c	 mov	 BYTE PTR [edi], -116	; ffffff8cH
+  00111	eb 03		 jmp	 SHORT $L83187
+$L83190:
+
+; 350  : 			case 0xa1: *q = (char) 0xa5; break;
+
+  00113	c6 07 a5	 mov	 BYTE PTR [edi], -91	; ffffffa5H
+$L83187:
+
+; 356  : 			}
+; 357  : 			p += 2;
+
+  00116	83 44 24 18 02	 add	 DWORD PTR 8+[esp+16], 2
+  0011b	8b f3		 mov	 esi, ebx
+
+; 358  : 		}
+; 359  : 		else {
+
+  0011d	eb 04		 jmp	 SHORT $L83178
+$L83182:
+
+; 360  : 			*q = *p;
+
+  0011f	8a 06		 mov	 al, BYTE PTR [esi]
+  00121	88 07		 mov	 BYTE PTR [edi], al
+$L83178:
+  00123	46		 inc	 esi
+  00124	ff 44 24 18	 inc	 DWORD PTR 8+[esp+16]
+  00128	47		 inc	 edi
+  00129	80 3e 00	 cmp	 BYTE PTR [esi], 0
+  0012c	0f 85 f6 fe ff
+	ff		 jne	 $L83177
+  00132	5d		 pop	 ebp
+  00133	5b		 pop	 ebx
+$L83179:
+
+; 361  : 		}
+; 362  : 	}
+; 363  : 	*q = '\0';
+
+  00134	80 27 00	 and	 BYTE PTR [edi], 0
+  00137	5f		 pop	 edi
+  00138	5e		 pop	 esi
+$L83171:
+
+; 364  : }
+
+  00139	59		 pop	 ecx
+  0013a	c3		 ret	 0
+_TlenUrlDecode ENDP
+_TEXT	ENDS
+PUBLIC	_TlenGroupDecode
+;	COMDAT _TlenGroupDecode
+_TEXT	SEGMENT
+_str$ = 8
+_TlenGroupDecode PROC NEAR				; COMDAT
+
+; 368  : 	char *p, *q;
+; 369  : 	if (str == NULL) return NULL;
+
+  00000	83 7c 24 04 00	 cmp	 DWORD PTR _str$[esp-4], 0
+  00005	75 03		 jne	 SHORT $L83209
+  00007	33 c0		 xor	 eax, eax
+
+; 374  : 		}
+; 375  : 	}
+; 376  : 	return q;
+; 377  : }
+
+  00009	c3		 ret	 0
+$L83209:
+
+; 370  : 	p = q = JabberTextDecode(str);
+
+  0000a	ff 74 24 04	 push	 DWORD PTR _str$[esp-4]
+  0000e	e8 00 00 00 00	 call	 _JabberTextDecode
+
+; 371  : 	for (; *p!='\0'; p++) {
+
+  00013	80 38 00	 cmp	 BYTE PTR [eax], 0
+  00016	59		 pop	 ecx
+  00017	8b c8		 mov	 ecx, eax
+  00019	74 0e		 je	 SHORT $L83205
+$L83211:
+
+; 372  : 		if (*p == '/') {
+
+  0001b	80 39 2f	 cmp	 BYTE PTR [ecx], 47	; 0000002fH
+  0001e	75 03		 jne	 SHORT $L83212
+
+; 373  : 			*p = '\\';
+
+  00020	c6 01 5c	 mov	 BYTE PTR [ecx], 92	; 0000005cH
+$L83212:
+
+; 371  : 	for (; *p!='\0'; p++) {
+
+  00023	41		 inc	 ecx
+  00024	80 39 00	 cmp	 BYTE PTR [ecx], 0
+  00027	75 f2		 jne	 SHORT $L83211
+$L83205:
+
+; 374  : 		}
+; 375  : 	}
+; 376  : 	return q;
+; 377  : }
+
+  00029	c3		 ret	 0
+_TlenGroupDecode ENDP
+_TEXT	ENDS
+PUBLIC	_TlenGroupEncode
+PUBLIC	_JabberTextEncode
+;	COMDAT _TlenGroupEncode
+_TEXT	SEGMENT
+_str$ = 8
+_TlenGroupEncode PROC NEAR				; COMDAT
+
+; 381  : 	char *p, *q;
+; 382  : 	if (str == NULL) return NULL;
+
+  00000	83 7c 24 04 00	 cmp	 DWORD PTR _str$[esp-4], 0
+  00005	75 03		 jne	 SHORT $L83221
+  00007	33 c0		 xor	 eax, eax
+
+; 392  : }
+
+  00009	c3		 ret	 0
+$L83221:
+  0000a	56		 push	 esi
+  0000b	57		 push	 edi
+
+; 383  : 	p = q = mir_strdup(str);
+
+  0000c	ff 74 24 0c	 push	 DWORD PTR _str$[esp+4]
+  00010	ff 15 14 00 00
+	00		 call	 DWORD PTR _mmi+20
+  00016	8b f0		 mov	 esi, eax
+  00018	59		 pop	 ecx
+
+; 384  : 	for (; *p!='\0'; p++) {
+
+  00019	80 3e 00	 cmp	 BYTE PTR [esi], 0
+  0001c	74 0e		 je	 SHORT $L83225
+$L83223:
+
+; 385  : 		if (*p == '\\') {
+
+  0001e	80 38 5c	 cmp	 BYTE PTR [eax], 92	; 0000005cH
+  00021	75 03		 jne	 SHORT $L83224
+
+; 386  : 			*p = '/';
+
+  00023	c6 00 2f	 mov	 BYTE PTR [eax], 47	; 0000002fH
+$L83224:
+
+; 384  : 	for (; *p!='\0'; p++) {
+
+  00026	40		 inc	 eax
+  00027	80 38 00	 cmp	 BYTE PTR [eax], 0
+  0002a	75 f2		 jne	 SHORT $L83223
+$L83225:
+
+; 387  : 		}
+; 388  : 	}
+; 389  : 	p = JabberTextEncode(q);
+
+  0002c	56		 push	 esi
+  0002d	e8 00 00 00 00	 call	 _JabberTextEncode
+
+; 390  : 	mir_free(q);
+
+  00032	56		 push	 esi
+  00033	8b f8		 mov	 edi, eax
+  00035	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  0003b	59		 pop	 ecx
+
+; 391  : 	return p;
+
+  0003c	8b c7		 mov	 eax, edi
+  0003e	59		 pop	 ecx
+  0003f	5f		 pop	 edi
+  00040	5e		 pop	 esi
+
+; 392  : }
+
+  00041	c3		 ret	 0
+_TlenGroupEncode ENDP
+_TEXT	ENDS
+;	COMDAT _JabberTextEncode
+_TEXT	SEGMENT
+_str$ = 8
+_JabberTextEncode PROC NEAR				; COMDAT
+
+; 396  : 	char *s1;
+; 397  : 
+; 398  : 	if (str == NULL) return NULL;
+
+  00000	83 7c 24 04 00	 cmp	 DWORD PTR _str$[esp-4], 0
+  00005	75 03		 jne	 SHORT $L83232
+  00007	33 c0		 xor	 eax, eax
+
+; 400  : 		return NULL;
+; 401  : 	return s1;
+; 402  : }
+
+  00009	c3		 ret	 0
+$L83232:
+
+; 399  : 	if ((s1=TlenUrlEncode(str)) == NULL)
+
+  0000a	ff 74 24 04	 push	 DWORD PTR _str$[esp-4]
+  0000e	e8 00 00 00 00	 call	 _TlenUrlEncode
+  00013	59		 pop	 ecx
+
+; 400  : 		return NULL;
+; 401  : 	return s1;
+; 402  : }
+
+  00014	c3		 ret	 0
+_JabberTextEncode ENDP
+_TEXT	ENDS
+;	COMDAT _JabberTextDecode
+_TEXT	SEGMENT
+_str$ = 8
+_JabberTextDecode PROC NEAR				; COMDAT
+
+; 406  : 	char *s1;
+; 407  : 
+; 408  : 	if (str == NULL) return NULL;
+
+  00000	83 7c 24 04 00	 cmp	 DWORD PTR _str$[esp-4], 0
+  00005	75 03		 jne	 SHORT $L83242
+  00007	33 c0		 xor	 eax, eax
+
+; 412  : }
+
+  00009	c3		 ret	 0
+$L83242:
+  0000a	56		 push	 esi
+
+; 409  : 	s1 = mir_strdup(str);
+
+  0000b	ff 74 24 08	 push	 DWORD PTR _str$[esp]
+  0000f	ff 15 14 00 00
+	00		 call	 DWORD PTR _mmi+20
+  00015	8b f0		 mov	 esi, eax
+
+; 410  : 	TlenUrlDecode(s1);
+
+  00017	56		 push	 esi
+  00018	e8 00 00 00 00	 call	 _TlenUrlDecode
+  0001d	59		 pop	 ecx
+
+; 411  : 	return s1;
+
+  0001e	8b c6		 mov	 eax, esi
+  00020	59		 pop	 ecx
+  00021	5e		 pop	 esi
+
+; 412  : }
+
+  00022	c3		 ret	 0
+_JabberTextDecode ENDP
+_TEXT	ENDS
+PUBLIC	_JabberBase64Encode
+;	COMDAT _JabberBase64Encode
+_TEXT	SEGMENT
+_buffer$ = 8
+_bufferLen$ = 12
+_igroup$ = 8
+_p$ = 12
+_res$ = -4
+_JabberBase64Encode PROC NEAR				; COMDAT
+
+; 417  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	51		 push	 ecx
+  00004	56		 push	 esi
+  00005	57		 push	 edi
+
+; 418  : 	int n;
+; 419  : 	unsigned char igroup[3];
+; 420  : 	char *p, *peob;
+; 421  : 	char *res, *r;
+; 422  : 
+; 423  : 	if (buffer==NULL || bufferLen<=0) return NULL;
+
+  00006	8b 7d 08	 mov	 edi, DWORD PTR _buffer$[ebp]
+  00009	85 ff		 test	 edi, edi
+  0000b	0f 84 df 00 00
+	00		 je	 $L83258
+  00011	8b 75 0c	 mov	 esi, DWORD PTR _bufferLen$[ebp]
+  00014	85 f6		 test	 esi, esi
+  00016	0f 8e d4 00 00
+	00		 jle	 $L83258
+
+; 424  : 	if ((res=(char *) mir_alloc((((bufferLen+2)/3)*4) + 1)) == NULL) return NULL;
+
+  0001c	8d 46 02	 lea	 eax, DWORD PTR [esi+2]
+  0001f	6a 03		 push	 3
+  00021	99		 cdq
+  00022	59		 pop	 ecx
+  00023	f7 f9		 idiv	 ecx
+  00025	8d 04 85 01 00
+	00 00		 lea	 eax, DWORD PTR [eax*4+1]
+  0002c	50		 push	 eax
+  0002d	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00033	59		 pop	 ecx
+  00034	8b c8		 mov	 ecx, eax
+  00036	85 c9		 test	 ecx, ecx
+  00038	89 4d fc	 mov	 DWORD PTR _res$[ebp], ecx
+  0003b	0f 84 af 00 00
+	00		 je	 $L83258
+
+; 425  : 
+; 426  : 	for (p=(char*)buffer,peob=p+bufferLen,r=res; p<peob;) {
+
+  00041	8d 04 37	 lea	 eax, DWORD PTR [edi+esi]
+  00044	89 7d 0c	 mov	 DWORD PTR _p$[ebp], edi
+  00047	3b f8		 cmp	 edi, eax
+  00049	0f 83 99 00 00
+	00		 jae	 $L83267
+  0004f	53		 push	 ebx
+$L83266:
+
+; 427  : 		igroup[0] = igroup[1] = igroup[2] = 0;
+
+  00050	33 d2		 xor	 edx, edx
+
+; 428  : 		for (n=0; n<3; n++) {
+
+  00052	33 ff		 xor	 edi, edi
+  00054	88 55 0a	 mov	 BYTE PTR _igroup$[ebp+2], dl
+  00057	88 55 09	 mov	 BYTE PTR _igroup$[ebp+1], dl
+  0005a	88 55 08	 mov	 BYTE PTR _igroup$[ebp], dl
+$L83268:
+
+; 429  : 			if (p >= peob) break;
+
+  0005d	39 45 0c	 cmp	 DWORD PTR _p$[ebp], eax
+  00060	73 12		 jae	 SHORT $L83781
+
+; 430  : 			igroup[n] = (unsigned char) *p;
+
+  00062	8b 75 0c	 mov	 esi, DWORD PTR _p$[ebp]
+
+; 431  : 			p++;
+
+  00065	ff 45 0c	 inc	 DWORD PTR _p$[ebp]
+  00068	47		 inc	 edi
+  00069	8a 1e		 mov	 bl, BYTE PTR [esi]
+  0006b	83 ff 03	 cmp	 edi, 3
+  0006e	88 5c 3d 07	 mov	 BYTE PTR _igroup$[ebp+edi-1], bl
+  00072	7c e9		 jl	 SHORT $L83268
+$L83781:
+
+; 432  : 		}
+; 433  : 		if (n > 0) {
+
+  00074	3b fa		 cmp	 edi, edx
+  00076	7e 66		 jle	 SHORT $L83273
+
+; 434  : 			r[0] = b64table[ igroup[0]>>2 ];
+
+  00078	0f b6 55 08	 movzx	 edx, BYTE PTR _igroup$[ebp]
+  0007c	8b f2		 mov	 esi, edx
+
+; 435  : 			r[1] = b64table[ ((igroup[0]&3)<<4) | (igroup[1]>>4) ];
+
+  0007e	83 e2 03	 and	 edx, 3
+  00081	c1 ee 02	 shr	 esi, 2
+  00084	c1 e2 04	 shl	 edx, 4
+  00087	8a 9e 00 00 00
+	00		 mov	 bl, BYTE PTR _b64table[esi]
+  0008d	0f b6 75 09	 movzx	 esi, BYTE PTR _igroup$[ebp+1]
+  00091	88 19		 mov	 BYTE PTR [ecx], bl
+  00093	8b de		 mov	 ebx, esi
+  00095	c1 eb 04	 shr	 ebx, 4
+  00098	0b da		 or	 ebx, edx
+
+; 436  : 			r[2] = b64table[ ((igroup[1]&0xf)<<2) | (igroup[2]>>6) ];
+
+  0009a	83 e6 0f	 and	 esi, 15			; 0000000fH
+  0009d	c1 e6 02	 shl	 esi, 2
+  000a0	8a 93 00 00 00
+	00		 mov	 dl, BYTE PTR _b64table[ebx]
+  000a6	88 51 01	 mov	 BYTE PTR [ecx+1], dl
+  000a9	0f b6 55 0a	 movzx	 edx, BYTE PTR _igroup$[ebp+2]
+  000ad	8b da		 mov	 ebx, edx
+
+; 437  : 			r[3] = b64table[ igroup[2]&0x3f ];
+
+  000af	83 e2 3f	 and	 edx, 63			; 0000003fH
+  000b2	c1 eb 06	 shr	 ebx, 6
+  000b5	0b de		 or	 ebx, esi
+
+; 438  : 			if (n < 3) {
+
+  000b7	83 ff 03	 cmp	 edi, 3
+  000ba	8a 9b 00 00 00
+	00		 mov	 bl, BYTE PTR _b64table[ebx]
+  000c0	88 59 02	 mov	 BYTE PTR [ecx+2], bl
+  000c3	8a 92 00 00 00
+	00		 mov	 dl, BYTE PTR _b64table[edx]
+  000c9	88 51 03	 mov	 BYTE PTR [ecx+3], dl
+  000cc	7d 0d		 jge	 SHORT $L83275
+
+; 439  : 				r[3] = '=';
+; 440  : 				if (n < 2)
+
+  000ce	83 ff 02	 cmp	 edi, 2
+  000d1	c6 41 03 3d	 mov	 BYTE PTR [ecx+3], 61	; 0000003dH
+  000d5	7d 04		 jge	 SHORT $L83275
+
+; 441  : 					r[2] = '=';
+
+  000d7	c6 41 02 3d	 mov	 BYTE PTR [ecx+2], 61	; 0000003dH
+$L83275:
+
+; 442  : 			}
+; 443  : 			r += 4;
+
+  000db	83 c1 04	 add	 ecx, 4
+$L83273:
+
+; 425  : 
+; 426  : 	for (p=(char*)buffer,peob=p+bufferLen,r=res; p<peob;) {
+
+  000de	39 45 0c	 cmp	 DWORD PTR _p$[ebp], eax
+  000e1	0f 82 69 ff ff
+	ff		 jb	 $L83266
+  000e7	5b		 pop	 ebx
+$L83267:
+
+; 444  : 		}
+; 445  : 	}
+; 446  : 	*r = '\0';
+
+  000e8	80 21 00	 and	 BYTE PTR [ecx], 0
+
+; 447  : 
+; 448  : 	return res;
+
+  000eb	8b 45 fc	 mov	 eax, DWORD PTR _res$[ebp]
+  000ee	eb 02		 jmp	 SHORT $L83249
+$L83258:
+
+; 418  : 	int n;
+; 419  : 	unsigned char igroup[3];
+; 420  : 	char *p, *peob;
+; 421  : 	char *res, *r;
+; 422  : 
+; 423  : 	if (buffer==NULL || bufferLen<=0) return NULL;
+
+  000f0	33 c0		 xor	 eax, eax
+$L83249:
+  000f2	5f		 pop	 edi
+  000f3	5e		 pop	 esi
+
+; 449  : }
+
+  000f4	c9		 leave
+  000f5	c3		 ret	 0
+_JabberBase64Encode ENDP
+_TEXT	ENDS
+PUBLIC	_JabberBase64Decode
+_BSS	SEGMENT
+_b64rtable DB	0100H DUP (?)
+_BSS	ENDS
+;	COMDAT _JabberBase64Decode
+_TEXT	SEGMENT
+_str$ = 8
+_resultLen$ = 12
+_res$ = -4
+_igroup$ = 8
+_a$ = -8
+_JabberBase64Decode PROC NEAR				; COMDAT
+
+; 454  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	51		 push	 ecx
+  00004	51		 push	 ecx
+  00005	53		 push	 ebx
+
+; 455  : 	char *res;
+; 456  : 	unsigned char *p, *r, igroup[4], a[4];
+; 457  : 	int n, num, count;
+; 458  : 
+; 459  : 	if (str==NULL || resultLen==NULL) return NULL;
+
+  00006	8b 5d 08	 mov	 ebx, DWORD PTR _str$[ebp]
+  00009	56		 push	 esi
+  0000a	57		 push	 edi
+  0000b	85 db		 test	 ebx, ebx
+  0000d	0f 84 24 01 00
+	00		 je	 $L83293
+  00013	83 7d 0c 00	 cmp	 DWORD PTR _resultLen$[ebp], 0
+  00017	0f 84 1a 01 00
+	00		 je	 $L83293
+
+; 460  : 	if ((res=(char *) mir_alloc(((strlen(str)+3)/4)*3)) == NULL) return NULL;
+
+  0001d	53		 push	 ebx
+  0001e	e8 00 00 00 00	 call	 _strlen
+  00023	83 c0 03	 add	 eax, 3
+  00026	c1 e8 02	 shr	 eax, 2
+  00029	8d 04 40	 lea	 eax, DWORD PTR [eax+eax*2]
+  0002c	50		 push	 eax
+  0002d	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+  00033	8b f0		 mov	 esi, eax
+  00035	59		 pop	 ecx
+  00036	85 f6		 test	 esi, esi
+  00038	59		 pop	 ecx
+  00039	89 75 fc	 mov	 DWORD PTR _res$[ebp], esi
+  0003c	0f 84 f5 00 00
+	00		 je	 $L83293
+
+; 461  : 
+; 462  : 	for (n=0; n<256; n++)
+; 463  : 		b64rtable[n] = (unsigned char) 0x80;
+
+  00042	6a 40		 push	 64			; 00000040H
+  00044	b8 80 80 80 80	 mov	 eax, -2139062144	; 80808080H
+  00049	59		 pop	 ecx
+  0004a	bf 00 00 00 00	 mov	 edi, OFFSET FLAT:_b64rtable
+  0004f	f3 ab		 rep stosd
+
+; 464  : 	for (n=0; n<26; n++)
+
+  00051	33 c0		 xor	 eax, eax
+$L83303:
+
+; 465  : 		b64rtable['A'+n] = n;
+
+  00053	88 80 41 00 00
+	00		 mov	 BYTE PTR _b64rtable[eax+65], al
+  00059	40		 inc	 eax
+  0005a	83 f8 1a	 cmp	 eax, 26			; 0000001aH
+  0005d	7c f4		 jl	 SHORT $L83303
+
+; 466  : 	for (n=0; n<26; n++)
+
+  0005f	33 c0		 xor	 eax, eax
+$L83306:
+
+; 467  : 		b64rtable['a'+n] = n + 26;
+
+  00061	8a c8		 mov	 cl, al
+  00063	80 c1 1a	 add	 cl, 26			; 0000001aH
+  00066	88 88 61 00 00
+	00		 mov	 BYTE PTR _b64rtable[eax+97], cl
+  0006c	40		 inc	 eax
+  0006d	83 f8 1a	 cmp	 eax, 26			; 0000001aH
+  00070	7c ef		 jl	 SHORT $L83306
+
+; 468  : 	for (n=0; n<10; n++)
+
+  00072	33 c0		 xor	 eax, eax
+$L83309:
+
+; 469  : 		b64rtable['0'+n] = n + 52;
+
+  00074	8a c8		 mov	 cl, al
+  00076	80 c1 34	 add	 cl, 52			; 00000034H
+  00079	88 88 30 00 00
+	00		 mov	 BYTE PTR _b64rtable[eax+48], cl
+  0007f	40		 inc	 eax
+  00080	83 f8 0a	 cmp	 eax, 10			; 0000000aH
+  00083	7c ef		 jl	 SHORT $L83309
+
+; 470  : 	b64rtable['+'] = 62;
+; 471  : 	b64rtable['/'] = 63;
+; 472  : 	b64rtable['='] = 0;
+
+  00085	80 25 3d 00 00
+	00 00		 and	 BYTE PTR _b64rtable+61, 0
+  0008c	c6 05 2b 00 00
+	00 3e		 mov	 BYTE PTR _b64rtable+43, 62 ; 0000003eH
+  00093	c6 05 2f 00 00
+	00 3f		 mov	 BYTE PTR _b64rtable+47, 63 ; 0000003fH
+
+; 473  : 	count = 0;
+
+  0009a	33 ff		 xor	 edi, edi
+$L83805:
+
+; 474  : 	for (p=(unsigned char *)str,r=(unsigned char *)res; *p!='\0';) {
+
+  0009c	80 3b 00	 cmp	 BYTE PTR [ebx], 0
+  0009f	0f 84 99 00 00
+	00		 je	 $LBL_Exit$83324
+
+; 475  : 		for (n=0; n<4; n++) {
+
+  000a5	33 c0		 xor	 eax, eax
+$L83317:
+
+; 476  : 			if ( *p == '\r' || *p == '\n' ) {
+
+  000a7	8a 0b		 mov	 cl, BYTE PTR [ebx]
+  000a9	80 f9 0d	 cmp	 cl, 13			; 0000000dH
+  000ac	74 21		 je	 SHORT $L83321
+  000ae	80 f9 0a	 cmp	 cl, 10			; 0000000aH
+  000b1	74 1c		 je	 SHORT $L83321
+
+; 478  : 				continue;
+; 479  : 			}
+; 480  : 
+; 481  : 			if ( *p=='\0' ) {
+
+  000b3	84 c9		 test	 cl, cl
+  000b5	74 72		 je	 SHORT $L83794
+
+; 483  : 					goto LBL_Exit;
+; 484  : 				mir_free( res );
+; 485  : 				return NULL;
+; 486  : 			}
+; 487  : 
+; 488  : 			if ( b64rtable[*p]==0x80 ) {
+
+  000b7	0f b6 d1	 movzx	 edx, cl
+  000ba	8a 92 00 00 00
+	00		 mov	 dl, BYTE PTR _b64rtable[edx]
+  000c0	80 fa 80	 cmp	 dl, 128			; 00000080H
+  000c3	74 68		 je	 SHORT $L83795
+
+; 490  : 				return NULL;
+; 491  : 			}
+; 492  : 
+; 493  : 			a[n] = *p;
+
+  000c5	88 4c 05 f8	 mov	 BYTE PTR _a$[ebp+eax], cl
+
+; 494  : 			igroup[n] = b64rtable[*p];
+
+  000c9	88 54 05 08	 mov	 BYTE PTR _igroup$[ebp+eax], dl
+
+; 495  : 			p++;
+; 496  : 		}
+
+  000cd	eb 01		 jmp	 SHORT $L83806
+$L83321:
+
+; 477  : 				n--; p++;
+
+  000cf	48		 dec	 eax
+$L83806:
+  000d0	43		 inc	 ebx
+  000d1	40		 inc	 eax
+  000d2	83 f8 04	 cmp	 eax, 4
+  000d5	7c d0		 jl	 SHORT $L83317
+
+; 497  : 		r[0] = igroup[0]<<2 | igroup[1]>>4;
+
+  000d7	8a 45 09	 mov	 al, BYTE PTR _igroup$[ebp+1]
+  000da	8a 4d 08	 mov	 cl, BYTE PTR _igroup$[ebp]
+  000dd	c0 e8 04	 shr	 al, 4
+  000e0	c0 e1 02	 shl	 cl, 2
+  000e3	0a c1		 or	 al, cl
+
+; 498  : 		r[1] = igroup[1]<<4 | igroup[2]>>2;
+
+  000e5	8a 4d 09	 mov	 cl, BYTE PTR _igroup$[ebp+1]
+  000e8	88 06		 mov	 BYTE PTR [esi], al
+  000ea	8a 45 0a	 mov	 al, BYTE PTR _igroup$[ebp+2]
+  000ed	c0 e8 02	 shr	 al, 2
+  000f0	c0 e1 04	 shl	 cl, 4
+  000f3	0a c1		 or	 al, cl
+  000f5	88 46 01	 mov	 BYTE PTR [esi+1], al
+
+; 499  : 		r[2] = igroup[2]<<6 | igroup[3];
+
+  000f8	8a 45 0a	 mov	 al, BYTE PTR _igroup$[ebp+2]
+  000fb	c0 e0 06	 shl	 al, 6
+  000fe	0a 45 0b	 or	 al, BYTE PTR _igroup$[ebp+3]
+
+; 500  : 		r += 3;
+
+  00101	83 c6 03	 add	 esi, 3
+
+; 501  : 		num = ( a[2]=='='?1:( a[3]=='='?2:3 ));
+
+  00104	80 7d fa 3d	 cmp	 BYTE PTR _a$[ebp+2], 61	; 0000003dH
+  00108	88 46 ff	 mov	 BYTE PTR [esi-1], al
+  0010b	75 05		 jne	 SHORT $L83786
+  0010d	6a 01		 push	 1
+  0010f	58		 pop	 eax
+  00110	eb 0b		 jmp	 SHORT $L83787
+$L83786:
+  00112	33 c0		 xor	 eax, eax
+  00114	80 7d fb 3d	 cmp	 BYTE PTR _a$[ebp+3], 61	; 0000003dH
+  00118	0f 95 c0	 setne	 al
+  0011b	40		 inc	 eax
+  0011c	40		 inc	 eax
+$L83787:
+
+; 502  : 		count += num;
+
+  0011d	03 f8		 add	 edi, eax
+
+; 503  : 		if ( num < 3 ) break;
+
+  0011f	83 f8 03	 cmp	 eax, 3
+  00122	7c 1a		 jl	 SHORT $LBL_Exit$83324
+  00124	e9 73 ff ff ff	 jmp	 $L83805
+$L83794:
+
+; 482  : 				if ( n == 0 )
+
+  00129	85 c0		 test	 eax, eax
+  0012b	74 11		 je	 SHORT $LBL_Exit$83324
+$L83795:
+
+; 489  : 				mir_free( res );
+
+  0012d	ff 75 fc	 push	 DWORD PTR _res$[ebp]
+  00130	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  00136	59		 pop	 ecx
+$L83293:
+
+; 455  : 	char *res;
+; 456  : 	unsigned char *p, *r, igroup[4], a[4];
+; 457  : 	int n, num, count;
+; 458  : 
+; 459  : 	if (str==NULL || resultLen==NULL) return NULL;
+
+  00137	33 c0		 xor	 eax, eax
+$L83281:
+  00139	5f		 pop	 edi
+  0013a	5e		 pop	 esi
+  0013b	5b		 pop	 ebx
+
+; 508  : }
+
+  0013c	c9		 leave
+  0013d	c3		 ret	 0
+$LBL_Exit$83324:
+
+; 504  : 	}
+; 505  : LBL_Exit:
+; 506  : 	*resultLen = count;
+
+  0013e	8b 45 0c	 mov	 eax, DWORD PTR _resultLen$[ebp]
+  00141	89 38		 mov	 DWORD PTR [eax], edi
+
+; 507  : 	return res;
+
+  00143	8b 45 fc	 mov	 eax, DWORD PTR _res$[ebp]
+  00146	eb f1		 jmp	 SHORT $L83281
+_JabberBase64Decode ENDP
+_TEXT	ENDS
+PUBLIC	_TlenTimeToUTC
+EXTRN	__imp__gmtime:NEAR
+;	COMDAT _TlenTimeToUTC
+_TEXT	SEGMENT
+_time$ = 8
+_TlenTimeToUTC PROC NEAR				; COMDAT
+
+; 541  : 	struct tm *timestamp;
+; 542  : 	timestamp = gmtime(&time);
+
+  00000	8d 44 24 04	 lea	 eax, DWORD PTR _time$[esp-4]
+  00004	50		 push	 eax
+  00005	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__gmtime
+
+; 543  : 	if ( (timestamp->tm_mon > 2 && timestamp->tm_mon < 9) ||
+; 544  : 		 (timestamp->tm_mon == 2 && timestamp->tm_mday - timestamp->tm_wday >= 25) ||
+; 545  : 		 (timestamp->tm_mon == 9 && timestamp->tm_mday - timestamp->tm_wday < 25)) {
+; 546  : 		//time -= 3600;
+; 547  : 	} else {
+; 548  : 		//time += 3600;
+; 549  : 	}
+; 550  : 	return time;
+
+  0000b	8b 44 24 08	 mov	 eax, DWORD PTR _time$[esp]
+  0000f	59		 pop	 ecx
+
+; 551  : }
+
+  00010	c3		 ret	 0
+_TlenTimeToUTC ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_08BEBH@?$CFd?3?$CFd?3?$CFd?$AA@		; `string'
+PUBLIC	_JabberIsoToUnixTime
+EXTRN	__imp___timezone:DWORD
+EXTRN	__imp__mktime:NEAR
+EXTRN	__imp___tzset:NEAR
+;	COMDAT ??_C@_08BEBH@?$CFd?3?$CFd?3?$CFd?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_util.c
+_DATA	SEGMENT
+??_C@_08BEBH@?$CFd?3?$CFd?3?$CFd?$AA@ DB '%d:%d:%d', 00H ; `string'
+_DATA	ENDS
+;	COMDAT _JabberIsoToUnixTime
+_TEXT	SEGMENT
+_stamp$ = 8
+_timestamp$ = -48
+_date$ = -12
+_JabberIsoToUnixTime PROC NEAR				; COMDAT
+
+; 554  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 30	 sub	 esp, 48			; 00000030H
+  00006	53		 push	 ebx
+  00007	56		 push	 esi
+
+; 555  : 	struct tm timestamp;
+; 556  : 	char date[9];
+; 557  : 	char *p;
+; 558  : 	int i, y;
+; 559  : 	time_t t;
+; 560  : 
+; 561  : 	if (stamp == NULL) return (time_t) 0;
+
+  00008	8b 75 08	 mov	 esi, DWORD PTR _stamp$[ebp]
+  0000b	57		 push	 edi
+  0000c	85 f6		 test	 esi, esi
+  0000e	0f 84 4e 01 00
+	00		 je	 $L83356
+
+; 562  : 
+; 563  : 	p = stamp;
+; 564  : 
+; 565  : 	// Get the date part
+; 566  : 	for (i=0; *p!='\0' && i<8 && isdigit(*p); p++,i++)
+
+  00014	33 ff		 xor	 edi, edi
+  00016	80 3e 00	 cmp	 BYTE PTR [esi], 0
+  00019	0f 84 43 01 00
+	00		 je	 $L83356
+  0001f	8b 1d 00 00 00
+	00		 mov	 ebx, DWORD PTR __imp___isctype
+$L83350:
+  00025	83 ff 08	 cmp	 edi, 8
+  00028	7d 38		 jge	 SHORT $L83352
+  0002a	a1 00 00 00 00	 mov	 eax, DWORD PTR __imp____mb_cur_max
+  0002f	83 38 01	 cmp	 DWORD PTR [eax], 1
+  00032	7e 0c		 jle	 SHORT $L83810
+  00034	0f be 06	 movsx	 eax, BYTE PTR [esi]
+  00037	6a 04		 push	 4
+  00039	50		 push	 eax
+  0003a	ff d3		 call	 ebx
+  0003c	59		 pop	 ecx
+  0003d	59		 pop	 ecx
+  0003e	eb 11		 jmp	 SHORT $L83811
+$L83810:
+  00040	8b 0d 00 00 00
+	00		 mov	 ecx, DWORD PTR __imp___pctype
+  00046	0f be 06	 movsx	 eax, BYTE PTR [esi]
+  00049	8b 09		 mov	 ecx, DWORD PTR [ecx]
+  0004b	8a 04 41	 mov	 al, BYTE PTR [ecx+eax*2]
+  0004e	83 e0 04	 and	 eax, 4
+$L83811:
+  00051	85 c0		 test	 eax, eax
+  00053	74 0d		 je	 SHORT $L83352
+
+; 567  : 		date[i] = *p;
+
+  00055	8a 06		 mov	 al, BYTE PTR [esi]
+  00057	46		 inc	 esi
+  00058	88 44 3d f4	 mov	 BYTE PTR _date$[ebp+edi], al
+  0005c	47		 inc	 edi
+  0005d	80 3e 00	 cmp	 BYTE PTR [esi], 0
+  00060	75 c3		 jne	 SHORT $L83350
+$L83352:
+
+; 568  : 
+; 569  : 	// Parse year
+; 570  : 	if (i == 6) {
+
+  00062	83 ff 06	 cmp	 edi, 6
+  00065	75 1c		 jne	 SHORT $L83353
+
+; 571  : 		// 2-digit year (1970-2069)
+; 572  : 		y = (date[0]-'0')*10 + (date[1]-'0');
+
+  00067	0f be 45 f4	 movsx	 eax, BYTE PTR _date$[ebp]
+  0006b	0f be 4d f5	 movsx	 ecx, BYTE PTR _date$[ebp+1]
+  0006f	8d 04 80	 lea	 eax, DWORD PTR [eax+eax*4]
+  00072	8d 84 41 f0 fd
+	ff ff		 lea	 eax, DWORD PTR [ecx+eax*2-528]
+
+; 573  : 		if (y < 70) y += 100;
+
+  00079	83 f8 46	 cmp	 eax, 70			; 00000046H
+  0007c	7d 34		 jge	 SHORT $L83357
+  0007e	83 c0 64	 add	 eax, 100		; 00000064H
+
+; 574  : 	}
+; 575  : 	else if (i == 8) {
+
+  00081	eb 2f		 jmp	 SHORT $L83357
+$L83353:
+  00083	83 ff 08	 cmp	 edi, 8
+  00086	0f 85 d6 00 00
+	00		 jne	 $L83356
+
+; 576  : 		// 4-digit year
+; 577  : 		y = (date[0]-'0')*1000 + (date[1]-'0')*100 + (date[2]-'0')*10 + date[3]-'0';
+; 578  : 		y -= 1900;
+
+  0008c	0f be 45 f4	 movsx	 eax, BYTE PTR _date$[ebp]
+  00090	0f be 4d f5	 movsx	 ecx, BYTE PTR _date$[ebp+1]
+  00094	8d 04 80	 lea	 eax, DWORD PTR [eax+eax*4]
+  00097	8d 04 41	 lea	 eax, DWORD PTR [ecx+eax*2]
+  0009a	0f be 4d f6	 movsx	 ecx, BYTE PTR _date$[ebp+2]
+  0009e	8d 04 80	 lea	 eax, DWORD PTR [eax+eax*4]
+  000a1	8d 04 41	 lea	 eax, DWORD PTR [ecx+eax*2]
+  000a4	0f be 4d f7	 movsx	 ecx, BYTE PTR _date$[ebp+3]
+  000a8	8d 04 80	 lea	 eax, DWORD PTR [eax+eax*4]
+  000ab	8d 84 41 44 28
+	ff ff		 lea	 eax, DWORD PTR [ecx+eax*2-55228]
+$L83357:
+
+; 582  : 	timestamp.tm_year = y;
+; 583  : 	// Parse month
+; 584  : 	timestamp.tm_mon = (date[i-4]-'0')*10 + date[i-3]-'0' - 1;
+
+  000b2	0f be 4c 3d f0	 movsx	 ecx, BYTE PTR _date$[ebp+edi-4]
+  000b7	0f be 54 3d f1	 movsx	 edx, BYTE PTR _date$[ebp+edi-3]
+  000bc	89 45 e4	 mov	 DWORD PTR _timestamp$[ebp+20], eax
+  000bf	8d 44 3d f4	 lea	 eax, DWORD PTR _date$[ebp+edi]
+  000c3	8d 0c 89	 lea	 ecx, DWORD PTR [ecx+ecx*4]
+  000c6	8d 8c 4a ef fd
+	ff ff		 lea	 ecx, DWORD PTR [edx+ecx*2-529]
+  000cd	89 4d e0	 mov	 DWORD PTR _timestamp$[ebp+16], ecx
+
+; 585  : 	// Parse date
+; 586  : 	timestamp.tm_mday = (date[i-2]-'0')*10 + date[i-1]-'0';
+
+  000d0	0f be 48 fe	 movsx	 ecx, BYTE PTR [eax-2]
+  000d4	0f be 40 ff	 movsx	 eax, BYTE PTR [eax-1]
+  000d8	8d 0c 89	 lea	 ecx, DWORD PTR [ecx+ecx*4]
+  000db	8d 84 48 f0 fd
+	ff ff		 lea	 eax, DWORD PTR [eax+ecx*2-528]
+  000e2	89 45 dc	 mov	 DWORD PTR _timestamp$[ebp+12], eax
+$L83821:
+
+; 587  : 
+; 588  : 	// Skip any date/time delimiter
+; 589  : 	for (; *p!='\0' && !isdigit(*p); p++);
+
+  000e5	8a 06		 mov	 al, BYTE PTR [esi]
+  000e7	84 c0		 test	 al, al
+  000e9	74 2f		 je	 SHORT $L83361
+  000eb	8b 0d 00 00 00
+	00		 mov	 ecx, DWORD PTR __imp____mb_cur_max
+  000f1	83 39 01	 cmp	 DWORD PTR [ecx], 1
+  000f4	7e 0c		 jle	 SHORT $L83812
+  000f6	0f be c0	 movsx	 eax, al
+  000f9	6a 04		 push	 4
+  000fb	50		 push	 eax
+  000fc	ff d3		 call	 ebx
+  000fe	59		 pop	 ecx
+  000ff	59		 pop	 ecx
+  00100	eb 11		 jmp	 SHORT $L83813
+$L83812:
+  00102	8b 0d 00 00 00
+	00		 mov	 ecx, DWORD PTR __imp___pctype
+  00108	0f be c0	 movsx	 eax, al
+  0010b	8b 09		 mov	 ecx, DWORD PTR [ecx]
+  0010d	8a 04 41	 mov	 al, BYTE PTR [ecx+eax*2]
+  00110	83 e0 04	 and	 eax, 4
+$L83813:
+  00113	85 c0		 test	 eax, eax
+  00115	75 03		 jne	 SHORT $L83361
+  00117	46		 inc	 esi
+  00118	eb cb		 jmp	 SHORT $L83821
+$L83361:
+
+; 590  : 
+; 591  : 	// Parse time
+; 592  : 	if (sscanf(p, "%d:%d:%d", &(timestamp.tm_hour), &(timestamp.tm_min), &(timestamp.tm_sec)) != 3)
+
+  0011a	8d 45 d0	 lea	 eax, DWORD PTR _timestamp$[ebp]
+  0011d	50		 push	 eax
+  0011e	8d 45 d4	 lea	 eax, DWORD PTR _timestamp$[ebp+4]
+  00121	50		 push	 eax
+  00122	8d 45 d8	 lea	 eax, DWORD PTR _timestamp$[ebp+8]
+  00125	50		 push	 eax
+  00126	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_08BEBH@?$CFd?3?$CFd?3?$CFd?$AA@ ; `string'
+  0012b	56		 push	 esi
+  0012c	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__sscanf
+  00132	83 c4 14	 add	 esp, 20			; 00000014H
+  00135	83 f8 03	 cmp	 eax, 3
+
+; 593  : 		return (time_t) 0;
+
+  00138	75 28		 jne	 SHORT $L83356
+
+; 594  : 
+; 595  : 	timestamp.tm_isdst = 0;	// DST is already present in _timezone below
+
+  0013a	83 65 f0 00	 and	 DWORD PTR _timestamp$[ebp+32], 0
+
+; 596  : 	_tzset();
+
+  0013e	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp___tzset
+
+; 597  : 	t = mktime(&timestamp);
+
+  00144	8d 45 d0	 lea	 eax, DWORD PTR _timestamp$[ebp]
+  00147	50		 push	 eax
+  00148	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__mktime
+
+; 598  : 	t -= _timezone;
+
+  0014e	8b 0d 00 00 00
+	00		 mov	 ecx, DWORD PTR __imp___timezone
+  00154	2b 01		 sub	 eax, DWORD PTR [ecx]
+
+; 599  : 	t = TlenTimeToUTC(t);
+
+  00156	50		 push	 eax
+  00157	e8 00 00 00 00	 call	 _TlenTimeToUTC
+  0015c	59		 pop	 ecx
+
+; 600  : 
+; 601  : 	if (t >= 0)
+
+  0015d	85 c0		 test	 eax, eax
+  0015f	59		 pop	 ecx
+
+; 602  : 		return t;
+
+  00160	7d 02		 jge	 SHORT $L83366
+$L83356:
+
+; 579  : 	}
+; 580  : 	else
+; 581  : 		return (time_t) 0;
+
+  00162	33 c0		 xor	 eax, eax
+$L83366:
+  00164	5f		 pop	 edi
+  00165	5e		 pop	 esi
+  00166	5b		 pop	 ebx
+
+; 603  : 	else
+; 604  : 		return (time_t) 0;
+; 605  : }
+
+  00167	c9		 leave
+  00168	c3		 ret	 0
+_JabberIsoToUnixTime ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@	; `string'
+PUBLIC	??_C@_08LOMK@?5to?$DN?8?$CFs?8?$AA@		; `string'
+PUBLIC	??_C@_09MLLO@available?$AA@			; `string'
+PUBLIC	??_C@_04EKMD@away?$AA@				; `string'
+PUBLIC	??_C@_02PNLN@xa?$AA@				; `string'
+PUBLIC	??_C@_03GPAF@dnd?$AA@				; `string'
+PUBLIC	??_C@_04FLKK@chat?$AA@				; `string'
+PUBLIC	??_C@_09HDMF@invisible?$AA@			; `string'
+PUBLIC	??_C@_0M@IHLO@unavailable?$AA@			; `string'
+PUBLIC	??_C@_0BE@EHOD@LeaveOfflineMessage?$AA@		; `string'
+PUBLIC	??_C@_0BF@CODL@OfflineMessageOption?$AA@	; `string'
+PUBLIC	??_C@_09LOKN@OnDefault?$AA@			; `string'
+PUBLIC	??_C@_0M@LG@AwayDefault?$AA@			; `string'
+PUBLIC	??_C@_09MFFI@NaDefault?$AA@			; `string'
+PUBLIC	??_C@_0L@CLFC@DndDefault?$AA@			; `string'
+PUBLIC	??_C@_0BA@NCII@FreeChatDefault?$AA@		; `string'
+PUBLIC	??_C@_0L@PHDP@InvDefault?$AA@			; `string'
+PUBLIC	??_C@_06CHCB@SRAway?$AA@			; `string'
+PUBLIC	??_C@_06CFEF@?$CFtime?$CF?$AA@			; `string'
+PUBLIC	??_C@_06OOEJ@?$CFdate?$CF?$AA@			; `string'
+PUBLIC	??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@	; `string'
+PUBLIC	??_C@_00A@?$AA@					; `string'
+PUBLIC	??_C@_0DJ@ODJJ@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$DMstatus?$DO?$CFs@ ; `string'
+PUBLIC	??_C@_0CG@OPDC@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$CFs?$CFs?$DM?1pres@ ; `string'
+PUBLIC	??_C@_0DO@DKPG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$DMstat@ ; `string'
+PUBLIC	??_C@_0CL@HAFG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$CFs?$CFs?$DM@ ; `string'
+PUBLIC	_JabberSendPresenceTo
+EXTRN	_memcpy:NEAR
+EXTRN	__imp__memmove:NEAR
+EXTRN	__imp___strnicmp:NEAR
+EXTRN	__imp___snprintf:NEAR
+EXTRN	__imp__GetTimeFormatA@24:NEAR
+EXTRN	__imp__GetDateFormatA@24:NEAR
+;	COMDAT ??_C@_00A@?$AA@
+; File C:\MirandaDev\miranda_svn2\include\m_database.h
+_BSS	SEGMENT
+??_C@_00A@?$AA@ DB 01H DUP (?)				; `string'
+_BSS	ENDS
+;	COMDAT ??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@
+_DATA	SEGMENT
+??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ DB 'DB/Contact/GetSetting', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@
+_DATA	SEGMENT
+??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ DB 'DB/Contact/FreeVariant', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_08LOMK@?5to?$DN?8?$CFs?8?$AA@
+_DATA	SEGMENT
+??_C@_08LOMK@?5to?$DN?8?$CFs?8?$AA@ DB ' to=''%s''', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_09MLLO@available?$AA@
+_DATA	SEGMENT
+??_C@_09MLLO@available?$AA@ DB 'available', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_04EKMD@away?$AA@
+_DATA	SEGMENT
+??_C@_04EKMD@away?$AA@ DB 'away', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_02PNLN@xa?$AA@
+_DATA	SEGMENT
+??_C@_02PNLN@xa?$AA@ DB 'xa', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_03GPAF@dnd?$AA@
+_DATA	SEGMENT
+??_C@_03GPAF@dnd?$AA@ DB 'dnd', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_04FLKK@chat?$AA@
+_DATA	SEGMENT
+??_C@_04FLKK@chat?$AA@ DB 'chat', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_09HDMF@invisible?$AA@
+_DATA	SEGMENT
+??_C@_09HDMF@invisible?$AA@ DB 'invisible', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@IHLO@unavailable?$AA@
+_DATA	SEGMENT
+??_C@_0M@IHLO@unavailable?$AA@ DB 'unavailable', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@EHOD@LeaveOfflineMessage?$AA@
+_DATA	SEGMENT
+??_C@_0BE@EHOD@LeaveOfflineMessage?$AA@ DB 'LeaveOfflineMessage', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@CODL@OfflineMessageOption?$AA@
+_DATA	SEGMENT
+??_C@_0BF@CODL@OfflineMessageOption?$AA@ DB 'OfflineMessageOption', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_09LOKN@OnDefault?$AA@
+_DATA	SEGMENT
+??_C@_09LOKN@OnDefault?$AA@ DB 'OnDefault', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@LG@AwayDefault?$AA@
+_DATA	SEGMENT
+??_C@_0M@LG@AwayDefault?$AA@ DB 'AwayDefault', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_09MFFI@NaDefault?$AA@
+_DATA	SEGMENT
+??_C@_09MFFI@NaDefault?$AA@ DB 'NaDefault', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@CLFC@DndDefault?$AA@
+_DATA	SEGMENT
+??_C@_0L@CLFC@DndDefault?$AA@ DB 'DndDefault', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@NCII@FreeChatDefault?$AA@
+_DATA	SEGMENT
+??_C@_0BA@NCII@FreeChatDefault?$AA@ DB 'FreeChatDefault', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@PHDP@InvDefault?$AA@
+_DATA	SEGMENT
+??_C@_0L@PHDP@InvDefault?$AA@ DB 'InvDefault', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_06CHCB@SRAway?$AA@
+_DATA	SEGMENT
+??_C@_06CHCB@SRAway?$AA@ DB 'SRAway', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_06CFEF@?$CFtime?$CF?$AA@
+_DATA	SEGMENT
+??_C@_06CFEF@?$CFtime?$CF?$AA@ DB '%time%', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_06OOEJ@?$CFdate?$CF?$AA@
+_DATA	SEGMENT
+??_C@_06OOEJ@?$CFdate?$CF?$AA@ DB '%date%', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0DJ@ODJJ@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$DMstatus?$DO?$CFs@
+_DATA	SEGMENT
+??_C@_0DJ@ODJJ@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$DMstatus?$DO?$CFs@ DB '<'
+	DB	'presence%s type=''%s''><status>%s</status>%s%s</presence>', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0CG@OPDC@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$CFs?$CFs?$DM?1pres@
+_DATA	SEGMENT
+??_C@_0CG@OPDC@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$CFs?$CFs?$DM?1pres@ DB '<'
+	DB	'presence%s type=''%s''>%s%s</presence>', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0DO@DKPG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$DMstat@
+_DATA	SEGMENT
+??_C@_0DO@DKPG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$DMstat@ DB '<'
+	DB	'presence%s><show>%s</show><status>%s</status>%s%s</presence>', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0CL@HAFG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$CFs?$CFs?$DM@
+_DATA	SEGMENT
+??_C@_0CL@HAFG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$CFs?$CFs?$DM@ DB '<'
+	DB	'presence%s><show>%s</show>%s%s</presence>', 00H ; `string'
+_DATA	ENDS
+;	COMDAT _JabberSendPresenceTo
+_TEXT	SEGMENT
+_proto$ = 8
+_status$ = 12
+_to$ = 16
+_extra$ = 20
+_showBody$ = 16
+_presenceType$ = 8
+_ptr$ = -4
+_priorityStr$ = -76
+_toStr$ = -716
+_dbv$83432 = -28
+_statusNames$83433 = -40
+_substituteStr$83444 = -204
+_dbv$83833 = -28
+_cgs$83834 = -16
+_dbv$83842 = -28
+_cgs$83843 = -16
+_cgs$83851 = -16
+_JabberSendPresenceTo PROC NEAR				; COMDAT
+
+; 608  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	81 ec cc 02 00
+	00		 sub	 esp, 716		; 000002ccH
+  00009	53		 push	 ebx
+  0000a	56		 push	 esi
+
+; 609  : 	char *showBody, *statusMsg, *presenceType;
+; 610  : 	char *ptr = NULL;
+; 611  : 	char priorityStr[32];
+; 612  : 	char toStr[512];
+; 613  : 
+; 614  : 	if (!proto->jabberOnline) return;
+
+  0000b	8b 75 08	 mov	 esi, DWORD PTR _proto$[ebp]
+  0000e	33 db		 xor	 ebx, ebx
+  00010	89 5d fc	 mov	 DWORD PTR _ptr$[ebp], ebx
+  00013	39 9e 78 01 00
+	00		 cmp	 DWORD PTR [esi+376], ebx
+  00019	0f 84 f3 03 00
+	00		 je	 $L83376
+
+; 615  : 
+; 616  : 	// Send <presence/> update for status (we won't handle ID_STATUS_OFFLINE here)
+; 617  : 	// Note: jabberModeMsg is already encoded using JabberTextEncode()
+; 618  : 	EnterCriticalSection(&proto->modeMsgMutex);
+
+  0001f	8d 86 80 01 00
+	00		 lea	 eax, DWORD PTR [esi+384]
+  00025	50		 push	 eax
+  00026	89 45 d4	 mov	 DWORD PTR -44+[ebp], eax
+  00029	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__EnterCriticalSection@4
+
+; 619  : 
+; 620  : 	priorityStr[0] = '\0';
+
+  0002f	20 5d b4	 and	 BYTE PTR _priorityStr$[ebp], bl
+
+; 621  : 
+; 622  : 	if (to != NULL)
+
+  00032	39 5d 10	 cmp	 DWORD PTR _to$[ebp], ebx
+  00035	74 1f		 je	 SHORT $L83386
+
+; 623  : 		_snprintf(toStr, sizeof(toStr), " to='%s'", to);
+
+  00037	ff 75 10	 push	 DWORD PTR _to$[ebp]
+  0003a	8d 85 34 fd ff
+	ff		 lea	 eax, DWORD PTR _toStr$[ebp]
+  00040	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_08LOMK@?5to?$DN?8?$CFs?8?$AA@ ; `string'
+  00045	68 00 02 00 00	 push	 512			; 00000200H
+  0004a	50		 push	 eax
+  0004b	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp___snprintf
+  00051	83 c4 10	 add	 esp, 16			; 00000010H
+
+; 624  : 	else
+
+  00054	eb 07		 jmp	 SHORT $L83388
+$L83386:
+
+; 625  : 		toStr[0] = '\0';
+
+  00056	80 a5 34 fd ff
+	ff 00		 and	 BYTE PTR _toStr$[ebp], 0
+$L83388:
+
+; 626  : 
+; 627  : 	showBody = NULL;
+; 628  : 	statusMsg = NULL;
+; 629  : 	presenceType = NULL;
+; 630  : 	switch (status) {
+
+  0005d	8b 4d 0c	 mov	 ecx, DWORD PTR _status$[ebp]
+  00060	33 c0		 xor	 eax, eax
+  00062	81 c1 79 63 ff
+	ff		 add	 ecx, -40071		; ffff6379H
+  00068	89 5d 10	 mov	 DWORD PTR _showBody$[ebp], ebx
+  0006b	83 f9 09	 cmp	 ecx, 9
+  0006e	89 5d 08	 mov	 DWORD PTR _presenceType$[ebp], ebx
+  00071	0f 87 eb 02 00
+	00		 ja	 $L83475
+  00077	ff 24 8d 00 00
+	00 00		 jmp	 DWORD PTR $L83867[ecx*4]
+$L83396:
+
+; 631  : 	case ID_STATUS_ONLINE:
+; 632  : 		showBody = "available";
+; 633  : 		statusMsg = proto->modeMsgs.szOnline;
+
+  0007e	8b 86 c8 00 00
+	00		 mov	 eax, DWORD PTR [esi+200]
+  00084	c7 45 10 00 00
+	00 00		 mov	 DWORD PTR _showBody$[ebp], OFFSET FLAT:??_C@_09MLLO@available?$AA@ ; `string'
+
+; 634  : 		break;
+
+  0008b	e9 d2 02 00 00	 jmp	 $L83475
+$L83398:
+
+; 635  : 	case ID_STATUS_AWAY:
+; 636  : 	case ID_STATUS_ONTHEPHONE:
+; 637  : 	case ID_STATUS_OUTTOLUNCH:
+; 638  : 		showBody = "away";
+; 639  : 		statusMsg = proto->modeMsgs.szAway;
+
+  00090	8b 86 cc 00 00
+	00		 mov	 eax, DWORD PTR [esi+204]
+  00096	c7 45 10 00 00
+	00 00		 mov	 DWORD PTR _showBody$[ebp], OFFSET FLAT:??_C@_04EKMD@away?$AA@ ; `string'
+
+; 640  : 		break;
+
+  0009d	e9 c0 02 00 00	 jmp	 $L83475
+$L83400:
+
+; 641  : 	case ID_STATUS_NA:
+; 642  : 		showBody = "xa";
+; 643  : 		statusMsg = proto->modeMsgs.szNa;
+
+  000a2	8b 86 d0 00 00
+	00		 mov	 eax, DWORD PTR [esi+208]
+  000a8	c7 45 10 00 00
+	00 00		 mov	 DWORD PTR _showBody$[ebp], OFFSET FLAT:??_C@_02PNLN@xa?$AA@ ; `string'
+
+; 644  : 		break;
+
+  000af	e9 ae 02 00 00	 jmp	 $L83475
+$L83402:
+
+; 645  : 	case ID_STATUS_DND:
+; 646  : 	case ID_STATUS_OCCUPIED:
+; 647  : 		showBody = "dnd";
+; 648  : 		statusMsg = proto->modeMsgs.szDnd;
+
+  000b4	8b 86 d4 00 00
+	00		 mov	 eax, DWORD PTR [esi+212]
+  000ba	c7 45 10 00 00
+	00 00		 mov	 DWORD PTR _showBody$[ebp], OFFSET FLAT:??_C@_03GPAF@dnd?$AA@ ; `string'
+
+; 649  : 		break;
+
+  000c1	e9 9c 02 00 00	 jmp	 $L83475
+$L83404:
+
+; 650  : 	case ID_STATUS_FREECHAT:
+; 651  : 		showBody = "chat";
+; 652  : 		statusMsg = proto->modeMsgs.szFreechat;
+
+  000c6	8b 86 d8 00 00
+	00		 mov	 eax, DWORD PTR [esi+216]
+  000cc	c7 45 10 00 00
+	00 00		 mov	 DWORD PTR _showBody$[ebp], OFFSET FLAT:??_C@_04FLKK@chat?$AA@ ; `string'
+
+; 653  : 		break;
+
+  000d3	e9 8a 02 00 00	 jmp	 $L83475
+$L83406:
+
+; 654  : 	case ID_STATUS_INVISIBLE:
+; 655  : 		presenceType = "invisible";
+; 656  : 		statusMsg = proto->modeMsgs.szInvisible;
+
+  000d8	8b 86 dc 00 00
+	00		 mov	 eax, DWORD PTR [esi+220]
+  000de	c7 45 08 00 00
+	00 00		 mov	 DWORD PTR _presenceType$[ebp], OFFSET FLAT:??_C@_09HDMF@invisible?$AA@ ; `string'
+
+; 657  : 		break;
+
+  000e5	e9 78 02 00 00	 jmp	 $L83475
+$L83408:
+
+; 658  : 	case ID_STATUS_OFFLINE:
+; 659  : 		presenceType = "unavailable";
+; 660  : 		if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", FALSE)) {
+
+  000ea	8b 46 1c	 mov	 eax, DWORD PTR [esi+28]
+  000ed	57		 push	 edi
+  000ee	89 45 f0	 mov	 DWORD PTR _cgs$83834[ebp], eax
+  000f1	8d 45 e4	 lea	 eax, DWORD PTR _dbv$83833[ebp]
+  000f4	89 45 f8	 mov	 DWORD PTR _cgs$83834[ebp+8], eax
+  000f7	8d 45 f0	 lea	 eax, DWORD PTR _cgs$83834[ebp]
+  000fa	50		 push	 eax
+  000fb	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00100	bf 00 00 00 00	 mov	 edi, OFFSET FLAT:??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@ ; `string'
+  00105	53		 push	 ebx
+  00106	57		 push	 edi
+  00107	c7 45 08 00 00
+	00 00		 mov	 DWORD PTR _presenceType$[ebp], OFFSET FLAT:??_C@_0M@IHLO@unavailable?$AA@ ; `string'
+  0010e	c7 45 f4 00 00
+	00 00		 mov	 DWORD PTR _cgs$83834[ebp+4], OFFSET FLAT:??_C@_0BE@EHOD@LeaveOfflineMessage?$AA@ ; `string'
+  00115	ff 50 24	 call	 DWORD PTR [eax+36]
+  00118	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0011b	85 c0		 test	 eax, eax
+  0011d	0f 85 3b 02 00
+	00		 jne	 $L83447
+  00123	0f b6 45 e8	 movzx	 eax, BYTE PTR _dbv$83833[ebp+4]
+  00127	3b c3		 cmp	 eax, ebx
+  00129	0f 84 2f 02 00
+	00		 je	 $L83447
+
+; 661  : 			int offlineMessageOption = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", 0);
+
+  0012f	8b 46 1c	 mov	 eax, DWORD PTR [esi+28]
+  00132	c7 45 f4 00 00
+	00 00		 mov	 DWORD PTR _cgs$83843[ebp+4], OFFSET FLAT:??_C@_0BF@CODL@OfflineMessageOption?$AA@ ; `string'
+  00139	89 45 f0	 mov	 DWORD PTR _cgs$83843[ebp], eax
+  0013c	8d 45 e4	 lea	 eax, DWORD PTR _dbv$83842[ebp]
+  0013f	89 45 f8	 mov	 DWORD PTR _cgs$83843[ebp+8], eax
+  00142	8d 45 f0	 lea	 eax, DWORD PTR _cgs$83843[ebp]
+  00145	50		 push	 eax
+  00146	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0014b	53		 push	 ebx
+  0014c	57		 push	 edi
+  0014d	ff 50 24	 call	 DWORD PTR [eax+36]
+  00150	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00153	85 c0		 test	 eax, eax
+  00155	75 08		 jne	 SHORT $L83860
+  00157	0f b7 45 e8	 movzx	 eax, WORD PTR _dbv$83842[ebp+4]
+
+; 662  : 			if (offlineMessageOption == 0) {
+
+  0015b	3b c3		 cmp	 eax, ebx
+  0015d	75 55		 jne	 SHORT $L83417
+$L83860:
+
+; 663  : 				switch (proto->iface.m_iStatus) {
+
+  0015f	8b 46 04	 mov	 eax, DWORD PTR [esi+4]
+  00162	05 78 63 ff ff	 add	 eax, -40072		; ffff6378H
+  00167	83 f8 08	 cmp	 eax, 8
+  0016a	0f 87 ee 01 00
+	00		 ja	 $L83447
+  00170	ff 24 85 00 00
+	00 00		 jmp	 DWORD PTR $L83868[eax*4]
+$L83422:
+
+; 664  : 					case ID_STATUS_ONLINE:
+; 665  : 						ptr = mir_strdup(proto->modeMsgs.szOnline);
+
+  00177	ff b6 c8 00 00
+	00		 push	 DWORD PTR [esi+200]
+$L83864:
+  0017d	ff 15 14 00 00
+	00		 call	 DWORD PTR _mmi+20
+  00183	59		 pop	 ecx
+  00184	89 45 fc	 mov	 DWORD PTR _ptr$[ebp], eax
+
+; 666  : 						break;
+
+  00187	e9 d2 01 00 00	 jmp	 $L83447
+$L83423:
+
+; 667  : 					case ID_STATUS_AWAY:
+; 668  : 					case ID_STATUS_ONTHEPHONE:
+; 669  : 					case ID_STATUS_OUTTOLUNCH:
+; 670  : 						ptr = mir_strdup(proto->modeMsgs.szAway);
+
+  0018c	ff b6 cc 00 00
+	00		 push	 DWORD PTR [esi+204]
+
+; 671  : 						break;
+
+  00192	eb e9		 jmp	 SHORT $L83864
+$L83424:
+
+; 672  : 					case ID_STATUS_NA:
+; 673  : 						ptr = mir_strdup(proto->modeMsgs.szNa);
+
+  00194	ff b6 d0 00 00
+	00		 push	 DWORD PTR [esi+208]
+
+; 674  : 						break;
+
+  0019a	eb e1		 jmp	 SHORT $L83864
+$L83425:
+
+; 675  : 					case ID_STATUS_DND:
+; 676  : 					case ID_STATUS_OCCUPIED:
+; 677  : 						ptr = mir_strdup(proto->modeMsgs.szDnd);
+
+  0019c	ff b6 d4 00 00
+	00		 push	 DWORD PTR [esi+212]
+
+; 678  : 						break;
+
+  001a2	eb d9		 jmp	 SHORT $L83864
+$L83426:
+
+; 679  : 					case ID_STATUS_FREECHAT:
+; 680  : 						ptr = mir_strdup(proto->modeMsgs.szFreechat);
+
+  001a4	ff b6 d8 00 00
+	00		 push	 DWORD PTR [esi+216]
+
+; 681  : 						break;
+
+  001aa	eb d1		 jmp	 SHORT $L83864
+$L83427:
+
+; 682  : 					case ID_STATUS_INVISIBLE:
+; 683  : 						ptr = mir_strdup(proto->modeMsgs.szInvisible);
+
+  001ac	ff b6 dc 00 00
+	00		 push	 DWORD PTR [esi+220]
+
+; 684  : 						break;
+; 685  : 				}
+; 686  : 			} else if (offlineMessageOption == 99) {
+
+  001b2	eb c9		 jmp	 SHORT $L83864
+$L83417:
+  001b4	83 f8 63	 cmp	 eax, 99			; 00000063H
+  001b7	0f 84 a1 01 00
+	00		 je	 $L83447
+
+; 687  : 
+; 688  : 			} else if (offlineMessageOption < 7) {
+
+  001bd	83 f8 07	 cmp	 eax, 7
+  001c0	0f 8d 98 01 00
+	00		 jge	 $L83447
+
+; 689  : 				DBVARIANT dbv;
+; 690  : 				const char *statusNames[] = {"OnDefault", "AwayDefault", "NaDefault", "DndDefault", "FreeChatDefault", "InvDefault"};
+
+  001c6	c7 45 d8 00 00
+	00 00		 mov	 DWORD PTR _statusNames$83433[ebp], OFFSET FLAT:??_C@_09LOKN@OnDefault?$AA@ ; `string'
+  001cd	c7 45 dc 00 00
+	00 00		 mov	 DWORD PTR _statusNames$83433[ebp+4], OFFSET FLAT:??_C@_0M@LG@AwayDefault?$AA@ ; `string'
+  001d4	c7 45 e0 00 00
+	00 00		 mov	 DWORD PTR _statusNames$83433[ebp+8], OFFSET FLAT:??_C@_09MFFI@NaDefault?$AA@ ; `string'
+  001db	c7 45 e4 00 00
+	00 00		 mov	 DWORD PTR _statusNames$83433[ebp+12], OFFSET FLAT:??_C@_0L@CLFC@DndDefault?$AA@ ; `string'
+  001e2	c7 45 e8 00 00
+	00 00		 mov	 DWORD PTR _statusNames$83433[ebp+16], OFFSET FLAT:??_C@_0BA@NCII@FreeChatDefault?$AA@ ; `string'
+  001e9	c7 45 ec 00 00
+	00 00		 mov	 DWORD PTR _statusNames$83433[ebp+20], OFFSET FLAT:??_C@_0L@PHDP@InvDefault?$AA@ ; `string'
+
+; 691  : 				if (!DBGetContactSetting(NULL, "SRAway", statusNames[offlineMessageOption-1], &dbv)) {
+
+  001f0	8b 44 85 d4	 mov	 eax, DWORD PTR _statusNames$83433[ebp+eax*4-4]
+  001f4	c7 45 f0 00 00
+	00 00		 mov	 DWORD PTR _cgs$83851[ebp], OFFSET FLAT:??_C@_06CHCB@SRAway?$AA@ ; `string'
+  001fb	89 45 f4	 mov	 DWORD PTR _cgs$83851[ebp+4], eax
+  001fe	8d 45 e4	 lea	 eax, DWORD PTR _dbv$83432[ebp]
+  00201	89 45 f8	 mov	 DWORD PTR _cgs$83851[ebp+8], eax
+  00204	8d 45 f0	 lea	 eax, DWORD PTR _cgs$83851[ebp]
+  00207	50		 push	 eax
+  00208	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0020d	53		 push	 ebx
+  0020e	57		 push	 edi
+  0020f	ff 50 24	 call	 DWORD PTR [eax+36]
+  00212	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00215	85 c0		 test	 eax, eax
+  00217	0f 85 41 01 00
+	00		 jne	 $L83447
+
+; 692  : 					int i;
+; 693  : 					char substituteStr[128];
+; 694  : 					ptr = mir_strdup(dbv.pszVal);
+
+  0021d	ff 75 e8	 push	 DWORD PTR _dbv$83432[ebp+4]
+  00220	ff 15 14 00 00
+	00		 call	 DWORD PTR _mmi+20
+  00226	8b f8		 mov	 edi, eax
+
+; 695  : 					DBFreeVariant(&dbv);
+
+  00228	8d 45 e4	 lea	 eax, DWORD PTR _dbv$83432[ebp]
+  0022b	50		 push	 eax
+  0022c	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00231	53		 push	 ebx
+  00232	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@ ; `string'
+  00237	89 7d fc	 mov	 DWORD PTR _ptr$[ebp], edi
+  0023a	ff 50 24	 call	 DWORD PTR [eax+36]
+  0023d	83 c4 10	 add	 esp, 16			; 00000010H
+
+; 696  : 					for(i=0;ptr[i];i++) {
+
+  00240	80 3f 00	 cmp	 BYTE PTR [edi], 0
+  00243	0f 84 13 01 00
+	00		 je	 $L83863
+$L83445:
+
+; 697  : 						if(ptr[i]!='%') continue;
+
+  00249	8b 45 fc	 mov	 eax, DWORD PTR _ptr$[ebp]
+  0024c	80 3c 03 25	 cmp	 BYTE PTR [ebx+eax], 37	; 00000025H
+  00250	8d 3c 03	 lea	 edi, DWORD PTR [ebx+eax]
+  00253	0f 85 f5 00 00
+	00		 jne	 $L83446
+
+; 698  : 						if(!_strnicmp(ptr+i,"%time%",6))
+
+  00259	6a 06		 push	 6
+  0025b	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_06CFEF@?$CFtime?$CF?$AA@ ; `string'
+  00260	57		 push	 edi
+  00261	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp___strnicmp
+  00267	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0026a	85 c0		 test	 eax, eax
+  0026c	75 1f		 jne	 SHORT $L83449
+
+; 699  : 							GetTimeFormatA(LOCALE_USER_DEFAULT,TIME_NOSECONDS,NULL,NULL,substituteStr,sizeof(substituteStr));
+
+  0026e	8d 85 34 ff ff
+	ff		 lea	 eax, DWORD PTR _substituteStr$83444[ebp]
+  00274	68 80 00 00 00	 push	 128			; 00000080H
+  00279	50		 push	 eax
+  0027a	6a 00		 push	 0
+  0027c	6a 00		 push	 0
+  0027e	6a 02		 push	 2
+  00280	68 00 04 00 00	 push	 1024			; 00000400H
+  00285	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__GetTimeFormatA@24
+
+; 700  : 						else if(!_strnicmp(ptr+i,"%date%",6))
+
+  0028b	eb 36		 jmp	 SHORT $L83472
+$L83449:
+  0028d	6a 06		 push	 6
+  0028f	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_06OOEJ@?$CFdate?$CF?$AA@ ; `string'
+  00294	57		 push	 edi
+  00295	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp___strnicmp
+  0029b	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0029e	85 c0		 test	 eax, eax
+  002a0	0f 85 a8 00 00
+	00		 jne	 $L83446
+
+; 701  : 							GetDateFormatA(LOCALE_USER_DEFAULT,DATE_SHORTDATE,NULL,NULL,substituteStr,sizeof(substituteStr));
+
+  002a6	8d 85 34 ff ff
+	ff		 lea	 eax, DWORD PTR _substituteStr$83444[ebp]
+  002ac	68 80 00 00 00	 push	 128			; 00000080H
+  002b1	50		 push	 eax
+  002b2	6a 00		 push	 0
+  002b4	6a 00		 push	 0
+  002b6	6a 01		 push	 1
+  002b8	68 00 04 00 00	 push	 1024			; 00000400H
+  002bd	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__GetDateFormatA@24
+$L83472:
+
+; 702  : 						else continue;
+; 703  : 						if(strlen(substituteStr)>6) ptr=(char*)mir_realloc(ptr,strlen(ptr)+1+strlen(substituteStr)-6);
+
+  002c3	8d 85 34 ff ff
+	ff		 lea	 eax, DWORD PTR _substituteStr$83444[ebp]
+  002c9	50		 push	 eax
+  002ca	e8 00 00 00 00	 call	 _strlen
+  002cf	83 f8 06	 cmp	 eax, 6
+  002d2	59		 pop	 ecx
+  002d3	76 2a		 jbe	 SHORT $L83473
+  002d5	ff 75 fc	 push	 DWORD PTR _ptr$[ebp]
+  002d8	e8 00 00 00 00	 call	 _strlen
+  002dd	8b f8		 mov	 edi, eax
+  002df	8d 85 34 ff ff
+	ff		 lea	 eax, DWORD PTR _substituteStr$83444[ebp]
+  002e5	50		 push	 eax
+  002e6	e8 00 00 00 00	 call	 _strlen
+  002eb	8d 44 07 fb	 lea	 eax, DWORD PTR [edi+eax-5]
+  002ef	50		 push	 eax
+  002f0	ff 75 fc	 push	 DWORD PTR _ptr$[ebp]
+  002f3	ff 15 08 00 00
+	00		 call	 DWORD PTR _mmi+8
+  002f9	83 c4 10	 add	 esp, 16			; 00000010H
+  002fc	89 45 fc	 mov	 DWORD PTR _ptr$[ebp], eax
+$L83473:
+
+; 704  : 						MoveMemory(ptr+i+strlen(substituteStr),ptr+i+6,strlen(ptr)-i-5);
+
+  002ff	8b 45 fc	 mov	 eax, DWORD PTR _ptr$[ebp]
+  00302	50		 push	 eax
+  00303	8d 3c 03	 lea	 edi, DWORD PTR [ebx+eax]
+  00306	e8 00 00 00 00	 call	 _strlen
+  0030b	59		 pop	 ecx
+  0030c	6a fb		 push	 -5			; fffffffbH
+  0030e	59		 pop	 ecx
+  0030f	2b cb		 sub	 ecx, ebx
+  00311	03 c1		 add	 eax, ecx
+  00313	50		 push	 eax
+  00314	8d 47 06	 lea	 eax, DWORD PTR [edi+6]
+  00317	50		 push	 eax
+  00318	8d 85 34 ff ff
+	ff		 lea	 eax, DWORD PTR _substituteStr$83444[ebp]
+  0031e	50		 push	 eax
+  0031f	e8 00 00 00 00	 call	 _strlen
+  00324	03 c3		 add	 eax, ebx
+  00326	59		 pop	 ecx
+  00327	03 45 fc	 add	 eax, DWORD PTR _ptr$[ebp]
+  0032a	50		 push	 eax
+  0032b	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__memmove
+
+; 705  : 						CopyMemory(ptr+i,substituteStr,strlen(substituteStr));
+
+  00331	8d 85 34 ff ff
+	ff		 lea	 eax, DWORD PTR _substituteStr$83444[ebp]
+  00337	50		 push	 eax
+  00338	e8 00 00 00 00	 call	 _strlen
+  0033d	50		 push	 eax
+  0033e	8d 85 34 ff ff
+	ff		 lea	 eax, DWORD PTR _substituteStr$83444[ebp]
+  00344	50		 push	 eax
+  00345	57		 push	 edi
+  00346	e8 00 00 00 00	 call	 _memcpy
+  0034b	83 c4 1c	 add	 esp, 28			; 0000001cH
+$L83446:
+  0034e	8b 45 fc	 mov	 eax, DWORD PTR _ptr$[ebp]
+  00351	43		 inc	 ebx
+  00352	80 3c 03 00	 cmp	 BYTE PTR [ebx+eax], 0
+  00356	0f 85 ed fe ff
+	ff		 jne	 $L83445
+$L83863:
+
+; 696  : 					for(i=0;ptr[i];i++) {
+
+  0035c	33 db		 xor	 ebx, ebx
+$L83447:
+
+; 706  : 					}
+; 707  : 				}
+; 708  : 			}
+; 709  : 		}
+; 710  : 		statusMsg = ptr;
+
+  0035e	8b 45 fc	 mov	 eax, DWORD PTR _ptr$[ebp]
+  00361	5f		 pop	 edi
+$L83475:
+
+; 711  : 		break;
+; 712  : 	default:
+; 713  : 		// Should not reach here
+; 714  : 		break;
+; 715  : 	}
+; 716  : 	proto->iface.m_iStatus = status;
+
+  00362	8b 4d 0c	 mov	 ecx, DWORD PTR _status$[ebp]
+
+; 717  : 	if (presenceType) {
+
+  00365	39 5d 08	 cmp	 DWORD PTR _presenceType$[ebp], ebx
+  00368	89 4e 04	 mov	 DWORD PTR [esi+4], ecx
+  0036b	74 3d		 je	 SHORT $L83476
+
+; 718  : 		extra = NULL;
+; 719  : 		if (statusMsg)
+
+  0036d	3b c3		 cmp	 eax, ebx
+
+; 720  : 			JabberSend(proto, "<presence%s type='%s'><status>%s</status>%s%s</presence>", toStr, presenceType, statusMsg, priorityStr, (extra!=NULL)?extra:"");
+
+  0036f	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_00A@?$AA@ ; `string'
+  00374	74 1f		 je	 SHORT $L83825
+  00376	8d 4d b4	 lea	 ecx, DWORD PTR _priorityStr$[ebp]
+  00379	51		 push	 ecx
+  0037a	50		 push	 eax
+  0037b	ff 75 08	 push	 DWORD PTR _presenceType$[ebp]
+  0037e	8d 85 34 fd ff
+	ff		 lea	 eax, DWORD PTR _toStr$[ebp]
+  00384	50		 push	 eax
+  00385	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0DJ@ODJJ@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$DMstatus?$DO?$CFs@ ; `string'
+$L83866:
+  0038a	56		 push	 esi
+  0038b	e8 00 00 00 00	 call	 _JabberSend
+  00390	83 c4 1c	 add	 esp, 28			; 0000001cH
+
+; 721  : 		else
+
+  00393	eb 65		 jmp	 SHORT $L83489
+$L83825:
+
+; 722  : 			JabberSend(proto, "<presence%s type='%s'>%s%s</presence>", toStr, presenceType, priorityStr, (extra!=NULL)?extra:"");
+
+  00395	8d 45 b4	 lea	 eax, DWORD PTR _priorityStr$[ebp]
+  00398	50		 push	 eax
+  00399	8d 85 34 fd ff
+	ff		 lea	 eax, DWORD PTR _toStr$[ebp]
+  0039f	ff 75 08	 push	 DWORD PTR _presenceType$[ebp]
+  003a2	50		 push	 eax
+  003a3	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0CG@OPDC@?$DMpresence?$CFs?5type?$DN?8?$CFs?8?$DO?$CFs?$CFs?$DM?1pres@ ; `string'
+
+; 723  : 	} else {
+
+  003a8	eb 47		 jmp	 SHORT $L83865
+$L83476:
+
+; 724  : 		if (statusMsg)
+
+  003aa	3b c3		 cmp	 eax, ebx
+  003ac	74 23		 je	 SHORT $L83486
+
+; 725  : 			JabberSend(proto, "<presence%s><show>%s</show><status>%s</status>%s%s</presence>", toStr, showBody, statusMsg, priorityStr, (extra!=NULL)?extra:"");
+
+  003ae	8b 4d 14	 mov	 ecx, DWORD PTR _extra$[ebp]
+  003b1	3b cb		 cmp	 ecx, ebx
+  003b3	75 05		 jne	 SHORT $L83828
+  003b5	b9 00 00 00 00	 mov	 ecx, OFFSET FLAT:??_C@_00A@?$AA@ ; `string'
+$L83828:
+  003ba	51		 push	 ecx
+  003bb	8d 4d b4	 lea	 ecx, DWORD PTR _priorityStr$[ebp]
+  003be	51		 push	 ecx
+  003bf	50		 push	 eax
+  003c0	ff 75 10	 push	 DWORD PTR _showBody$[ebp]
+  003c3	8d 85 34 fd ff
+	ff		 lea	 eax, DWORD PTR _toStr$[ebp]
+  003c9	50		 push	 eax
+  003ca	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0DO@DKPG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$DMstat@ ; `string'
+
+; 726  : 		else
+
+  003cf	eb b9		 jmp	 SHORT $L83866
+$L83486:
+
+; 727  : 			JabberSend(proto, "<presence%s><show>%s</show>%s%s</presence>", toStr, showBody, priorityStr, (extra!=NULL)?extra:"");
+
+  003d1	8b 45 14	 mov	 eax, DWORD PTR _extra$[ebp]
+  003d4	3b c3		 cmp	 eax, ebx
+  003d6	75 05		 jne	 SHORT $L83830
+  003d8	b8 00 00 00 00	 mov	 eax, OFFSET FLAT:??_C@_00A@?$AA@ ; `string'
+$L83830:
+  003dd	50		 push	 eax
+  003de	8d 45 b4	 lea	 eax, DWORD PTR _priorityStr$[ebp]
+  003e1	50		 push	 eax
+  003e2	8d 85 34 fd ff
+	ff		 lea	 eax, DWORD PTR _toStr$[ebp]
+  003e8	ff 75 10	 push	 DWORD PTR _showBody$[ebp]
+  003eb	50		 push	 eax
+  003ec	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0CL@HAFG@?$DMpresence?$CFs?$DO?$DMshow?$DO?$CFs?$DM?1show?$DO?$CFs?$CFs?$DM@ ; `string'
+$L83865:
+  003f1	56		 push	 esi
+  003f2	e8 00 00 00 00	 call	 _JabberSend
+  003f7	83 c4 18	 add	 esp, 24			; 00000018H
+$L83489:
+
+; 728  : 	}
+; 729  : 	if (ptr) {
+
+  003fa	39 5d fc	 cmp	 DWORD PTR _ptr$[ebp], ebx
+  003fd	74 0a		 je	 SHORT $L83492
+
+; 730  : 		mir_free(ptr);
+
+  003ff	ff 75 fc	 push	 DWORD PTR _ptr$[ebp]
+  00402	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+  00408	59		 pop	 ecx
+$L83492:
+
+; 731  : 	}
+; 732  : 	LeaveCriticalSection(&proto->modeMsgMutex);
+
+  00409	ff 75 d4	 push	 DWORD PTR -44+[ebp]
+  0040c	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__LeaveCriticalSection@4
+$L83376:
+  00412	5e		 pop	 esi
+  00413	5b		 pop	 ebx
+
+; 733  : }
+
+  00414	c9		 leave
+  00415	c3		 ret	 0
+$L83867:
+  00416	00 00 00 00	 DD	 $L83408
+  0041a	00 00 00 00	 DD	 $L83396
+  0041e	00 00 00 00	 DD	 $L83398
+  00422	00 00 00 00	 DD	 $L83402
+  00426	00 00 00 00	 DD	 $L83400
+  0042a	00 00 00 00	 DD	 $L83402
+  0042e	00 00 00 00	 DD	 $L83404
+  00432	00 00 00 00	 DD	 $L83406
+  00436	00 00 00 00	 DD	 $L83398
+  0043a	00 00 00 00	 DD	 $L83398
+$L83868:
+  0043e	00 00 00 00	 DD	 $L83422
+  00442	00 00 00 00	 DD	 $L83423
+  00446	00 00 00 00	 DD	 $L83425
+  0044a	00 00 00 00	 DD	 $L83424
+  0044e	00 00 00 00	 DD	 $L83425
+  00452	00 00 00 00	 DD	 $L83426
+  00456	00 00 00 00	 DD	 $L83427
+  0045a	00 00 00 00	 DD	 $L83423
+  0045e	00 00 00 00	 DD	 $L83423
+_JabberSendPresenceTo ENDP
+_TEXT	ENDS
+PUBLIC	_JabberSendPresence
+;	COMDAT _JabberSendPresence
+_TEXT	SEGMENT
+_proto$ = 8
+_status$ = 12
+_JabberSendPresence PROC NEAR				; COMDAT
+
+; 737  : 	switch (status) {
+
+  00000	8b 4c 24 08	 mov	 ecx, DWORD PTR _status$[esp-4]
+  00004	81 f9 87 9c 00
+	00		 cmp	 ecx, 40071		; 00009c87H
+  0000a	7c 2c		 jl	 SHORT $L83503
+  0000c	81 f9 88 9c 00
+	00		 cmp	 ecx, 40072		; 00009c88H
+  00012	7e 29		 jle	 SHORT $L83499
+  00014	ba 8a 9c 00 00	 mov	 edx, 40074		; 00009c8aH
+  00019	3b ca		 cmp	 ecx, edx
+  0001b	74 32		 je	 SHORT $L83504
+  0001d	81 f9 8b 9c 00
+	00		 cmp	 ecx, 40075		; 00009c8bH
+  00023	74 18		 je	 SHORT $L83499
+  00025	b8 8c 9c 00 00	 mov	 eax, 40076		; 00009c8cH
+  0002a	3b c8		 cmp	 ecx, eax
+  0002c	74 21		 je	 SHORT $L83504
+  0002e	7e 08		 jle	 SHORT $L83503
+  00030	81 f9 8e 9c 00
+	00		 cmp	 ecx, 40078		; 00009c8eH
+  00036	7e 05		 jle	 SHORT $L83499
+$L83503:
+
+; 738  : 		case ID_STATUS_ONLINE:
+; 739  : 		case ID_STATUS_OFFLINE:
+; 740  : 		case ID_STATUS_NA:
+; 741  : 		case ID_STATUS_FREECHAT:
+; 742  : 		case ID_STATUS_INVISIBLE:
+; 743  : 			status = status;
+; 744  : 			break;
+; 745  : 		case ID_STATUS_AWAY:
+; 746  : 		case ID_STATUS_ONTHEPHONE:
+; 747  : 		case ID_STATUS_OUTTOLUNCH:
+; 748  : 		default:
+; 749  : 			status = ID_STATUS_AWAY;
+
+  00038	b9 89 9c 00 00	 mov	 ecx, 40073		; 00009c89H
+$L83499:
+
+; 755  : 	}
+; 756  : 	JabberSendPresenceTo(proto, status, NULL, NULL);
+
+  0003d	6a 00		 push	 0
+  0003f	6a 00		 push	 0
+  00041	51		 push	 ecx
+  00042	ff 74 24 10	 push	 DWORD PTR _proto$[esp+8]
+  00046	e8 00 00 00 00	 call	 _JabberSendPresenceTo
+  0004b	83 c4 10	 add	 esp, 16			; 00000010H
+
+; 757  : /*
+; 758  : 	if (DBGetContactSettingByte(NULL, iface.m_szModuleName, "VisibilitySupport", FALSE)) {
+; 759  : 		if (status == ID_STATUS_INVISIBLE)
+; 760  : 			JabberSendVisiblePresence();
+; 761  : 		else
+; 762  : 			JabberSendInvisiblePresence();
+; 763  : 	}
+; 764  : 	*/
+; 765  : }
+
+  0004e	c3		 ret	 0
+$L83504:
+
+; 750  : 			break;
+; 751  : 		case ID_STATUS_DND:
+; 752  : 		case ID_STATUS_OCCUPIED:
+; 753  : 			status = ID_STATUS_DND;
+
+  0004f	8b ca		 mov	 ecx, edx
+
+; 754  : 			break;
+
+  00051	eb ea		 jmp	 SHORT $L83499
+_JabberSendPresence ENDP
+_TEXT	ENDS
+PUBLIC	_JabberStringAppend
+;	COMDAT _JabberStringAppend
+_TEXT	SEGMENT
+_str$ = 8
+_sizeAlloced$ = 12
+_fmt$ = 16
+_size$ = 8
+_len$ = 12
+_JabberStringAppend PROC NEAR				; COMDAT
+
+; 768  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	53		 push	 ebx
+  00004	56		 push	 esi
+  00005	57		 push	 edi
+
+; 769  : 	va_list vararg;
+; 770  : 	char *p;
+; 771  : 	int size, len;
+; 772  : 
+; 773  : 	if (str == NULL) return;
+
+  00006	8b 7d 08	 mov	 edi, DWORD PTR _str$[ebp]
+  00009	85 ff		 test	 edi, edi
+  0000b	0f 84 8b 00 00
+	00		 je	 $L83530
+
+; 774  : 
+; 775  : 	if (*str==NULL || *sizeAlloced<=0) {
+
+  00011	8b 07		 mov	 eax, DWORD PTR [edi]
+  00013	8b 5d 0c	 mov	 ebx, DWORD PTR _sizeAlloced$[ebp]
+  00016	85 c0		 test	 eax, eax
+  00018	be 00 08 00 00	 mov	 esi, 2048		; 00000800H
+  0001d	74 20		 je	 SHORT $L83522
+  0001f	83 3b 00	 cmp	 DWORD PTR [ebx], 0
+  00022	7e 1b		 jle	 SHORT $L83522
+
+; 779  : 	}
+; 780  : 	else {
+; 781  : 		len = strlen(*str);
+
+  00024	50		 push	 eax
+  00025	e8 00 00 00 00	 call	 _strlen
+
+; 782  : 		size = *sizeAlloced - strlen(*str);
+
+  0002a	ff 37		 push	 DWORD PTR [edi]
+  0002c	89 45 0c	 mov	 DWORD PTR _len$[ebp], eax
+  0002f	e8 00 00 00 00	 call	 _strlen
+  00034	59		 pop	 ecx
+  00035	59		 pop	 ecx
+  00036	8b 0b		 mov	 ecx, DWORD PTR [ebx]
+  00038	2b c8		 sub	 ecx, eax
+  0003a	89 4d 08	 mov	 DWORD PTR _size$[ebp], ecx
+  0003d	eb 15		 jmp	 SHORT $L83524
+$L83522:
+
+; 776  : 		*sizeAlloced = size = 2048;
+; 777  : 		*str = (char *) mir_alloc(size);
+
+  0003f	56		 push	 esi
+  00040	89 75 08	 mov	 DWORD PTR _size$[ebp], esi
+  00043	89 33		 mov	 DWORD PTR [ebx], esi
+  00045	ff 15 04 00 00
+	00		 call	 DWORD PTR _mmi+4
+
+; 778  : 		len = 0;
+
+  0004b	83 65 0c 00	 and	 DWORD PTR _len$[ebp], 0
+  0004f	59		 pop	 ecx
+  00050	89 07		 mov	 DWORD PTR [edi], eax
+  00052	8b ce		 mov	 ecx, esi
+$L83524:
+
+; 783  : 	}
+; 784  : 
+; 785  : 	p = *str + len;
+
+  00054	8b 07		 mov	 eax, DWORD PTR [edi]
+
+; 786  : 	va_start(vararg, fmt);
+; 787  : 	while (_vsnprintf(p, size, fmt, vararg) == -1) {
+
+  00056	8d 55 14	 lea	 edx, DWORD PTR _fmt$[ebp+4]
+  00059	03 45 0c	 add	 eax, DWORD PTR _len$[ebp]
+  0005c	52		 push	 edx
+  0005d	ff 75 10	 push	 DWORD PTR _fmt$[ebp]
+  00060	51		 push	 ecx
+  00061	50		 push	 eax
+  00062	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp___vsnprintf
+  00068	83 c4 10	 add	 esp, 16			; 00000010H
+$L83875:
+  0006b	83 f8 ff	 cmp	 eax, -1
+  0006e	75 2c		 jne	 SHORT $L83530
+
+; 788  : 		size += 2048;
+; 789  : 		(*sizeAlloced) += 2048;
+
+  00070	01 33		 add	 DWORD PTR [ebx], esi
+
+; 790  : 		*str = (char *) mir_realloc(*str, *sizeAlloced);
+
+  00072	ff 33		 push	 DWORD PTR [ebx]
+  00074	01 75 08	 add	 DWORD PTR _size$[ebp], esi
+  00077	ff 37		 push	 DWORD PTR [edi]
+  00079	ff 15 08 00 00
+	00		 call	 DWORD PTR _mmi+8
+
+; 791  : 		p = *str + len;
+
+  0007f	8b 4d 0c	 mov	 ecx, DWORD PTR _len$[ebp]
+  00082	89 07		 mov	 DWORD PTR [edi], eax
+  00084	03 c1		 add	 eax, ecx
+  00086	8d 4d 14	 lea	 ecx, DWORD PTR _fmt$[ebp+4]
+  00089	51		 push	 ecx
+  0008a	ff 75 10	 push	 DWORD PTR _fmt$[ebp]
+  0008d	ff 75 08	 push	 DWORD PTR _size$[ebp]
+  00090	50		 push	 eax
+  00091	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp___vsnprintf
+  00097	83 c4 18	 add	 esp, 24			; 00000018H
+  0009a	eb cf		 jmp	 SHORT $L83875
+$L83530:
+  0009c	5f		 pop	 edi
+  0009d	5e		 pop	 esi
+  0009e	5b		 pop	 ebx
+
+; 792  : 	}
+; 793  : 	va_end(vararg);
+; 794  : }
+
+  0009f	5d		 pop	 ebp
+  000a0	c3		 ret	 0
+_JabberStringAppend ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_05FECE@GIF89?$AA@				; `string'
+PUBLIC	??_C@_04JKCC@?$IJPNG?$AA@			; `string'
+PUBLIC	??_C@_02HGED@BM?$AA@				; `string'
+PUBLIC	??_C@_02IHJM@?$PP?X?$AA@			; `string'
+PUBLIC	_JabberGetPictureType
+EXTRN	_memcmp:NEAR
+;	COMDAT ??_C@_05FECE@GIF89?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_util.c
+_DATA	SEGMENT
+??_C@_05FECE@GIF89?$AA@ DB 'GIF89', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_04JKCC@?$IJPNG?$AA@
+_DATA	SEGMENT
+??_C@_04JKCC@?$IJPNG?$AA@ DB 089H, 'PNG', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_02HGED@BM?$AA@
+_DATA	SEGMENT
+??_C@_02HGED@BM?$AA@ DB 'BM', 00H			; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_02IHJM@?$PP?X?$AA@
+_DATA	SEGMENT
+??_C@_02IHJM@?$PP?X?$AA@ DB 0ffH, 0d8H, 00H		; `string'
+_DATA	ENDS
+;	COMDAT _JabberGetPictureType
+_TEXT	SEGMENT
+_buf$ = 8
+_JabberGetPictureType PROC NEAR				; COMDAT
+
+; 813  : {
+
+  00000	56		 push	 esi
+
+; 814  : 	if ( buf != NULL ) {
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _buf$[esp]
+  00005	85 f6		 test	 esi, esi
+  00007	74 61		 je	 SHORT $L83544
+
+; 815  : 		if ( memcmp( buf, "GIF89", 5 ) == 0 )    return PA_FORMAT_GIF;
+
+  00009	6a 05		 push	 5
+  0000b	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_05FECE@GIF89?$AA@ ; `string'
+  00010	56		 push	 esi
+  00011	e8 00 00 00 00	 call	 _memcmp
+  00016	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00019	85 c0		 test	 eax, eax
+  0001b	75 04		 jne	 SHORT $L83538
+  0001d	6a 05		 push	 5
+  0001f	eb 46		 jmp	 SHORT $L83877
+$L83538:
+
+; 816  : 		if ( memcmp( buf, "\x89PNG", 4 ) == 0 )  return PA_FORMAT_PNG;
+
+  00021	6a 04		 push	 4
+  00023	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_04JKCC@?$IJPNG?$AA@ ; `string'
+  00028	56		 push	 esi
+  00029	e8 00 00 00 00	 call	 _memcmp
+  0002e	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00031	85 c0		 test	 eax, eax
+  00033	75 04		 jne	 SHORT $L83540
+  00035	6a 01		 push	 1
+  00037	eb 2e		 jmp	 SHORT $L83877
+$L83540:
+
+; 817  : 		if ( memcmp( buf, "BM", 2 ) == 0 )       return PA_FORMAT_BMP;
+
+  00039	6a 02		 push	 2
+  0003b	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_02HGED@BM?$AA@ ; `string'
+  00040	56		 push	 esi
+  00041	e8 00 00 00 00	 call	 _memcmp
+  00046	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00049	85 c0		 test	 eax, eax
+  0004b	75 04		 jne	 SHORT $L83542
+  0004d	6a 04		 push	 4
+  0004f	eb 16		 jmp	 SHORT $L83877
+$L83542:
+
+; 818  : 		if ( memcmp( buf, "\xFF\xD8", 2 ) == 0 ) return PA_FORMAT_JPEG;	}
+
+  00051	6a 02		 push	 2
+  00053	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_02IHJM@?$PP?X?$AA@ ; `string'
+  00058	56		 push	 esi
+  00059	e8 00 00 00 00	 call	 _memcmp
+  0005e	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00061	85 c0		 test	 eax, eax
+  00063	75 05		 jne	 SHORT $L83544
+  00065	6a 02		 push	 2
+$L83877:
+  00067	58		 pop	 eax
+  00068	5e		 pop	 esi
+
+; 820  : }
+
+  00069	c3		 ret	 0
+$L83544:
+
+; 819  : 	return PA_FORMAT_UNKNOWN;
+
+  0006a	33 c0		 xor	 eax, eax
+  0006c	5e		 pop	 esi
+
+; 820  : }
+
+  0006d	c3		 ret	 0
+_JabberGetPictureType ENDP
+_TEXT	ENDS
+END

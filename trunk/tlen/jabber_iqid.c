@@ -27,8 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_iq.h"
 #include "tlen_muc.h"
 
-extern char *searchJID;
-
 void JabberIqResultAuth(TlenProtocol *proto, XmlNode *iqNode)
 {
 	char *type;
@@ -468,9 +466,9 @@ void JabberIqResultSearch(TlenProtocol *proto, XmlNode *iqNode)
 					}
 				}
 			}
-			if (searchJID!=NULL) {
+			if (proto->searchJID!=NULL) {
 				if (!found) {
-					_snprintf(jsr.jid, sizeof(jsr.jid), "%s@%s", searchJID, dbv.pszVal);
+					_snprintf(jsr.jid, sizeof(jsr.jid), "%s@%s", proto->searchJID, dbv.pszVal);
 					jsr.jid[sizeof(jsr.jid)-1] = '\0';
 					jsr.hdr.nick = mir_strdup("");
 					jsr.hdr.firstName = mir_strdup("");
@@ -482,8 +480,8 @@ void JabberIqResultSearch(TlenProtocol *proto, XmlNode *iqNode)
 					mir_free(jsr.hdr.lastName);
 					mir_free(jsr.hdr.email);
 				}
-				mir_free(searchJID);
-				searchJID = NULL;
+				mir_free(proto->searchJID);
+				proto->searchJID = NULL;
 			}
 			DBFreeVariant(&dbv);
 		}

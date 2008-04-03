@@ -24,6 +24,7 @@
 #define IDD_VOICE						159
 #define IDD_ACCEPT_VOICE				160
 #define IDD_USER_CHANGEAVATAR			161
+#define IDD_ACCMGRUI                    162
 
 #define IDC_TABS						1000
 #define IDC_EDIT_USERNAME               1001

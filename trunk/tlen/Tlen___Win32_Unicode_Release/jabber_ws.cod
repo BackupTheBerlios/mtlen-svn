@@ -1,0 +1,1174 @@
+	TITLE	E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_ws.c
+	.386P
+include listing.inc
+if @Version gt 510
+.model FLAT
+else
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT DWORD USE32 PUBLIC 'BSS'
+_BSS	ENDS
+_TLS	SEGMENT DWORD USE32 PUBLIC 'TLS'
+_TLS	ENDS
+;	COMDAT ??_C@_0BG@FJFA@Miranda?1System?1GetMMI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@DNA@Miranda?1System?1GetLI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@FHMP@Miranda?1System?1GetUTFI?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@DCOH@Miranda?1Thread?1Fork?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@IENN@Miranda?1Thread?1ForkEx?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@FGIN@Miranda?1SysTerm?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@LIGC@Utils?1AddToWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BL@PEAI@Utils?1RemoveFromWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@GMNB@Utils?1FindWindowInList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BM@NOMI@Utils?1BroadcastToWindowList?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0CB@CFCA@Utils?1BroadcastToWindowListAsync@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@MDKL@Utils?1SaveWindowPos?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@GALP@Utils?1RestoreWindowPos?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@CHLF@Miranda?1System?1GetMD5I?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@FOPF@Miranda?1System?1GetSHA1I?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@OCFE@Netlib?1CloseHandle?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@EFDJ@Netlib?1Send?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0M@GFGB@Netlib?1Recv?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@CMGK@Netlib?1Log?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BM@GDOO@Netlib?1InitSecurityProvider?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BP@JINJ@Netlib?1DestroySecurityProvider?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BK@CBFG@Netlib?1NtlmCreateResponse?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@COCL@Proto?1EnumAccounts?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@CCNI@Proto?1GetAccount?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@IFFL@Proto?1BroadcastAck?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@MGBG@DB?1Event?1GetText?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@HANO@DB?1Contact?1GetSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@BEPM@DB?1Contact?1GetSettingStr?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@OGAJ@DB?1Contact?1FreeVariant?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0DA@FLKM@C?3?2MirandaDev?2miranda_svn2?2inclu@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@IGCO@DB?1Contact?1DeleteSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@PLGC@DB?1Contact?1WriteSetting?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@GNEH@LangPack?1TranslateDialog?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@GFNK@Skin?1Icons?1Load?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BF@BLFF@Skin?1Icons?1LoadProto?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@CNOA@Skin?1Sounds?1AddNew?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@LENC@Skin?1Sounds?1Play?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0P@PNGM@PopUp?1AddPopUp?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@OBDC@PopUp?1AddPopUpEx?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BA@CGKI@PopUp?1AddPopUpW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@HIHP@PopUp?1GetContact?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@CCHD@PopUp?1GetPluginData?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BI@HKEA@PopUp?1IsSecondLineShown?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@KGOE@PopUp?1Changetext?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BC@LAPD@PopUp?1ChangetextW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0N@KOPP@PopUp?1Change?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BC@BGJ@PopUp?1ShowMessage?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BD@NFFE@PopUp?1ShowMessageW?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@MAHO@PopUp?1AddPopupClass?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0L@DLBA@connection?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_05JKGE@?$CFs?5?$CFs?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@JCJA@Netlib?1RegisterUser?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_07LFML@?$CFsSOCKS?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@EIPI@Netlib?1SetUserSettings?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BG@JEKK@Netlib?1OpenConnection?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BP@PBNN@Netlib_Send?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BP@PJEJ@Netlib_Recv?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BN@OHML@Connection?5closed?5gracefully?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT ??_C@_0BB@OHBC@Sending?5?$CFd?5bytes?$AA@
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+;	COMDAT _Netlib_CloseHandle
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _Netlib_Send
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _Netlib_Recv
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingByte_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingWord_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingDword_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBGetContactSettingString_Helper
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _DBFreeVariant
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberWsInit
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberWsUninit
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberWsConnect
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberWsSend
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberWsRecv
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberWsSendAES
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _JabberWsRecvAES
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+FLAT	GROUP _DATA, CONST, _BSS
+	ASSUME	CS: FLAT, DS: FLAT, SS: FLAT
+endif
+PUBLIC	_JabberWsInit
+PUBLIC	??_C@_0L@DLBA@connection?$AA@			; `string'
+PUBLIC	??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@	; `string'
+PUBLIC	??_C@_05JKGE@?$CFs?5?$CFs?$AA@			; `string'
+PUBLIC	??_C@_0BE@JCJA@Netlib?1RegisterUser?$AA@	; `string'
+PUBLIC	??_C@_07LFML@?$CFsSOCKS?$AA@			; `string'
+PUBLIC	??_C@_0BH@EIPI@Netlib?1SetUserSettings?$AA@	; `string'
+EXTRN	_mmi:BYTE
+EXTRN	__imp__sprintf:NEAR
+EXTRN	_pluginLink:DWORD
+;	COMDAT ??_C@_0L@DLBA@connection?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_ws.c
+_DATA	SEGMENT
+??_C@_0L@DLBA@connection?$AA@ DB 'connection', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@
+_DATA	SEGMENT
+??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ DB 'LangPack/TranslateStrin'
+	DB	'g', 00H					; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_05JKGE@?$CFs?5?$CFs?$AA@
+_DATA	SEGMENT
+??_C@_05JKGE@?$CFs?5?$CFs?$AA@ DB '%s %s', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BE@JCJA@Netlib?1RegisterUser?$AA@
+_DATA	SEGMENT
+??_C@_0BE@JCJA@Netlib?1RegisterUser?$AA@ DB 'Netlib/RegisterUser', 00H ; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_07LFML@?$CFsSOCKS?$AA@
+_DATA	SEGMENT
+??_C@_07LFML@?$CFsSOCKS?$AA@ DB '%sSOCKS', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BH@EIPI@Netlib?1SetUserSettings?$AA@
+_DATA	SEGMENT
+??_C@_0BH@EIPI@Netlib?1SetUserSettings?$AA@ DB 'Netlib/SetUserSettings', 00H ; `string'
+_DATA	ENDS
+;	COMDAT _JabberWsInit
+_TEXT	SEGMENT
+_proto$ = 8
+_nlu$ = -44
+_nlus$ = -104
+_name$ = -232
+_szTmp$ = 8
+_JabberWsInit PROC NEAR					; COMDAT
+
+; 27   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	81 ec e8 00 00
+	00		 sub	 esp, 232		; 000000e8H
+  00009	53		 push	 ebx
+  0000a	56		 push	 esi
+
+; 28   : 	NETLIBUSER nlu = {0};
+; 29   : 	NETLIBUSERSETTINGS nlus = {0};
+; 30   : 	char name[128];
+; 31   : 
+; 32   : #ifdef UNICODE
+; 33   : 	char *szTmp = mir_u2a(proto->iface.m_tszUserName);
+
+  0000b	8b 75 08	 mov	 esi, DWORD PTR _proto$[ebp]
+  0000e	57		 push	 edi
+  0000f	6a 0a		 push	 10			; 0000000aH
+  00011	33 db		 xor	 ebx, ebx
+  00013	59		 pop	 ecx
+  00014	33 c0		 xor	 eax, eax
+  00016	8d 7d d8	 lea	 edi, DWORD PTR _nlu$[ebp+4]
+  00019	89 5d d4	 mov	 DWORD PTR _nlu$[ebp], ebx
+  0001c	f3 ab		 rep stosd
+  0001e	6a 0e		 push	 14			; 0000000eH
+  00020	8d 7d 9c	 lea	 edi, DWORD PTR _nlus$[ebp+4]
+  00023	59		 pop	 ecx
+  00024	89 5d 98	 mov	 DWORD PTR _nlus$[ebp], ebx
+  00027	ff 76 14	 push	 DWORD PTR [esi+20]
+  0002a	f3 ab		 rep stosd
+  0002c	ff 15 38 00 00
+	00		 call	 DWORD PTR _mmi+56
+  00032	89 45 08	 mov	 DWORD PTR _szTmp$[ebp], eax
+
+; 34   : 	sprintf( name, "%s %s", szTmp, Translate( "connection" ));
+
+  00035	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0003a	c7 04 24 00 00
+	00 00		 mov	 DWORD PTR [esp], OFFSET FLAT:??_C@_0L@DLBA@connection?$AA@ ; `string'
+  00041	53		 push	 ebx
+  00042	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BJ@MKNL@LangPack?1TranslateString?$AA@ ; `string'
+  00047	ff 50 24	 call	 DWORD PTR [eax+36]
+  0004a	8b 3d 00 00 00
+	00		 mov	 edi, DWORD PTR __imp__sprintf
+  00050	50		 push	 eax
+  00051	ff 75 08	 push	 DWORD PTR _szTmp$[ebp]
+  00054	8d 85 18 ff ff
+	ff		 lea	 eax, DWORD PTR _name$[ebp]
+  0005a	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_05JKGE@?$CFs?5?$CFs?$AA@ ; `string'
+  0005f	50		 push	 eax
+  00060	ff d7		 call	 edi
+
+; 35   : 	mir_free(szTmp);
+
+  00062	ff 75 08	 push	 DWORD PTR _szTmp$[ebp]
+  00065	ff 15 0c 00 00
+	00		 call	 DWORD PTR _mmi+12
+
+; 36   : #else
+; 37   : 	sprintf( name, "%s %s", proto->iface.m_tszUserName, Translate( "connection" ));
+; 38   : #endif
+; 39   : 
+; 40   : 	nlu.cbSize = sizeof(nlu);
+; 41   : 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_HTTPCONNS;	// | NUF_HTTPGATEWAY;
+; 42   : 	nlu.szDescriptiveName = name;
+
+  0006b	8d 85 18 ff ff
+	ff		 lea	 eax, DWORD PTR _name$[ebp]
+  00071	c7 45 d4 2c 00
+	00 00		 mov	 DWORD PTR _nlu$[ebp], 44 ; 0000002cH
+  00078	89 45 dc	 mov	 DWORD PTR _nlu$[ebp+8], eax
+
+; 43   : 	nlu.szSettingsModule = proto->iface.m_szModuleName;
+
+  0007b	8b 46 1c	 mov	 eax, DWORD PTR [esi+28]
+  0007e	89 45 d8	 mov	 DWORD PTR _nlu$[ebp+4], eax
+
+; 44   : 	proto->hNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
+
+  00081	8d 45 d4	 lea	 eax, DWORD PTR _nlu$[ebp]
+  00084	50		 push	 eax
+  00085	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0008a	53		 push	 ebx
+  0008b	bb 00 00 00 00	 mov	 ebx, OFFSET FLAT:??_C@_0BE@JCJA@Netlib?1RegisterUser?$AA@ ; `string'
+  00090	53		 push	 ebx
+  00091	c7 45 e0 13 00
+	00 00		 mov	 DWORD PTR _nlu$[ebp+12], 19 ; 00000013H
+  00098	ff 50 24	 call	 DWORD PTR [eax+36]
+
+; 45   : 
+; 46   : 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_NOOPTIONS;
+; 47   : 	sprintf(name, "%sSOCKS", proto->iface.m_szModuleName);
+
+  0009b	ff 76 1c	 push	 DWORD PTR [esi+28]
+  0009e	89 86 c0 00 00
+	00		 mov	 DWORD PTR [esi+192], eax
+  000a4	8d 85 18 ff ff
+	ff		 lea	 eax, DWORD PTR _name$[ebp]
+  000aa	c7 45 e0 0b 00
+	00 00		 mov	 DWORD PTR _nlu$[ebp+12], 11 ; 0000000bH
+  000b1	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_07LFML@?$CFsSOCKS?$AA@ ; `string'
+  000b6	50		 push	 eax
+  000b7	ff d7		 call	 edi
+
+; 48   : 	nlu.szDescriptiveName = name;
+
+  000b9	8d 85 18 ff ff
+	ff		 lea	 eax, DWORD PTR _name$[ebp]
+
+; 49   : 	proto->hFileNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
+
+  000bf	33 ff		 xor	 edi, edi
+  000c1	89 45 dc	 mov	 DWORD PTR _nlu$[ebp+8], eax
+  000c4	8d 45 d4	 lea	 eax, DWORD PTR _nlu$[ebp]
+  000c7	50		 push	 eax
+  000c8	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  000cd	57		 push	 edi
+  000ce	53		 push	 ebx
+  000cf	ff 50 24	 call	 DWORD PTR [eax+36]
+  000d2	83 c4 44	 add	 esp, 68			; 00000044H
+
+; 50   : 	nlus.cbSize = sizeof(nlus);
+; 51   : 	nlus.useProxy = 0;
+; 52   : 	CallService(MS_NETLIB_SETUSERSETTINGS, (WPARAM) proto->hFileNetlibUser, (LPARAM) &nlus);
+
+  000d5	8d 4d 98	 lea	 ecx, DWORD PTR _nlus$[ebp]
+  000d8	89 86 c4 00 00
+	00		 mov	 DWORD PTR [esi+196], eax
+  000de	c7 45 98 3c 00
+	00 00		 mov	 DWORD PTR _nlus$[ebp], 60 ; 0000003cH
+  000e5	51		 push	 ecx
+  000e6	50		 push	 eax
+  000e7	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  000ec	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BH@EIPI@Netlib?1SetUserSettings?$AA@ ; `string'
+  000f1	89 7d 9c	 mov	 DWORD PTR _nlus$[ebp+4], edi
+  000f4	ff 50 24	 call	 DWORD PTR [eax+36]
+  000f7	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 53   : 
+; 54   : 	return (proto->hNetlibUser!=NULL)?TRUE:FALSE;
+
+  000fa	33 c0		 xor	 eax, eax
+  000fc	39 be c0 00 00
+	00		 cmp	 DWORD PTR [esi+192], edi
+  00102	5f		 pop	 edi
+  00103	5e		 pop	 esi
+  00104	0f 95 c0	 setne	 al
+  00107	5b		 pop	 ebx
+
+; 55   : }
+
+  00108	c9		 leave
+  00109	c3		 ret	 0
+_JabberWsInit ENDP
+_TEXT	ENDS
+PUBLIC	??_C@_0BD@OCFE@Netlib?1CloseHandle?$AA@		; `string'
+PUBLIC	_JabberWsUninit
+;	COMDAT ??_C@_0BD@OCFE@Netlib?1CloseHandle?$AA@
+; File C:\MirandaDev\miranda_svn2\include\m_netlib.h
+_DATA	SEGMENT
+??_C@_0BD@OCFE@Netlib?1CloseHandle?$AA@ DB 'Netlib/CloseHandle', 00H ; `string'
+_DATA	ENDS
+;	COMDAT _JabberWsUninit
+_TEXT	SEGMENT
+_proto$ = 8
+_JabberWsUninit PROC NEAR				; COMDAT
+
+; 58   : {
+
+  00000	56		 push	 esi
+
+; 59   : 	if (proto->hNetlibUser!=NULL) Netlib_CloseHandle(proto->hNetlibUser);
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _proto$[esp]
+  00005	57		 push	 edi
+  00006	bf 00 00 00 00	 mov	 edi, OFFSET FLAT:??_C@_0BD@OCFE@Netlib?1CloseHandle?$AA@ ; `string'
+  0000b	8b 86 c0 00 00
+	00		 mov	 eax, DWORD PTR [esi+192]
+  00011	85 c0		 test	 eax, eax
+  00013	74 0f		 je	 SHORT $L83014
+  00015	6a 00		 push	 0
+  00017	50		 push	 eax
+  00018	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  0001d	57		 push	 edi
+  0001e	ff 50 24	 call	 DWORD PTR [eax+36]
+  00021	83 c4 0c	 add	 esp, 12			; 0000000cH
+$L83014:
+
+; 60   : 	if (proto->hFileNetlibUser!=NULL) Netlib_CloseHandle(proto->hFileNetlibUser);
+
+  00024	8b 86 c4 00 00
+	00		 mov	 eax, DWORD PTR [esi+196]
+  0002a	85 c0		 test	 eax, eax
+  0002c	74 0f		 je	 SHORT $L83018
+  0002e	6a 00		 push	 0
+  00030	50		 push	 eax
+  00031	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00036	57		 push	 edi
+  00037	ff 50 24	 call	 DWORD PTR [eax+36]
+  0003a	83 c4 0c	 add	 esp, 12			; 0000000cH
+$L83018:
+
+; 61   :     proto->hNetlibUser = NULL;
+
+  0003d	83 a6 c0 00 00
+	00 00		 and	 DWORD PTR [esi+192], 0
+
+; 62   :     proto->hFileNetlibUser = NULL;
+
+  00044	83 a6 c4 00 00
+	00 00		 and	 DWORD PTR [esi+196], 0
+  0004b	5f		 pop	 edi
+  0004c	5e		 pop	 esi
+
+; 63   : }
+
+  0004d	c3		 ret	 0
+_JabberWsUninit ENDP
+_TEXT	ENDS
+PUBLIC	_JabberWsConnect
+PUBLIC	??_C@_0BG@JEKK@Netlib?1OpenConnection?$AA@	; `string'
+;	COMDAT ??_C@_0BG@JEKK@Netlib?1OpenConnection?$AA@
+; File E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\jabber_ws.c
+_DATA	SEGMENT
+??_C@_0BG@JEKK@Netlib?1OpenConnection?$AA@ DB 'Netlib/OpenConnection', 00H ; `string'
+_DATA	ENDS
+;	COMDAT _JabberWsConnect
+_TEXT	SEGMENT
+_proto$ = 8
+_host$ = 12
+_port$ = 16
+_nloc$ = -24
+_JabberWsConnect PROC NEAR				; COMDAT
+
+; 66   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 18	 sub	 esp, 24			; 00000018H
+
+; 67   : 	NETLIBOPENCONNECTION nloc;
+; 68   : 
+; 69   : 	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
+; 70   : 	nloc.szHost = host;
+
+  00006	8b 45 0c	 mov	 eax, DWORD PTR _host$[ebp]
+
+; 71   : 	nloc.wPort = port;
+; 72   : 	nloc.flags = 0;
+
+  00009	83 65 f4 00	 and	 DWORD PTR _nloc$[ebp+12], 0
+  0000d	89 45 ec	 mov	 DWORD PTR _nloc$[ebp+4], eax
+  00010	66 8b 45 10	 mov	 ax, WORD PTR _port$[ebp]
+  00014	66 89 45 f0	 mov	 WORD PTR _nloc$[ebp+8], ax
+
+; 73   : 	return (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) proto->hNetlibUser, (LPARAM) &nloc);
+
+  00018	8d 45 e8	 lea	 eax, DWORD PTR _nloc$[ebp]
+  0001b	50		 push	 eax
+  0001c	8b 45 08	 mov	 eax, DWORD PTR _proto$[ebp]
+  0001f	c7 45 e8 10 00
+	00 00		 mov	 DWORD PTR _nloc$[ebp], 16 ; 00000010H
+  00026	ff b0 c0 00 00
+	00		 push	 DWORD PTR [eax+192]
+  0002c	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00031	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BG@JEKK@Netlib?1OpenConnection?$AA@ ; `string'
+  00036	ff 50 24	 call	 DWORD PTR [eax+36]
+  00039	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 74   : }
+
+  0003c	c9		 leave
+  0003d	c3		 ret	 0
+_JabberWsConnect ENDP
+_TEXT	ENDS
+PUBLIC	_JabberWsSend
+PUBLIC	??_C@_0M@EFDJ@Netlib?1Send?$AA@			; `string'
+PUBLIC	??_C@_0BP@PBNN@Netlib_Send?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ ; `string'
+EXTRN	_WSAGetLastError@0:NEAR
+EXTRN	_JabberLog:NEAR
+;	COMDAT ??_C@_0M@EFDJ@Netlib?1Send?$AA@
+; File C:\MirandaDev\miranda_svn2\include\m_netlib.h
+_DATA	SEGMENT
+??_C@_0M@EFDJ@Netlib?1Send?$AA@ DB 'Netlib/Send', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BP@PBNN@Netlib_Send?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@
+_DATA	SEGMENT
+??_C@_0BP@PBNN@Netlib_Send?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ DB 'Net'
+	DB	'lib_Send() failed, error=%d', 00H		; `string'
+_DATA	ENDS
+;	COMDAT _JabberWsSend
+_TEXT	SEGMENT
+_nlb$83026 = -12
+_proto$ = 8
+_data$ = 12
+_datalen$ = 16
+_JabberWsSend PROC NEAR					; COMDAT
+
+; 77   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 0c	 sub	 esp, 12			; 0000000cH
+  00006	56		 push	 esi
+  00007	57		 push	 edi
+
+; 78   : 	int len;
+; 79   :     if (proto->threadData == NULL) {
+
+  00008	8b 7d 08	 mov	 edi, DWORD PTR _proto$[ebp]
+  0000b	8b 87 e0 00 00
+	00		 mov	 eax, DWORD PTR [edi+224]
+  00011	85 c0		 test	 eax, eax
+
+; 80   :         return FALSE;
+
+  00013	74 50		 je	 SHORT $L83028
+
+; 81   :     }
+; 82   : 	if ((len=Netlib_Send(proto->threadData->s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT))==SOCKET_ERROR || len!=datalen) {
+
+  00015	8b 4d 0c	 mov	 ecx, DWORD PTR _data$[ebp]
+  00018	8b 80 d4 02 00
+	00		 mov	 eax, DWORD PTR [eax+724]
+  0001e	8b 75 10	 mov	 esi, DWORD PTR _datalen$[ebp]
+  00021	89 4d f4	 mov	 DWORD PTR _nlb$83026[ebp], ecx
+  00024	8d 4d f4	 lea	 ecx, DWORD PTR _nlb$83026[ebp]
+  00027	89 75 f8	 mov	 DWORD PTR _nlb$83026[ebp+4], esi
+  0002a	51		 push	 ecx
+  0002b	50		 push	 eax
+  0002c	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00031	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0M@EFDJ@Netlib?1Send?$AA@ ; `string'
+  00036	c7 45 fc 00 00
+	08 00		 mov	 DWORD PTR _nlb$83026[ebp+8], 524288 ; 00080000H
+  0003d	ff 50 24	 call	 DWORD PTR [eax+36]
+  00040	83 c4 0c	 add	 esp, 12			; 0000000cH
+  00043	83 f8 ff	 cmp	 eax, -1
+  00046	74 09		 je	 SHORT $L82857
+  00048	3b c6		 cmp	 eax, esi
+  0004a	75 05		 jne	 SHORT $L82857
+
+; 85   : 	}
+; 86   : 	return TRUE;
+
+  0004c	6a 01		 push	 1
+  0004e	58		 pop	 eax
+  0004f	eb 16		 jmp	 SHORT $L82852
+$L82857:
+
+; 83   : 		JabberLog(proto, "Netlib_Send() failed, error=%d", WSAGetLastError());
+
+  00051	e8 00 00 00 00	 call	 _WSAGetLastError@0
+  00056	50		 push	 eax
+  00057	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BP@PBNN@Netlib_Send?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ ; `string'
+  0005c	57		 push	 edi
+  0005d	e8 00 00 00 00	 call	 _JabberLog
+  00062	83 c4 0c	 add	 esp, 12			; 0000000cH
+$L83028:
+
+; 84   : 		return FALSE;
+
+  00065	33 c0		 xor	 eax, eax
+$L82852:
+  00067	5f		 pop	 edi
+  00068	5e		 pop	 esi
+
+; 87   : }
+
+  00069	c9		 leave
+  0006a	c3		 ret	 0
+_JabberWsSend ENDP
+_TEXT	ENDS
+PUBLIC	_JabberWsRecv
+PUBLIC	??_C@_0M@GFGB@Netlib?1Recv?$AA@			; `string'
+PUBLIC	??_C@_0BP@PJEJ@Netlib_Recv?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ ; `string'
+PUBLIC	??_C@_0BN@OHML@Connection?5closed?5gracefully?$AA@ ; `string'
+;	COMDAT ??_C@_0M@GFGB@Netlib?1Recv?$AA@
+; File C:\MirandaDev\miranda_svn2\include\m_netlib.h
+_DATA	SEGMENT
+??_C@_0M@GFGB@Netlib?1Recv?$AA@ DB 'Netlib/Recv', 00H	; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BP@PJEJ@Netlib_Recv?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@
+_DATA	SEGMENT
+??_C@_0BP@PJEJ@Netlib_Recv?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ DB 'Net'
+	DB	'lib_Recv() failed, error=%d', 00H		; `string'
+_DATA	ENDS
+;	COMDAT ??_C@_0BN@OHML@Connection?5closed?5gracefully?$AA@
+_DATA	SEGMENT
+??_C@_0BN@OHML@Connection?5closed?5gracefully?$AA@ DB 'Connection closed '
+	DB	'gracefully', 00H				; `string'
+_DATA	ENDS
+;	COMDAT _JabberWsRecv
+_TEXT	SEGMENT
+_nlb$83033 = -12
+_proto$ = 8
+_data$ = 12
+_datalen$ = 16
+_JabberWsRecv PROC NEAR					; COMDAT
+
+; 90   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 0c	 sub	 esp, 12			; 0000000cH
+  00006	56		 push	 esi
+
+; 91   : 	int ret;
+; 92   :     if (proto->threadData == NULL) {
+
+  00007	8b 75 08	 mov	 esi, DWORD PTR _proto$[ebp]
+  0000a	8b 86 e0 00 00
+	00		 mov	 eax, DWORD PTR [esi+224]
+  00010	85 c0		 test	 eax, eax
+
+; 93   :         return 0;
+
+  00012	74 5a		 je	 SHORT $L83035
+
+; 94   :     }
+; 95   : 	ret = Netlib_Recv(proto->threadData->s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT);
+
+  00014	8b 4d 0c	 mov	 ecx, DWORD PTR _data$[ebp]
+  00017	8b 80 d4 02 00
+	00		 mov	 eax, DWORD PTR [eax+724]
+  0001d	89 4d f4	 mov	 DWORD PTR _nlb$83033[ebp], ecx
+  00020	8b 4d 10	 mov	 ecx, DWORD PTR _datalen$[ebp]
+  00023	89 4d f8	 mov	 DWORD PTR _nlb$83033[ebp+4], ecx
+  00026	8d 4d f4	 lea	 ecx, DWORD PTR _nlb$83033[ebp]
+  00029	51		 push	 ecx
+  0002a	50		 push	 eax
+  0002b	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00030	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0M@GFGB@Netlib?1Recv?$AA@ ; `string'
+  00035	c7 45 fc 00 00
+	08 00		 mov	 DWORD PTR _nlb$83033[ebp+8], 524288 ; 00080000H
+  0003c	ff 50 24	 call	 DWORD PTR [eax+36]
+  0003f	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 96   : 	if(ret == SOCKET_ERROR) {
+
+  00042	83 f8 ff	 cmp	 eax, -1
+  00045	75 16		 jne	 SHORT $L82869
+
+; 97   : 		JabberLog(proto, "Netlib_Recv() failed, error=%d", WSAGetLastError());
+
+  00047	e8 00 00 00 00	 call	 _WSAGetLastError@0
+  0004c	50		 push	 eax
+  0004d	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BP@PJEJ@Netlib_Recv?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ ; `string'
+  00052	56		 push	 esi
+  00053	e8 00 00 00 00	 call	 _JabberLog
+  00058	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 98   : 		return 0;
+
+  0005b	eb 11		 jmp	 SHORT $L83035
+$L82869:
+
+; 99   : 	}
+; 100  : 	if(ret == 0) {
+
+  0005d	85 c0		 test	 eax, eax
+  0005f	75 0f		 jne	 SHORT $L82865
+
+; 101  : 		JabberLog(proto, "Connection closed gracefully");
+
+  00061	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BN@OHML@Connection?5closed?5gracefully?$AA@ ; `string'
+  00066	56		 push	 esi
+  00067	e8 00 00 00 00	 call	 _JabberLog
+  0006c	59		 pop	 ecx
+  0006d	59		 pop	 ecx
+$L83035:
+
+; 102  : 		return 0;
+
+  0006e	33 c0		 xor	 eax, eax
+$L82865:
+  00070	5e		 pop	 esi
+
+; 103  : 	}
+; 104  : 	return ret;
+; 105  : }
+
+  00071	c9		 leave
+  00072	c3		 ret	 0
+_JabberWsRecv ENDP
+_TEXT	ENDS
+PUBLIC	_JabberWsSendAES
+PUBLIC	??_C@_0BB@OHBC@Sending?5?$CFd?5bytes?$AA@	; `string'
+EXTRN	_aes_cbc_encrypt:NEAR
+EXTRN	_memcpy:NEAR
+EXTRN	_memset:NEAR
+;	COMDAT ??_C@_0BB@OHBC@Sending?5?$CFd?5bytes?$AA@
+; File C:\MirandaDev\miranda_svn2\include\m_netlib.h
+_DATA	SEGMENT
+??_C@_0BB@OHBC@Sending?5?$CFd?5bytes?$AA@ DB 'Sending %d bytes', 00H ; `string'
+_DATA	ENDS
+;	COMDAT _JabberWsSendAES
+_TEXT	SEGMENT
+_nlb$83044 = -16
+_proto$ = 8
+_data$ = 12
+_datalen$ = 16
+_aes_ctx$ = 20
+_aes_iv$ = 24
+_aes_input$ = -32
+_aes_output$ = -288
+_pad$82896 = -4
+_JabberWsSendAES PROC NEAR				; COMDAT
+
+; 109  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	81 ec 20 01 00
+	00		 sub	 esp, 288		; 00000120H
+
+; 110  : 	int len, sendlen;
+; 111  : 	unsigned char aes_input[16];
+; 112  : 	unsigned char aes_output[256];
+; 113  :     if (proto->threadData == NULL) {
+
+  00009	8b 45 08	 mov	 eax, DWORD PTR _proto$[ebp]
+  0000c	53		 push	 ebx
+  0000d	56		 push	 esi
+  0000e	33 f6		 xor	 esi, esi
+  00010	39 b0 e0 00 00
+	00		 cmp	 DWORD PTR [eax+224], esi
+  00016	57		 push	 edi
+
+; 114  :         return FALSE;
+
+  00017	0f 84 f9 00 00
+	00		 je	 $L83054
+
+; 115  :     }
+; 116  : 	while (datalen > 0) {
+
+  0001d	39 75 10	 cmp	 DWORD PTR _datalen$[ebp], esi
+  00020	0f 8e d2 00 00
+	00		 jle	 $L82892
+  00026	6a 10		 push	 16			; 00000010H
+  00028	5f		 pop	 edi
+
+; 118  : 		while (datalen > 0 && len < 256) {
+
+  00029	0f 8e c9 00 00
+	00		 jle	 $L82892
+$L83053:
+
+; 117  : 		len = 0;
+
+  0002f	8b df		 mov	 ebx, edi
+  00031	2b 5d 10	 sub	 ebx, DWORD PTR _datalen$[ebp]
+$L82894:
+
+; 118  : 		while (datalen > 0 && len < 256) {
+
+  00034	81 fe 00 01 00
+	00		 cmp	 esi, 256		; 00000100H
+  0003a	7d 5f		 jge	 SHORT $L82895
+
+; 119  : 			int pad = datalen < 16 ? 16 - datalen : 0;
+
+  0003c	8b 45 10	 mov	 eax, DWORD PTR _datalen$[ebp]
+  0003f	3b c7		 cmp	 eax, edi
+  00041	7d 05		 jge	 SHORT $L83037
+  00043	89 5d fc	 mov	 DWORD PTR _pad$82896[ebp], ebx
+  00046	eb 04		 jmp	 SHORT $L83038
+$L83037:
+  00048	83 65 fc 00	 and	 DWORD PTR _pad$82896[ebp], 0
+$L83038:
+
+; 120  : 			memcpy(aes_input, data, datalen < 16 ? datalen : 16);
+
+  0004c	3b c7		 cmp	 eax, edi
+  0004e	7c 02		 jl	 SHORT $L83040
+  00050	8b c7		 mov	 eax, edi
+$L83040:
+  00052	50		 push	 eax
+  00053	8d 45 e0	 lea	 eax, DWORD PTR _aes_input$[ebp]
+  00056	ff 75 0c	 push	 DWORD PTR _data$[ebp]
+  00059	50		 push	 eax
+  0005a	e8 00 00 00 00	 call	 _memcpy
+
+; 121  : 			memset(aes_input + 16 - pad, ' ', pad);
+
+  0005f	ff 75 fc	 push	 DWORD PTR _pad$82896[ebp]
+  00062	8d 45 f0	 lea	 eax, DWORD PTR _aes_input$[ebp+16]
+  00065	2b 45 fc	 sub	 eax, DWORD PTR _pad$82896[ebp]
+  00068	6a 20		 push	 32			; 00000020H
+  0006a	50		 push	 eax
+  0006b	e8 00 00 00 00	 call	 _memset
+
+; 122  : 			aes_cbc_encrypt(aes_ctx, aes_iv, aes_input, aes_output + len, 16);
+
+  00070	8d 84 35 e0 fe
+	ff ff		 lea	 eax, DWORD PTR _aes_output$[ebp+esi]
+  00077	57		 push	 edi
+  00078	50		 push	 eax
+  00079	8d 45 e0	 lea	 eax, DWORD PTR _aes_input$[ebp]
+  0007c	50		 push	 eax
+  0007d	ff 75 18	 push	 DWORD PTR _aes_iv$[ebp]
+  00080	ff 75 14	 push	 DWORD PTR _aes_ctx$[ebp]
+  00083	e8 00 00 00 00	 call	 _aes_cbc_encrypt
+
+; 123  : 			datalen -= 16;
+
+  00088	29 7d 10	 sub	 DWORD PTR _datalen$[ebp], edi
+
+; 124  : 			data += 16;
+
+  0008b	01 7d 0c	 add	 DWORD PTR _data$[ebp], edi
+  0008e	83 c4 2c	 add	 esp, 44			; 0000002cH
+  00091	03 df		 add	 ebx, edi
+
+; 125  : 			len += 16;
+
+  00093	03 f7		 add	 esi, edi
+  00095	83 7d 10 00	 cmp	 DWORD PTR _datalen$[ebp], 0
+  00099	7f 99		 jg	 SHORT $L82894
+$L82895:
+
+; 126  : 		}
+; 127  : 		if (len > 0) {
+
+  0009b	85 f6		 test	 esi, esi
+  0009d	7e 4e		 jle	 SHORT $L82899
+
+; 128  : 			JabberLog(proto, "Sending %d bytes", len);
+
+  0009f	56		 push	 esi
+  000a0	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BB@OHBC@Sending?5?$CFd?5bytes?$AA@ ; `string'
+  000a5	ff 75 08	 push	 DWORD PTR _proto$[ebp]
+  000a8	e8 00 00 00 00	 call	 _JabberLog
+
+; 129  : 			if ((sendlen=Netlib_Send(proto->threadData->s, aes_output, len, MSG_NODUMP))==SOCKET_ERROR || len!=sendlen) {
+
+  000ad	8b 45 08	 mov	 eax, DWORD PTR _proto$[ebp]
+  000b0	8d 8d e0 fe ff
+	ff		 lea	 ecx, DWORD PTR _aes_output$[ebp]
+  000b6	89 4d f0	 mov	 DWORD PTR _nlb$83044[ebp], ecx
+  000b9	8d 4d f0	 lea	 ecx, DWORD PTR _nlb$83044[ebp]
+  000bc	8b 80 e0 00 00
+	00		 mov	 eax, DWORD PTR [eax+224]
+  000c2	51		 push	 ecx
+  000c3	89 75 f4	 mov	 DWORD PTR _nlb$83044[ebp+4], esi
+  000c6	c7 45 f8 00 00
+	02 00		 mov	 DWORD PTR _nlb$83044[ebp+8], 131072 ; 00020000H
+  000cd	8b 80 d4 02 00
+	00		 mov	 eax, DWORD PTR [eax+724]
+  000d3	50		 push	 eax
+  000d4	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  000d9	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0M@EFDJ@Netlib?1Send?$AA@ ; `string'
+  000de	ff 50 24	 call	 DWORD PTR [eax+36]
+  000e1	83 c4 18	 add	 esp, 24			; 00000018H
+  000e4	83 f8 ff	 cmp	 eax, -1
+  000e7	74 17		 je	 SHORT $L82900
+  000e9	3b f0		 cmp	 esi, eax
+  000eb	75 13		 jne	 SHORT $L82900
+$L82899:
+
+; 115  :     }
+; 116  : 	while (datalen > 0) {
+
+  000ed	33 f6		 xor	 esi, esi
+  000ef	39 75 10	 cmp	 DWORD PTR _datalen$[ebp], esi
+  000f2	0f 8f 37 ff ff
+	ff		 jg	 $L83053
+$L82892:
+
+; 132  : 			}
+; 133  : 		}
+; 134  : 	}
+; 135  : 	return TRUE;
+
+  000f8	6a 01		 push	 1
+  000fa	58		 pop	 eax
+$L82883:
+  000fb	5f		 pop	 edi
+  000fc	5e		 pop	 esi
+  000fd	5b		 pop	 ebx
+
+; 136  : }
+
+  000fe	c9		 leave
+  000ff	c3		 ret	 0
+$L82900:
+
+; 130  : 				JabberLog(proto, "Netlib_Send() failed, error=%d", WSAGetLastError());
+
+  00100	e8 00 00 00 00	 call	 _WSAGetLastError@0
+  00105	50		 push	 eax
+  00106	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BP@PBNN@Netlib_Send?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ ; `string'
+  0010b	ff 75 08	 push	 DWORD PTR _proto$[ebp]
+  0010e	e8 00 00 00 00	 call	 _JabberLog
+  00113	83 c4 0c	 add	 esp, 12			; 0000000cH
+$L83054:
+
+; 131  : 				return FALSE;
+
+  00116	33 c0		 xor	 eax, eax
+  00118	eb e1		 jmp	 SHORT $L82883
+_JabberWsSendAES ENDP
+_TEXT	ENDS
+PUBLIC	_JabberWsRecvAES
+EXTRN	_aes_cbc_decrypt:NEAR
+;	COMDAT _JabberWsRecvAES
+_TEXT	SEGMENT
+_nlb$83059 = -16
+_proto$ = 8
+_data$ = 12
+_datalen$ = 16
+_aes_ctx$ = 20
+_aes_iv$ = 24
+_len$ = -4
+_aes_input$ = -32
+_aes_output$ = 12
+_JabberWsRecvAES PROC NEAR				; COMDAT
+
+; 139  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 20	 sub	 esp, 32			; 00000020H
+
+; 140  : 	int ret, len = 0, maxlen = datalen;
+
+  00006	83 65 fc 00	 and	 DWORD PTR _len$[ebp], 0
+  0000a	53		 push	 ebx
+
+; 141  : 	unsigned char aes_input[16];
+; 142  : 	unsigned char *aes_output = (unsigned char *)data;
+
+  0000b	8b 5d 0c	 mov	 ebx, DWORD PTR _data$[ebp]
+  0000e	56		 push	 esi
+  0000f	57		 push	 edi
+
+; 143  :     if (proto->threadData == NULL) {
+
+  00010	8b 7d 08	 mov	 edi, DWORD PTR _proto$[ebp]
+  00013	89 5d 0c	 mov	 DWORD PTR _aes_output$[ebp], ebx
+  00016	83 bf e0 00 00
+	00 00		 cmp	 DWORD PTR [edi+224], 0
+
+; 144  :         return 0;
+
+  0001d	0f 84 ad 00 00
+	00		 je	 $L83068
+
+; 145  :     }
+; 146  : 	for (maxlen = maxlen & ~0xF; maxlen != 0; maxlen = maxlen & 0xF) {
+
+  00023	8b 75 10	 mov	 esi, DWORD PTR _datalen$[ebp]
+  00026	83 e6 f0	 and	 esi, -16		; fffffff0H
+  00029	74 43		 je	 SHORT $L82922
+$L82920:
+
+; 147  : 		ret = Netlib_Recv(proto->threadData->s, data, maxlen, MSG_NODUMP);
+
+  0002b	8b 87 e0 00 00
+	00		 mov	 eax, DWORD PTR [edi+224]
+  00031	8d 4d f0	 lea	 ecx, DWORD PTR _nlb$83059[ebp]
+  00034	51		 push	 ecx
+  00035	89 5d f0	 mov	 DWORD PTR _nlb$83059[ebp], ebx
+  00038	8b 80 d4 02 00
+	00		 mov	 eax, DWORD PTR [eax+724]
+  0003e	89 75 f4	 mov	 DWORD PTR _nlb$83059[ebp+4], esi
+  00041	50		 push	 eax
+  00042	a1 00 00 00 00	 mov	 eax, DWORD PTR _pluginLink
+  00047	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0M@GFGB@Netlib?1Recv?$AA@ ; `string'
+  0004c	c7 45 f8 00 00
+	02 00		 mov	 DWORD PTR _nlb$83059[ebp+8], 131072 ; 00020000H
+  00053	ff 50 24	 call	 DWORD PTR [eax+36]
+  00056	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 148  : 		if(ret == SOCKET_ERROR) {
+
+  00059	83 f8 ff	 cmp	 eax, -1
+  0005c	74 4f		 je	 SHORT $L83063
+
+; 151  : 		}
+; 152  : 		if(ret == 0) {
+
+  0005e	85 c0		 test	 eax, eax
+  00060	74 61		 je	 SHORT $L83064
+
+; 155  : 		}
+; 156  : 		data += ret;
+; 157  : 		len += ret;
+
+  00062	01 45 fc	 add	 DWORD PTR _len$[ebp], eax
+
+; 158  : 		maxlen -= ret;
+
+  00065	2b f0		 sub	 esi, eax
+  00067	03 d8		 add	 ebx, eax
+  00069	83 e6 0f	 and	 esi, 15			; 0000000fH
+  0006c	75 bd		 jne	 SHORT $L82920
+$L82922:
+
+; 162  : 	while (len > 15) {
+
+  0006e	8b 75 fc	 mov	 esi, DWORD PTR _len$[ebp]
+  00071	83 fe 0f	 cmp	 esi, 15			; 0000000fH
+  00074	7e 2f		 jle	 SHORT $L82927
+
+; 159  : 	}
+; 160  : 
+; 161  : 	ret = len;
+
+  00076	c1 ee 04	 shr	 esi, 4
+$L82926:
+
+; 163  : 		memcpy(aes_input, aes_output, 16);
+
+  00079	6a 10		 push	 16			; 00000010H
+  0007b	8d 45 e0	 lea	 eax, DWORD PTR _aes_input$[ebp]
+  0007e	ff 75 0c	 push	 DWORD PTR _aes_output$[ebp]
+  00081	50		 push	 eax
+  00082	e8 00 00 00 00	 call	 _memcpy
+
+; 164  : 		aes_cbc_decrypt(aes_ctx, aes_iv, aes_input, aes_output, 16);
+
+  00087	6a 10		 push	 16			; 00000010H
+  00089	8d 45 e0	 lea	 eax, DWORD PTR _aes_input$[ebp]
+  0008c	ff 75 0c	 push	 DWORD PTR _aes_output$[ebp]
+  0008f	50		 push	 eax
+  00090	ff 75 18	 push	 DWORD PTR _aes_iv$[ebp]
+  00093	ff 75 14	 push	 DWORD PTR _aes_ctx$[ebp]
+  00096	e8 00 00 00 00	 call	 _aes_cbc_decrypt
+
+; 165  : 		aes_output += 16;
+
+  0009b	83 45 0c 10	 add	 DWORD PTR _aes_output$[ebp], 16 ; 00000010H
+  0009f	83 c4 20	 add	 esp, 32			; 00000020H
+  000a2	4e		 dec	 esi
+  000a3	75 d4		 jne	 SHORT $L82926
+$L82927:
+
+; 166  : 		len -= 16;
+; 167  : 	}
+; 168  : 	return ret;
+
+  000a5	8b 45 fc	 mov	 eax, DWORD PTR _len$[ebp]
+$L82911:
+  000a8	5f		 pop	 edi
+  000a9	5e		 pop	 esi
+  000aa	5b		 pop	 ebx
+
+; 169  : }
+
+  000ab	c9		 leave
+  000ac	c3		 ret	 0
+$L83063:
+
+; 149  : 			JabberLog(proto, "Netlib_Recv() failed, error=%d", WSAGetLastError());
+
+  000ad	e8 00 00 00 00	 call	 _WSAGetLastError@0
+  000b2	50		 push	 eax
+  000b3	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BP@PJEJ@Netlib_Recv?$CI?$CJ?5failed?0?5error?$DN?$CFd?$AA@ ; `string'
+  000b8	57		 push	 edi
+  000b9	e8 00 00 00 00	 call	 _JabberLog
+  000be	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 150  : 			return 0;
+
+  000c1	eb 0d		 jmp	 SHORT $L83068
+$L83064:
+
+; 153  : 			JabberLog(proto, "Connection closed gracefully");
+
+  000c3	68 00 00 00 00	 push	 OFFSET FLAT:??_C@_0BN@OHML@Connection?5closed?5gracefully?$AA@ ; `string'
+  000c8	57		 push	 edi
+  000c9	e8 00 00 00 00	 call	 _JabberLog
+  000ce	59		 pop	 ecx
+  000cf	59		 pop	 ecx
+$L83068:
+
+; 154  : 			return 0;
+
+  000d0	33 c0		 xor	 eax, eax
+  000d2	eb d4		 jmp	 SHORT $L82911
+_JabberWsRecvAES ENDP
+_TEXT	ENDS
+END

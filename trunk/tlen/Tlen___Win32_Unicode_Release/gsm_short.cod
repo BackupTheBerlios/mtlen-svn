@@ -1,0 +1,991 @@
+	TITLE	E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\codec\gsm_short.c
+	.386P
+include listing.inc
+if @Version gt 510
+.model FLAT
+else
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT DWORD USE32 PUBLIC 'BSS'
+_BSS	ENDS
+_TLS	SEGMENT DWORD USE32 PUBLIC 'TLS'
+_TLS	ENDS
+;	COMDAT _dequantizeLARs
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _interpolateLARs_0_12
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _interpolateLARs_13_26
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _interpolateLARs_27_39
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _interpolateLARs_40_159
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _LARToR
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _shortTermAnalysisFilter
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _shortTermSynthesisFilter
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _shortTermAnalysis
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _shortTermSynthesis
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+FLAT	GROUP _DATA, CONST, _BSS
+	ASSUME	CS: FLAT, DS: FLAT, SS: FLAT
+endif
+PUBLIC	_shortTermAnalysis
+EXTRN	_lpcAnalysis:NEAR
+;	COMDAT _shortTermAnalysis
+_TEXT	SEGMENT
+_state$ = 8
+_in$ = 12
+_LARpp_j_1$ = 8
+_LARp$ = -32
+_shortTermAnalysis PROC NEAR				; COMDAT
+
+; 147  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 20	 sub	 esp, 32			; 00000020H
+  00006	53		 push	 ebx
+  00007	56		 push	 esi
+
+; 148  : 	int * qLARs = state->qLARs;
+; 149  : 	int * LARpp_j = state->LARpp[state->j];
+
+  00008	8b 75 08	 mov	 esi, DWORD PTR _state$[ebp]
+
+; 150  : 	int * LARpp_j_1 = state->LARpp[state->j ^1];
+; 151  : 	int	LARp[8];
+; 152  : //	int i;
+; 153  : 	
+; 154  : 	lpcAnalysis(state, in);//i_samples);
+
+  0000b	8b 5d 0c	 mov	 ebx, DWORD PTR _in$[ebp]
+  0000e	57		 push	 edi
+  0000f	53		 push	 ebx
+  00010	8b 46 40	 mov	 eax, DWORD PTR [esi+64]
+  00013	56		 push	 esi
+  00014	8b f8		 mov	 edi, eax
+  00016	83 f0 01	 xor	 eax, 1
+  00019	c1 e0 05	 shl	 eax, 5
+  0001c	c1 e7 05	 shl	 edi, 5
+  0001f	03 c6		 add	 eax, esi
+  00021	03 fe		 add	 edi, esi
+  00023	89 45 08	 mov	 DWORD PTR _LARpp_j_1$[ebp], eax
+  00026	e8 00 00 00 00	 call	 _lpcAnalysis
+  0002b	8d 46 44	 lea	 eax, DWORD PTR [esi+68]
+
+; 155  : /*
+; 156  : 	printf("short term in: \n");
+; 157  : 	for (i=0;i<160;i++) {
+; 158  : 		printf("%7d ", in[i]);//((float)i_lpc[i])/32768.0f);
+; 159  : 	}
+; 160  : 	printf("\n");
+; 161  : 	*/
+; 162  : 	dequantizeLARs(qLARs, LARpp_j);
+
+  0002e	57		 push	 edi
+  0002f	50		 push	 eax
+  00030	e8 00 00 00 00	 call	 _dequantizeLARs
+
+; 163  : 	interpolateLARs_0_12(LARpp_j_1, LARpp_j, LARp);
+
+  00035	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00038	50		 push	 eax
+  00039	57		 push	 edi
+  0003a	ff 75 08	 push	 DWORD PTR _LARpp_j_1$[ebp]
+  0003d	e8 00 00 00 00	 call	 _interpolateLARs_0_12
+
+; 164  : 	LARToR(LARp);
+
+  00042	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00045	50		 push	 eax
+  00046	e8 00 00 00 00	 call	 _LARToR
+
+; 165  : 	shortTermAnalysisFilter(state, LARp, 13, in);
+
+  0004b	53		 push	 ebx
+  0004c	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  0004f	6a 0d		 push	 13			; 0000000dH
+  00051	50		 push	 eax
+  00052	56		 push	 esi
+  00053	e8 00 00 00 00	 call	 _shortTermAnalysisFilter
+
+; 166  : 	interpolateLARs_13_26(LARpp_j_1, LARpp_j, LARp);
+
+  00058	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  0005b	50		 push	 eax
+  0005c	57		 push	 edi
+  0005d	ff 75 08	 push	 DWORD PTR _LARpp_j_1$[ebp]
+  00060	e8 00 00 00 00	 call	 _interpolateLARs_13_26
+
+; 167  : 	LARToR(LARp);
+
+  00065	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00068	50		 push	 eax
+  00069	e8 00 00 00 00	 call	 _LARToR
+  0006e	83 c4 40	 add	 esp, 64			; 00000040H
+
+; 168  : 	shortTermAnalysisFilter(state, LARp, 14, in+13);
+
+  00071	8d 43 1a	 lea	 eax, DWORD PTR [ebx+26]
+  00074	50		 push	 eax
+  00075	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00078	6a 0e		 push	 14			; 0000000eH
+  0007a	50		 push	 eax
+  0007b	56		 push	 esi
+  0007c	e8 00 00 00 00	 call	 _shortTermAnalysisFilter
+
+; 169  : 	interpolateLARs_27_39(LARpp_j_1, LARpp_j, LARp);
+
+  00081	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00084	50		 push	 eax
+  00085	57		 push	 edi
+  00086	ff 75 08	 push	 DWORD PTR _LARpp_j_1$[ebp]
+  00089	e8 00 00 00 00	 call	 _interpolateLARs_27_39
+
+; 170  : 	LARToR(LARp);
+
+  0008e	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00091	50		 push	 eax
+  00092	e8 00 00 00 00	 call	 _LARToR
+
+; 171  : 	shortTermAnalysisFilter(state, LARp, 13, in+27);
+
+  00097	8d 43 36	 lea	 eax, DWORD PTR [ebx+54]
+  0009a	50		 push	 eax
+  0009b	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  0009e	6a 0d		 push	 13			; 0000000dH
+  000a0	50		 push	 eax
+  000a1	56		 push	 esi
+  000a2	e8 00 00 00 00	 call	 _shortTermAnalysisFilter
+
+; 172  : 	interpolateLARs_40_159(LARpp_j_1, LARpp_j, LARp);
+
+  000a7	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  000aa	50		 push	 eax
+  000ab	57		 push	 edi
+  000ac	ff 75 08	 push	 DWORD PTR _LARpp_j_1$[ebp]
+  000af	e8 00 00 00 00	 call	 _interpolateLARs_40_159
+
+; 173  : 	LARToR(LARp);
+
+  000b4	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  000b7	50		 push	 eax
+  000b8	e8 00 00 00 00	 call	 _LARToR
+  000bd	83 c4 40	 add	 esp, 64			; 00000040H
+
+; 174  : 	shortTermAnalysisFilter(state, LARp, 120, in+40);
+
+  000c0	83 c3 50	 add	 ebx, 80			; 00000050H
+  000c3	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  000c6	53		 push	 ebx
+  000c7	6a 78		 push	 120			; 00000078H
+  000c9	50		 push	 eax
+  000ca	56		 push	 esi
+  000cb	e8 00 00 00 00	 call	 _shortTermAnalysisFilter
+  000d0	83 c4 10	 add	 esp, 16			; 00000010H
+  000d3	5f		 pop	 edi
+  000d4	5e		 pop	 esi
+  000d5	5b		 pop	 ebx
+
+; 175  : 	/*
+; 176  : 	printf("short-term residuals: \n");
+; 177  : 	for (i=0;i<160;i++) {
+; 178  : 		printf("%7d ", in[i]);//((float)i_lpc[i])/32768.0f);
+; 179  : 	}
+; 180  : 	printf("\n");
+; 181  : 	*/
+; 182  : }
+
+  000d6	c9		 leave
+  000d7	c3		 ret	 0
+_shortTermAnalysis ENDP
+_TEXT	ENDS
+;	COMDAT _dequantizeLARs
+_TEXT	SEGMENT
+_qLARs$ = 8
+_LARs$ = 12
+_dqA$ = -96
+_dqB$ = -64
+_dqMin$ = -32
+_dequantizeLARs PROC NEAR				; COMDAT
+
+; 36   : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 60	 sub	 esp, 96			; 00000060H
+  00006	53		 push	 ebx
+  00007	56		 push	 esi
+  00008	57		 push	 edi
+
+; 37   : 	int dqA[]={13107, 13107, 13107, 13107, 19223, 17476, 31454, 29708};
+
+  00009	b8 33 33 00 00	 mov	 eax, 13107		; 00003333H
+
+; 38   : 	int dqB[]={0, 0, 2048, -2560, 94, -1792, -341, -1144};
+; 39   : 	int dqMin[]={-32, -32, -16, -16, -8, -8, -4, -4};
+
+  0000e	6a e0		 push	 -32			; ffffffe0H
+  00010	89 45 a0	 mov	 DWORD PTR _dqA$[ebp], eax
+  00013	89 45 a4	 mov	 DWORD PTR _dqA$[ebp+4], eax
+  00016	89 45 a8	 mov	 DWORD PTR _dqA$[ebp+8], eax
+  00019	89 45 ac	 mov	 DWORD PTR _dqA$[ebp+12], eax
+  0001c	58		 pop	 eax
+  0001d	6a f0		 push	 -16			; fffffff0H
+  0001f	89 45 e0	 mov	 DWORD PTR _dqMin$[ebp], eax
+  00022	89 45 e4	 mov	 DWORD PTR _dqMin$[ebp+4], eax
+  00025	58		 pop	 eax
+  00026	6a f8		 push	 -8			; fffffff8H
+  00028	89 45 e8	 mov	 DWORD PTR _dqMin$[ebp+8], eax
+  0002b	89 45 ec	 mov	 DWORD PTR _dqMin$[ebp+12], eax
+  0002e	58		 pop	 eax
+
+; 40   : 	int i;
+; 41   : 	for (i = 0; i < 8; i++) {
+
+  0002f	8b 7d 0c	 mov	 edi, DWORD PTR _LARs$[ebp]
+  00032	83 65 c0 00	 and	 DWORD PTR _dqB$[ebp], 0
+  00036	83 65 c4 00	 and	 DWORD PTR _dqB$[ebp+4], 0
+  0003a	6a fc		 push	 -4			; fffffffcH
+  0003c	89 45 f0	 mov	 DWORD PTR _dqMin$[ebp+16], eax
+  0003f	89 45 f4	 mov	 DWORD PTR _dqMin$[ebp+20], eax
+  00042	58		 pop	 eax
+  00043	8d 4d e0	 lea	 ecx, DWORD PTR _dqMin$[ebp]
+  00046	89 45 f8	 mov	 DWORD PTR _dqMin$[ebp+24], eax
+  00049	89 45 fc	 mov	 DWORD PTR _dqMin$[ebp+28], eax
+  0004c	8b 45 08	 mov	 eax, DWORD PTR _qLARs$[ebp]
+  0004f	8d 55 c0	 lea	 edx, DWORD PTR _dqB$[ebp]
+  00052	8d 75 a0	 lea	 esi, DWORD PTR _dqA$[ebp]
+  00055	2b c8		 sub	 ecx, eax
+  00057	2b d0		 sub	 edx, eax
+  00059	2b f0		 sub	 esi, eax
+  0005b	2b f8		 sub	 edi, eax
+  0005d	c7 45 b0 17 4b
+	00 00		 mov	 DWORD PTR _dqA$[ebp+16], 19223 ; 00004b17H
+  00064	c7 45 b4 44 44
+	00 00		 mov	 DWORD PTR _dqA$[ebp+20], 17476 ; 00004444H
+  0006b	c7 45 b8 de 7a
+	00 00		 mov	 DWORD PTR _dqA$[ebp+24], 31454 ; 00007adeH
+  00072	c7 45 bc 0c 74
+	00 00		 mov	 DWORD PTR _dqA$[ebp+28], 29708 ; 0000740cH
+  00079	c7 45 c8 00 08
+	00 00		 mov	 DWORD PTR _dqB$[ebp+8], 2048 ; 00000800H
+  00080	c7 45 cc 00 f6
+	ff ff		 mov	 DWORD PTR _dqB$[ebp+12], -2560 ; fffff600H
+  00087	c7 45 d0 5e 00
+	00 00		 mov	 DWORD PTR _dqB$[ebp+16], 94 ; 0000005eH
+  0008e	c7 45 d4 00 f9
+	ff ff		 mov	 DWORD PTR _dqB$[ebp+20], -1792 ; fffff900H
+  00095	c7 45 d8 ab fe
+	ff ff		 mov	 DWORD PTR _dqB$[ebp+24], -341 ; fffffeabH
+  0009c	c7 45 dc 88 fb
+	ff ff		 mov	 DWORD PTR _dqB$[ebp+28], -1144 ; fffffb88H
+  000a3	89 7d 0c	 mov	 DWORD PTR 12+[ebp], edi
+  000a6	c7 45 08 08 00
+	00 00		 mov	 DWORD PTR 8+[ebp], 8
+$L75908:
+
+; 42   : 		int temp;
+; 43   : 		temp = ((((qLARs[i] + dqMin[i]) << 10) - (dqB[i] << 1)) * dqA[i] + 16384) >> 15;
+; 44   : 		LARs[i] = temp + temp;
+
+  000ad	8b 3c 01	 mov	 edi, DWORD PTR [ecx+eax]
+  000b0	8b 1c 02	 mov	 ebx, DWORD PTR [edx+eax]
+  000b3	03 38		 add	 edi, DWORD PTR [eax]
+  000b5	d1 e3		 shl	 ebx, 1
+  000b7	c1 e7 0a	 shl	 edi, 10			; 0000000aH
+  000ba	2b fb		 sub	 edi, ebx
+  000bc	8b 5d 0c	 mov	 ebx, DWORD PTR 12+[ebp]
+  000bf	0f af 3c 06	 imul	 edi, DWORD PTR [esi+eax]
+  000c3	81 c7 00 40 00
+	00		 add	 edi, 16384		; 00004000H
+  000c9	c1 ff 0f	 sar	 edi, 15			; 0000000fH
+  000cc	d1 e7		 shl	 edi, 1
+  000ce	89 3c 03	 mov	 DWORD PTR [ebx+eax], edi
+  000d1	83 c0 04	 add	 eax, 4
+  000d4	ff 4d 08	 dec	 DWORD PTR 8+[ebp]
+  000d7	75 d4		 jne	 SHORT $L75908
+  000d9	5f		 pop	 edi
+  000da	5e		 pop	 esi
+  000db	5b		 pop	 ebx
+
+; 45   : 	}
+; 46   : }
+
+  000dc	c9		 leave
+  000dd	c3		 ret	 0
+_dequantizeLARs ENDP
+_TEXT	ENDS
+;	COMDAT _interpolateLARs_0_12
+_TEXT	SEGMENT
+_LARpp_j_1$ = 8
+_LARpp_j$ = 12
+_LARp$ = 16
+_interpolateLARs_0_12 PROC NEAR				; COMDAT
+
+; 51   : {	int i;
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+
+; 52   : 	for (i = 0; i < 8; i++) {
+
+  00003	8b 4d 08	 mov	 ecx, DWORD PTR _LARpp_j_1$[ebp]
+  00006	8b 55 0c	 mov	 edx, DWORD PTR _LARpp_j$[ebp]
+  00009	53		 push	 ebx
+  0000a	56		 push	 esi
+  0000b	8b 75 10	 mov	 esi, DWORD PTR _LARp$[ebp]
+  0000e	2b d1		 sub	 edx, ecx
+  00010	57		 push	 edi
+  00011	2b f1		 sub	 esi, ecx
+  00013	c7 45 08 08 00
+	00 00		 mov	 DWORD PTR 8+[ebp], 8
+$L75921:
+
+; 53   : 		LARp[i] = (LARpp_j_1[i] >> 1) + (LARpp_j_1[i] >> 2) + (LARpp_j[i] >> 2);
+
+  0001a	8b 01		 mov	 eax, DWORD PTR [ecx]
+  0001c	8b 3c 0a	 mov	 edi, DWORD PTR [edx+ecx]
+  0001f	8b d8		 mov	 ebx, eax
+  00021	c1 ff 02	 sar	 edi, 2
+  00024	c1 fb 02	 sar	 ebx, 2
+  00027	03 fb		 add	 edi, ebx
+  00029	d1 f8		 sar	 eax, 1
+  0002b	03 f8		 add	 edi, eax
+  0002d	89 3c 0e	 mov	 DWORD PTR [esi+ecx], edi
+  00030	83 c1 04	 add	 ecx, 4
+  00033	ff 4d 08	 dec	 DWORD PTR 8+[ebp]
+  00036	75 e2		 jne	 SHORT $L75921
+  00038	5f		 pop	 edi
+  00039	5e		 pop	 esi
+  0003a	5b		 pop	 ebx
+
+; 54   : 	}
+; 55   : }
+
+  0003b	5d		 pop	 ebp
+  0003c	c3		 ret	 0
+_interpolateLARs_0_12 ENDP
+_TEXT	ENDS
+;	COMDAT _interpolateLARs_13_26
+_TEXT	SEGMENT
+_LARpp_j_1$ = 8
+_LARpp_j$ = 12
+_LARp$ = 16
+_interpolateLARs_13_26 PROC NEAR			; COMDAT
+
+; 61   : 	for (i = 0; i < 8; i++) {
+
+  00000	8b 44 24 08	 mov	 eax, DWORD PTR _LARpp_j$[esp-4]
+  00004	8b 4c 24 04	 mov	 ecx, DWORD PTR _LARpp_j_1$[esp-4]
+  00008	8b 54 24 0c	 mov	 edx, DWORD PTR _LARp$[esp-4]
+  0000c	53		 push	 ebx
+  0000d	56		 push	 esi
+  0000e	57		 push	 edi
+  0000f	6a 08		 push	 8
+  00011	2b c8		 sub	 ecx, eax
+  00013	2b d0		 sub	 edx, eax
+  00015	5e		 pop	 esi
+$L75933:
+
+; 62   : 		LARp[i] = (LARpp_j_1[i] >> 1) + (LARpp_j[i] >> 1);
+
+  00016	8b 3c 01	 mov	 edi, DWORD PTR [ecx+eax]
+  00019	8b 18		 mov	 ebx, DWORD PTR [eax]
+  0001b	d1 ff		 sar	 edi, 1
+  0001d	d1 fb		 sar	 ebx, 1
+  0001f	03 fb		 add	 edi, ebx
+  00021	89 3c 02	 mov	 DWORD PTR [edx+eax], edi
+  00024	83 c0 04	 add	 eax, 4
+  00027	4e		 dec	 esi
+  00028	75 ec		 jne	 SHORT $L75933
+  0002a	5f		 pop	 edi
+  0002b	5e		 pop	 esi
+  0002c	5b		 pop	 ebx
+
+; 63   : 	}
+; 64   : }
+
+  0002d	c3		 ret	 0
+_interpolateLARs_13_26 ENDP
+_TEXT	ENDS
+;	COMDAT _interpolateLARs_27_39
+_TEXT	SEGMENT
+_LARpp_j_1$ = 8
+_LARpp_j$ = 12
+_LARp$ = 16
+_interpolateLARs_27_39 PROC NEAR			; COMDAT
+
+; 69   : {	int i;
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+
+; 70   : 	for (i = 0; i < 8; i++) {
+
+  00003	8b 4d 0c	 mov	 ecx, DWORD PTR _LARpp_j$[ebp]
+  00006	8b 55 08	 mov	 edx, DWORD PTR _LARpp_j_1$[ebp]
+  00009	53		 push	 ebx
+  0000a	56		 push	 esi
+  0000b	8b 75 10	 mov	 esi, DWORD PTR _LARp$[ebp]
+  0000e	2b d1		 sub	 edx, ecx
+  00010	57		 push	 edi
+  00011	2b f1		 sub	 esi, ecx
+  00013	c7 45 0c 08 00
+	00 00		 mov	 DWORD PTR 12+[ebp], 8
+$L75945:
+
+; 71   : 		LARp[i] = (LARpp_j[i] >> 1) + (LARpp_j_1[i] >> 2) + (LARpp_j[i] >> 2);
+
+  0001a	8b 01		 mov	 eax, DWORD PTR [ecx]
+  0001c	8b 3c 0a	 mov	 edi, DWORD PTR [edx+ecx]
+  0001f	8b d8		 mov	 ebx, eax
+  00021	c1 ff 02	 sar	 edi, 2
+  00024	c1 fb 02	 sar	 ebx, 2
+  00027	03 fb		 add	 edi, ebx
+  00029	d1 f8		 sar	 eax, 1
+  0002b	03 f8		 add	 edi, eax
+  0002d	89 3c 0e	 mov	 DWORD PTR [esi+ecx], edi
+  00030	83 c1 04	 add	 ecx, 4
+  00033	ff 4d 0c	 dec	 DWORD PTR 12+[ebp]
+  00036	75 e2		 jne	 SHORT $L75945
+  00038	5f		 pop	 edi
+  00039	5e		 pop	 esi
+  0003a	5b		 pop	 ebx
+
+; 72   : 	}
+; 73   : }
+
+  0003b	5d		 pop	 ebp
+  0003c	c3		 ret	 0
+_interpolateLARs_27_39 ENDP
+_TEXT	ENDS
+;	COMDAT _interpolateLARs_40_159
+_TEXT	SEGMENT
+_LARpp_j$ = 12
+_LARp$ = 16
+_interpolateLARs_40_159 PROC NEAR			; COMDAT
+
+; 79   : 	for (i = 0; i < 8; i++) {
+
+  00000	8b 44 24 0c	 mov	 eax, DWORD PTR _LARp$[esp-4]
+  00004	8b 4c 24 08	 mov	 ecx, DWORD PTR _LARpp_j$[esp-4]
+  00008	56		 push	 esi
+  00009	6a 08		 push	 8
+  0000b	2b c8		 sub	 ecx, eax
+  0000d	5a		 pop	 edx
+$L75957:
+
+; 80   : 		LARp[i] = LARpp_j[i];
+
+  0000e	8b 34 01	 mov	 esi, DWORD PTR [ecx+eax]
+  00011	89 30		 mov	 DWORD PTR [eax], esi
+  00013	83 c0 04	 add	 eax, 4
+  00016	4a		 dec	 edx
+  00017	75 f5		 jne	 SHORT $L75957
+  00019	5e		 pop	 esi
+
+; 81   : 	}
+; 82   : }
+
+  0001a	c3		 ret	 0
+_interpolateLARs_40_159 ENDP
+_TEXT	ENDS
+EXTRN	_abs:NEAR
+;	COMDAT _LARToR
+_TEXT	SEGMENT
+_LARp$ = 8
+_LARToR	PROC NEAR					; COMDAT
+
+; 87   : {
+
+  00000	53		 push	 ebx
+  00001	56		 push	 esi
+
+; 88   : 	int 		i;
+; 89   : 	int 		temp;
+; 90   : 	for (i = 0; i < 8; i++) {
+
+  00002	8b 74 24 0c	 mov	 esi, DWORD PTR _LARp$[esp+4]
+  00006	57		 push	 edi
+  00007	6a 08		 push	 8
+  00009	bf 33 2b 00 00	 mov	 edi, 11059		; 00002b33H
+  0000e	5b		 pop	 ebx
+$L75966:
+
+; 91   : 		temp = abs(LARp[i]);
+
+  0000f	ff 36		 push	 DWORD PTR [esi]
+  00011	e8 00 00 00 00	 call	 _abs
+
+; 92   : 		if (temp < 11059) temp <<= 1;
+
+  00016	3b c7		 cmp	 eax, edi
+  00018	59		 pop	 ecx
+  00019	7d 04		 jge	 SHORT $L75969
+  0001b	d1 e0		 shl	 eax, 1
+
+; 93   : 		else if (temp < 20070) temp += 11059;
+
+  0001d	eb 13		 jmp	 SHORT $L75972
+$L75969:
+  0001f	3d 66 4e 00 00	 cmp	 eax, 20070		; 00004e66H
+  00024	7d 04		 jge	 SHORT $L75971
+  00026	03 c7		 add	 eax, edi
+
+; 94   : 		else temp = (temp >> 2) + 26112;
+
+  00028	eb 08		 jmp	 SHORT $L75972
+$L75971:
+  0002a	c1 f8 02	 sar	 eax, 2
+  0002d	05 00 66 00 00	 add	 eax, 26112		; 00006600H
+$L75972:
+
+; 95   : 		LARp[i] = LARp[i] < 0 ? -temp : temp;
+
+  00032	83 3e 00	 cmp	 DWORD PTR [esi], 0
+  00035	7d 02		 jge	 SHORT $L76075
+  00037	f7 d8		 neg	 eax
+$L76075:
+  00039	89 06		 mov	 DWORD PTR [esi], eax
+  0003b	83 c6 04	 add	 esi, 4
+  0003e	4b		 dec	 ebx
+  0003f	75 ce		 jne	 SHORT $L75966
+  00041	5f		 pop	 edi
+  00042	5e		 pop	 esi
+  00043	5b		 pop	 ebx
+
+; 96   : 	}
+; 97   : }
+
+  00044	c3		 ret	 0
+_LARToR	ENDP
+_TEXT	ENDS
+;	COMDAT _shortTermAnalysisFilter
+_TEXT	SEGMENT
+_state$ = 8
+_rp$ = 12
+_len$ = 16
+_in$ = 20
+_u$ = -8
+_di$ = 8
+_shortTermAnalysisFilter PROC NEAR			; COMDAT
+
+; 110  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	51		 push	 ecx
+  00004	51		 push	 ecx
+
+; 111  : 	int		* u = state->u;
+
+  00005	8b 45 08	 mov	 eax, DWORD PTR _state$[ebp]
+  00008	83 c0 64	 add	 eax, 100		; 00000064H
+  0000b	89 45 f8	 mov	 DWORD PTR _u$[ebp], eax
+
+; 112  : 	int		i;
+; 113  : 	int		di, ui, sav, rpi;
+; 114  : 	for (; len--; in++) {
+
+  0000e	8b 45 10	 mov	 eax, DWORD PTR _len$[ebp]
+  00011	8b c8		 mov	 ecx, eax
+  00013	48		 dec	 eax
+  00014	85 c9		 test	 ecx, ecx
+  00016	74 61		 je	 SHORT $L75991
+  00018	53		 push	 ebx
+  00019	40		 inc	 eax
+  0001a	56		 push	 esi
+  0001b	57		 push	 edi
+  0001c	89 45 fc	 mov	 DWORD PTR -4+[ebp], eax
+  0001f	be 00 40 00 00	 mov	 esi, 16384		; 00004000H
+$L75989:
+
+; 115  : 		di = sav = *in;
+
+  00024	8b 45 14	 mov	 eax, DWORD PTR _in$[ebp]
+  00027	8b 4d f8	 mov	 ecx, DWORD PTR _u$[ebp]
+
+; 116  : 		for (i = 0; i < 8; i++) {	
+
+  0002a	8b 5d 0c	 mov	 ebx, DWORD PTR _rp$[ebp]
+  0002d	c7 45 10 08 00
+	00 00		 mov	 DWORD PTR 16+[ebp], 8
+  00034	0f bf 10	 movsx	 edx, WORD PTR [eax]
+  00037	89 55 08	 mov	 DWORD PTR _di$[ebp], edx
+  0003a	2b d9		 sub	 ebx, ecx
+$L75992:
+
+; 117  : 			ui    = u[i];
+
+  0003c	8b 39		 mov	 edi, DWORD PTR [ecx]
+
+; 118  : 			rpi   = rp[i];
+
+  0003e	8b 04 0b	 mov	 eax, DWORD PTR [ebx+ecx]
+
+; 119  : 			u[i]  = sav;
+
+  00041	89 11		 mov	 DWORD PTR [ecx], edx
+
+; 120  : 			sav   = ui + ((rpi * di + 16384) >> 15);
+
+  00043	8b d0		 mov	 edx, eax
+  00045	0f af 55 08	 imul	 edx, DWORD PTR _di$[ebp]
+
+; 121  : 			di    = di + ((rpi * ui + 16384) >> 15);
+
+  00049	0f af c7	 imul	 eax, edi
+  0004c	03 d6		 add	 edx, esi
+  0004e	03 c6		 add	 eax, esi
+  00050	c1 fa 0f	 sar	 edx, 15			; 0000000fH
+  00053	c1 f8 0f	 sar	 eax, 15			; 0000000fH
+  00056	01 45 08	 add	 DWORD PTR _di$[ebp], eax
+  00059	03 d7		 add	 edx, edi
+  0005b	83 c1 04	 add	 ecx, 4
+  0005e	ff 4d 10	 dec	 DWORD PTR 16+[ebp]
+  00061	75 d9		 jne	 SHORT $L75992
+
+; 122  : 		}
+; 123  : 		*in = di;
+
+  00063	8b 45 14	 mov	 eax, DWORD PTR _in$[ebp]
+  00066	66 8b 4d 08	 mov	 cx, WORD PTR _di$[ebp]
+  0006a	83 45 14 02	 add	 DWORD PTR _in$[ebp], 2
+  0006e	ff 4d fc	 dec	 DWORD PTR -4+[ebp]
+  00071	66 89 08	 mov	 WORD PTR [eax], cx
+  00074	75 ae		 jne	 SHORT $L75989
+  00076	5f		 pop	 edi
+  00077	5e		 pop	 esi
+  00078	5b		 pop	 ebx
+$L75991:
+
+; 124  : 	}
+; 125  : }
+
+  00079	c9		 leave
+  0007a	c3		 ret	 0
+_shortTermAnalysisFilter ENDP
+_TEXT	ENDS
+PUBLIC	_shortTermSynthesis
+;	COMDAT _shortTermSynthesis
+_TEXT	SEGMENT
+_state$ = 8
+_in$ = 12
+_out$ = 16
+_LARpp_j_1$ = 8
+_LARp$ = -32
+_shortTermSynthesis PROC NEAR				; COMDAT
+
+; 185  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 20	 sub	 esp, 32			; 00000020H
+  00006	53		 push	 ebx
+  00007	56		 push	 esi
+  00008	57		 push	 edi
+
+; 186  : 	int * qLARs = state->qLARs;
+; 187  : 	int * LARpp_j = state->LARpp[state->j];
+
+  00009	8b 7d 08	 mov	 edi, DWORD PTR _state$[ebp]
+  0000c	8b 47 40	 mov	 eax, DWORD PTR [edi+64]
+  0000f	8b f0		 mov	 esi, eax
+
+; 188  : 	int * LARpp_j_1 = state->LARpp[state->j ^1];
+
+  00011	83 f0 01	 xor	 eax, 1
+  00014	c1 e0 05	 shl	 eax, 5
+  00017	c1 e6 05	 shl	 esi, 5
+  0001a	03 c7		 add	 eax, edi
+  0001c	03 f7		 add	 esi, edi
+  0001e	89 45 08	 mov	 DWORD PTR _LARpp_j_1$[ebp], eax
+  00021	8d 47 44	 lea	 eax, DWORD PTR [edi+68]
+
+; 189  : 	int	LARp[8];
+; 190  : //	int i;
+; 191  : 
+; 192  : 	dequantizeLARs(qLARs, LARpp_j);
+
+  00024	56		 push	 esi
+  00025	50		 push	 eax
+  00026	e8 00 00 00 00	 call	 _dequantizeLARs
+
+; 193  : 	interpolateLARs_0_12(LARpp_j_1, LARpp_j, LARp);
+
+  0002b	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  0002e	50		 push	 eax
+  0002f	56		 push	 esi
+  00030	ff 75 08	 push	 DWORD PTR _LARpp_j_1$[ebp]
+  00033	e8 00 00 00 00	 call	 _interpolateLARs_0_12
+
+; 194  : 	LARToR(LARp);
+
+  00038	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  0003b	50		 push	 eax
+  0003c	e8 00 00 00 00	 call	 _LARToR
+
+; 195  : 	shortTermSynthesisFilter(state, LARp, 13, in, out);
+
+  00041	8b 5d 10	 mov	 ebx, DWORD PTR _out$[ebp]
+  00044	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00047	53		 push	 ebx
+  00048	ff 75 0c	 push	 DWORD PTR _in$[ebp]
+  0004b	6a 0d		 push	 13			; 0000000dH
+  0004d	50		 push	 eax
+  0004e	57		 push	 edi
+  0004f	e8 00 00 00 00	 call	 _shortTermSynthesisFilter
+
+; 196  : 	interpolateLARs_13_26(LARpp_j_1, LARpp_j, LARp);
+
+  00054	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00057	50		 push	 eax
+  00058	56		 push	 esi
+  00059	ff 75 08	 push	 DWORD PTR _LARpp_j_1$[ebp]
+  0005c	e8 00 00 00 00	 call	 _interpolateLARs_13_26
+
+; 197  : 	LARToR(LARp);
+
+  00061	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00064	50		 push	 eax
+  00065	e8 00 00 00 00	 call	 _LARToR
+
+; 198  : 	shortTermSynthesisFilter(state, LARp, 14, in+13, out+13);
+
+  0006a	8d 43 1a	 lea	 eax, DWORD PTR [ebx+26]
+  0006d	50		 push	 eax
+  0006e	8b 45 0c	 mov	 eax, DWORD PTR _in$[ebp]
+  00071	83 c0 1a	 add	 eax, 26			; 0000001aH
+  00074	50		 push	 eax
+  00075	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00078	6a 0e		 push	 14			; 0000000eH
+  0007a	50		 push	 eax
+  0007b	57		 push	 edi
+  0007c	e8 00 00 00 00	 call	 _shortTermSynthesisFilter
+  00081	83 c4 50	 add	 esp, 80			; 00000050H
+
+; 199  : 	interpolateLARs_27_39(LARpp_j_1, LARpp_j, LARp);
+
+  00084	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00087	50		 push	 eax
+  00088	56		 push	 esi
+  00089	ff 75 08	 push	 DWORD PTR _LARpp_j_1$[ebp]
+  0008c	e8 00 00 00 00	 call	 _interpolateLARs_27_39
+
+; 200  : 	LARToR(LARp);
+
+  00091	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  00094	50		 push	 eax
+  00095	e8 00 00 00 00	 call	 _LARToR
+
+; 201  : 	shortTermSynthesisFilter(state, LARp, 13, in+27, out+27);
+
+  0009a	8d 43 36	 lea	 eax, DWORD PTR [ebx+54]
+  0009d	50		 push	 eax
+  0009e	8b 45 0c	 mov	 eax, DWORD PTR _in$[ebp]
+  000a1	83 c0 36	 add	 eax, 54			; 00000036H
+  000a4	50		 push	 eax
+  000a5	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  000a8	6a 0d		 push	 13			; 0000000dH
+  000aa	50		 push	 eax
+  000ab	57		 push	 edi
+  000ac	e8 00 00 00 00	 call	 _shortTermSynthesisFilter
+
+; 202  : 	interpolateLARs_40_159(LARpp_j_1, LARpp_j, LARp);
+
+  000b1	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  000b4	50		 push	 eax
+  000b5	56		 push	 esi
+  000b6	ff 75 08	 push	 DWORD PTR _LARpp_j_1$[ebp]
+  000b9	e8 00 00 00 00	 call	 _interpolateLARs_40_159
+
+; 203  : 	LARToR(LARp);
+
+  000be	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  000c1	50		 push	 eax
+  000c2	e8 00 00 00 00	 call	 _LARToR
+
+; 204  : 	shortTermSynthesisFilter(state, LARp, 120, in+40, out+40);
+
+  000c7	8b 45 0c	 mov	 eax, DWORD PTR _in$[ebp]
+  000ca	83 c3 50	 add	 ebx, 80			; 00000050H
+  000cd	53		 push	 ebx
+  000ce	83 c0 50	 add	 eax, 80			; 00000050H
+  000d1	50		 push	 eax
+  000d2	8d 45 e0	 lea	 eax, DWORD PTR _LARp$[ebp]
+  000d5	6a 78		 push	 120			; 00000078H
+  000d7	50		 push	 eax
+  000d8	57		 push	 edi
+  000d9	e8 00 00 00 00	 call	 _shortTermSynthesisFilter
+  000de	83 c4 48	 add	 esp, 72			; 00000048H
+  000e1	5f		 pop	 edi
+  000e2	5e		 pop	 esi
+  000e3	5b		 pop	 ebx
+
+; 205  : 	/*
+; 206  : 	printf("samples[reconstructed]: \n");
+; 207  : 	for (i=0;i<160;i++) {
+; 208  : 		printf("%7d ", out[i]);
+; 209  : 	}
+; 210  : 	*/
+; 211  : }
+
+  000e4	c9		 leave
+  000e5	c3		 ret	 0
+_shortTermSynthesis ENDP
+_TEXT	ENDS
+;	COMDAT _shortTermSynthesisFilter
+_TEXT	SEGMENT
+_state$ = 8
+_rrp$ = 12
+_len$ = 16
+_in$ = 20
+_out$ = 24
+_shortTermSynthesisFilter PROC NEAR			; COMDAT
+
+; 128  : {
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	83 ec 0c	 sub	 esp, 12			; 0000000cH
+
+; 129  : 	int 	* v = state->v;
+; 130  : 	int		i;
+; 131  : 	int 	sri;
+; 132  : 	for (; len--; in++, out++) {
+
+  00006	8b 45 10	 mov	 eax, DWORD PTR _len$[ebp]
+  00009	8b 55 08	 mov	 edx, DWORD PTR _state$[ebp]
+  0000c	8b c8		 mov	 ecx, eax
+  0000e	48		 dec	 eax
+  0000f	85 c9		 test	 ecx, ecx
+  00011	0f 84 ae 00 00
+	00		 je	 $L76012
+  00017	53		 push	 ebx
+  00018	56		 push	 esi
+  00019	40		 inc	 eax
+  0001a	57		 push	 edi
+  0001b	89 45 f8	 mov	 DWORD PTR -8+[ebp], eax
+  0001e	bf 00 80 ff ff	 mov	 edi, -32768		; ffff8000H
+$L76010:
+
+; 133  : 		sri = *in;
+
+  00023	8b 45 14	 mov	 eax, DWORD PTR _in$[ebp]
+  00026	c7 45 fc 08 00
+	00 00		 mov	 DWORD PTR -4+[ebp], 8
+  0002d	0f bf 08	 movsx	 ecx, WORD PTR [eax]
+  00030	8b 45 0c	 mov	 eax, DWORD PTR _rrp$[ebp]
+  00033	83 c0 1c	 add	 eax, 28			; 0000001cH
+  00036	81 c2 a4 00 00
+	00		 add	 edx, 164		; 000000a4H
+  0003c	89 45 10	 mov	 DWORD PTR 16+[ebp], eax
+$L76014:
+
+; 135  : 			sri -= (rrp[i] * v[i] + 16384) >> 15;
+
+  0003f	8b 72 fc	 mov	 esi, DWORD PTR [edx-4]
+  00042	8d 42 fc	 lea	 eax, DWORD PTR [edx-4]
+  00045	89 45 f4	 mov	 DWORD PTR -12+[ebp], eax
+  00048	8b 45 10	 mov	 eax, DWORD PTR 16+[ebp]
+  0004b	8b de		 mov	 ebx, esi
+  0004d	8b 00		 mov	 eax, DWORD PTR [eax]
+  0004f	0f af d8	 imul	 ebx, eax
+  00052	81 c3 00 40 00
+	00		 add	 ebx, 16384		; 00004000H
+  00058	c1 fb 0f	 sar	 ebx, 15			; 0000000fH
+  0005b	2b cb		 sub	 ecx, ebx
+
+; 136  : 			if (sri < -32768) sri = -32768;
+
+  0005d	3b cf		 cmp	 ecx, edi
+  0005f	7d 09		 jge	 SHORT $L76016
+  00061	8b cf		 mov	 ecx, edi
+
+; 137  : 			else if (sri > 32767) sri = 32767;
+
+  00063	bb ff 7f 00 00	 mov	 ebx, 32767		; 00007fffH
+  00068	eb 0b		 jmp	 SHORT $L76018
+$L76016:
+  0006a	bb ff 7f 00 00	 mov	 ebx, 32767		; 00007fffH
+  0006f	3b cb		 cmp	 ecx, ebx
+  00071	7e 02		 jle	 SHORT $L76018
+  00073	8b cb		 mov	 ecx, ebx
+$L76018:
+
+; 138  : 			v[i+1] = v[i] + ((rrp[i] * sri + 16384) >> 15);
+
+  00075	0f af c1	 imul	 eax, ecx
+  00078	05 00 40 00 00	 add	 eax, 16384		; 00004000H
+  0007d	c1 f8 0f	 sar	 eax, 15			; 0000000fH
+  00080	03 c6		 add	 eax, esi
+
+; 139  : 			if (v[i+1] < -32768) v[i+1] = -32768;
+
+  00082	3b c7		 cmp	 eax, edi
+  00084	89 02		 mov	 DWORD PTR [edx], eax
+  00086	7d 04		 jge	 SHORT $L76019
+  00088	89 3a		 mov	 DWORD PTR [edx], edi
+
+; 140  : 			else if (v[i+1] > 32767) v[i+1] = 32767;
+
+  0008a	eb 06		 jmp	 SHORT $L76021
+$L76019:
+  0008c	3b c3		 cmp	 eax, ebx
+  0008e	7e 02		 jle	 SHORT $L76021
+  00090	89 1a		 mov	 DWORD PTR [edx], ebx
+$L76021:
+
+; 134  : 		for (i = 8; i--;) {
+
+  00092	ff 4d fc	 dec	 DWORD PTR -4+[ebp]
+  00095	83 6d 10 04	 sub	 DWORD PTR 16+[ebp], 4
+  00099	83 7d fc 00	 cmp	 DWORD PTR -4+[ebp], 0
+  0009d	8b 55 f4	 mov	 edx, DWORD PTR -12+[ebp]
+  000a0	77 9d		 ja	 SHORT $L76014
+
+; 141  : 		}
+; 142  : 		*out = v[0] = sri;
+
+  000a2	8b 55 08	 mov	 edx, DWORD PTR _state$[ebp]
+  000a5	8b 45 18	 mov	 eax, DWORD PTR _out$[ebp]
+  000a8	83 45 14 02	 add	 DWORD PTR _in$[ebp], 2
+  000ac	83 45 18 02	 add	 DWORD PTR _out$[ebp], 2
+  000b0	ff 4d f8	 dec	 DWORD PTR -8+[ebp]
+  000b3	89 8a 84 00 00
+	00		 mov	 DWORD PTR [edx+132], ecx
+  000b9	66 89 08	 mov	 WORD PTR [eax], cx
+  000bc	0f 85 61 ff ff
+	ff		 jne	 $L76010
+  000c2	5f		 pop	 edi
+  000c3	5e		 pop	 esi
+  000c4	5b		 pop	 ebx
+$L76012:
+
+; 143  : 	}
+; 144  : }
+
+  000c5	c9		 leave
+  000c6	c3		 ret	 0
+_shortTermSynthesisFilter ENDP
+_TEXT	ENDS
+END

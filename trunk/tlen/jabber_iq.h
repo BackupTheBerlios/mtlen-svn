@@ -20,7 +20,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-
 #ifndef _JABBER_IQ_H_
 #define _JABBER_IQ_H_
 
@@ -29,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 typedef void (*JABBER_IQ_PFUNC)(TlenProtocol *proto, XmlNode *iqNode);
 
-typedef struct {
+typedef struct JABBER_IQ_FUNC_STRUCT {
 	int iqId;					// id to match IQ get/set with IQ result
 	JABBER_IQ_PROCID procId;	// must be unique in the list, except for IQ_PROC_NONE which can have multiple entries
 	JABBER_IQ_PFUNC func;		// callback function

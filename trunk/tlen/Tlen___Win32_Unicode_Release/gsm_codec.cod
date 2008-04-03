@@ -1,0 +1,1740 @@
+	TITLE	E:\Documents and Settings\piotr\Moje dokumenty\NetBeansProjects\tlen8\codec\gsm_codec.c
+	.386P
+include listing.inc
+if @Version gt 510
+.model FLAT
+else
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT DWORD USE32 PUBLIC 'BSS'
+_BSS	ENDS
+_TLS	SEGMENT DWORD USE32 PUBLIC 'TLS'
+_TLS	ENDS
+;	COMDAT _gsm_create
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _gsm_release
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _gsm_encode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+;	COMDAT _gsm_decode
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+FLAT	GROUP _DATA, CONST, _BSS
+	ASSUME	CS: FLAT, DS: FLAT, SS: FLAT
+endif
+PUBLIC	_gsm_create
+EXTRN	_memset:NEAR
+EXTRN	__imp__malloc:NEAR
+;	COMDAT _gsm_create
+_TEXT	SEGMENT
+_gsm_create PROC NEAR					; COMDAT
+
+; 34   : {
+
+  00000	56		 push	 esi
+  00001	57		 push	 edi
+
+; 35   : 	gsm_state * state = (gsm_state *)malloc(sizeof(gsm_state));
+
+  00002	bf a4 06 00 00	 mov	 edi, 1700		; 000006a4H
+  00007	57		 push	 edi
+  00008	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__malloc
+  0000e	8b f0		 mov	 esi, eax
+
+; 36   : 	memset(state, 0, sizeof(gsm_state));
+
+  00010	57		 push	 edi
+  00011	6a 00		 push	 0
+  00013	56		 push	 esi
+  00014	e8 00 00 00 00	 call	 _memset
+  00019	83 c4 10	 add	 esp, 16			; 00000010H
+
+; 37   : 	state->nrp = 40;
+
+  0001c	c7 86 5c 05 00
+	00 28 00 00 00	 mov	 DWORD PTR [esi+1372], 40 ; 00000028H
+
+; 38   : 	return state;
+
+  00026	8b c6		 mov	 eax, esi
+  00028	5f		 pop	 edi
+  00029	5e		 pop	 esi
+
+; 39   : }
+
+  0002a	c3		 ret	 0
+_gsm_create ENDP
+_TEXT	ENDS
+PUBLIC	_gsm_release
+EXTRN	__imp__free:NEAR
+;	COMDAT _gsm_release
+_TEXT	SEGMENT
+_ptr$ = 8
+_gsm_release PROC NEAR					; COMDAT
+
+; 43   : 	free(ptr);
+
+  00000	ff 74 24 04	 push	 DWORD PTR _ptr$[esp-4]
+  00004	ff 15 00 00 00
+	00		 call	 DWORD PTR __imp__free
+  0000a	59		 pop	 ecx
+
+; 44   : }
+
+  0000b	c3		 ret	 0
+_gsm_release ENDP
+_TEXT	ENDS
+PUBLIC	_gsm_encode
+EXTRN	_memcpy:NEAR
+EXTRN	_gsm_preprocessing:NEAR
+EXTRN	_shortTermAnalysis:NEAR
+EXTRN	_longTermAnalysis:NEAR
+EXTRN	_encodeRPE:NEAR
+;	COMDAT _gsm_encode
+_TEXT	SEGMENT
+_state$ = 8
+_in$ = 12
+_i$ = 8
+_temp_in$ = -324
+_gsm_encode PROC NEAR					; COMDAT
+
+; 47   : {	int i, j;
+
+  00000	55		 push	 ebp
+  00001	8b ec		 mov	 ebp, esp
+  00003	81 ec 44 01 00
+	00		 sub	 esp, 324		; 00000144H
+  00009	53		 push	 ebx
+  0000a	56		 push	 esi
+
+; 48   : 	unsigned char *c = state->gsmFrame;
+
+  0000b	8b 75 08	 mov	 esi, DWORD PTR _state$[ebp]
+
+; 49   : 	short temp_in[160];
+; 50   : 
+; 51   : 	gsm_preprocessing(state, in, temp_in);
+
+  0000e	8d 85 bc fe ff
+	ff		 lea	 eax, DWORD PTR _temp_in$[ebp]
+  00014	57		 push	 edi
+  00015	50		 push	 eax
+  00016	ff 75 0c	 push	 DWORD PTR _in$[ebp]
+  00019	8d be 80 06 00
+	00		 lea	 edi, DWORD PTR [esi+1664]
+  0001f	56		 push	 esi
+  00020	e8 00 00 00 00	 call	 _gsm_preprocessing
+
+; 52   : 	shortTermAnalysis(state, temp_in);
+
+  00025	8d 85 bc fe ff
+	ff		 lea	 eax, DWORD PTR _temp_in$[ebp]
+  0002b	50		 push	 eax
+  0002c	56		 push	 esi
+  0002d	e8 00 00 00 00	 call	 _shortTermAnalysis
+  00032	8d 85 bc fe ff
+	ff		 lea	 eax, DWORD PTR _temp_in$[ebp]
+  00038	83 c4 14	 add	 esp, 20			; 00000014H
+
+; 53   : 	for (i = 0; i < 4; i++) {
+
+  0003b	83 65 08 00	 and	 DWORD PTR _i$[ebp], 0
+  0003f	89 45 0c	 mov	 DWORD PTR 12+[ebp], eax
+  00042	8d 86 dc 02 00
+	00		 lea	 eax, DWORD PTR [esi+732]
+  00048	8d 9e 9c 01 00
+	00		 lea	 ebx, DWORD PTR [esi+412]
+  0004e	89 45 fc	 mov	 DWORD PTR -4+[ebp], eax
+$L75803:
+
+; 54   : 		state->subframe = i;
+; 55   : 		longTermAnalysis(state, temp_in + 40 * i);
+
+  00051	ff 75 0c	 push	 DWORD PTR 12+[ebp]
+  00054	8b 45 08	 mov	 eax, DWORD PTR _i$[ebp]
+  00057	89 86 a8 00 00
+	00		 mov	 DWORD PTR [esi+168], eax
+  0005d	56		 push	 esi
+  0005e	e8 00 00 00 00	 call	 _longTermAnalysis
+
+; 56   : 		encodeRPE(state);
+
+  00063	56		 push	 esi
+  00064	e8 00 00 00 00	 call	 _encodeRPE
+  00069	8b 55 fc	 mov	 edx, DWORD PTR -4+[ebp]
+  0006c	83 c4 0c	 add	 esp, 12			; 0000000cH
+  0006f	8b cb		 mov	 ecx, ebx
+  00071	c7 45 fc 28 00
+	00 00		 mov	 DWORD PTR -4+[ebp], 40	; 00000028H
+$L75806:
+
+; 57   :         for (j = 0; j < 40; j++) {
+; 58   : 			int ii = (int) state->dp0[120 + i * 40 + j] + state->e[i * 40 + j];
+
+  00078	0f bf 01	 movsx	 eax, WORD PTR [ecx]
+  0007b	03 02		 add	 eax, DWORD PTR [edx]
+
+; 59   : 			if (ii<-32768) ii = -32768;
+
+  0007d	bb 00 80 ff ff	 mov	 ebx, -32768		; ffff8000H
+  00082	3b c3		 cmp	 eax, ebx
+
+; 60   : 			else if (ii>32767) ii=32767;
+
+  00084	7c 09		 jl	 SHORT $L75846
+  00086	bb ff 7f 00 00	 mov	 ebx, 32767		; 00007fffH
+  0008b	3b c3		 cmp	 eax, ebx
+  0008d	7e 02		 jle	 SHORT $L75813
+$L75846:
+  0008f	8b c3		 mov	 eax, ebx
+$L75813:
+
+; 61   : 	        state->dp0[120 + i * 40 + j] = ii;
+
+  00091	66 89 01	 mov	 WORD PTR [ecx], ax
+  00094	83 c2 04	 add	 edx, 4
+  00097	41		 inc	 ecx
+  00098	41		 inc	 ecx
+  00099	ff 4d fc	 dec	 DWORD PTR -4+[ebp]
+  0009c	75 da		 jne	 SHORT $L75806
+  0009e	ff 45 08	 inc	 DWORD PTR _i$[ebp]
+  000a1	83 45 0c 50	 add	 DWORD PTR 12+[ebp], 80	; 00000050H
+  000a5	83 7d 08 04	 cmp	 DWORD PTR _i$[ebp], 4
+  000a9	8b d9		 mov	 ebx, ecx
+  000ab	89 55 fc	 mov	 DWORD PTR -4+[ebp], edx
+  000ae	7c a1		 jl	 SHORT $L75803
+
+; 62   : 		}
+; 63   : 	}
+; 64   : 	memcpy(state->dp0, state->dp0 + 160, 120 * sizeof(short));
+
+  000b0	8d 86 ec 01 00
+	00		 lea	 eax, DWORD PTR [esi+492]
+  000b6	68 f0 00 00 00	 push	 240			; 000000f0H
+  000bb	50		 push	 eax
+  000bc	8d 86 ac 00 00
+	00		 lea	 eax, DWORD PTR [esi+172]
+  000c2	50		 push	 eax
+  000c3	e8 00 00 00 00	 call	 _memcpy
+  000c8	83 c4 0c	 add	 esp, 12			; 0000000cH
+
+; 65   : 	state->j ^= 1;
+
+  000cb	6a 01		 push	 1
+  000cd	59		 pop	 ecx
+  000ce	31 4e 40	 xor	 DWORD PTR [esi+64], ecx
+
+; 66   : 	*c++ =   ((GSM_MAGIC & 0xF) << 4)
+; 67   : 	       | ((state->qLARs[0] >> 2) & 0xF);
+
+  000d1	8b 46 44	 mov	 eax, DWORD PTR [esi+68]
+  000d4	c1 f8 02	 sar	 eax, 2
+  000d7	24 0f		 and	 al, 15			; 0000000fH
+  000d9	0c d0		 or	 al, 208			; 000000d0H
+  000db	88 07		 mov	 BYTE PTR [edi], al
+
+; 68   : 	*c++ =   ((state->qLARs[0] & 0x3) << 6)
+; 69   : 	       | (state->qLARs[1] & 0x3F);
+
+  000dd	8a 46 48	 mov	 al, BYTE PTR [esi+72]
+  000e0	8a 56 44	 mov	 dl, BYTE PTR [esi+68]
+  000e3	24 3f		 and	 al, 63			; 0000003fH
+  000e5	c0 e2 06	 shl	 dl, 6
+  000e8	47		 inc	 edi
+  000e9	0a c2		 or	 al, dl
+  000eb	88 07		 mov	 BYTE PTR [edi], al
+
+; 70   : 	*c++ =   ((state->qLARs[2] & 0x1F) << 3)
+; 71   : 	       | ((state->qLARs[3] >> 2) & 0x7);
+
+  000ed	8b 56 50	 mov	 edx, DWORD PTR [esi+80]
+  000f0	8a 5e 4c	 mov	 bl, BYTE PTR [esi+76]
+  000f3	b0 07		 mov	 al, 7
+  000f5	c1 fa 02	 sar	 edx, 2
+  000f8	22 d0		 and	 dl, al
+  000fa	47		 inc	 edi
+  000fb	c0 e3 03	 shl	 bl, 3
+  000fe	0a d3		 or	 dl, bl
+  00100	88 17		 mov	 BYTE PTR [edi], dl
+
+; 72   : 	*c++ =   ((state->qLARs[3] & 0x3) << 6)
+; 73   : 	       | ((state->qLARs[4] & 0xF) << 2)
+; 74   : 	       | ((state->qLARs[5] >> 2) & 0x3);
+
+  00102	8a 56 54	 mov	 dl, BYTE PTR [esi+84]
+  00105	8a 5e 50	 mov	 bl, BYTE PTR [esi+80]
+  00108	80 e2 0f	 and	 dl, 15			; 0000000fH
+  0010b	c0 e3 04	 shl	 bl, 4
+  0010e	0a d3		 or	 dl, bl
+  00110	8b 5e 58	 mov	 ebx, DWORD PTR [esi+88]
+  00113	c1 fb 02	 sar	 ebx, 2
+  00116	c0 e2 02	 shl	 dl, 2
+  00119	80 e3 03	 and	 bl, 3
+  0011c	47		 inc	 edi
+  0011d	0a d3		 or	 dl, bl
+  0011f	88 17		 mov	 BYTE PTR [edi], dl
+
+; 75   : 	*c++ =   ((state->qLARs[5] & 0x3) << 6)
+; 76   : 	       | ((state->qLARs[6] & 0x7) << 3)
+; 77   : 	       | (state->qLARs[7] & 0x7);
+
+  00121	8a 56 5c	 mov	 dl, BYTE PTR [esi+92]
+  00124	8a 5e 58	 mov	 bl, BYTE PTR [esi+88]
+  00127	22 d0		 and	 dl, al
+  00129	c0 e3 03	 shl	 bl, 3
+  0012c	0a d3		 or	 dl, bl
+  0012e	8a 5e 60	 mov	 bl, BYTE PTR [esi+96]
+  00131	c0 e2 03	 shl	 dl, 3
+  00134	22 d8		 and	 bl, al
+  00136	47		 inc	 edi
+  00137	0a d3		 or	 dl, bl
+  00139	88 17		 mov	 BYTE PTR [edi], dl
+
+; 78   : 	*c++ =   ((state->Nc[0] & 0x7F) << 1)
+; 79   : 	       | ((state->bc[0] >> 1) & 0x1);
+
+  0013b	8b 96 70 05 00
+	00		 mov	 edx, DWORD PTR [esi+1392]
+  00141	8a 9e 60 05 00
+	00		 mov	 bl, BYTE PTR [esi+1376]
+  00147	47		 inc	 edi
+  00148	d1 fa		 sar	 edx, 1
+  0014a	22 d1		 and	 dl, cl
+  0014c	d0 e3		 shl	 bl, 1
+  0014e	0a d3		 or	 dl, bl
+  00150	88 17		 mov	 BYTE PTR [edi], dl
+
+; 80   : 	*c++ =   ((state->bc[0] & 0x1) << 7)
+; 81   : 	       | ((state->Mc[0] & 0x3) << 5)
+; 82   : 	       | ((state->xMaxc[0] >> 1) & 0x1F);
+
+  00152	8a 96 80 05 00
+	00		 mov	 dl, BYTE PTR [esi+1408]
+  00158	8a 9e 70 05 00
+	00		 mov	 bl, BYTE PTR [esi+1392]
+  0015e	80 e2 03	 and	 dl, 3
+  00161	c0 e3 02	 shl	 bl, 2
+  00164	0a d3		 or	 dl, bl
+  00166	8b 9e 90 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1424]
+  0016c	d1 fb		 sar	 ebx, 1
+  0016e	c0 e2 05	 shl	 dl, 5
+  00171	80 e3 1f	 and	 bl, 31			; 0000001fH
+  00174	47		 inc	 edi
+  00175	0a d3		 or	 dl, bl
+  00177	88 17		 mov	 BYTE PTR [edi], dl
+
+; 83   : 	*c++ =   ((state->xMaxc[0] & 0x1) << 7)
+; 84   : 	       | ((state->xMc[0] & 0x7) << 4)
+; 85   : 	       | ((state->xMc[1] & 0x7) << 1)
+; 86   : 	       | ((state->xMc[2] >> 2) & 0x1);
+
+  00179	8a 96 a0 05 00
+	00		 mov	 dl, BYTE PTR [esi+1440]
+  0017f	8a 9e 90 05 00
+	00		 mov	 bl, BYTE PTR [esi+1424]
+  00185	22 d0		 and	 dl, al
+  00187	c0 e3 03	 shl	 bl, 3
+  0018a	0a d3		 or	 dl, bl
+  0018c	47		 inc	 edi
+  0018d	c0 e2 03	 shl	 dl, 3
+  00190	8a 9e a4 05 00
+	00		 mov	 bl, BYTE PTR [esi+1444]
+  00196	22 d8		 and	 bl, al
+  00198	0a d3		 or	 dl, bl
+  0019a	8b 9e a8 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1448]
+  001a0	c1 fb 02	 sar	 ebx, 2
+  001a3	d0 e2		 shl	 dl, 1
+  001a5	22 d9		 and	 bl, cl
+  001a7	0a d3		 or	 dl, bl
+  001a9	88 17		 mov	 BYTE PTR [edi], dl
+
+; 87   : 	*c++ =   ((state->xMc[2] & 0x3) << 6)
+; 88   : 	       | ((state->xMc[3] & 0x7) << 3)
+; 89   : 	       | (state->xMc[4] & 0x7);
+
+  001ab	8a 96 ac 05 00
+	00		 mov	 dl, BYTE PTR [esi+1452]
+  001b1	8a 9e a8 05 00
+	00		 mov	 bl, BYTE PTR [esi+1448]
+  001b7	22 d0		 and	 dl, al
+  001b9	c0 e3 03	 shl	 bl, 3
+  001bc	0a d3		 or	 dl, bl
+  001be	8a 9e b0 05 00
+	00		 mov	 bl, BYTE PTR [esi+1456]
+  001c4	c0 e2 03	 shl	 dl, 3
+  001c7	22 d8		 and	 bl, al
+  001c9	47		 inc	 edi
+  001ca	0a d3		 or	 dl, bl
+  001cc	88 17		 mov	 BYTE PTR [edi], dl
+
+; 90   : 	*c++ =   ((state->xMc[5] & 0x7) << 5)
+; 91   : 	       | ((state->xMc[6] & 0x7) << 2)
+; 92   : 	       | ((state->xMc[7] >> 1) & 0x3);
+
+  001ce	8a 96 b8 05 00
+	00		 mov	 dl, BYTE PTR [esi+1464]
+  001d4	8a 9e b4 05 00
+	00		 mov	 bl, BYTE PTR [esi+1460]
+  001da	22 d0		 and	 dl, al
+  001dc	c0 e3 03	 shl	 bl, 3
+  001df	0a d3		 or	 dl, bl
+  001e1	8b 9e bc 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1468]
+  001e7	d1 fb		 sar	 ebx, 1
+  001e9	c0 e2 02	 shl	 dl, 2
+  001ec	80 e3 03	 and	 bl, 3
+  001ef	47		 inc	 edi
+  001f0	0a d3		 or	 dl, bl
+  001f2	88 17		 mov	 BYTE PTR [edi], dl
+
+; 93   : 	*c++ =   ((state->xMc[7] & 0x1) << 7)
+; 94   : 	       | ((state->xMc[8] & 0x7) << 4)
+; 95   : 	       | ((state->xMc[9] & 0x7) << 1)
+; 96   : 	       | ((state->xMc[10] >> 2) & 0x1);
+
+  001f4	8a 96 c0 05 00
+	00		 mov	 dl, BYTE PTR [esi+1472]
+  001fa	8a 9e bc 05 00
+	00		 mov	 bl, BYTE PTR [esi+1468]
+  00200	22 d0		 and	 dl, al
+  00202	c0 e3 03	 shl	 bl, 3
+  00205	0a d3		 or	 dl, bl
+  00207	8a 9e c4 05 00
+	00		 mov	 bl, BYTE PTR [esi+1476]
+  0020d	c0 e2 03	 shl	 dl, 3
+  00210	22 d8		 and	 bl, al
+  00212	47		 inc	 edi
+  00213	0a d3		 or	 dl, bl
+  00215	8b 9e c8 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1480]
+  0021b	c1 fb 02	 sar	 ebx, 2
+  0021e	d0 e2		 shl	 dl, 1
+  00220	22 d9		 and	 bl, cl
+  00222	0a d3		 or	 dl, bl
+  00224	88 17		 mov	 BYTE PTR [edi], dl
+
+; 97   : 	*c++ =   ((state->xMc[10] & 0x3) << 6)
+; 98   : 	       | ((state->xMc[11] & 0x7) << 3)
+; 99   : 	       | (state->xMc[12] & 0x7);
+
+  00226	8a 96 cc 05 00
+	00		 mov	 dl, BYTE PTR [esi+1484]
+  0022c	8a 9e c8 05 00
+	00		 mov	 bl, BYTE PTR [esi+1480]
+  00232	22 d0		 and	 dl, al
+  00234	c0 e3 03	 shl	 bl, 3
+  00237	0a d3		 or	 dl, bl
+  00239	8a 9e d0 05 00
+	00		 mov	 bl, BYTE PTR [esi+1488]
+  0023f	c0 e2 03	 shl	 dl, 3
+  00242	22 d8		 and	 bl, al
+  00244	47		 inc	 edi
+  00245	0a d3		 or	 dl, bl
+  00247	88 17		 mov	 BYTE PTR [edi], dl
+
+; 100  : 	*c++ =   ((state->Nc[1] & 0x7F) << 1)
+; 101  : 	       | ((state->bc[1] >> 1) & 0x1);
+
+  00249	8b 96 74 05 00
+	00		 mov	 edx, DWORD PTR [esi+1396]
+  0024f	8a 9e 64 05 00
+	00		 mov	 bl, BYTE PTR [esi+1380]
+  00255	47		 inc	 edi
+  00256	d1 fa		 sar	 edx, 1
+  00258	22 d1		 and	 dl, cl
+  0025a	d0 e3		 shl	 bl, 1
+  0025c	0a d3		 or	 dl, bl
+  0025e	88 17		 mov	 BYTE PTR [edi], dl
+
+; 102  : 	*c++ =   ((state->bc[1] & 0x1) << 7)
+; 103  : 	       | ((state->Mc[1] & 0x3) << 5)
+; 104  : 	       | ((state->xMaxc[1] >> 1) & 0x1F);
+
+  00260	8a 96 84 05 00
+	00		 mov	 dl, BYTE PTR [esi+1412]
+  00266	8a 9e 74 05 00
+	00		 mov	 bl, BYTE PTR [esi+1396]
+  0026c	80 e2 03	 and	 dl, 3
+  0026f	c0 e3 02	 shl	 bl, 2
+  00272	0a d3		 or	 dl, bl
+  00274	8b 9e 94 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1428]
+  0027a	d1 fb		 sar	 ebx, 1
+  0027c	c0 e2 05	 shl	 dl, 5
+  0027f	80 e3 1f	 and	 bl, 31			; 0000001fH
+  00282	47		 inc	 edi
+  00283	0a d3		 or	 dl, bl
+  00285	88 17		 mov	 BYTE PTR [edi], dl
+
+; 105  : 	*c++ =   ((state->xMaxc[1] & 0x1) << 7)
+; 106  : 	       | ((state->xMc[13] & 0x7) << 4)
+; 107  : 	       | ((state->xMc[14] & 0x7) << 1)
+; 108  : 	       | ((state->xMc[15] >> 2) & 0x1);
+
+  00287	8a 96 d4 05 00
+	00		 mov	 dl, BYTE PTR [esi+1492]
+  0028d	47		 inc	 edi
+  0028e	8a 9e 94 05 00
+	00		 mov	 bl, BYTE PTR [esi+1428]
+  00294	22 d0		 and	 dl, al
+  00296	c0 e3 03	 shl	 bl, 3
+  00299	0a d3		 or	 dl, bl
+  0029b	8a 9e d8 05 00
+	00		 mov	 bl, BYTE PTR [esi+1496]
+  002a1	c0 e2 03	 shl	 dl, 3
+  002a4	22 d8		 and	 bl, al
+  002a6	0a d3		 or	 dl, bl
+  002a8	8b 9e dc 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1500]
+  002ae	c1 fb 02	 sar	 ebx, 2
+  002b1	d0 e2		 shl	 dl, 1
+  002b3	22 d9		 and	 bl, cl
+  002b5	0a d3		 or	 dl, bl
+  002b7	88 17		 mov	 BYTE PTR [edi], dl
+
+; 109  : 	*c++ =   ((state->xMc[15] & 0x3) << 6)
+; 110  : 	       | ((state->xMc[16] & 0x7) << 3)
+; 111  : 	       | (state->xMc[17] & 0x7);
+
+  002b9	8a 96 e0 05 00
+	00		 mov	 dl, BYTE PTR [esi+1504]
+  002bf	8a 9e dc 05 00
+	00		 mov	 bl, BYTE PTR [esi+1500]
+  002c5	22 d0		 and	 dl, al
+  002c7	c0 e3 03	 shl	 bl, 3
+  002ca	0a d3		 or	 dl, bl
+  002cc	8a 9e e4 05 00
+	00		 mov	 bl, BYTE PTR [esi+1508]
+  002d2	c0 e2 03	 shl	 dl, 3
+  002d5	22 d8		 and	 bl, al
+  002d7	47		 inc	 edi
+  002d8	0a d3		 or	 dl, bl
+  002da	88 17		 mov	 BYTE PTR [edi], dl
+
+; 112  : 	*c++ =   ((state->xMc[18] & 0x7) << 5)
+; 113  : 	       | ((state->xMc[19] & 0x7) << 2)
+; 114  : 	       | ((state->xMc[20] >> 1) & 0x3);
+
+  002dc	8a 96 ec 05 00
+	00		 mov	 dl, BYTE PTR [esi+1516]
+  002e2	8a 9e e8 05 00
+	00		 mov	 bl, BYTE PTR [esi+1512]
+  002e8	22 d0		 and	 dl, al
+  002ea	c0 e3 03	 shl	 bl, 3
+  002ed	0a d3		 or	 dl, bl
+  002ef	8b 9e f0 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1520]
+  002f5	d1 fb		 sar	 ebx, 1
+  002f7	c0 e2 02	 shl	 dl, 2
+  002fa	80 e3 03	 and	 bl, 3
+  002fd	47		 inc	 edi
+  002fe	0a d3		 or	 dl, bl
+  00300	88 17		 mov	 BYTE PTR [edi], dl
+
+; 115  : 	*c++ =   ((state->xMc[20] & 0x1) << 7)
+; 116  : 	       | ((state->xMc[21] & 0x7) << 4)
+; 117  : 	       | ((state->xMc[22] & 0x7) << 1)
+; 118  : 	       | ((state->xMc[23] >> 2) & 0x1);
+
+  00302	8a 96 f4 05 00
+	00		 mov	 dl, BYTE PTR [esi+1524]
+  00308	8a 9e f0 05 00
+	00		 mov	 bl, BYTE PTR [esi+1520]
+  0030e	22 d0		 and	 dl, al
+  00310	c0 e3 03	 shl	 bl, 3
+  00313	0a d3		 or	 dl, bl
+  00315	8a 9e f8 05 00
+	00		 mov	 bl, BYTE PTR [esi+1528]
+  0031b	c0 e2 03	 shl	 dl, 3
+  0031e	22 d8		 and	 bl, al
+  00320	47		 inc	 edi
+  00321	0a d3		 or	 dl, bl
+  00323	8b 9e fc 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1532]
+  00329	c1 fb 02	 sar	 ebx, 2
+  0032c	d0 e2		 shl	 dl, 1
+  0032e	22 d9		 and	 bl, cl
+  00330	0a d3		 or	 dl, bl
+  00332	88 17		 mov	 BYTE PTR [edi], dl
+
+; 119  : 	*c++ =   ((state->xMc[23] & 0x3) << 6)
+; 120  : 	       | ((state->xMc[24] & 0x7) << 3)
+; 121  : 	       | (state->xMc[25] & 0x7);
+
+  00334	8a 96 00 06 00
+	00		 mov	 dl, BYTE PTR [esi+1536]
+  0033a	8a 9e fc 05 00
+	00		 mov	 bl, BYTE PTR [esi+1532]
+  00340	22 d0		 and	 dl, al
+  00342	c0 e3 03	 shl	 bl, 3
+  00345	0a d3		 or	 dl, bl
+  00347	8a 9e 04 06 00
+	00		 mov	 bl, BYTE PTR [esi+1540]
+  0034d	c0 e2 03	 shl	 dl, 3
+  00350	22 d8		 and	 bl, al
+  00352	47		 inc	 edi
+  00353	0a d3		 or	 dl, bl
+  00355	88 17		 mov	 BYTE PTR [edi], dl
+
+; 122  : 	*c++ =   ((state->Nc[2] & 0x7F) << 1)
+; 123  : 	       | ((state->bc[2] >> 1) & 0x1);
+
+  00357	8b 96 78 05 00
+	00		 mov	 edx, DWORD PTR [esi+1400]
+  0035d	8a 9e 68 05 00
+	00		 mov	 bl, BYTE PTR [esi+1384]
+  00363	47		 inc	 edi
+  00364	d1 fa		 sar	 edx, 1
+  00366	22 d1		 and	 dl, cl
+  00368	d0 e3		 shl	 bl, 1
+  0036a	0a d3		 or	 dl, bl
+  0036c	88 17		 mov	 BYTE PTR [edi], dl
+
+; 124  : 	*c++ =   ((state->bc[2] & 0x1) << 7)
+; 125  : 	       | ((state->Mc[2] & 0x3) << 5)
+; 126  : 	       | ((state->xMaxc[2] >> 1) & 0x1F);
+
+  0036e	8a 96 88 05 00
+	00		 mov	 dl, BYTE PTR [esi+1416]
+  00374	8a 9e 78 05 00
+	00		 mov	 bl, BYTE PTR [esi+1400]
+  0037a	80 e2 03	 and	 dl, 3
+  0037d	c0 e3 02	 shl	 bl, 2
+  00380	0a d3		 or	 dl, bl
+  00382	8b 9e 98 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1432]
+  00388	47		 inc	 edi
+  00389	c0 e2 05	 shl	 dl, 5
+  0038c	d1 fb		 sar	 ebx, 1
+  0038e	80 e3 1f	 and	 bl, 31			; 0000001fH
+  00391	0a d3		 or	 dl, bl
+  00393	88 17		 mov	 BYTE PTR [edi], dl
+
+; 127  : 	*c++ =   ((state->xMaxc[2] & 0x1) << 7)
+; 128  : 	       | ((state->xMc[26] & 0x7) << 4)
+; 129  : 	       | ((state->xMc[27] & 0x7) << 1)
+; 130  : 	       | ((state->xMc[28] >> 2) & 0x1);
+
+  00395	8a 96 08 06 00
+	00		 mov	 dl, BYTE PTR [esi+1544]
+  0039b	8a 9e 98 05 00
+	00		 mov	 bl, BYTE PTR [esi+1432]
+  003a1	22 d0		 and	 dl, al
+  003a3	c0 e3 03	 shl	 bl, 3
+  003a6	0a d3		 or	 dl, bl
+  003a8	8a 9e 0c 06 00
+	00		 mov	 bl, BYTE PTR [esi+1548]
+  003ae	c0 e2 03	 shl	 dl, 3
+  003b1	22 d8		 and	 bl, al
+  003b3	47		 inc	 edi
+  003b4	0a d3		 or	 dl, bl
+  003b6	8b 9e 10 06 00
+	00		 mov	 ebx, DWORD PTR [esi+1552]
+  003bc	c1 fb 02	 sar	 ebx, 2
+  003bf	d0 e2		 shl	 dl, 1
+  003c1	22 d9		 and	 bl, cl
+  003c3	0a d3		 or	 dl, bl
+  003c5	88 17		 mov	 BYTE PTR [edi], dl
+
+; 131  : 	*c++ =   ((state->xMc[28] & 0x3) << 6)
+; 132  : 	       | ((state->xMc[29] & 0x7) << 3)
+; 133  : 	       | (state->xMc[30] & 0x7);
+
+  003c7	8a 96 14 06 00
+	00		 mov	 dl, BYTE PTR [esi+1556]
+  003cd	8a 9e 10 06 00
+	00		 mov	 bl, BYTE PTR [esi+1552]
+  003d3	22 d0		 and	 dl, al
+  003d5	c0 e3 03	 shl	 bl, 3
+  003d8	0a d3		 or	 dl, bl
+  003da	8a 9e 18 06 00
+	00		 mov	 bl, BYTE PTR [esi+1560]
+  003e0	c0 e2 03	 shl	 dl, 3
+  003e3	22 d8		 and	 bl, al
+  003e5	47		 inc	 edi
+  003e6	0a d3		 or	 dl, bl
+  003e8	88 17		 mov	 BYTE PTR [edi], dl
+
+; 134  : 	*c++ =   ((state->xMc[31] & 0x7) << 5)
+; 135  : 	       | ((state->xMc[32] & 0x7) << 2)
+; 136  : 	       | ((state->xMc[33] >> 1) & 0x3);
+
+  003ea	8a 96 20 06 00
+	00		 mov	 dl, BYTE PTR [esi+1568]
+  003f0	8a 9e 1c 06 00
+	00		 mov	 bl, BYTE PTR [esi+1564]
+  003f6	22 d0		 and	 dl, al
+  003f8	c0 e3 03	 shl	 bl, 3
+  003fb	0a d3		 or	 dl, bl
+  003fd	8b 9e 24 06 00
+	00		 mov	 ebx, DWORD PTR [esi+1572]
+  00403	d1 fb		 sar	 ebx, 1
+  00405	c0 e2 02	 shl	 dl, 2
+  00408	80 e3 03	 and	 bl, 3
+  0040b	47		 inc	 edi
+  0040c	0a d3		 or	 dl, bl
+  0040e	88 17		 mov	 BYTE PTR [edi], dl
+
+; 137  : 	*c++ =   ((state->xMc[33] & 0x1) << 7)
+; 138  : 	       | ((state->xMc[34] & 0x7) << 4)
+; 139  : 	       | ((state->xMc[35] & 0x7) << 1)
+; 140  : 	       | ((state->xMc[36] >> 2) & 0x1);
+
+  00410	8a 96 28 06 00
+	00		 mov	 dl, BYTE PTR [esi+1576]
+  00416	8a 9e 24 06 00
+	00		 mov	 bl, BYTE PTR [esi+1572]
+  0041c	22 d0		 and	 dl, al
+  0041e	c0 e3 03	 shl	 bl, 3
+  00421	0a d3		 or	 dl, bl
+  00423	8a 9e 2c 06 00
+	00		 mov	 bl, BYTE PTR [esi+1580]
+  00429	c0 e2 03	 shl	 dl, 3
+  0042c	22 d8		 and	 bl, al
+  0042e	47		 inc	 edi
+  0042f	0a d3		 or	 dl, bl
+  00431	8b 9e 30 06 00
+	00		 mov	 ebx, DWORD PTR [esi+1584]
+  00437	c1 fb 02	 sar	 ebx, 2
+  0043a	d0 e2		 shl	 dl, 1
+  0043c	22 d9		 and	 bl, cl
+  0043e	0a d3		 or	 dl, bl
+  00440	88 17		 mov	 BYTE PTR [edi], dl
+
+; 141  : 	*c++ =   ((state->xMc[36] & 0x3) << 6)
+; 142  : 	       | ((state->xMc[37] & 0x7) << 3)
+; 143  : 	       | (state->xMc[38] & 0x7);
+
+  00442	8a 96 34 06 00
+	00		 mov	 dl, BYTE PTR [esi+1588]
+  00448	8a 9e 30 06 00
+	00		 mov	 bl, BYTE PTR [esi+1584]
+  0044e	22 d0		 and	 dl, al
+  00450	c0 e3 03	 shl	 bl, 3
+  00453	0a d3		 or	 dl, bl
+  00455	8a 9e 38 06 00
+	00		 mov	 bl, BYTE PTR [esi+1592]
+  0045b	c0 e2 03	 shl	 dl, 3
+  0045e	22 d8		 and	 bl, al
+  00460	47		 inc	 edi
+  00461	0a d3		 or	 dl, bl
+  00463	88 17		 mov	 BYTE PTR [edi], dl
+
+; 144  : 	*c++ =   ((state->Nc[3] & 0x7F) << 1)
+; 145  : 	       | ((state->bc[3] >> 1) & 0x1);
+
+  00465	8b 96 7c 05 00
+	00		 mov	 edx, DWORD PTR [esi+1404]
+  0046b	8a 9e 6c 05 00
+	00		 mov	 bl, BYTE PTR [esi+1388]
+  00471	47		 inc	 edi
+  00472	d1 fa		 sar	 edx, 1
+  00474	22 d1		 and	 dl, cl
+  00476	d0 e3		 shl	 bl, 1
+  00478	0a d3		 or	 dl, bl
+  0047a	88 17		 mov	 BYTE PTR [edi], dl
+
+; 146  : 	*c++ =   ((state->bc[3] & 0x1) << 7)
+; 147  : 	       | ((state->Mc[3] & 0x3) << 5)
+; 148  : 	       | ((state->xMaxc[3] >> 1) & 0x1F);
+
+  0047c	8a 96 8c 05 00
+	00		 mov	 dl, BYTE PTR [esi+1420]
+  00482	8a 9e 7c 05 00
+	00		 mov	 bl, BYTE PTR [esi+1404]
+  00488	47		 inc	 edi
+  00489	80 e2 03	 and	 dl, 3
+  0048c	c0 e3 02	 shl	 bl, 2
+  0048f	0a d3		 or	 dl, bl
+  00491	8b 9e 9c 05 00
+	00		 mov	 ebx, DWORD PTR [esi+1436]
+  00497	d1 fb		 sar	 ebx, 1
+  00499	c0 e2 05	 shl	 dl, 5
+  0049c	80 e3 1f	 and	 bl, 31			; 0000001fH
+  0049f	0a d3		 or	 dl, bl
+  004a1	88 17		 mov	 BYTE PTR [edi], dl
+
+; 149  : 	*c++ =   ((state->xMaxc[3] & 0x1) << 7)
+; 150  : 	       | ((state->xMc[39] & 0x7) << 4)
+; 151  : 	       | ((state->xMc[40] & 0x7) << 1)
+; 152  : 	       | ((state->xMc[41] >> 2) & 0x1);
+
+  004a3	8a 96 3c 06 00
+	00		 mov	 dl, BYTE PTR [esi+1596]
+  004a9	8a 9e 9c 05 00
+	00		 mov	 bl, BYTE PTR [esi+1436]
+  004af	22 d0		 and	 dl, al
+  004b1	c0 e3 03	 shl	 bl, 3
+  004b4	0a d3		 or	 dl, bl
+  004b6	8a 9e 40 06 00
+	00		 mov	 bl, BYTE PTR [esi+1600]
+  004bc	c0 e2 03	 shl	 dl, 3
+  004bf	22 d8		 and	 bl, al
+  004c1	47		 inc	 edi
+  004c2	0a d3		 or	 dl, bl
+  004c4	8b 9e 44 06 00
+	00		 mov	 ebx, DWORD PTR [esi+1604]
+  004ca	c1 fb 02	 sar	 ebx, 2
+  004cd	d0 e2		 shl	 dl, 1
+  004cf	22 d9		 and	 bl, cl
+  004d1	0a d3		 or	 dl, bl
+  004d3	88 17		 mov	 BYTE PTR [edi], dl
+
+; 153  : 	*c++ =   ((state->xMc[41] & 0x3) << 6)
+; 154  : 	       | ((state->xMc[42] & 0x7) << 3)
+; 155  : 	       | (state->xMc[43] & 0x7);
+
+  004d5	8a 96 48 06 00
+	00		 mov	 dl, BYTE PTR [esi+1608]
+  004db	8a 9e 44 06 00
+	00		 mov	 bl, BYTE PTR [esi+1604]
+  004e1	22 d0		 and	 dl, al
+  004e3	c0 e3 03	 shl	 bl, 3
+  004e6	0a d3		 or	 dl, bl
+  004e8	8a 9e 4c 06 00
+	00		 mov	 bl, BYTE PTR [esi+1612]
+  004ee	c0 e2 03	 shl	 dl, 3
+  004f1	22 d8		 and	 bl, al
+  004f3	47		 inc	 edi
+  004f4	0a d3		 or	 dl, bl
+  004f6	88 17		 mov	 BYTE PTR [edi], dl
+
+; 156  : 	*c++ =   ((state->xMc[44] & 0x7) << 5)
+; 157  : 	       | ((state->xMc[45] & 0x7) << 2)
+; 158  : 	       | ((state->xMc[46] >> 1) & 0x3);
+
+  004f8	8a 96 54 06 00
+	00		 mov	 dl, BYTE PTR [esi+1620]
+  004fe	8a 9e 50 06 00
+	00		 mov	 bl, BYTE PTR [esi+1616]
+  00504	22 d0		 and	 dl, al
+  00506	c0 e3 03	 shl	 bl, 3
+  00509	0a d3		 or	 dl, bl
+  0050b	8b 9e 58 06 00
+	00		 mov	 ebx, DWORD PTR [esi+1624]
+  00511	d1 fb		 sar	 ebx, 1
+  00513	c0 e2 02	 shl	 dl, 2
+  00516	80 e3 03	 and	 bl, 3
+  00519	47		 inc	 edi
+  0051a	0a d3		 or	 dl, bl
+  0051c	88 17		 mov	 BYTE PTR [edi], dl
+
+; 159  : 	*c++ =   ((state->xMc[46] & 0x1) << 7)
+; 160  : 	       | ((state->xMc[47] & 0x7) << 4)
+; 161  : 	       | ((state->xMc[48] & 0x7) << 1)
+; 162  : 	       | ((state->xMc[49] >> 2) & 0x1);
+
+  0051e	8a 96 5c 06 00
+	00		 mov	 dl, BYTE PTR [esi+1628]
+  00524	8a 9e 58 06 00
+	00		 mov	 bl, BYTE PTR [esi+1624]
+  0052a	22 d0		 and	 dl, al
+  0052c	c0 e3 03	 shl	 bl, 3
+  0052f	0a d3		 or	 dl, bl
+  00531	8a 9e 60 06 00
+	00		 mov	 bl, BYTE PTR [esi+1632]
+  00537	c0 e2 03	 shl	 dl, 3
+  0053a	22 d8		 and	 bl, al
+  0053c	47		 inc	 edi
+  0053d	0a d3		 or	 dl, bl
+  0053f	8b 9e 64 06 00
+	00		 mov	 ebx, DWORD PTR [esi+1636]
+  00545	c1 fb 02	 sar	 ebx, 2
+  00548	d0 e2		 shl	 dl, 1
+  0054a	22 d9		 and	 bl, cl
+  0054c	0a d3		 or	 dl, bl
+  0054e	88 17		 mov	 BYTE PTR [edi], dl
+
+; 163  : 	*c++ =   ((state->xMc[49] & 0x3) << 6)
+; 164  : 	       | ((state->xMc[50] & 0x7) << 3)
+; 165  : 	       | (state->xMc[51] & 0x7);
+
+  00550	8a 8e 68 06 00
+	00		 mov	 cl, BYTE PTR [esi+1640]
+  00556	8a 96 64 06 00
+	00		 mov	 dl, BYTE PTR [esi+1636]
+  0055c	22 c8		 and	 cl, al
+  0055e	c0 e2 03	 shl	 dl, 3
+  00561	0a ca		 or	 cl, dl
+  00563	8a 96 6c 06 00
+	00		 mov	 dl, BYTE PTR [esi+1644]
+  00569	c0 e1 03	 shl	 cl, 3
+  0056c	22 d0		 and	 dl, al
+  0056e	0a ca		 or	 cl, dl
+  00570	88 4f 01	 mov	 BYTE PTR [edi+1], cl
+  00573	5f		 pop	 edi
+  00574	5e		 pop	 esi
+  00575	5b		 pop	 ebx
+
+; 166  : }
+
+  00576	c9		 leave
+  00577	c3		 ret	 0
+_gsm_encode ENDP
+_TEXT	ENDS
+PUBLIC	_gsm_decode
+EXTRN	_decodeRPE:NEAR
+EXTRN	_longTermSynthesis:NEAR
+EXTRN	_shortTermSynthesis:NEAR
+EXTRN	_gsm_postprocessing:NEAR
+;	COMDAT _gsm_decode
+_TEXT	SEGMENT
+_state$ = 8
+_out$ = 12
+_gsm_decode PROC NEAR					; COMDAT
+
+; 169  : {
+
+  00000	56		 push	 esi
+
+; 170  :     int i;
+; 171  : 	unsigned char *c = state->gsmFrame;
+
+  00001	8b 74 24 08	 mov	 esi, DWORD PTR _state$[esp]
+
+; 172  : 
+; 173  : 	if (((*c >> 4) & 0x0F) != GSM_MAGIC) return ;
+
+  00005	8a 8e 80 06 00
+	00		 mov	 cl, BYTE PTR [esi+1664]
+  0000b	8d 86 80 06 00
+	00		 lea	 eax, DWORD PTR [esi+1664]
+  00011	8a d1		 mov	 dl, cl
+  00013	80 e2 f0	 and	 dl, 240			; 000000f0H
+  00016	80 fa d0	 cmp	 dl, 208			; 000000d0H
+  00019	0f 85 f9 04 00
+	00		 jne	 $L75819
+
+; 174  : 	state->qLARs[0]  = (*c++ & 0xF) << 2;
+
+  0001f	83 e1 0f	 and	 ecx, 15			; 0000000fH
+  00022	53		 push	 ebx
+  00023	c1 e1 02	 shl	 ecx, 2
+  00026	40		 inc	 eax
+  00027	89 4e 44	 mov	 DWORD PTR [esi+68], ecx
+  0002a	57		 push	 edi
+
+; 175  : 	state->qLARs[0] |= (*c >> 6) & 0x3;
+; 176  : 	state->qLARs[1]  = *c++ & 0x3F;
+; 177  : 	state->qLARs[2]  = (*c >> 3) & 0x1F;
+; 178  : 	state->qLARs[3]  = (*c++ & 0x7) << 2;
+
+  0002b	6a 07		 push	 7
+  0002d	0f b6 08	 movzx	 ecx, BYTE PTR [eax]
+  00030	c1 e9 06	 shr	 ecx, 6
+  00033	09 4e 44	 or	 DWORD PTR [esi+68], ecx
+  00036	8a 08		 mov	 cl, BYTE PTR [eax]
+  00038	83 e1 3f	 and	 ecx, 63			; 0000003fH
+  0003b	40		 inc	 eax
+  0003c	89 4e 48	 mov	 DWORD PTR [esi+72], ecx
+  0003f	0f b6 08	 movzx	 ecx, BYTE PTR [eax]
+  00042	c1 e9 03	 shr	 ecx, 3
+  00045	89 4e 4c	 mov	 DWORD PTR [esi+76], ecx
+  00048	8a 10		 mov	 dl, BYTE PTR [eax]
+  0004a	59		 pop	 ecx
+  0004b	23 d1		 and	 edx, ecx
+
+; 179  : 	state->qLARs[3] |= (*c >> 6) & 0x3;
+; 180  : 	state->qLARs[4]  = (*c >> 2) & 0xF;
+; 181  : 	state->qLARs[5]  = (*c++ & 0x3) << 2;
+; 182  : 	state->qLARs[5] |= (*c >> 6) & 0x3;
+; 183  : 	state->qLARs[6]  = (*c >> 3) & 0x7;
+; 184  : 	state->qLARs[7]  = *c++ & 0x7;
+; 185  : 	state->Nc[0]  = (*c >> 1) & 0x7F;
+; 186  : 	state->bc[0]  = (*c++ & 0x1) << 1;
+
+  0004d	6a 01		 push	 1
+  0004f	c1 e2 02	 shl	 edx, 2
+  00052	40		 inc	 eax
+  00053	89 56 50	 mov	 DWORD PTR [esi+80], edx
+  00056	5f		 pop	 edi
+  00057	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  0005a	c1 ea 06	 shr	 edx, 6
+  0005d	09 56 50	 or	 DWORD PTR [esi+80], edx
+  00060	8a 10		 mov	 dl, BYTE PTR [eax]
+  00062	c1 ea 02	 shr	 edx, 2
+  00065	83 e2 0f	 and	 edx, 15			; 0000000fH
+  00068	89 56 54	 mov	 DWORD PTR [esi+84], edx
+  0006b	8a 10		 mov	 dl, BYTE PTR [eax]
+  0006d	83 e2 03	 and	 edx, 3
+  00070	c1 e2 02	 shl	 edx, 2
+  00073	40		 inc	 eax
+  00074	89 56 58	 mov	 DWORD PTR [esi+88], edx
+  00077	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  0007a	c1 ea 06	 shr	 edx, 6
+  0007d	09 56 58	 or	 DWORD PTR [esi+88], edx
+  00080	8a 10		 mov	 dl, BYTE PTR [eax]
+  00082	c1 ea 03	 shr	 edx, 3
+  00085	23 d1		 and	 edx, ecx
+  00087	89 56 5c	 mov	 DWORD PTR [esi+92], edx
+  0008a	8a 10		 mov	 dl, BYTE PTR [eax]
+  0008c	23 d1		 and	 edx, ecx
+  0008e	40		 inc	 eax
+  0008f	89 56 60	 mov	 DWORD PTR [esi+96], edx
+  00092	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  00095	d1 ea		 shr	 edx, 1
+  00097	89 96 60 05 00
+	00		 mov	 DWORD PTR [esi+1376], edx
+  0009d	8a 18		 mov	 bl, BYTE PTR [eax]
+  0009f	23 df		 and	 ebx, edi
+  000a1	8d 96 70 05 00
+	00		 lea	 edx, DWORD PTR [esi+1392]
+  000a7	d1 e3		 shl	 ebx, 1
+  000a9	40		 inc	 eax
+  000aa	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 187  : 	state->bc[0] |= (*c >> 7) & 0x1;
+
+  000ac	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  000af	c1 eb 07	 shr	 ebx, 7
+  000b2	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 188  : 	state->Mc[0]  = (*c >> 5) & 0x3;
+
+  000b4	8a 10		 mov	 dl, BYTE PTR [eax]
+  000b6	c1 ea 05	 shr	 edx, 5
+  000b9	83 e2 03	 and	 edx, 3
+  000bc	89 96 80 05 00
+	00		 mov	 DWORD PTR [esi+1408], edx
+
+; 189  : 	state->xMaxc[0]  = (*c++ & 0x1F) << 1;
+
+  000c2	8a 18		 mov	 bl, BYTE PTR [eax]
+  000c4	83 e3 1f	 and	 ebx, 31			; 0000001fH
+  000c7	8d 96 90 05 00
+	00		 lea	 edx, DWORD PTR [esi+1424]
+  000cd	d1 e3		 shl	 ebx, 1
+  000cf	40		 inc	 eax
+  000d0	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 190  : 	state->xMaxc[0] |= (*c >> 7) & 0x1;
+
+  000d2	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  000d5	c1 eb 07	 shr	 ebx, 7
+  000d8	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 191  : 	state->xMc[0]  = (*c >> 4) & 0x7;
+
+  000da	8a 10		 mov	 dl, BYTE PTR [eax]
+  000dc	c1 ea 04	 shr	 edx, 4
+  000df	23 d1		 and	 edx, ecx
+  000e1	89 96 a0 05 00
+	00		 mov	 DWORD PTR [esi+1440], edx
+
+; 192  : 	state->xMc[1]  = (*c >> 1) & 0x7;
+
+  000e7	8a 10		 mov	 dl, BYTE PTR [eax]
+  000e9	d1 ea		 shr	 edx, 1
+  000eb	23 d1		 and	 edx, ecx
+  000ed	89 96 a4 05 00
+	00		 mov	 DWORD PTR [esi+1444], edx
+
+; 193  : 	state->xMc[2]  = (*c++ & 0x1) << 2;
+
+  000f3	8a 18		 mov	 bl, BYTE PTR [eax]
+  000f5	8d 96 a8 05 00
+	00		 lea	 edx, DWORD PTR [esi+1448]
+  000fb	23 df		 and	 ebx, edi
+  000fd	c1 e3 02	 shl	 ebx, 2
+  00100	40		 inc	 eax
+  00101	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 194  : 	state->xMc[2] |= (*c >> 6) & 0x3;
+
+  00103	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  00106	c1 eb 06	 shr	 ebx, 6
+  00109	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 195  : 	state->xMc[3]  = (*c >> 3) & 0x7;
+
+  0010b	8a 10		 mov	 dl, BYTE PTR [eax]
+  0010d	c1 ea 03	 shr	 edx, 3
+  00110	23 d1		 and	 edx, ecx
+  00112	89 96 ac 05 00
+	00		 mov	 DWORD PTR [esi+1452], edx
+
+; 196  : 	state->xMc[4]  = *c++ & 0x7;
+
+  00118	8a 10		 mov	 dl, BYTE PTR [eax]
+  0011a	23 d1		 and	 edx, ecx
+  0011c	40		 inc	 eax
+  0011d	89 96 b0 05 00
+	00		 mov	 DWORD PTR [esi+1456], edx
+
+; 197  : 	state->xMc[5]  = (*c >> 5) & 0x7;
+
+  00123	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  00126	c1 ea 05	 shr	 edx, 5
+  00129	89 96 b4 05 00
+	00		 mov	 DWORD PTR [esi+1460], edx
+
+; 198  : 	state->xMc[6]  = (*c >> 2) & 0x7;
+
+  0012f	8a 10		 mov	 dl, BYTE PTR [eax]
+  00131	c1 ea 02	 shr	 edx, 2
+  00134	23 d1		 and	 edx, ecx
+  00136	89 96 b8 05 00
+	00		 mov	 DWORD PTR [esi+1464], edx
+
+; 199  : 	state->xMc[7]  = (*c++ & 0x3) << 1;
+
+  0013c	8a 18		 mov	 bl, BYTE PTR [eax]
+  0013e	83 e3 03	 and	 ebx, 3
+  00141	8d 96 bc 05 00
+	00		 lea	 edx, DWORD PTR [esi+1468]
+  00147	d1 e3		 shl	 ebx, 1
+  00149	40		 inc	 eax
+  0014a	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 200  : 	state->xMc[7] |= (*c >> 7) & 0x1;
+
+  0014c	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  0014f	c1 eb 07	 shr	 ebx, 7
+  00152	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 201  : 	state->xMc[8]  = (*c >> 4) & 0x7;
+
+  00154	8a 10		 mov	 dl, BYTE PTR [eax]
+  00156	c1 ea 04	 shr	 edx, 4
+  00159	23 d1		 and	 edx, ecx
+  0015b	89 96 c0 05 00
+	00		 mov	 DWORD PTR [esi+1472], edx
+
+; 202  : 	state->xMc[9]  = (*c >> 1) & 0x7;
+
+  00161	8a 10		 mov	 dl, BYTE PTR [eax]
+  00163	d1 ea		 shr	 edx, 1
+  00165	23 d1		 and	 edx, ecx
+  00167	89 96 c4 05 00
+	00		 mov	 DWORD PTR [esi+1476], edx
+
+; 203  : 	state->xMc[10]  = (*c++ & 0x1) << 2;
+
+  0016d	8a 18		 mov	 bl, BYTE PTR [eax]
+  0016f	23 df		 and	 ebx, edi
+  00171	8d 96 c8 05 00
+	00		 lea	 edx, DWORD PTR [esi+1480]
+  00177	c1 e3 02	 shl	 ebx, 2
+  0017a	40		 inc	 eax
+  0017b	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 204  : 	state->xMc[10] |= (*c >> 6) & 0x3;
+
+  0017d	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  00180	c1 eb 06	 shr	 ebx, 6
+  00183	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 205  : 	state->xMc[11]  = (*c >> 3) & 0x7;
+
+  00185	8a 10		 mov	 dl, BYTE PTR [eax]
+  00187	c1 ea 03	 shr	 edx, 3
+  0018a	23 d1		 and	 edx, ecx
+  0018c	89 96 cc 05 00
+	00		 mov	 DWORD PTR [esi+1484], edx
+
+; 206  : 	state->xMc[12]  = *c++ & 0x7;
+
+  00192	8a 10		 mov	 dl, BYTE PTR [eax]
+  00194	23 d1		 and	 edx, ecx
+  00196	40		 inc	 eax
+  00197	89 96 d0 05 00
+	00		 mov	 DWORD PTR [esi+1488], edx
+
+; 207  : 	state->Nc[1]  = (*c >> 1) & 0x7F;
+
+  0019d	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  001a0	d1 ea		 shr	 edx, 1
+  001a2	89 96 64 05 00
+	00		 mov	 DWORD PTR [esi+1380], edx
+
+; 208  : 	state->bc[1]  = (*c++ & 0x1) << 1;
+
+  001a8	8a 18		 mov	 bl, BYTE PTR [eax]
+  001aa	23 df		 and	 ebx, edi
+  001ac	8d 96 74 05 00
+	00		 lea	 edx, DWORD PTR [esi+1396]
+  001b2	d1 e3		 shl	 ebx, 1
+  001b4	40		 inc	 eax
+  001b5	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 209  : 	state->bc[1] |= (*c >> 7) & 0x1;
+
+  001b7	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  001ba	c1 eb 07	 shr	 ebx, 7
+  001bd	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 210  : 	state->Mc[1]  = (*c >> 5) & 0x3;
+
+  001bf	8a 10		 mov	 dl, BYTE PTR [eax]
+  001c1	c1 ea 05	 shr	 edx, 5
+  001c4	83 e2 03	 and	 edx, 3
+  001c7	89 96 84 05 00
+	00		 mov	 DWORD PTR [esi+1412], edx
+
+; 211  : 	state->xMaxc[1]  = (*c++ & 0x1F) << 1;
+
+  001cd	8a 18		 mov	 bl, BYTE PTR [eax]
+  001cf	83 e3 1f	 and	 ebx, 31			; 0000001fH
+  001d2	8d 96 94 05 00
+	00		 lea	 edx, DWORD PTR [esi+1428]
+  001d8	d1 e3		 shl	 ebx, 1
+  001da	40		 inc	 eax
+  001db	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 212  : 	state->xMaxc[1] |= (*c >> 7) & 0x1;
+
+  001dd	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  001e0	c1 eb 07	 shr	 ebx, 7
+  001e3	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 213  : 	state->xMc[13]  = (*c >> 4) & 0x7;
+
+  001e5	8a 10		 mov	 dl, BYTE PTR [eax]
+  001e7	c1 ea 04	 shr	 edx, 4
+  001ea	23 d1		 and	 edx, ecx
+  001ec	89 96 d4 05 00
+	00		 mov	 DWORD PTR [esi+1492], edx
+
+; 214  : 	state->xMc[14]  = (*c >> 1) & 0x7;
+
+  001f2	8a 10		 mov	 dl, BYTE PTR [eax]
+  001f4	d1 ea		 shr	 edx, 1
+  001f6	23 d1		 and	 edx, ecx
+  001f8	89 96 d8 05 00
+	00		 mov	 DWORD PTR [esi+1496], edx
+
+; 215  : 	state->xMc[15]  = (*c++ & 0x1) << 2;
+
+  001fe	8a 18		 mov	 bl, BYTE PTR [eax]
+  00200	23 df		 and	 ebx, edi
+  00202	8d 96 dc 05 00
+	00		 lea	 edx, DWORD PTR [esi+1500]
+  00208	c1 e3 02	 shl	 ebx, 2
+  0020b	40		 inc	 eax
+  0020c	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 216  : 	state->xMc[15] |= (*c >> 6) & 0x3;
+
+  0020e	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  00211	c1 eb 06	 shr	 ebx, 6
+  00214	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 217  : 	state->xMc[16]  = (*c >> 3) & 0x7;
+
+  00216	8a 10		 mov	 dl, BYTE PTR [eax]
+  00218	c1 ea 03	 shr	 edx, 3
+  0021b	23 d1		 and	 edx, ecx
+  0021d	89 96 e0 05 00
+	00		 mov	 DWORD PTR [esi+1504], edx
+
+; 218  : 	state->xMc[17]  = *c++ & 0x7;
+
+  00223	8a 10		 mov	 dl, BYTE PTR [eax]
+  00225	23 d1		 and	 edx, ecx
+  00227	40		 inc	 eax
+  00228	89 96 e4 05 00
+	00		 mov	 DWORD PTR [esi+1508], edx
+
+; 219  : 	state->xMc[18]  = (*c >> 5) & 0x7;
+
+  0022e	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  00231	c1 ea 05	 shr	 edx, 5
+  00234	89 96 e8 05 00
+	00		 mov	 DWORD PTR [esi+1512], edx
+
+; 220  : 	state->xMc[19]  = (*c >> 2) & 0x7;
+
+  0023a	8a 10		 mov	 dl, BYTE PTR [eax]
+  0023c	c1 ea 02	 shr	 edx, 2
+  0023f	23 d1		 and	 edx, ecx
+  00241	89 96 ec 05 00
+	00		 mov	 DWORD PTR [esi+1516], edx
+
+; 221  : 	state->xMc[20]  = (*c++ & 0x3) << 1;
+
+  00247	8a 18		 mov	 bl, BYTE PTR [eax]
+  00249	83 e3 03	 and	 ebx, 3
+  0024c	8d 96 f0 05 00
+	00		 lea	 edx, DWORD PTR [esi+1520]
+  00252	d1 e3		 shl	 ebx, 1
+  00254	40		 inc	 eax
+  00255	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 222  : 	state->xMc[20] |= (*c >> 7) & 0x1;
+
+  00257	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  0025a	c1 eb 07	 shr	 ebx, 7
+  0025d	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 223  : 	state->xMc[21]  = (*c >> 4) & 0x7;
+
+  0025f	8a 10		 mov	 dl, BYTE PTR [eax]
+  00261	c1 ea 04	 shr	 edx, 4
+  00264	23 d1		 and	 edx, ecx
+  00266	89 96 f4 05 00
+	00		 mov	 DWORD PTR [esi+1524], edx
+
+; 224  : 	state->xMc[22]  = (*c >> 1) & 0x7;
+
+  0026c	8a 10		 mov	 dl, BYTE PTR [eax]
+  0026e	d1 ea		 shr	 edx, 1
+  00270	23 d1		 and	 edx, ecx
+  00272	89 96 f8 05 00
+	00		 mov	 DWORD PTR [esi+1528], edx
+
+; 225  : 	state->xMc[23]  = (*c++ & 0x1) << 2;
+
+  00278	8a 18		 mov	 bl, BYTE PTR [eax]
+  0027a	23 df		 and	 ebx, edi
+  0027c	8d 96 fc 05 00
+	00		 lea	 edx, DWORD PTR [esi+1532]
+  00282	c1 e3 02	 shl	 ebx, 2
+  00285	40		 inc	 eax
+  00286	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 226  : 	state->xMc[23] |= (*c >> 6) & 0x3;
+
+  00288	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  0028b	c1 eb 06	 shr	 ebx, 6
+  0028e	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 227  : 	state->xMc[24]  = (*c >> 3) & 0x7;
+
+  00290	8a 10		 mov	 dl, BYTE PTR [eax]
+  00292	c1 ea 03	 shr	 edx, 3
+  00295	23 d1		 and	 edx, ecx
+  00297	89 96 00 06 00
+	00		 mov	 DWORD PTR [esi+1536], edx
+
+; 228  : 	state->xMc[25]  = *c++ & 0x7;
+
+  0029d	8a 10		 mov	 dl, BYTE PTR [eax]
+  0029f	23 d1		 and	 edx, ecx
+  002a1	40		 inc	 eax
+  002a2	89 96 04 06 00
+	00		 mov	 DWORD PTR [esi+1540], edx
+
+; 229  : 	state->Nc[2]  = (*c >> 1) & 0x7F;
+
+  002a8	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  002ab	d1 ea		 shr	 edx, 1
+  002ad	89 96 68 05 00
+	00		 mov	 DWORD PTR [esi+1384], edx
+
+; 230  : 	state->bc[2]  = (*c++ & 0x1) << 1;
+
+  002b3	8a 18		 mov	 bl, BYTE PTR [eax]
+  002b5	23 df		 and	 ebx, edi
+  002b7	8d 96 78 05 00
+	00		 lea	 edx, DWORD PTR [esi+1400]
+  002bd	d1 e3		 shl	 ebx, 1
+  002bf	40		 inc	 eax
+  002c0	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 231  : 	state->bc[2] |= (*c >> 7) & 0x1;
+
+  002c2	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  002c5	c1 eb 07	 shr	 ebx, 7
+  002c8	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 232  : 	state->Mc[2]  = (*c >> 5) & 0x3;
+
+  002ca	8a 10		 mov	 dl, BYTE PTR [eax]
+  002cc	c1 ea 05	 shr	 edx, 5
+  002cf	83 e2 03	 and	 edx, 3
+  002d2	89 96 88 05 00
+	00		 mov	 DWORD PTR [esi+1416], edx
+
+; 233  : 	state->xMaxc[2]  = (*c++ & 0x1F) << 1;
+
+  002d8	8a 18		 mov	 bl, BYTE PTR [eax]
+  002da	83 e3 1f	 and	 ebx, 31			; 0000001fH
+  002dd	8d 96 98 05 00
+	00		 lea	 edx, DWORD PTR [esi+1432]
+  002e3	d1 e3		 shl	 ebx, 1
+  002e5	40		 inc	 eax
+  002e6	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 234  : 	state->xMaxc[2] |= (*c >> 7) & 0x1;
+
+  002e8	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  002eb	c1 eb 07	 shr	 ebx, 7
+  002ee	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 235  : 	state->xMc[26]  = (*c >> 4) & 0x7;
+
+  002f0	8a 10		 mov	 dl, BYTE PTR [eax]
+  002f2	c1 ea 04	 shr	 edx, 4
+  002f5	23 d1		 and	 edx, ecx
+  002f7	89 96 08 06 00
+	00		 mov	 DWORD PTR [esi+1544], edx
+
+; 236  : 	state->xMc[27]  = (*c >> 1) & 0x7;
+
+  002fd	8a 10		 mov	 dl, BYTE PTR [eax]
+  002ff	d1 ea		 shr	 edx, 1
+  00301	23 d1		 and	 edx, ecx
+  00303	89 96 0c 06 00
+	00		 mov	 DWORD PTR [esi+1548], edx
+
+; 237  : 	state->xMc[28]  = (*c++ & 0x1) << 2;
+
+  00309	8a 18		 mov	 bl, BYTE PTR [eax]
+  0030b	23 df		 and	 ebx, edi
+  0030d	8d 96 10 06 00
+	00		 lea	 edx, DWORD PTR [esi+1552]
+  00313	c1 e3 02	 shl	 ebx, 2
+  00316	40		 inc	 eax
+  00317	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 238  : 	state->xMc[28] |= (*c >> 6) & 0x3;
+
+  00319	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  0031c	c1 eb 06	 shr	 ebx, 6
+  0031f	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 239  : 	state->xMc[29]  = (*c >> 3) & 0x7;
+
+  00321	8a 10		 mov	 dl, BYTE PTR [eax]
+  00323	c1 ea 03	 shr	 edx, 3
+  00326	23 d1		 and	 edx, ecx
+  00328	89 96 14 06 00
+	00		 mov	 DWORD PTR [esi+1556], edx
+
+; 240  : 	state->xMc[30]  = *c++ & 0x7;
+
+  0032e	8a 10		 mov	 dl, BYTE PTR [eax]
+  00330	23 d1		 and	 edx, ecx
+  00332	40		 inc	 eax
+  00333	89 96 18 06 00
+	00		 mov	 DWORD PTR [esi+1560], edx
+
+; 241  : 	state->xMc[31]  = (*c >> 5) & 0x7;
+
+  00339	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  0033c	c1 ea 05	 shr	 edx, 5
+  0033f	89 96 1c 06 00
+	00		 mov	 DWORD PTR [esi+1564], edx
+
+; 242  : 	state->xMc[32]  = (*c >> 2) & 0x7;
+
+  00345	8a 10		 mov	 dl, BYTE PTR [eax]
+  00347	c1 ea 02	 shr	 edx, 2
+  0034a	23 d1		 and	 edx, ecx
+  0034c	89 96 20 06 00
+	00		 mov	 DWORD PTR [esi+1568], edx
+
+; 243  : 	state->xMc[33]  = (*c++ & 0x3) << 1;
+
+  00352	8a 18		 mov	 bl, BYTE PTR [eax]
+  00354	83 e3 03	 and	 ebx, 3
+  00357	8d 96 24 06 00
+	00		 lea	 edx, DWORD PTR [esi+1572]
+  0035d	d1 e3		 shl	 ebx, 1
+  0035f	40		 inc	 eax
+  00360	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 244  : 	state->xMc[33] |= (*c >> 7) & 0x1;
+
+  00362	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  00365	c1 eb 07	 shr	 ebx, 7
+  00368	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 245  : 	state->xMc[34]  = (*c >> 4) & 0x7;
+
+  0036a	8a 10		 mov	 dl, BYTE PTR [eax]
+  0036c	c1 ea 04	 shr	 edx, 4
+  0036f	23 d1		 and	 edx, ecx
+  00371	89 96 28 06 00
+	00		 mov	 DWORD PTR [esi+1576], edx
+
+; 246  : 	state->xMc[35]  = (*c >> 1) & 0x7;
+
+  00377	8a 10		 mov	 dl, BYTE PTR [eax]
+  00379	d1 ea		 shr	 edx, 1
+  0037b	23 d1		 and	 edx, ecx
+  0037d	89 96 2c 06 00
+	00		 mov	 DWORD PTR [esi+1580], edx
+
+; 247  : 	state->xMc[36]  = (*c++ & 0x1) << 2;
+
+  00383	8a 18		 mov	 bl, BYTE PTR [eax]
+  00385	23 df		 and	 ebx, edi
+  00387	8d 96 30 06 00
+	00		 lea	 edx, DWORD PTR [esi+1584]
+  0038d	c1 e3 02	 shl	 ebx, 2
+  00390	40		 inc	 eax
+  00391	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 248  : 	state->xMc[36] |= (*c >> 6) & 0x3;
+
+  00393	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  00396	c1 eb 06	 shr	 ebx, 6
+  00399	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 249  : 	state->xMc[37]  = (*c >> 3) & 0x7;
+
+  0039b	8a 10		 mov	 dl, BYTE PTR [eax]
+  0039d	c1 ea 03	 shr	 edx, 3
+  003a0	23 d1		 and	 edx, ecx
+  003a2	89 96 34 06 00
+	00		 mov	 DWORD PTR [esi+1588], edx
+
+; 250  : 	state->xMc[38]  = *c++ & 0x7;
+
+  003a8	8a 10		 mov	 dl, BYTE PTR [eax]
+  003aa	23 d1		 and	 edx, ecx
+  003ac	40		 inc	 eax
+  003ad	89 96 38 06 00
+	00		 mov	 DWORD PTR [esi+1592], edx
+
+; 251  : 	state->Nc[3]  = (*c >> 1) & 0x7F;
+
+  003b3	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  003b6	d1 ea		 shr	 edx, 1
+  003b8	89 96 6c 05 00
+	00		 mov	 DWORD PTR [esi+1388], edx
+
+; 252  : 	state->bc[3]  = (*c++ & 0x1) << 1;
+
+  003be	8a 18		 mov	 bl, BYTE PTR [eax]
+  003c0	8d 96 7c 05 00
+	00		 lea	 edx, DWORD PTR [esi+1404]
+  003c6	23 df		 and	 ebx, edi
+  003c8	d1 e3		 shl	 ebx, 1
+  003ca	40		 inc	 eax
+  003cb	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 253  : 	state->bc[3] |= (*c >> 7) & 0x1;
+
+  003cd	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  003d0	c1 eb 07	 shr	 ebx, 7
+  003d3	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 254  : 	state->Mc[3]  = (*c >> 5) & 0x3;
+
+  003d5	8a 10		 mov	 dl, BYTE PTR [eax]
+  003d7	c1 ea 05	 shr	 edx, 5
+  003da	83 e2 03	 and	 edx, 3
+  003dd	89 96 8c 05 00
+	00		 mov	 DWORD PTR [esi+1420], edx
+
+; 255  : 	state->xMaxc[3]  = (*c++ & 0x1F) << 1;
+
+  003e3	8a 18		 mov	 bl, BYTE PTR [eax]
+  003e5	83 e3 1f	 and	 ebx, 31			; 0000001fH
+  003e8	8d 96 9c 05 00
+	00		 lea	 edx, DWORD PTR [esi+1436]
+  003ee	d1 e3		 shl	 ebx, 1
+  003f0	40		 inc	 eax
+  003f1	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 256  : 	state->xMaxc[3] |= (*c >> 7) & 0x1;
+
+  003f3	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  003f6	c1 eb 07	 shr	 ebx, 7
+  003f9	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 257  : 	state->xMc[39]  = (*c >> 4) & 0x7;
+
+  003fb	8a 10		 mov	 dl, BYTE PTR [eax]
+  003fd	c1 ea 04	 shr	 edx, 4
+  00400	23 d1		 and	 edx, ecx
+  00402	89 96 3c 06 00
+	00		 mov	 DWORD PTR [esi+1596], edx
+
+; 258  : 	state->xMc[40]  = (*c >> 1) & 0x7;
+
+  00408	8a 10		 mov	 dl, BYTE PTR [eax]
+  0040a	d1 ea		 shr	 edx, 1
+  0040c	23 d1		 and	 edx, ecx
+  0040e	89 96 40 06 00
+	00		 mov	 DWORD PTR [esi+1600], edx
+
+; 259  : 	state->xMc[41]  = (*c++ & 0x1) << 2;
+
+  00414	8a 18		 mov	 bl, BYTE PTR [eax]
+  00416	23 df		 and	 ebx, edi
+  00418	8d 96 44 06 00
+	00		 lea	 edx, DWORD PTR [esi+1604]
+  0041e	c1 e3 02	 shl	 ebx, 2
+  00421	40		 inc	 eax
+  00422	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 260  : 	state->xMc[41] |= (*c >> 6) & 0x3;
+
+  00424	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  00427	c1 eb 06	 shr	 ebx, 6
+  0042a	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 261  : 	state->xMc[42]  = (*c >> 3) & 0x7;
+
+  0042c	8a 10		 mov	 dl, BYTE PTR [eax]
+  0042e	c1 ea 03	 shr	 edx, 3
+  00431	23 d1		 and	 edx, ecx
+  00433	89 96 48 06 00
+	00		 mov	 DWORD PTR [esi+1608], edx
+
+; 262  : 	state->xMc[43]  = *c++ & 0x7;
+
+  00439	8a 10		 mov	 dl, BYTE PTR [eax]
+  0043b	23 d1		 and	 edx, ecx
+  0043d	40		 inc	 eax
+  0043e	89 96 4c 06 00
+	00		 mov	 DWORD PTR [esi+1612], edx
+
+; 263  : 	state->xMc[44]  = (*c >> 5) & 0x7;
+
+  00444	0f b6 10	 movzx	 edx, BYTE PTR [eax]
+  00447	c1 ea 05	 shr	 edx, 5
+  0044a	89 96 50 06 00
+	00		 mov	 DWORD PTR [esi+1616], edx
+
+; 264  : 	state->xMc[45]  = (*c >> 2) & 0x7;
+
+  00450	8a 10		 mov	 dl, BYTE PTR [eax]
+  00452	c1 ea 02	 shr	 edx, 2
+  00455	23 d1		 and	 edx, ecx
+  00457	89 96 54 06 00
+	00		 mov	 DWORD PTR [esi+1620], edx
+
+; 265  : 	state->xMc[46]  = (*c++ & 0x3) << 1;
+
+  0045d	8a 18		 mov	 bl, BYTE PTR [eax]
+  0045f	83 e3 03	 and	 ebx, 3
+  00462	8d 96 58 06 00
+	00		 lea	 edx, DWORD PTR [esi+1624]
+  00468	d1 e3		 shl	 ebx, 1
+  0046a	40		 inc	 eax
+  0046b	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 266  : 	state->xMc[46] |= (*c >> 7) & 0x1;
+
+  0046d	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  00470	c1 eb 07	 shr	 ebx, 7
+  00473	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 267  : 	state->xMc[47]  = (*c >> 4) & 0x7;
+
+  00475	8a 10		 mov	 dl, BYTE PTR [eax]
+  00477	c1 ea 04	 shr	 edx, 4
+  0047a	23 d1		 and	 edx, ecx
+  0047c	89 96 5c 06 00
+	00		 mov	 DWORD PTR [esi+1628], edx
+
+; 268  : 	state->xMc[48]  = (*c >> 1) & 0x7;
+
+  00482	8a 10		 mov	 dl, BYTE PTR [eax]
+  00484	d1 ea		 shr	 edx, 1
+  00486	23 d1		 and	 edx, ecx
+  00488	89 96 60 06 00
+	00		 mov	 DWORD PTR [esi+1632], edx
+
+; 269  : 	state->xMc[49]  = (*c++ & 0x1) << 2;
+
+  0048e	8a 18		 mov	 bl, BYTE PTR [eax]
+  00490	23 df		 and	 ebx, edi
+  00492	8d 96 64 06 00
+	00		 lea	 edx, DWORD PTR [esi+1636]
+  00498	c1 e3 02	 shl	 ebx, 2
+  0049b	40		 inc	 eax
+  0049c	89 1a		 mov	 DWORD PTR [edx], ebx
+
+; 270  : 	state->xMc[49] |= (*c >> 6) & 0x3;
+
+  0049e	0f b6 18	 movzx	 ebx, BYTE PTR [eax]
+  004a1	c1 eb 06	 shr	 ebx, 6
+  004a4	09 1a		 or	 DWORD PTR [edx], ebx
+
+; 271  : 	state->xMc[50]  = (*c >> 3) & 0x7;
+
+  004a6	8a 10		 mov	 dl, BYTE PTR [eax]
+  004a8	c1 ea 03	 shr	 edx, 3
+  004ab	23 d1		 and	 edx, ecx
+  004ad	89 96 68 06 00
+	00		 mov	 DWORD PTR [esi+1640], edx
+
+; 272  : 	state->xMc[51]  = *c & 0x7;
+
+  004b3	8a 00		 mov	 al, BYTE PTR [eax]
+  004b5	23 c1		 and	 eax, ecx
+
+; 273  : 
+; 274  : 	for (i = 0; i < 4; i++) {
+
+  004b7	33 db		 xor	 ebx, ebx
+  004b9	89 86 6c 06 00
+	00		 mov	 DWORD PTR [esi+1644], eax
+$L75823:
+
+; 275  : 		state->subframe = i;
+; 276  : 		decodeRPE(state);
+
+  004bf	56		 push	 esi
+  004c0	89 9e a8 00 00
+	00		 mov	 DWORD PTR [esi+168], ebx
+  004c6	e8 00 00 00 00	 call	 _decodeRPE
+
+; 277  : 		longTermSynthesis(state);
+
+  004cb	56		 push	 esi
+  004cc	e8 00 00 00 00	 call	 _longTermSynthesis
+  004d1	43		 inc	 ebx
+  004d2	59		 pop	 ecx
+  004d3	83 fb 04	 cmp	 ebx, 4
+  004d6	59		 pop	 ecx
+  004d7	7c e6		 jl	 SHORT $L75823
+
+; 278  : 	}
+; 279  : 	memcpy(state->dp0, state->dp0 + 160, 120 * sizeof(short));
+
+  004d9	8d 86 ec 01 00
+	00		 lea	 eax, DWORD PTR [esi+492]
+  004df	68 f0 00 00 00	 push	 240			; 000000f0H
+  004e4	50		 push	 eax
+  004e5	8d 86 ac 00 00
+	00		 lea	 eax, DWORD PTR [esi+172]
+  004eb	50		 push	 eax
+  004ec	e8 00 00 00 00	 call	 _memcpy
+
+; 280  : 	shortTermSynthesis(state, &state->dp0[120], out);
+
+  004f1	ff 74 24 20	 push	 DWORD PTR _out$[esp+20]
+  004f5	8d 86 9c 01 00
+	00		 lea	 eax, DWORD PTR [esi+412]
+  004fb	50		 push	 eax
+  004fc	56		 push	 esi
+  004fd	e8 00 00 00 00	 call	 _shortTermSynthesis
+
+; 281  : 	gsm_postprocessing(state, out, out);
+
+  00502	ff 74 24 2c	 push	 DWORD PTR _out$[esp+32]
+  00506	ff 74 24 30	 push	 DWORD PTR _out$[esp+36]
+  0050a	56		 push	 esi
+  0050b	e8 00 00 00 00	 call	 _gsm_postprocessing
+  00510	83 c4 24	 add	 esp, 36			; 00000024H
+
+; 282  : 	state->j ^= 1;
+
+  00513	31 7e 40	 xor	 DWORD PTR [esi+64], edi
+  00516	5f		 pop	 edi
+  00517	5b		 pop	 ebx
+$L75819:
+  00518	5e		 pop	 esi
+
+; 283  : }
+
+  00519	c3		 ret	 0
+_gsm_decode ENDP
+_TEXT	ENDS
+END

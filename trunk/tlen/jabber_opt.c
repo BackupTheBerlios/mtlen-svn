@@ -42,7 +42,8 @@ typedef struct TabDefStruct {
 static TabDef tabPages[] = {
 						 {TlenBasicOptDlgProc, IDD_OPTIONS_BASIC, _T("General")},
 						 {TlenVoiceOptDlgProc, IDD_OPTIONS_VOICE, _T("Voice Chats")},
-						 {TlenAdvOptDlgProc, IDD_OPTIONS_ADVANCED, _T("Advanced")}
+						 {TlenAdvOptDlgProc, IDD_OPTIONS_ADVANCED, _T("Advanced")},
+						 {TlenPopupsDlgProc, IDD_OPTIONS_POPUPS, _T("Notifications")}
 						 };
 
 void TlenLoadOptions(TlenProtocol *proto)
@@ -96,7 +97,7 @@ int TlenOptionsInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
 		odp.ptszTab = tabPages[i].tabName;
 		CallService(MS_OPT_ADDPAGE, wParam, (LPARAM) & odp);
 	}
-
+/*
 	if (ServiceExists(MS_POPUP_ADDPOPUP)) {
 		ZeroMemory(&odp,sizeof(odp));
 		odp.cbSize = sizeof(odp);
@@ -110,6 +111,7 @@ int TlenOptionsInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
 		odp.pfnDlgProc = TlenPopupsDlgProc;
 		CallService(MS_OPT_ADDPAGE,wParam,(LPARAM)&odp);
 	}
+ */
 	return 0;
 }
 
@@ -126,6 +128,85 @@ static LRESULT CALLBACK JabberValidateUsernameWndProc(HWND hwndEdit, UINT msg, W
 	return CallWindowProc(oldProc, hwndEdit, msg, wParam, lParam);
 }
 
+BOOL CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	char text[256];
+	WNDPROC oldProc;
+
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	switch (msg) {
+	case WM_INITDIALOG:
+		{
+			DBVARIANT dbv;
+			proto = (TlenProtocol *)lParam;
+            SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
+			TranslateDialogDefault(hwndDlg);
+			if (!DBGetContactSettingTString(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
+				SetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, dbv.ptszVal);
+				DBFreeVariant(&dbv);
+			}
+			if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "Password", &dbv)) {
+				CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
+				SetDlgItemTextA(hwndDlg, IDC_EDIT_PASSWORD, dbv.pszVal);
+				DBFreeVariant(&dbv);
+			}
+			CheckDlgButton(hwndDlg, IDC_SAVEPASSWORD, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", TRUE));
+
+			oldProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_USERDATA, (LONG) oldProc);
+			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC, (LONG) JabberValidateUsernameWndProc);
+			return TRUE;
+		}
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDC_EDIT_USERNAME:
+		case IDC_EDIT_PASSWORD:
+			if ((HWND)lParam==GetFocus() && HIWORD(wParam)==EN_CHANGE)
+				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			break;
+		case IDC_SAVEPASSWORD:
+        	SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+			break;
+		case IDC_REGISTERACCOUNT:
+		    CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) TLEN_REGISTER);
+		    break;
+		}
+		break;
+	case WM_NOTIFY:
+		switch (((LPNMHDR) lParam)->code) {
+		case PSN_APPLY:
+			{
+				BOOL reconnectRequired = FALSE;
+				DBVARIANT dbv;
+
+				GetDlgItemTextA(hwndDlg, IDC_EDIT_USERNAME, text, sizeof(text));
+				if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv) || strcmp(text, dbv.pszVal))
+					reconnectRequired = TRUE;
+				if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
+				DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "LoginName", strlwr(text));
+
+				if (IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD)) {
+					GetDlgItemTextA(hwndDlg, IDC_EDIT_PASSWORD, text, sizeof(text));
+					CallService(MS_DB_CRYPT_ENCODESTRING, sizeof(text), (LPARAM) text);
+					if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "Password", &dbv) || strcmp(text, dbv.pszVal))
+						reconnectRequired = TRUE;
+					if (dbv.pszVal != NULL)	DBFreeVariant(&dbv);
+					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "Password", text);
+				}
+				else
+					DBDeleteContactSetting(NULL, proto->iface.m_szModuleName, "Password");
+
+				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD));
+				if (reconnectRequired && proto->jabberConnected)
+					MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
+				TlenLoadOptions(proto);
+				return TRUE;
+			}
+		}
+		break;
+	}
+	return FALSE;
+}
 
 static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -564,7 +645,7 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			case IDC_DELAY_POPUP:
 			case IDC_DELAY_CUSTOM:
 			case IDC_DELAY_PERMANENT:
-				SendMessage(GetParent(hwndDlg), PSM_CHANGED, 0, 0);
+                MarkChanges(8, hwndDlg);
 				break;
 			case IDC_PREVIEW:
 				{
@@ -577,7 +658,7 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					} else {
 						delay=GetDlgItemInt(hwndDlg, IDC_DELAY, NULL, FALSE);
 					}
-					snprintf(title, sizeof(title), Translate("%s mail"), proto->iface.m_szProtoName);
+					_snprintf(title, sizeof(title), Translate("%s mail"), proto->iface.m_szProtoName);
 					MailPopupPreview((DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORBKG,CPM_GETCOLOUR,0,0),
 									 (DWORD) SendDlgItemMessage(hwndDlg,IDC_COLORTXT,CPM_GETCOLOUR,0,0),
 									 title,
@@ -606,6 +687,7 @@ static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 
 					}
 					DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "MailPopupDelayMode", delayMode);
+					ApplyChanges(proto, 8);
 					return TRUE;
 				}
 			}

@@ -36,12 +36,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 struct MM_INTERFACE mmi;
 struct SHA1_INTERFACE sha1i;
 struct MD5_INTERFACE   md5i;
-
+struct UTF8_INTERFACE utfi;
 HINSTANCE hInst;
 PLUGINLINK *pluginLink;
 HANDLE hMainThread;
 HICON tlenIcons[TLEN_ICON_TOTAL];
-BOOL isMIrandaUnicode = FALSE;
 
 PLUGININFOEX pluginInfoEx = {
 	sizeof(PLUGININFOEX),
@@ -57,9 +56,7 @@ PLUGININFOEX pluginInfoEx = {
     {0x11fc3484, 0x475c, 0x11dc, { 0x83, 0x14, 0x08, 0x00, 0x20, 0x0c, 0x9a, 0x66 }}
 };
 
-CRITICAL_SECTION mutex;
 // Main jabber server connection thread global variables
-UINT jabberCodePage;
 
 void TlenLoadOptions(TlenProtocol *proto);
 int TlenOptionsInit(void *ptr, WPARAM wParam, LPARAM lParam);
@@ -517,6 +514,7 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
     TlenInitServicesVTbl(proto);
 
 	InitializeCriticalSection(&proto->modeMsgMutex);
+	InitializeCriticalSection(&proto->csSend);
     
 	sprintf(text, "%s/%s", proto->iface.m_szModuleName, "Nudge");
 	proto->hTlenNudge = CreateHookableEvent(text);
@@ -562,6 +560,7 @@ static int tlenProtoUninit( TlenProtocol *proto )
 	JabberIqUninit(proto);
 	JabberSerialUninit(proto);
 	DeleteCriticalSection(&proto->modeMsgMutex);
+    DeleteCriticalSection(&proto->csSend);
 	mir_free(proto->modeMsgs.szOnline);
 	mir_free(proto->modeMsgs.szAway);
 	mir_free(proto->modeMsgs.szNa);
@@ -574,22 +573,18 @@ static int tlenProtoUninit( TlenProtocol *proto )
 
 int __declspec(dllexport) Load(PLUGINLINK *link)
 {
-    char str[500];
 	PROTOCOLDESCRIPTOR pd;
     
 	pluginLink = link;
 	mir_getMMI( &mmi );
     mir_getMD5I( &md5i );
     mir_getSHA1I( &sha1i );
+	mir_getUTFI( &utfi );
 
 	DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &hMainThread, THREAD_SET_CONTEXT, FALSE, 0);
 
     srand((unsigned) time(NULL));
 
-    CallService(MS_SYSTEM_GETVERSIONTEXT, (WPARAM)sizeof(str), (LPARAM)(char*)str);
-    if (strstr(str, "Unicode")) {
-        isMIrandaUnicode = TRUE;
-	}
 	TlenRegisterIcons();
     
 	// Register protocol module
@@ -601,17 +596,12 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	pd.type = PROTOTYPE_PROTOCOL;
 	CallService(MS_PROTO_REGISTERMODULE, 0, (LPARAM) &pd);
   
-	jabberCodePage = CP_ACP;
-
-	InitializeCriticalSection(&mutex);
-   
 	return 0;
 }
 
 int __declspec(dllexport) Unload(void)
 {
     TlenReleaseIcons();
-	DeleteCriticalSection(&mutex);
 	return 0;
 }
 
