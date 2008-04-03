@@ -49,7 +49,7 @@ static TabDef tabPages[] = {
 void TlenLoadOptions(TlenProtocol *proto)
 {
 	proto->tlenOptions.useEncryption = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE);
-	proto->tlenOptions.reconnect = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "Reconnect", FALSE);
+	proto->tlenOptions.reconnect = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "Reconnect", TRUE);
 	proto->tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", 0);
 	proto->tlenOptions.rosterSync = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "RosterSync", FALSE);
 	proto->tlenOptions.offlineAsInvisible = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "OfflineAsInvisible", FALSE);
@@ -58,7 +58,7 @@ void TlenLoadOptions(TlenProtocol *proto)
 	proto->tlenOptions.ignoreAdvertisements = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "IgnoreAdvertisements", TRUE);
 	proto->tlenOptions.groupChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "GroupChatPolicy", 0);
 	proto->tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceChatPolicy", 0);
-	proto->tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableAvatars", FALSE);
+	proto->tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableAvatars", TRUE);
 	proto->tlenOptions.enableVersion = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", FALSE);
 	proto->tlenOptions.useNudge = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", FALSE);
 	proto->tlenOptions.logAlerts = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", FALSE);

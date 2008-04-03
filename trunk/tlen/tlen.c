@@ -551,6 +551,7 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
 
 static int tlenProtoUninit( TlenProtocol *proto )
 {
+    /* TODO: remove menu items */
 	if (proto->hTlenNudge)
 		DestroyHookableEvent(proto->hTlenNudge);
     UnhookEvents_Ex(proto);

@@ -1269,19 +1269,19 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
 	CreateServiceFunction_Ex(s, proto, TlenGetName);
     
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETAVATARINFO);
-	CreateServiceFunction_Ex(s, proto,TlenGetAvatarInfo);
+	CreateServiceFunction_Ex(s, proto, TlenGetAvatarInfo);
  
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, "/SendNudge");
-	CreateServiceFunction_Ex(s, proto,TlenSendAlert);
+	CreateServiceFunction_Ex(s, proto, TlenSendAlert);
 
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETAVATARCAPS);
-	CreateServiceFunction_Ex(s, proto,TlenGetAvatarCaps);
+	CreateServiceFunction_Ex(s, proto, TlenGetAvatarCaps);
 
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_SETMYAVATAR);
-	CreateServiceFunction_Ex(s, proto,TlenSetMyAvatar);
+	CreateServiceFunction_Ex(s, proto, TlenSetMyAvatar);
 
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETMYAVATAR);
-	CreateServiceFunction_Ex(s, proto,TlenGetMyAvatar);
+	CreateServiceFunction_Ex(s, proto, TlenGetMyAvatar);
 
     sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETSTATUS);
 	CreateServiceFunction_Ex(s, proto, TlenGetStatus);

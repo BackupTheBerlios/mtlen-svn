@@ -142,10 +142,11 @@ int TlenUserInfoInit(void *ptr, WPARAM wParam, LPARAM lParam)
 	if ((szProto!=NULL && !strcmp(szProto, proto->iface.m_szModuleName)) || !lParam) {
 		odp.cbSize = sizeof(odp);
 		odp.hInstance = hInst;
+        odp.flags = ODPF_TCHAR;
 		odp.pfnDlgProc = TlenUserInfoDlgProc;
 		odp.position = -2000000000;
 		odp.pszTemplate = ((HANDLE)lParam!=NULL) ? MAKEINTRESOURCEA(IDD_USER_INFO):MAKEINTRESOURCEA(IDD_USER_VCARD);
-		odp.pszTitle = LPGEN("Account");
+        odp.ptszTitle = (hContact != NULL) ? TranslateT("Account") : proto->iface.m_tszUserName;
         odp.dwInitParam = (LPARAM)proto;
 		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
 
