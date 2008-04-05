@@ -187,24 +187,24 @@ typedef struct {
 } TlenConfiguration;
 
 typedef struct {
-	int useEncryption;
-	int reconnect;
-	int rosterSync;
-	int offlineAsInvisible;
-	int leaveOfflineMessage;
+	BOOL useEncryption;
+	BOOL reconnect;
+	BOOL rosterSync;
+	BOOL offlineAsInvisible;
+	BOOL leaveOfflineMessage;
 	int offlineMessageOption;
-	int ignoreAdvertisements;
+	BOOL ignoreAdvertisements;
 	int alertPolicy;
 	int groupChatPolicy;
 	int voiceChatPolicy;
-	int enableAvatars;
-	int enableVersion;
-	int useNudge;
-	int logAlerts;
-	int useNewP2P;
+	BOOL enableAvatars;
+	BOOL enableVersion;
+	BOOL useNudge;
+	BOOL logAlerts;
+	BOOL useNewP2P;
     BOOL sendKeepAlive;
-    
-} TLEN_OPTIONS;
+    BOOL savePassword;
+} TlenOptions;
 
 struct JABBER_IQ_FUNC_STRUCT;
 struct JABBER_LIST_ITEM_STRUCT;
@@ -243,8 +243,8 @@ typedef struct {
 
     CRITICAL_SECTION csSerial;
     unsigned int serial;
-    BOOL jabberOnline;
-    BOOL jabberConnected;
+    BOOL isOnline;
+    BOOL isConnected;
 
     CRITICAL_SECTION modeMsgMutex;
     
@@ -257,8 +257,10 @@ typedef struct {
     int searchQueryLen;
 
     CRITICAL_SECTION csSend;
+
+    HWND voiceDlgHWND;
     
-    TLEN_OPTIONS tlenOptions;
+    TlenOptions tlenOptions;
 } TlenProtocol;
 
 

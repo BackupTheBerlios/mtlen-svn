@@ -23,8 +23,37 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _TLEN_VOICE_H_
 
 #include <windows.h>
+#include <mmsystem.h>
 
 #include "jabber.h"
+#include "codec/gsm.h"
+
+typedef struct TLEN_VOICE_CONTROL_STRUCT {
+	int			waveMode;
+	int			codec;
+	int			bDisable;
+
+	short		*recordingData;
+	short		*waveData;
+	WAVEHDR		*waveHeaders;
+	int			waveFrameSize;
+	int			waveHeadersPos;
+	int			waveHeadersNum;
+
+//	HANDLE		hEvent;
+	HANDLE		hThread;
+	DWORD		threadID;
+	HWAVEOUT	hWaveOut;
+	HWAVEIN		hWaveIn;
+	int			isRunning;
+	int			stopThread;
+	gsm_state	*gsmstate;
+	TLEN_FILE_TRANSFER *ft;
+	int			vuMeter;
+	int			bytesSum;
+	TlenProtocol *proto;
+} TLEN_VOICE_CONTROL;
+
 
 extern void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft);
 extern void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft);

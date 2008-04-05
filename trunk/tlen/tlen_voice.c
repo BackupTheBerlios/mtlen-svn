@@ -24,62 +24,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <mmsystem.h>
 #include <math.h>
 #include <m_button.h>
 //#include <win2k.h>
 #include "resource.h"
-#include "codec/gsm.h"
 #include "jabber_list.h"
 #include "tlen_voice.h"
 #include "tlen_p2p_old.h"
 #include "tlen_file.h"
 
-static int modeFrequency[]= {0, 0, 8000, 11025, 22050, 44100};
-static int modeFrameSize[]= {0, 0, 5, 5, 10, 25};
-
-typedef struct {
-	int			waveMode;
-	int			codec;
-	int			bDisable;
-
-	short		*recordingData;
-	short		*waveData;
-	WAVEHDR		*waveHeaders;
-	int			waveFrameSize;
-	int			waveHeadersPos;
-	int			waveHeadersNum;
-
-//	HANDLE		hEvent;
-	HANDLE		hThread;
-	DWORD		threadID;
-	HWAVEOUT	hWaveOut;
-	HWAVEIN		hWaveIn;
-	int			isRunning;
-	int			stopThread;
-	gsm_state	*gsmstate;
-	TLEN_FILE_TRANSFER *ft;
-	int			vuMeter;
-	int			bytesSum;
-	TlenProtocol *proto;
-} TLEN_VOICE_CONTROL;
+static int MODE_FREQUENCY[]= {0, 0, 8000, 11025, 22050, 44100};
+static int MODE_FRAME_SIZE[]= {0, 0, 5, 5, 10, 25};
+static int FRAMES_AVAILABLE_MAX_LIMIT = 2;
+static int VU_METER_HEIGHT = 64;
+static int VU_METER_WIDTH = 20;
+static int VU_METER_LEVELS = 16;
+static HBITMAP vuMeterBitmaps[100];
 
 static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft);
 static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft);
 static void TlenVoiceReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
-static HWND voiceDlgHWND = NULL;
+
 static TLEN_VOICE_CONTROL *playbackControl = NULL;
 static TLEN_VOICE_CONTROL *recordingControl = NULL;
-static int availPlayback = 0;
-static int availOverrun = 0;
-static int availLimit = 0;
-static int availLimitMin = 2;
-static int availLimitMax = 4;
+static int framesAvailableForPlayback = 0;
+static int availOverrunValue = 0;
 
-static int vuMeterHeight = 64;
-static int vuMeterWidth = 20;
-static int vuMeterLevels = 16;
-static HBITMAP vuMeterBitmaps[100];
 
 
 static void CALLBACK TlenVoicePlaybackCallback(HWAVEOUT hwo, UINT uMsg, DWORD* dwInstance, DWORD dwParam1, DWORD dwParam2)
@@ -87,8 +57,8 @@ static void CALLBACK TlenVoicePlaybackCallback(HWAVEOUT hwo, UINT uMsg, DWORD* d
 	if (uMsg == WOM_DONE) {
 		//TLEN_VOICE_CONTROL *control = (TLEN_VOICE_CONTROL *) dwInstance;
 		waveOutUnprepareHeader(hwo, (WAVEHDR *) dwParam1, sizeof(WAVEHDR));
-		if (availPlayback > 0) {
-			availPlayback--;
+		if (framesAvailableForPlayback > 0) {
+			framesAvailableForPlayback--;
 		}
 //		playbackControl->waveHeaders[playbackControl->waveHeadersPos].dwFlags =  WHDR_DONE;
 //		playbackControl->waveHeaders[playbackControl->waveHeadersPos].lpData = (char *) (playbackControl->waveData + playbackControl->waveHeadersPos * playbackControl->waveFrameSize);
@@ -158,15 +128,15 @@ static int TlenVoicePlaybackStart(TLEN_VOICE_CONTROL *control)
     wfm.cbSize          = sizeof(WAVEFORMATEX);
     wfm.nChannels       = 1;
     wfm.wBitsPerSample  = 16;
-    wfm.nSamplesPerSec  = modeFrequency[control->codec];
+    wfm.nSamplesPerSec  = MODE_FREQUENCY[control->codec];
     wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nChannels * wfm.wBitsPerSample/8;
     wfm.nBlockAlign     = 2 * wfm.nChannels;
     wfm.wFormatTag      = WAVE_FORMAT_PCM;
 
 	control->waveMode	= 0;
-	control->waveFrameSize = modeFrameSize[control->codec] * 160 * wfm.nChannels;// * wfm.wBitsPerSample / 8;
+	control->waveFrameSize = MODE_FRAME_SIZE[control->codec] * 160 * wfm.nChannels;// * wfm.wBitsPerSample / 8;
 	control->waveHeadersPos = 0;
-	control->waveHeadersNum = availLimitMin + 2;
+	control->waveHeadersNum = FRAMES_AVAILABLE_MAX_LIMIT + 2;
 
 	j = DBGetContactSettingWord(NULL, control->proto->iface.m_szModuleName, "VoiceDeviceOut", 0);
 	iSelDev = WAVE_MAPPER;
@@ -213,7 +183,7 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
     wfm.cbSize          = sizeof(WAVEFORMATEX);
     wfm.nChannels       = 1;
     wfm.wBitsPerSample  = 16;
-    wfm.nSamplesPerSec  = modeFrequency[control->codec];
+    wfm.nSamplesPerSec  = MODE_FREQUENCY[control->codec];
     wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nChannels * wfm.wBitsPerSample/8;
     wfm.nBlockAlign     = 2 * wfm.nChannels;
     wfm.wFormatTag      = WAVE_FORMAT_PCM;
@@ -221,7 +191,7 @@ static int TlenVoiceRecordingStart(TLEN_VOICE_CONTROL *control)
 
 	control->waveMode		= 0;
 //	control->isRunning	= 1;
-	control->waveFrameSize = modeFrameSize[control->codec] * 160 * wfm.nChannels;// * wfm.wBitsPerSample / 8;
+	control->waveFrameSize = MODE_FRAME_SIZE[control->codec] * 160 * wfm.nChannels;// * wfm.wBitsPerSample / 8;
 	control->waveHeadersPos = 0;
 	control->waveHeadersNum = 2;
 
@@ -357,7 +327,7 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 	nloc.szHost = ft->hostName;
 	nloc.wPort = ft->wPort;
 	nloc.flags = 0;
-	SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Connecting..."));
+	SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Connecting..."));
 //	ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
 	if (s != NULL) {
@@ -387,7 +357,7 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 		if (s != NULL) {
 			HANDLE hEvent;
 			char *nick;
-			SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Waiting for connection..."));
+			SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Waiting for connection..."));
 			ft->s = s;
 			hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 			ft->hFileEvent = hEvent;
@@ -408,14 +378,14 @@ void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft)
 	}
 	JabberListRemove(ft->proto, LIST_VOICE, ft->iqId);
 	if (ft->state==FT_DONE) {
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Finished..."));
+		SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Finished..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 	} else {
 		char *nick;
 		nick = JabberNickFromJID(ft->jid);
 		JabberSend(ft->proto, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
 		mir_free(nick);
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Error..."));
+		SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Error..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 	}
 	JabberLog(ft->proto, "Thread ended: type=file_receive server='%s'", ft->hostName);
@@ -446,11 +416,11 @@ static void TlenVoiceReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemo
 		playbackControl = NULL;
 		recordingControl = NULL;
 		if (ft->state==FT_DONE) {
-			SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Finished..."));
+			SetDlgItemText(proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Finished..."));
 //			ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 		} else {
 //			ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-			SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Error..."));
+			SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Error..."));
 		}
 		JabberLog(ft->proto, "Closing connection for this file transfer... (ft->s is now hBind)");
 		ft->s = slisten;
@@ -484,16 +454,14 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 				if (playbackControl == NULL) {
 					playbackControl = TlenVoiceCreateVC(ft->proto, codec);
 					TlenVoicePlaybackStart(playbackControl);
-					availPlayback = 0;
-					availOverrun = 0;
-					availLimit = availLimitMax;
+					framesAvailableForPlayback = 0;
+					availOverrunValue = 0;
 				} else if (playbackControl->codec != codec) {
 					TlenVoiceFreeVc(playbackControl);
 					playbackControl = TlenVoiceCreateVC(ft->proto, codec);
 					TlenVoicePlaybackStart(playbackControl);
-					availPlayback = 0;
-					availOverrun = 0;
-					availLimit = availLimitMax;
+					framesAvailableForPlayback = 0;
+					availOverrunValue = 0;
 				}
 				if (!playbackControl->bDisable) {
 					playbackControl->waveHeaders[playbackControl->waveHeadersPos].dwFlags =  WHDR_DONE;
@@ -511,7 +479,7 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 						playbackControl->waveHeaders[playbackControl->waveHeadersPos].dwBufferLength = playbackControl->waveFrameSize * 2;
 					}
 						*/
-					chunkNum = min(modeFrameSize[codec], (int)(packet->len - 4) / 33);
+					chunkNum = min(MODE_FRAME_SIZE[codec], (int)(packet->len - 4) / 33);
 					out = (short *)playbackControl->waveHeaders[playbackControl->waveHeadersPos].lpData;
 					for (i=0; i<chunkNum; i++) {
 						for (j=0;j<33;j++) {
@@ -522,32 +490,32 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 					}
 					out = (short *)playbackControl->waveHeaders[playbackControl->waveHeadersPos].lpData;
 					val = 0;
-					for (i=0; i<modeFrameSize[codec] * 160; i+=modeFrameSize[codec]) {
+					for (i=0; i<MODE_FRAME_SIZE[codec] * 160; i+=MODE_FRAME_SIZE[codec]) {
 						val += out[i]*out[i];
 					}
 					j = (int)((log10(val) - 4) * 2.35);
-					if (j > vuMeterLevels - 1 ) {
-						j = vuMeterLevels - 1;
+					if (j > VU_METER_LEVELS - 1 ) {
+						j = VU_METER_LEVELS - 1;
 					} else if (j<0) {
 						j = 0;
 					}
 					playbackControl->vuMeter = j;
 					playbackControl->bytesSum  += 8 + packet->len;
 					/* Simple logic to avoid huge delays. If a delay is detected a frame is not played */
-					j = availOverrun > 0 ? -1 : 0;
-					while (availPlayback > availLimitMin) {
+					j = availOverrunValue > 0 ? -1 : 0;
+					while (framesAvailableForPlayback > FRAMES_AVAILABLE_MAX_LIMIT) {
 						j = 1;
 						SleepEx(5, FALSE);
 					}
-					availOverrun += j;
+					availOverrunValue += j;
 					/* 40 frames - 800ms/8kHz */
-					if (availOverrun < 40) {
-						availPlayback++;
+					if (availOverrunValue < 40) {
+						framesAvailableForPlayback++;
 						waveOutPrepareHeader(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
 						waveOutWrite(playbackControl->hWaveOut, &playbackControl->waveHeaders[playbackControl->waveHeadersPos], sizeof(WAVEHDR));
 						playbackControl->waveHeadersPos = (playbackControl->waveHeadersPos +1) % playbackControl->waveHeadersNum;
 					} else {
-						availOverrun -= 10;
+						availOverrunValue -= 10;
 						statusTxt = "!! Skipping frame !!";
 					}
 				}
@@ -555,8 +523,8 @@ static void TlenVoiceReceiveParse(TLEN_FILE_TRANSFER *ft)
 		}
 		{
 			char ttt[2048];
-			sprintf(ttt, "%s %d %d ", statusTxt, availPlayback, availOverrun);
-			SetDlgItemTextA(voiceDlgHWND, IDC_STATUS, ttt);
+			sprintf(ttt, "%s %d %d ", statusTxt, framesAvailableForPlayback, availOverrunValue);
+			SetDlgItemTextA(ft->proto->voiceDlgHWND, IDC_STATUS, ttt);
 		}
 		TlenP2PPacketFree(packet);
 	}
@@ -580,7 +548,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 	ft->pfnNewConnectionV2 = TlenVoiceReceivingConnection;
 	s = TlenP2PListen(ft);
 	if (s != NULL) {
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Waiting for connection..."));
+		SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Waiting for connection..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 		ft->s = s;
 		//JabberLog("ft->s = %d", s);
@@ -614,7 +582,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 			nloc.flags = 0;
 			s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
 			if (s != NULL) {
-				SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Connecting..."));
+				SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Connecting..."));
 				//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
 				ft->s = s;
 				TlenP2PEstablishOutgoingConnection(ft, FALSE);
@@ -642,11 +610,11 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 	switch (ft->state) {
 	case FT_DONE:
 		JabberLog(ft->proto, "Finish successfully");
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Finished..."));
+		SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Finished..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
 		break;
 	case FT_DENIED:
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Denied..."));
+		SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Denied..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, ft, 0);
 		break;
 	default: // FT_ERROR:
@@ -654,7 +622,7 @@ void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft)
 		JabberSend(ft->proto, "<v t='%s' i='%s' e='8'/>", nick, ft->iqId);
 		mir_free(nick);
 		JabberLog(ft->proto, "Finish with errors");
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...Error..."));
+		SetDlgItemText(ft->proto->voiceDlgHWND, IDC_STATUS, TranslateT("...Error..."));
 		//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
 		break;
 	}
@@ -668,7 +636,7 @@ static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft)
 	TLEN_FILE_PACKET *packet;
 
 	codec = recordingControl->codec;
-	if ((packet=TlenP2PPacketCreate(sizeof(DWORD)+modeFrameSize[codec]*33)) != NULL) {
+	if ((packet=TlenP2PPacketCreate(sizeof(DWORD)+MODE_FRAME_SIZE[codec]*33)) != NULL) {
 		short *in;
 		float val;
 		in = recordingControl->recordingData;
@@ -676,17 +644,17 @@ static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft)
 		packet->packet[0] = codec;
 		TlenP2PPacketPackDword(packet, codec);
 		val = 0;
-		for (i=0; i<modeFrameSize[codec] * 160; i+=modeFrameSize[codec]) {
+		for (i=0; i<MODE_FRAME_SIZE[codec] * 160; i+=MODE_FRAME_SIZE[codec]) {
 			val += in[i]*in[i];
 		}
 		i = (int)((log10(val) - 4) * 2.35);
-		if (i > vuMeterLevels - 1 ) {
-			i = vuMeterLevels - 1;
+		if (i > VU_METER_LEVELS - 1 ) {
+			i = VU_METER_LEVELS - 1;
 		} else if (i<0) {
 			i = 0;
 		}
 		recordingControl->vuMeter = i;
-		for (i=0; i<modeFrameSize[codec]; i++) {
+		for (i=0; i<MODE_FRAME_SIZE[codec]; i++) {
 			gsm_encode(recordingControl->gsmstate, in + i * 160);
 			TlenP2PPacketPackBuffer(packet, recordingControl->gsmstate->gsmFrame, 33);
 		}
@@ -714,7 +682,7 @@ int TlenVoiceCancelAll(TlenProtocol *proto)
 			if (ft != NULL) {
 				if (ft->s) {
 					//ProtoBroadcastAck(iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-					JabberLog(ft->proto, "Closing ft->s = %d", ft->s);
+					JabberLog(proto, "Closing ft->s = %d", ft->s);
 					ft->state = FT_ERROR;
 					Netlib_CloseHandle(ft->s);
 					ft->s = NULL;
@@ -724,14 +692,14 @@ int TlenVoiceCancelAll(TlenProtocol *proto)
 						SetEvent(hEvent);
 					}
 				} else {
-					JabberLog(ft->proto, "freeing (V) ft struct");
+					JabberLog(proto, "freeing (V) ft struct");
 					TlenP2PFreeFileTransfer(ft);
 				}
 			}
 		}
 	}
-	if (voiceDlgHWND !=NULL) {
-		EndDialog(voiceDlgHWND, 0);
+	if (proto->voiceDlgHWND !=NULL) {
+		EndDialog(proto->voiceDlgHWND, 0);
 	}
 	return 0;
 }
@@ -743,7 +711,7 @@ int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 	JABBER_LIST_ITEM *item;
 	TLEN_FILE_TRANSFER *ft;
     TlenProtocol *proto =(TlenProtocol *)ptr;
-	if (!proto->jabberOnline) {
+	if (!proto->isOnline) {
 		return 1;
 	}
 	if ((hContact=(HANDLE) wParam)!=NULL) {
@@ -758,7 +726,7 @@ int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 				item->ft = ft;
 //				JabberSend(ft->proto, "<iq to='%s'><query xmlns='voip'><voip k='1' s='1' v='1' i='51245604'/></query></iq>", ft->jid);
 //				Sleep(5000);
-				TlenVoiceStart(NULL, 2);
+				TlenVoiceStart(ft, 2);
 				JabberSend(ft->proto, "<v t='%s' e='1' i='%s' v='1'/>", ft->jid, serialId);
 			}
 			DBFreeVariant(&dbv);
@@ -768,7 +736,7 @@ int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 }
 
 int TlenVoiceIsInUse(TlenProtocol *proto) {
-	if (JabberListFindNext(proto, LIST_VOICE, 0) >= 0 || voiceDlgHWND!=NULL) {
+	if (JabberListFindNext(proto, LIST_VOICE, 0) >= 0 || proto->voiceDlgHWND!=NULL) {
 		return 1;
 	}
 	return 0;
@@ -803,13 +771,13 @@ static void TlenVoiceInitVUMeters()
 	int ledWidth, ledHeight;
 	ledWidth = 9;
 	ledHeight = 6;
-	vuMeterHeight = ledHeight;
-	vuMeterWidth = (vuMeterLevels-1) * ledWidth;
-	vuMeterWidth = (vuMeterWidth + 3) & (~3);
-	pBits = (unsigned char *)mir_alloc(3*vuMeterWidth*vuMeterHeight);
-	memset(pBits, 0x80, 3*vuMeterWidth*vuMeterHeight);
-	for (i=0;i<vuMeterLevels;i++) {
-		for (v=0;v<vuMeterLevels-1;v++) {
+	VU_METER_HEIGHT = ledHeight;
+	VU_METER_WIDTH = (VU_METER_LEVELS-1) * ledWidth;
+	VU_METER_WIDTH = (VU_METER_WIDTH + 3) & (~3);
+	pBits = (unsigned char *)mir_alloc(3*VU_METER_WIDTH*VU_METER_HEIGHT);
+	memset(pBits, 0x80, 3*VU_METER_WIDTH*VU_METER_HEIGHT);
+	for (i=0;i<VU_METER_LEVELS;i++) {
+		for (v=0;v<VU_METER_LEVELS-1;v++) {
 			if (v>=i) {
 				if (v < 10) col0 = 0x104010;
 				else if (v<13) col0 = 0x404010;
@@ -820,16 +788,16 @@ static void TlenVoiceInitVUMeters()
 				else col0 = 0xf00000;
 			}
 			x0 = v * ledWidth;
-			for (y=1;y<vuMeterHeight-1;y++) {
+			for (y=1;y<VU_METER_HEIGHT-1;y++) {
 				col = col0;
 				for (x=1;x<ledWidth;x++) {
-					pBits[3*(x+x0+y*vuMeterWidth)] = col &0xFF;
-					pBits[3*(x+x0+y*vuMeterWidth)+1] = (col>>8) &0xFF;
-					pBits[3*(x+x0+y*vuMeterWidth)+2] = (col>>16) &0xFF;
+					pBits[3*(x+x0+y*VU_METER_WIDTH)] = col &0xFF;
+					pBits[3*(x+x0+y*VU_METER_WIDTH)+1] = (col>>8) &0xFF;
+					pBits[3*(x+x0+y*VU_METER_WIDTH)+2] = (col>>16) &0xFF;
 				}
 			}
 		}
-		vuMeterBitmaps[i] = TlenVoiceMakeBitmap(vuMeterWidth, vuMeterHeight, 24, pBits);
+		vuMeterBitmaps[i] = TlenVoiceMakeBitmap(VU_METER_WIDTH, VU_METER_HEIGHT, 24, pBits);
 	}
 	mir_free(pBits);
 }
@@ -839,9 +807,12 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 	HDC hDC, hMemDC;
 	int v;
 	static int counter;
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
-		voiceDlgHWND = hwndDlg;
+        proto = (TlenProtocol *)lParam;
+        SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
+		proto->voiceDlgHWND = hwndDlg;
 		TranslateDialogDefault(hwndDlg);
 		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) TranslateT("8000 Hz / 13.8 kbps"));
 		SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) TranslateT("11025 Hz / 19.1 kbps"));
@@ -857,13 +828,13 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 		CheckDlgButton(hwndDlg, IDC_MICROPHONE, TRUE);
 		CheckDlgButton(hwndDlg, IDC_SPEAKER, TRUE);
 		TlenVoiceInitVUMeters();
-		SetDlgItemText(voiceDlgHWND, IDC_STATUS, TranslateT("...???..."));
+		SetDlgItemText(hwndDlg, IDC_STATUS, TranslateT("...???..."));
 		counter = 0;
 		SetTimer(hwndDlg, 1, 100, NULL);
 		return FALSE;
 	case WM_TIMER:
 		if (recordingControl != NULL && !recordingControl->bDisable) {
-			v = recordingControl->vuMeter % vuMeterLevels;
+			v = recordingControl->vuMeter % VU_METER_LEVELS;
 			if (recordingControl->vuMeter >0) {
 				recordingControl->vuMeter--;
 			}
@@ -873,12 +844,12 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 		hDC = GetDC(GetDlgItem(hwndDlg, IDC_VUMETERIN));
 		if (NULL != (hMemDC = CreateCompatibleDC( hDC ))) {
 			SelectObject( hMemDC, vuMeterBitmaps[v]) ;
-			BitBlt( hDC, 0, 0, vuMeterWidth, vuMeterHeight, hMemDC, 0, 0, SRCCOPY ) ;
+			BitBlt( hDC, 0, 0, VU_METER_WIDTH, VU_METER_HEIGHT, hMemDC, 0, 0, SRCCOPY ) ;
 			DeleteDC(hMemDC);
 		}
 		ReleaseDC(GetDlgItem(hwndDlg, IDC_PLAN), hDC);
 		if (playbackControl != NULL  && !playbackControl->bDisable) {
-			v = playbackControl->vuMeter % vuMeterLevels;
+			v = playbackControl->vuMeter % VU_METER_LEVELS;
 			if (playbackControl->vuMeter >0) {
 				playbackControl->vuMeter--;
 			}
@@ -888,7 +859,7 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 		hDC = GetDC(GetDlgItem(hwndDlg, IDC_VUMETEROUT));
 		if (NULL != (hMemDC = CreateCompatibleDC( hDC ))) {
 			SelectObject( hMemDC, vuMeterBitmaps[v]) ;
-			BitBlt( hDC, 0, 0, vuMeterWidth, vuMeterHeight, hMemDC, 0, 0, SRCCOPY ) ;
+			BitBlt( hDC, 0, 0, VU_METER_WIDTH, VU_METER_HEIGHT, hMemDC, 0, 0, SRCCOPY ) ;
 			DeleteDC(hMemDC);
 		}
 		ReleaseDC(GetDlgItem(hwndDlg, IDC_PLAN), hDC);
@@ -946,6 +917,7 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 		}
 		break;
 	case WM_CLOSE:
+    	proto->voiceDlgHWND = NULL;
 		EndDialog(hwndDlg, 0);
 		break;
 	}
@@ -956,8 +928,7 @@ static void __cdecl TlenVoiceDlgThread(void *ptr)
 {
     
     TLEN_FILE_TRANSFER *ft = (TLEN_FILE_TRANSFER *)ptr;
-	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_VOICE), NULL, TlenVoiceDlgProc, (LPARAM) NULL);
-	voiceDlgHWND = NULL;
+	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_VOICE), NULL, TlenVoiceDlgProc, (LPARAM) ft->proto);
 	TlenVoiceCancelAll(ft->proto);
 }
 
@@ -1029,13 +1000,13 @@ static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
     
 	ACCEPTDIALOGDATA *data = (ACCEPTDIALOGDATA *)ptr;
 	int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ACCEPT_VOICE), NULL, TlenVoiceAcceptDlgProc, (LPARAM) data);
-	if (result && data->proto->jabberOnline) {
+	if (result && data->proto->isOnline) {
 		data->item->ft = TlenFileCreateFT(data->proto, data->item->nick);
 		data->item->ft->iqId = mir_strdup(data->item->jid);
 		TlenVoiceStart(NULL, 2);
 		JabberSend(data->proto, "<v t='%s' i='%s' e='5' v='1'/>", data->item->nick, data->item->jid);
 	} else {
-		if (data->proto->jabberOnline) {
+		if (data->proto->isOnline) {
 			JabberSend(data->proto, "<v t='%s' i='%s' e='4' />", data->item->nick, data->item->jid);
 		}
 		JabberListRemove(data->proto, LIST_VOICE, data->item->jid);
@@ -1092,7 +1063,7 @@ int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from)
 				ignore = FALSE;
 			}
 			if (ignore) {
-				if (proto->jabberOnline) {
+				if (proto->isOnline) {
 					JabberSend(proto, "<v t='%s' i='%s' e='4' />", from, id);
 				}
 				JabberListRemove(proto, LIST_VOICE, id);
@@ -1103,10 +1074,10 @@ int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from)
                     data->proto = proto;
                     data->item = item;
 					JabberForkThread((void (__cdecl *)(void*))TlenVoiceAcceptDlgThread, 0, data);
-				} else if (proto->jabberOnline) {
+				} else if (proto->isOnline) {
 					item->ft = TlenFileCreateFT(proto, from);
 					item->ft->iqId = mir_strdup(id);
-					TlenVoiceStart(NULL, 2);
+					TlenVoiceStart(item->ft, 2);
 					JabberSend(proto, "<v t='%s' i='%s' e='5' v='1'/>", item->nick, item->jid);
 				}
 			}

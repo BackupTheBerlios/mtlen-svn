@@ -642,21 +642,10 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(info->proto, LIST_FILE, p)) != NULL) {
 						if (item->ft != NULL) {
-							HANDLE  hEvent = item->ft->hFileEvent;
-							item->ft->hFileEvent = NULL;
-							item->ft->state = FT_ERROR;
-							if (item->ft->s != NULL) {
-								Netlib_CloseHandle(item->ft->s);
-								item->ft->s = NULL;
-								if (hEvent != NULL) {
-									SetEvent(hEvent);
-								}
-							} else {
-								TlenP2PFreeFileTransfer(item->ft);
-							}
-						} else {
-							JabberListRemove(info->proto, LIST_FILE, p);
+							ProtoBroadcastAck(info->proto->iface.m_szModuleName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, item->ft, 0);
+							TlenFileCancel(info->proto, NULL, item->ft);
 						}
+						JabberListRemove(info->proto, LIST_FILE, p);
 					}
 				}
 			}

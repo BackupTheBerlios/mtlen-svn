@@ -151,7 +151,7 @@ int TlenUserInfoInit(void *ptr, WPARAM wParam, LPARAM lParam)
 		CallService(MS_USERINFO_ADDPAGE, wParam, (LPARAM) &odp);
 
 	}
-	if (!lParam && proto->jabberOnline) {
+	if (!lParam && proto->isOnline) {
 		CCSDATA ccs = {0};
 		JabberGetInfo(ptr, 0, (LPARAM) &ccs);
 	}
@@ -258,7 +258,7 @@ static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				SetDlgItemTextA(hwndDlg, IDC_INFO_JID, jid);
 				mir_free(jid);
 				jid = dbv.pszVal;
-				if (data->proto->jabberOnline) {
+				if (data->proto->isOnline) {
 					if ((item=JabberListGetItemPtr(data->proto, LIST_ROSTER, jid)) != NULL) {
 						switch (item->subscription) {
 						case SUB_BOTH:

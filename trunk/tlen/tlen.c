@@ -226,7 +226,7 @@ static int TlenPrebuildContactMenu(void *ptr, WPARAM wParam, LPARAM lParam)
 	JABBER_LIST_ITEM *item;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 	clmi.cbSize = sizeof(CLISTMENUITEM);
-	if ((hContact=(HANDLE) wParam)!=NULL && proto->jabberOnline) {
+	if ((hContact=(HANDLE) wParam)!=NULL && proto->isOnline) {
 		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 			if ((item=JabberListGetItemPtr(proto, LIST_ROSTER, dbv.pszVal)) != NULL) {
 				if (item->subscription==SUB_NONE || item->subscription==SUB_FROM)
@@ -264,6 +264,10 @@ static int TlenPrebuildContactMenu(void *ptr, WPARAM wParam, LPARAM lParam)
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactVoice, (LPARAM) &clmi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactRequestAuth, (LPARAM) &clmi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactGrantAuth, (LPARAM) &clmi);
+    if (proto->isOnline) {
+    	clmi.flags = CMIM_FLAGS|CMIF_NOTONLINE;
+    }
+    CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactFile, (LPARAM) &clmi);
 	return 0;
 }
 
@@ -272,7 +276,7 @@ int TlenContactMenuHandleRequestAuth(void *ptr, WPARAM wParam, LPARAM lParam)
 	HANDLE hContact;
 	DBVARIANT dbv;
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	if ((hContact=(HANDLE) wParam)!=NULL && proto->jabberOnline) {
+	if ((hContact=(HANDLE) wParam)!=NULL && proto->isOnline) {
 		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 			JabberSend(proto, "<presence to='%s' type='subscribe'/>", dbv.pszVal);
 			DBFreeVariant(&dbv);
@@ -286,7 +290,7 @@ int TlenContactMenuHandleGrantAuth(void *ptr, WPARAM wParam, LPARAM lParam)
 	HANDLE hContact;
 	DBVARIANT dbv;
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	if ((hContact=(HANDLE) wParam)!=NULL && proto->jabberOnline) {
+	if ((hContact=(HANDLE) wParam)!=NULL && proto->isOnline) {
 		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 			JabberSend(proto, "<presence to='%s' type='subscribed'/>", dbv.pszVal);
 			DBFreeVariant(&dbv);
@@ -300,7 +304,7 @@ int TlenContactMenuHandleSendPicture(void *ptr, WPARAM wParam, LPARAM lParam)
 	HANDLE hContact;
 	DBVARIANT dbv;
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	if ((hContact=(HANDLE) wParam)!=NULL && proto->jabberOnline) {
+	if ((hContact=(HANDLE) wParam)!=NULL && proto->isOnline) {
 		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
 			JabberSend(proto, "<message type='pic' to='the_leech7@tlen.pl' crc='da4fe23' idt='2174' size='21161'/>");
 //			JabberSend(proto, "<message type='pic' to='%s' crc='b4f7bdd' idt='6195' size='5583'/>", dbv.pszVal);
@@ -387,8 +391,6 @@ int TlenOnModulesLoaded(void *ptr, WPARAM wParam, LPARAM lParam) {
 int TlenPreShutdown(void *ptr, WPARAM wParam, LPARAM lParam)
 {
     TlenProtocol *proto = (TlenProtocol *)ptr;
-	TlenVoiceCancelAll(proto);
-	TlenFileCancelAll(proto);
 	return 0;
 }
 
@@ -447,6 +449,7 @@ static void initMenuItems(TlenProtocol *proto)
 	// "Invite to MUC"
 	sprintf(text, "%s/ContactMenuMUC", proto->iface.m_szModuleName);
 	CreateServiceFunction_Ex(text, proto, TlenMUCContactMenuHandleMUC);
+	mi.flags = 0;
 	mi.pszName = Translate("Multi-User Conference");
 	mi.position = -2000020000;
 	mi.hIcon = tlenIcons[TLEN_IDI_MUC];
@@ -552,6 +555,8 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
 static int tlenProtoUninit( TlenProtocol *proto )
 {
     /* TODO: remove menu items */
+	TlenVoiceCancelAll(proto);
+	TlenFileCancelAll(proto);
 	if (proto->hTlenNudge)
 		DestroyHookableEvent(proto->hTlenNudge);
     UnhookEvents_Ex(proto);

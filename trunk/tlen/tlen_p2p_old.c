@@ -30,7 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 void TlenP2PFreeFileTransfer(TLEN_FILE_TRANSFER *ft)
 {
 	int i;
-
 	if (ft->jid) mir_free(ft->jid);
 	if (ft->iqId) mir_free(ft->iqId);
 	if (ft->id2) mir_free(ft->id2);

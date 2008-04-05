@@ -48,6 +48,7 @@ static TabDef tabPages[] = {
 
 void TlenLoadOptions(TlenProtocol *proto)
 {
+    proto->tlenOptions.savePassword = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", TRUE);
 	proto->tlenOptions.useEncryption = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE);
 	proto->tlenOptions.reconnect = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "Reconnect", TRUE);
 	proto->tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", 0);
@@ -62,6 +63,7 @@ void TlenLoadOptions(TlenProtocol *proto)
 	proto->tlenOptions.enableVersion = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", FALSE);
 	proto->tlenOptions.useNudge = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", FALSE);
 	proto->tlenOptions.logAlerts = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", FALSE);
+    proto->tlenOptions.sendKeepAlive = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "KeepAlive", TRUE);
 	proto->tlenOptions.useNewP2P = FALSE;
 }
 
@@ -197,7 +199,7 @@ BOOL CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM 
 					DBDeleteContactSetting(NULL, proto->iface.m_szModuleName, "Password");
 
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_SAVEPASSWORD));
-				if (reconnectRequired && proto->jabberConnected)
+				if (reconnectRequired && proto->isConnected)
 					MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
 				TlenLoadOptions(proto);
 				return TRUE;
@@ -344,7 +346,7 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VERSIONINFO));
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_NUDGE_SUPPORT));
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_LOG_ALERTS));
-				if (reconnectRequired && proto->jabberConnected)
+				if (reconnectRequired && proto->isConnected)
 					MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
 				ApplyChanges(proto, 1);
 				return TRUE;
@@ -567,7 +569,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 					GetDlgItemTextA(hwndDlg, IDC_FILE_PROXY_PASSWORD, text, sizeof(text));
 					CallService(MS_DB_CRYPT_ENCODESTRING, sizeof(text), (LPARAM) text);
 					DBWriteContactSettingString(NULL, proto->iface.m_szModuleName, "FileProxyPassword", text);
-					if (reconnectRequired && proto->jabberConnected)
+					if (reconnectRequired && proto->isConnected)
 						MessageBox(hwndDlg, TranslateT("These changes will take effect the next time you connect to the Tlen network."), TranslateT("Tlen Protocol Option"), MB_OK|MB_SETFOREGROUND);
 					ApplyChanges(proto, 4);
 					return TRUE;

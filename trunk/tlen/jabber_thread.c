@@ -159,7 +159,7 @@ void __cdecl JabberServerThread(ThreadData *info)
     }
 
     if (loginErr == 0) {
-        if (DBGetContactSettingByte(NULL, info->proto->iface.m_szModuleName, "SavePassword", TRUE) == FALSE) {
+        if (!info->proto->tlenOptions.savePassword) {
             // Ugly hack: continue logging on only the return value is &(onlinePassword[0])
             // because if WM_QUIT while dialog box is still visible, p is returned with some
             // exit code which may not be NULL.
@@ -290,11 +290,7 @@ void __cdecl JabberServerThread(ThreadData *info)
 		// User may change status to OFFLINE while we are connecting above
 		if (info->proto->iface.m_iDesiredStatus!=ID_STATUS_OFFLINE) {
 
-			info->proto->jabberConnected = TRUE;
-			if (DBGetContactSettingByte(NULL, info->proto->iface.m_szModuleName, "KeepAlive", 1))
-				info->proto->tlenOptions.sendKeepAlive = TRUE;
-			else
-				info->proto->tlenOptions.sendKeepAlive = FALSE;
+			info->proto->isConnected = TRUE;
 			JabberForkThread(JabberKeepAliveThread, 0, info->proto);
 
 			JabberXmlInitState(&xmlState);
@@ -352,8 +348,8 @@ void __cdecl JabberServerThread(ThreadData *info)
 
 			JabberXmlDestroyState(&xmlState);
 
-			info->proto->jabberOnline = FALSE;
-			info->proto->jabberConnected = FALSE;
+			info->proto->isOnline = FALSE;
+			info->proto->isConnected = FALSE;
 
 			memset(&clmi, 0, sizeof(CLISTMENUITEM));
 			clmi.cbSize = sizeof(CLISTMENUITEM);
@@ -627,7 +623,7 @@ static void JabberProcessMessage(XmlNode *node, ThreadData *info)
 	}
 	else {
 		if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
-			if (DBGetContactSettingByte(NULL, info->proto->iface.m_szModuleName, "IgnoreAdvertisements", TRUE) && strstr(from, "b73@tlen.pl") == from) {
+			if (info->proto->tlenOptions.ignoreAdvertisements && strstr(from, "b73@tlen.pl") == from) {
 				return;
 			}
 			// If message is from a stranger (not in roster), item is NULL
@@ -899,7 +895,7 @@ static void JabberProcessPresence(XmlNode *node, ThreadData *info)
 				status = ID_STATUS_OFFLINE;
 				statusNode = JabberXmlGetChild(node, "status");
 				if (statusNode) {
-					if (DBGetContactSettingByte(NULL, info->proto->iface.m_szModuleName, "OfflineAsInvisible", FALSE)==TRUE) {
+					if (info->proto->tlenOptions.offlineAsInvisible) {
 						status = ID_STATUS_INVISIBLE;
 					}
 					p = JabberTextDecode(statusNode->text);

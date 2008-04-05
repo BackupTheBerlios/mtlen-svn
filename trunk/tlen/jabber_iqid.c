@@ -249,7 +249,7 @@ void JabberIqResultRoster(TlenProtocol *proto, XmlNode *iqNode)
 				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuChats, (LPARAM) &clmi);
 			}
 
-			proto->jabberOnline = TRUE;
+			proto->isOnline = TRUE;
 			JabberLog(proto, "Status changed via THREADSTART");
 			oldStatus = proto->iface.m_iStatus;
 			JabberSendPresence(proto, proto->iface.m_iDesiredStatus);

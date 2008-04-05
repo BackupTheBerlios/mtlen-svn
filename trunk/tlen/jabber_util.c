@@ -609,7 +609,7 @@ void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to, char *extra
 	char priorityStr[32];
 	char toStr[512];
 
-	if (!proto->jabberOnline) return;
+	if (!proto->isOnline) return;
 
 	// Send <presence/> update for status (we won't handle ID_STATUS_OFFLINE here)
 	// Note: jabberModeMsg is already encoded using JabberTextEncode()
