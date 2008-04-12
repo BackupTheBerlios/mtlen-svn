@@ -1288,6 +1288,5 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
     sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_CREATEACCMGRUI);
 	CreateServiceFunction_Ex(s, proto, TlenAccMgrUI);
     
-    
 }
 

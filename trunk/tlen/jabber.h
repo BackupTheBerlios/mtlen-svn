@@ -208,6 +208,7 @@ typedef struct {
 
 struct JABBER_IQ_FUNC_STRUCT;
 struct JABBER_LIST_ITEM_STRUCT;
+struct TLEN_VOICE_CONTROL_STRUCT;
 
 typedef struct {
     PROTO_INTERFACE iface;
@@ -259,6 +260,10 @@ typedef struct {
     CRITICAL_SECTION csSend;
 
     HWND voiceDlgHWND;
+    struct TLEN_VOICE_CONTROL_STRUCT *playbackControl;
+    struct TLEN_VOICE_CONTROL_STRUCT *recordingControl;
+    int framesAvailableForPlayback;
+    int availOverrunValue;
     
     TlenOptions tlenOptions;
 } TlenProtocol;

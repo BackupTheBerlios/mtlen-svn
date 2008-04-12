@@ -27,106 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "tlen_p2p_old.h"
 
-static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft);
-static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft);
-static void TlenFileSendingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
-static void TlenFileReceivingConnection(HANDLE hNewConnection, DWORD dwRemoteIP, void * pExtra);
+extern int TlenFileCancel(PROTO_INTERFACE *ptr, HANDLE hContact, HANDLE hTransfer);
 
-
-static void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
-{
-	NETLIBOPENCONNECTION nloc;
-	JABBER_SOCKET s;
-	JabberLog(ft->proto, "Thread started: type=file_receive server='%s' port='%d'", ft->hostName, ft->wPort);
-	ft->mode = FT_RECV;
-	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
-	nloc.szHost = ft->hostName;
-	nloc.wPort = ft->wPort;
-	nloc.flags = 0;
-	ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
-	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
-	if (s != NULL) {
-		ft->s = s;
-		JabberLog(ft->proto, "Entering file receive loop");
-		TlenP2PEstablishOutgoingConnection(ft, TRUE);
-		while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
-			TlenFileReceiveParse(ft);
-		}
-		if (ft->s) {
-			Netlib_CloseHandle(s);
-		}
-		ft->s = NULL;
-	} else {
-		ft->pfnNewConnectionV2 = TlenFileReceivingConnection;
-		JabberLog(ft->proto, "Connection failed - receiving as server");
-		s = TlenP2PListen(ft);
-		if (s != NULL) {
-			HANDLE hEvent;
-			char *nick;
-			ft->s = s;
-			hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-			ft->hFileEvent = hEvent;
-			ft->currentFile = 0;
-			ft->state = FT_CONNECTING;
-			nick = JabberNickFromJID(ft->jid);
-			JabberSend(ft->proto, "<f t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
-			mir_free(nick);
-			JabberLog(ft->proto, "Waiting for the file to be received...");
-			WaitForSingleObject(hEvent, INFINITE);
-			ft->hFileEvent = NULL;
-			CloseHandle(hEvent);
-			JabberLog(ft->proto, "Finish all files");
-			Netlib_CloseHandle(s);
-		} else {
-			ft->state = FT_ERROR;
-		}
-	}
-	JabberListRemove(ft->proto, LIST_FILE, ft->iqId);
-	if (ft->state==FT_DONE)
-		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
-	else {
-		char *nick;
-		nick = JabberNickFromJID(ft->jid);
-		JabberSend(ft->proto, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
-		mir_free(nick);
-		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-	}
-
-	JabberLog(ft->proto, "Thread ended: type=file_receive server='%s'", ft->hostName);
-	TlenP2PFreeFileTransfer(ft);
-}
-
-static void TlenFileReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
-{
-	JABBER_SOCKET slisten;
-	TLEN_FILE_TRANSFER *ft;
-
-    TlenProtocol *proto = (TlenProtocol *)pExtra;
-    ft = TlenP2PEstablishIncomingConnection(proto, hConnection, LIST_FILE, TRUE);
-	if (ft != NULL) {
-		slisten = ft->s;
-		ft->s = hConnection;
-		JabberLog(ft->proto, "Set ft->s to %d (saving %d)", hConnection, slisten);
-		JabberLog(ft->proto, "Entering send loop for this file connection... (ft->s is hConnection)");
-		while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
-			TlenFileReceiveParse(ft);
-		}
-		if (ft->state==FT_DONE)
-			ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
-		else
-			ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-		JabberLog(ft->proto, "Closing connection for this file transfer... (ft->s is now hBind)");
-		ft->s = slisten;
-		JabberLog(ft->proto, "ft->s is restored to %d", ft->s);
-		if (ft->s != hConnection) {
-			Netlib_CloseHandle(hConnection);
-		}
-		if (ft->hFileEvent != NULL)
-			SetEvent(ft->hFileEvent);
-	} else {
-		Netlib_CloseHandle(hConnection);
-	}
-}
 
 static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 {
@@ -254,108 +156,20 @@ static void TlenFileReceiveParse(TLEN_FILE_TRANSFER *ft)
 	}
 }
 
-
-static void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
-{
-	JABBER_SOCKET s = NULL;
-	HANDLE hEvent;
-	char *nick;
-
-	JabberLog(ft->proto, "Thread started: type=tlen_file_send");
-	ft->mode = FT_SEND;
-	ft->pfnNewConnectionV2 = TlenFileSendingConnection;
-	s = TlenP2PListen(ft);
-	if (s != NULL) {
-		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
-		ft->s = s;
-		//JabberLog("ft->s = %d", s);
-		//JabberLog("fileCount = %d", ft->fileCount);
-
-		hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-		ft->hFileEvent = hEvent;
-		ft->currentFile = 0;
-		ft->state = FT_CONNECTING;
-
-		nick = JabberNickFromJID(ft->jid);
-		JabberSend(ft->proto, "<f t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
-		mir_free(nick);
-		JabberLog(ft->proto, "Waiting for the file to be sent...");
-		WaitForSingleObject(hEvent, INFINITE);
-		ft->hFileEvent = NULL;
-		CloseHandle(hEvent);
-		JabberLog(ft->proto, "Finish all files");
-		Netlib_CloseHandle(s);
-		ft->s = NULL;
-		JabberLog(ft->proto, "ft->s is NULL");
-
-		if (ft->state == FT_SWITCH) {
-			NETLIBOPENCONNECTION nloc;
-			JABBER_SOCKET s;
-			JabberLog(ft->proto, "Sending as client...");
-			ft->state = FT_CONNECTING;
-			nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
-			nloc.szHost = ft->hostName;
-			nloc.wPort = ft->wPort;
-			nloc.flags = 0;
-			s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
-			if (s != NULL) {
-				ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
-				ft->s = s;
-				TlenP2PEstablishOutgoingConnection(ft, TRUE);
-				JabberLog(ft->proto, "Entering send loop for this file connection...");
-				while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
-					TlenFileSendParse(ft);
-				}
-				if (ft->state==FT_DONE)
-					ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
-				else
-					ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-				JabberLog(ft->proto, "Closing connection for this file transfer... ");
-				Netlib_CloseHandle(s);
-			} else {
-				ft->state = FT_ERROR;
-			}
-		}
-	} else {
-		JabberLog(ft->proto, "Cannot allocate port to bind for file server thread, thread ended.");
-		ft->state = FT_ERROR;
-	}
-	JabberListRemove(ft->proto, LIST_FILE, ft->iqId);
-	switch (ft->state) {
-	case FT_DONE:
-		JabberLog(ft->proto, "Finish successfully");
-		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
-		break;
-	case FT_DENIED:
-		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, ft, 0);
-		break;
-	default: // FT_ERROR:
-		nick = JabberNickFromJID(ft->jid);
-		JabberSend(ft->proto, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
-		mir_free(nick);
-		JabberLog(ft->proto, "Finish with errors");
-		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
-		break;
-	}
-	JabberLog(ft->proto, "Thread ended: type=file_send");
-	TlenP2PFreeFileTransfer(ft);
-}
-
-static void TlenFileSendingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
+static void TlenFileReceivingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
 {
 	JABBER_SOCKET slisten;
 	TLEN_FILE_TRANSFER *ft;
-	TlenProtocol *proto = (TlenProtocol *)pExtra;
 
-	ft = TlenP2PEstablishIncomingConnection(proto, hConnection, LIST_FILE, TRUE);
+    TlenProtocol *proto = (TlenProtocol *)pExtra;
+    ft = TlenP2PEstablishIncomingConnection(proto, hConnection, LIST_FILE, TRUE);
 	if (ft != NULL) {
 		slisten = ft->s;
 		ft->s = hConnection;
 		JabberLog(ft->proto, "Set ft->s to %d (saving %d)", hConnection, slisten);
-
 		JabberLog(ft->proto, "Entering send loop for this file connection... (ft->s is hConnection)");
 		while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
-			TlenFileSendParse(ft);
+			TlenFileReceiveParse(ft);
 		}
 		if (ft->state==FT_DONE)
 			ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
@@ -373,6 +187,72 @@ static void TlenFileSendingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteI
 		Netlib_CloseHandle(hConnection);
 	}
 }
+
+
+static void __cdecl TlenFileReceiveThread(TLEN_FILE_TRANSFER *ft)
+{
+	NETLIBOPENCONNECTION nloc;
+	JABBER_SOCKET s;
+	JabberLog(ft->proto, "Thread started: type=file_receive server='%s' port='%d'", ft->hostName, ft->wPort);
+	ft->mode = FT_RECV;
+	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
+	nloc.szHost = ft->hostName;
+	nloc.wPort = ft->wPort;
+	nloc.flags = 0;
+	ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
+	s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
+	if (s != NULL) {
+		ft->s = s;
+		JabberLog(ft->proto, "Entering file receive loop");
+		TlenP2PEstablishOutgoingConnection(ft, TRUE);
+		while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
+			TlenFileReceiveParse(ft);
+		}
+		if (ft->s) {
+			Netlib_CloseHandle(s);
+		}
+		ft->s = NULL;
+	} else {
+		ft->pfnNewConnectionV2 = TlenFileReceivingConnection;
+		JabberLog(ft->proto, "Connection failed - receiving as server");
+		s = TlenP2PListen(ft);
+		if (s != NULL) {
+			HANDLE hEvent;
+			char *nick;
+			ft->s = s;
+			hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+			ft->hFileEvent = hEvent;
+			ft->currentFile = 0;
+			ft->state = FT_CONNECTING;
+			nick = JabberNickFromJID(ft->jid);
+			JabberSend(ft->proto, "<f t='%s' i='%s' e='7' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
+			mir_free(nick);
+			JabberLog(ft->proto, "Waiting for the file to be received...");
+			WaitForSingleObject(hEvent, INFINITE);
+			ft->hFileEvent = NULL;
+			CloseHandle(hEvent);
+			JabberLog(ft->proto, "Finish all files");
+			Netlib_CloseHandle(s);
+		} else {
+			ft->state = FT_ERROR;
+		}
+	}
+	JabberListRemove(ft->proto, LIST_FILE, ft->iqId);
+	if (ft->state==FT_DONE)
+		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
+	else {
+		char *nick;
+		nick = JabberNickFromJID(ft->jid);
+		JabberSend(ft->proto, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
+		mir_free(nick);
+		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+	}
+
+	JabberLog(ft->proto, "Thread ended: type=file_receive server='%s'", ft->hostName);
+	TlenP2PFreeFileTransfer(ft);
+}
+
+
 
 static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 {
@@ -519,6 +399,39 @@ static void TlenFileSendParse(TLEN_FILE_TRANSFER *ft)
 	}
 }
 
+static void TlenFileSendingConnection(JABBER_SOCKET hConnection, DWORD dwRemoteIP, void * pExtra)
+{
+	JABBER_SOCKET slisten;
+	TLEN_FILE_TRANSFER *ft;
+	TlenProtocol *proto = (TlenProtocol *)pExtra;
+
+	ft = TlenP2PEstablishIncomingConnection(proto, hConnection, LIST_FILE, TRUE);
+	if (ft != NULL) {
+		slisten = ft->s;
+		ft->s = hConnection;
+		JabberLog(ft->proto, "Set ft->s to %d (saving %d)", hConnection, slisten);
+
+		JabberLog(ft->proto, "Entering send loop for this file connection... (ft->s is hConnection)");
+		while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
+			TlenFileSendParse(ft);
+		}
+		if (ft->state==FT_DONE)
+			ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
+		else
+			ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+		JabberLog(ft->proto, "Closing connection for this file transfer... (ft->s is now hBind)");
+		ft->s = slisten;
+		JabberLog(ft->proto, "ft->s is restored to %d", ft->s);
+		if (ft->s != hConnection) {
+			Netlib_CloseHandle(hConnection);
+		}
+		if (ft->hFileEvent != NULL)
+			SetEvent(ft->hFileEvent);
+	} else {
+		Netlib_CloseHandle(hConnection);
+	}
+}
+
 int TlenFileCancelAll(TlenProtocol *proto)
 {
 	JABBER_LIST_ITEM *item;
@@ -550,6 +463,93 @@ int TlenFileCancelAll(TlenProtocol *proto)
 	}
 	return 0;
 }
+
+static void __cdecl TlenFileSendingThread(TLEN_FILE_TRANSFER *ft)
+{
+	JABBER_SOCKET s = NULL;
+	HANDLE hEvent;
+	char *nick;
+
+	JabberLog(ft->proto, "Thread started: type=tlen_file_send");
+	ft->mode = FT_SEND;
+	ft->pfnNewConnectionV2 = TlenFileSendingConnection;
+	s = TlenP2PListen(ft);
+	if (s != NULL) {
+		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
+		ft->s = s;
+		//JabberLog("ft->s = %d", s);
+		//JabberLog("fileCount = %d", ft->fileCount);
+
+		hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		ft->hFileEvent = hEvent;
+		ft->currentFile = 0;
+		ft->state = FT_CONNECTING;
+
+		nick = JabberNickFromJID(ft->jid);
+		JabberSend(ft->proto, "<f t='%s' i='%s' e='6' a='%s' p='%d'/>", nick, ft->iqId, ft->localName, ft->wLocalPort);
+		mir_free(nick);
+		JabberLog(ft->proto, "Waiting for the file to be sent...");
+		WaitForSingleObject(hEvent, INFINITE);
+		ft->hFileEvent = NULL;
+		CloseHandle(hEvent);
+		JabberLog(ft->proto, "Finish all files");
+		Netlib_CloseHandle(s);
+		ft->s = NULL;
+		JabberLog(ft->proto, "ft->s is NULL");
+
+		if (ft->state == FT_SWITCH) {
+			NETLIBOPENCONNECTION nloc;
+			JABBER_SOCKET s;
+			JabberLog(ft->proto, "Sending as client...");
+			ft->state = FT_CONNECTING;
+			nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
+			nloc.szHost = ft->hostName;
+			nloc.wPort = ft->wPort;
+			nloc.flags = 0;
+			s = (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) ft->proto->hNetlibUser, (LPARAM) &nloc);
+			if (s != NULL) {
+				ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_CONNECTING, ft, 0);
+				ft->s = s;
+				TlenP2PEstablishOutgoingConnection(ft, TRUE);
+				JabberLog(ft->proto, "Entering send loop for this file connection...");
+				while (ft->state!=FT_DONE && ft->state!=FT_ERROR) {
+					TlenFileSendParse(ft);
+				}
+				if (ft->state==FT_DONE)
+					ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
+				else
+					ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+				JabberLog(ft->proto, "Closing connection for this file transfer... ");
+				Netlib_CloseHandle(s);
+			} else {
+				ft->state = FT_ERROR;
+			}
+		}
+	} else {
+		JabberLog(ft->proto, "Cannot allocate port to bind for file server thread, thread ended.");
+		ft->state = FT_ERROR;
+	}
+	JabberListRemove(ft->proto, LIST_FILE, ft->iqId);
+	switch (ft->state) {
+	case FT_DONE:
+		JabberLog(ft->proto, "Finish successfully");
+		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_SUCCESS, ft, 0);
+		break;
+	case FT_DENIED:
+		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_DENIED, ft, 0);
+		break;
+	default: // FT_ERROR:
+		nick = JabberNickFromJID(ft->jid);
+		JabberSend(ft->proto, "<f t='%s' i='%s' e='8'/>", nick, ft->iqId);
+		mir_free(nick);
+		JabberLog(ft->proto, "Finish with errors");
+		ProtoBroadcastAck(ft->proto->iface.m_szModuleName, ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, ft, 0);
+		break;
+	}
+	JabberLog(ft->proto, "Thread ended: type=file_send");
+	TlenP2PFreeFileTransfer(ft);
+}
+
 
 TLEN_FILE_TRANSFER *TlenFileCreateFT(TlenProtocol *proto, const char *jid) {
 	TLEN_FILE_TRANSFER *ft;
@@ -643,7 +643,7 @@ void TlenProcessF(XmlNode *node, ThreadData *info)
 					if ((item=JabberListGetItemPtr(info->proto, LIST_FILE, p)) != NULL) {
 						if (item->ft != NULL) {
 							ProtoBroadcastAck(info->proto->iface.m_szModuleName, item->ft->hContact, ACKTYPE_FILE, ACKRESULT_FAILED, item->ft, 0);
-							TlenFileCancel(info->proto, NULL, item->ft);
+							TlenFileCancel((PROTO_INTERFACE *)info->proto, NULL, item->ft);
 						}
 						JabberListRemove(info->proto, LIST_FILE, p);
 					}
