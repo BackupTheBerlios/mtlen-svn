@@ -712,9 +712,7 @@ int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 			char serialId[32];
 			sprintf(serialId, "%d", JabberSerialNext(proto));
 			if ((item = JabberListAdd(proto, LIST_VOICE, serialId)) != NULL) {
-                char *jid = JabberNickFromJID(dbv.pszVal);
-                ft = TlenFileCreateFT(proto, jid);
-                mir_free(jid);
+                ft = TlenFileCreateFT(proto, dbv.pszVal);
 				ft->iqId = mir_strdup(serialId);
 				item->ft = ft;
 //				JabberSend(ft->proto, "<iq to='%s'><query xmlns='voip'><voip k='1' s='1' v='1' i='51245604'/></query></iq>", ft->jid);
@@ -730,6 +728,7 @@ int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 
 int TlenVoiceIsInUse(TlenProtocol *proto) {
 	if (JabberListFindNext(proto, LIST_VOICE, 0) >= 0 || proto->voiceDlgHWND!=NULL) {
+		JabberLog(proto, "voice in use ? %d", proto->voiceDlgHWND);
 		return 1;
 	}
 	return 0;
@@ -910,9 +909,12 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
             }
             break;
 	case WM_CLOSE:
-            proto->voiceDlgHWND = NULL;
             EndDialog(hwndDlg, 0);
             break;
+	case WM_DESTROY:
+            proto->voiceDlgHWND = NULL;
+			break;
+
     }
     return FALSE;
 }
@@ -921,13 +923,15 @@ static void __cdecl TlenVoiceDlgThread(void *ptr)
 {
     
     TLEN_FILE_TRANSFER *ft = (TLEN_FILE_TRANSFER *)ptr;
-	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_VOICE), NULL, TlenVoiceDlgProc, (LPARAM) ft->proto);
-	TlenVoiceCancelAll(ft->proto);
+	TlenProtocol * proto = ft->proto;
+	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_VOICE), NULL, TlenVoiceDlgProc, (LPARAM) proto);
+	TlenVoiceCancelAll(proto);
 }
 
 int TlenVoiceStart(TLEN_FILE_TRANSFER *ft, int mode)
 {
 
+	JabberLog(ft->proto, "starting voice %d", mode);
 	if (mode==0) {
 		JabberForkThread((void (__cdecl *)(void*))TlenVoiceReceiveThread, 0, ft);
 	} else if (mode==1) {
@@ -996,7 +1000,7 @@ static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
 	if (result && data->proto->isOnline) {
 		data->item->ft = TlenFileCreateFT(data->proto, data->item->nick);
 		data->item->ft->iqId = mir_strdup(data->item->jid);
-		TlenVoiceStart(NULL, 2);
+		TlenVoiceStart(data->item->ft, 2);
 		JabberSend(data->proto, "<v t='%s' i='%s' e='5' v='1'/>", data->item->nick, data->item->jid);
 	} else {
 		if (data->proto->isOnline) {

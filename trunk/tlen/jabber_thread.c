@@ -1556,11 +1556,17 @@ static void TlenProcessP(XmlNode *node, ThreadData *info)
  */
 static void TlenProcessV(XmlNode *node, ThreadData *info)
 {
+	char jid[128];
 	JABBER_LIST_ITEM *item;
-	char *from, *id, *e, *p, *nick;
+	char *from, *id, *e, *p;
 //	if (!node->name || strcmp(node->name, "v")) return;
 
 	if ((from=JabberXmlGetAttrValue(node, "f")) != NULL) {
+		if (strchr(from, '@') == NULL) {
+			_snprintf(jid, sizeof(jid), "%s@%s", from, info->server);
+		} else {
+			_snprintf(jid, sizeof(jid), "%s", from);
+		}
 		if ((e=JabberXmlGetAttrValue(node, "e")) != NULL) {
 			if (!strcmp(e, "1")) {
 				if ((id=JabberXmlGetAttrValue(node, "i")) != NULL) {
@@ -1593,23 +1599,21 @@ static void TlenProcessV(XmlNode *node, ThreadData *info)
 				// FILE_SEND : e='4' : File sending request was denied by the remote client
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(info->proto, LIST_VOICE, p)) != NULL) {
-						nick = JabberNickFromJID(item->ft->jid);
-						if (!strcmp(nick, from)) {
+						if (!strcmp(item->ft->jid, jid)) {
 							TlenVoiceCancelAll(info->proto);
 							//JabberListRemove(info->proto, LIST_VOICE, p);
 						}
-						mir_free(nick);
 					}
 				}
 			} else if (!strcmp(e, "5")) {
 			// FILE_SEND : e='5' : Voice request was accepted
 				if ((p=JabberXmlGetAttrValue(node, "i")) != NULL) {
 					if ((item=JabberListGetItemPtr(info->proto, LIST_VOICE, p)) != NULL) {
-						nick = JabberNickFromJID(item->ft->jid);
-						if (!strcmp(nick, from)) {
+						JabberLog(info->proto, "should start voice 1 ? %s ?? %s", jid, item->ft->jid);
+						if (!strcmp(item->ft->jid, jid)) {
+							JabberLog(info->proto, "starting voice 1");
 							TlenVoiceStart(item->ft, 1);
 						}
-						mir_free(nick);
 					}
 				}
 			} else if (!strcmp(e, "6")) {
