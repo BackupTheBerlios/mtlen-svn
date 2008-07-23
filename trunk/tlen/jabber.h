@@ -32,6 +32,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define MIRANDA_VER 0x0800
 
+#undef _WIN32_WINNT
+#undef _WIN32_IE
+#define _WIN32_WINNT 0x0501
+#define _WIN32_IE 0x0501
+
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -46,13 +51,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global header files
  *******************************************************************/
-#define _WIN32_WINNT 0x501
 #include <windows.h>
 #include <process.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
 #include <limits.h>
+#define TV_KEYDOWN
+#include <win2k.h>
+
 
 #include <newpluginapi.h>
 #include <m_system.h>

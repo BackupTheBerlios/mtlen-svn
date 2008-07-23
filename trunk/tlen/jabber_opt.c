@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber.h"
 #include "jabber_list.h"
 #include "tlen_voice.h"
-#include <win2k.h>
 #include <commctrl.h>
 #include "resource.h"
 
