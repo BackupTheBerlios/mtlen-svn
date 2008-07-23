@@ -530,7 +530,6 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
 	HookEventObj_Ex(ME_DB_CONTACT_SETTINGCHANGED, proto, JabberDbSettingChanged);
 	HookEventObj_Ex(ME_DB_CONTACT_DELETED, proto, JabberContactDeleted);
 	HookEventObj_Ex(ME_CLIST_PREBUILDCONTACTMENU, proto, TlenPrebuildContactMenu);
-    HookEventObj_Ex(ME_SYSTEM_MODULESLOADED, proto, TlenOnModulesLoaded);
 	HookEventObj_Ex(ME_SKIN2_ICONSCHANGED, proto, TlenIconsChanged);
 	HookEventObj_Ex(ME_SYSTEM_PRESHUTDOWN, proto, TlenPreShutdown);
 
