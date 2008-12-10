@@ -1,3 +1,6 @@
+1.8.0.1
+-------
+* bugfix: removed ME_SYSTEM_MODULESLOADED hook
 1.8.0.0
 -------
 + support for account manager (requires MIM 0.8)
