@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <richedit.h>
 #include <ctype.h>
 #include <m_icolib.h>
+#include <m_genmenu.h>
 
 
 struct MM_INTERFACE mmi;
@@ -506,6 +507,19 @@ static void initMenuItems(TlenProtocol *proto)
     
 }
 
+static void uninitMenuItems(TlenProtocol *proto) {
+	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuRoot, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuChats, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuMUC, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuInbox, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactMUC, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactVoice, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactRequestAuth, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactGrantAuth, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactFile, (LPARAM) 0);
+}
+
+
 static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUserName )
 {
 	DBVARIANT dbv;
@@ -558,6 +572,7 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
 static int tlenProtoUninit( TlenProtocol *proto )
 {
     /* TODO: remove menu items */
+	uninitMenuItems(proto);
 	TlenVoiceCancelAll(proto);
 	TlenFileCancelAll(proto);
 	if (proto->hTlenNudge)
