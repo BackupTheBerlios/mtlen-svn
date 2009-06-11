@@ -60,7 +60,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define TV_KEYDOWN
 #include <win2k.h>
 
-
 #include <newpluginapi.h>
 #include <m_system.h>
 #include <m_netlib.h>
@@ -125,19 +124,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define TLEN_MUC_IGNORE_ALL 4
 
 #define IDC_STATIC (-1)
-
-enum {
-	TLEN_IDI_TLEN = 0,
-	TLEN_IDI_MAIL,
-	TLEN_IDI_MUC,
-	TLEN_IDI_CHATS,
-	TLEN_IDI_GRANT,
-	TLEN_IDI_REQUEST,
-	TLEN_IDI_VOICE,
-	TLEN_IDI_MICROPHONE,
-	TLEN_IDI_SPEAKER,
-	TLEN_ICON_TOTAL
-};
 
 /*******************************************************************
  * Global data structures and data type definitions
@@ -220,10 +206,10 @@ struct TLEN_VOICE_CONTROL_STRUCT;
 typedef struct {
     PROTO_INTERFACE iface;
     HANDLE hNetlibUser;
-    HANDLE hFileNetlibUser;    
+    HANDLE hFileNetlibUser;
 
     JABBER_MODEMSGS modeMsgs;
-    
+
     struct ThreadDataStruct *threadData;
     HANDLE hTlenNudge;
     HANDLE hMenuMUC;
@@ -234,12 +220,12 @@ typedef struct {
     HANDLE hMenuContactVoice;
     HANDLE hMenuContactGrantAuth;
     HANDLE hMenuContactRequestAuth;
-    
+
     HANDLE* hServices;
     unsigned serviceNum;
     HANDLE* hHooks;
     unsigned hookNum;
-    
+
     int listsCount;
     struct JABBER_LIST_ITEM_STRUCT *lists;
     CRITICAL_SECTION csLists;
@@ -255,7 +241,7 @@ typedef struct {
     BOOL isConnected;
 
     CRITICAL_SECTION modeMsgMutex;
-    
+
     HANDLE hMenuRoot;
 
     char *searchJID;
@@ -271,7 +257,7 @@ typedef struct {
     struct TLEN_VOICE_CONTROL_STRUCT *recordingControl;
     int framesAvailableForPlayback;
     int availOverrunValue;
-    
+
     TlenOptions tlenOptions;
 } TlenProtocol;
 
@@ -366,11 +352,13 @@ typedef struct {
  *******************************************************************/
 extern HINSTANCE hInst;
 extern HANDLE hMainThread;
-extern HICON tlenIcons[TLEN_ICON_TOTAL];
 
 /*******************************************************************
  * Function declarations
  *******************************************************************/
+HICON GetIcolibIcon(int iconId);
+void ReleaseIcolibIcon(HICON hIcon);
+
 void JabberLog(TlenProtocol *proto, const char *fmt, ...);
 void __cdecl JabberServerThread(ThreadData *info);
 // jabber_ws.c

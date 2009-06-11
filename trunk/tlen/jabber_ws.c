@@ -27,24 +27,18 @@ BOOL JabberWsInit(TlenProtocol *proto)
 {
 	NETLIBUSER nlu = {0};
 	NETLIBUSERSETTINGS nlus = {0};
-	char name[128];
+	TCHAR name[128];
 
-#ifdef UNICODE
-	char *szTmp = mir_u2a(proto->iface.m_tszUserName);
-	sprintf( name, "%s %s", szTmp, Translate( "connection" ));
-	mir_free(szTmp);
-#else
-	sprintf( name, "%s %s", proto->iface.m_tszUserName, Translate( "connection" ));
-#endif
 
 	nlu.cbSize = sizeof(nlu);
-	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_HTTPCONNS;	// | NUF_HTTPGATEWAY;
+	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_HTTPCONNS | NUF_TCHAR;	// | NUF_HTTPGATEWAY;
+	mir_sntprintf( name, SIZEOF(name), TranslateT("%s connection"), proto->iface.m_tszUserName);
 	nlu.szDescriptiveName = name;
 	nlu.szSettingsModule = proto->iface.m_szModuleName;
 	proto->hNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
 
 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_NOOPTIONS;
-	sprintf(name, "%sSOCKS", proto->iface.m_szModuleName);
+	mir_sntprintf( name, SIZEOF(name), TranslateT("%s SOCKS connection"), proto->iface.m_tszUserName);
 	nlu.szDescriptiveName = name;
 	proto->hFileNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
 	nlus.cbSize = sizeof(nlus);

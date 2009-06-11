@@ -815,8 +815,14 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
             SendDlgItemMessage(hwndDlg, IDC_SPEAKER, BUTTONSETASFLATBTN, 0, 0);
             SendDlgItemMessage(hwndDlg, IDC_MICROPHONE, BUTTONSETASPUSHBTN, 0, 0);
             SendDlgItemMessage(hwndDlg, IDC_SPEAKER, BUTTONSETASPUSHBTN, 0, 0);
-            SendDlgItemMessage(hwndDlg, IDC_MICROPHONE, BM_SETIMAGE, IMAGE_ICON, (LPARAM) tlenIcons[TLEN_IDI_MICROPHONE]);
-            SendDlgItemMessage(hwndDlg, IDC_SPEAKER, BM_SETIMAGE, IMAGE_ICON, (LPARAM) tlenIcons[TLEN_IDI_SPEAKER]);
+            {
+            	HICON hIcon = GetIcolibIcon(IDI_MICROPHONE);
+				SendDlgItemMessage(hwndDlg, IDC_MICROPHONE, BM_SETIMAGE, IMAGE_ICON, (LPARAM) hIcon);
+				ReleaseIcolibIcon(hIcon);
+				hIcon = GetIcolibIcon(IDI_SPEAKER);
+				SendDlgItemMessage(hwndDlg, IDC_SPEAKER, BM_SETIMAGE, IMAGE_ICON, (LPARAM) hIcon);
+				ReleaseIcolibIcon(hIcon);
+            }
             CheckDlgButton(hwndDlg, IDC_MICROPHONE, TRUE);
             CheckDlgButton(hwndDlg, IDC_SPEAKER, TRUE);
             TlenVoiceInitVUMeters();
@@ -921,7 +927,7 @@ static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 
 static void __cdecl TlenVoiceDlgThread(void *ptr)
 {
-    
+
     TLEN_FILE_TRANSFER *ft = (TLEN_FILE_TRANSFER *)ptr;
 	TlenProtocol * proto = ft->proto;
 	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_VOICE), NULL, TlenVoiceDlgProc, (LPARAM) proto);
@@ -994,7 +1000,7 @@ static BOOL CALLBACK TlenVoiceAcceptDlgProc(HWND hwndDlg, UINT msg, WPARAM wPara
 
 static void __cdecl TlenVoiceAcceptDlgThread(void *ptr)
 {
-    
+
 	ACCEPTDIALOGDATA *data = (ACCEPTDIALOGDATA *)ptr;
 	int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ACCEPT_VOICE), NULL, TlenVoiceAcceptDlgProc, (LPARAM) data);
 	if (result && data->proto->isOnline) {

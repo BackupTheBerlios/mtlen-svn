@@ -83,15 +83,15 @@ static void SetAvatar(TlenProtocol *proto, HANDLE hContact, JABBER_LIST_ITEM *it
 	char md5[33];
     mir_md5_state_t ctx;
     DWORD digest[4];
-    
+
 	if (format == PA_FORMAT_UNKNOWN && len > 4) {
 		format = JabberGetPictureType(data);
 	}
-    
+
 	mir_md5_init( &ctx );
     mir_md5_append( &ctx, data, len);
 	mir_md5_finish( &ctx, ( BYTE* )digest );
-    
+
 	sprintf( md5, "%08x%08x%08x%08x", (int)htonl(digest[0]), (int)htonl(digest[1]), (int)htonl(digest[2]), (int)htonl(digest[3]));
 	if (item != NULL) {
 		char *hash = item->avatarHash;
@@ -123,7 +123,7 @@ int TlenProcessAvatarNode(TlenProtocol *proto, XmlNode *avatarNode, JABBER_LIST_
 	hContact = NULL;
 	if (item != NULL) {
 		if ((hContact=JabberHContactFromJID(proto, item->jid)) == NULL) return 0;
-	} 
+	}
 	if (item == NULL) {
 		oldHash = proto->threadData->avatarHash;
 	} else {
@@ -225,7 +225,7 @@ typedef struct {
 } TLENGETAVATARTHREADDATA;
 
 static void TlenGetAvatarThread(void *ptr) {
-    
+
     JABBER_LIST_ITEM *item = NULL;
 	NETLIBHTTPREQUEST req;
     NETLIBHTTPREQUEST *resp;
@@ -331,7 +331,7 @@ static void TlenRemoveAvatarRequestThread(void *ptr) {
 		RemoveAvatar(data->proto, NULL);
 	}
     mir_free(data);
-	
+
 }
 
 typedef struct {

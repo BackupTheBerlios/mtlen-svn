@@ -63,8 +63,12 @@ int TlenGetName(void *ptr, WPARAM wParam, LPARAM lParam)
 
 HICON TlenGetIcon(PROTO_INTERFACE *ptr, int iconIndex)
 {
-	if ((iconIndex&0xffff) == PLI_PROTOCOL)
-		return CopyIcon(tlenIcons[TLEN_IDI_TLEN]);
+	if ((iconIndex&0xffff) == PLI_PROTOCOL) {
+		HICON hIcon = GetIcolibIcon(IDI_TLEN);
+		HICON hIconCopy = CopyIcon(hIcon);
+		ReleaseIcolibIcon(hIcon);
+		return hIconCopy;
+	}
 	return (HICON) NULL;
 }
 
@@ -725,17 +729,17 @@ static int TlenGetAvatarInfo(void *ptr, WPARAM wParam, LPARAM lParam)
 	return GAIR_NOAVATAR;
 }
 
-int TlenGetAwayMsg(PROTO_INTERFACE *ptr, HANDLE hContact)
+HANDLE TlenGetAwayMsg(PROTO_INTERFACE *ptr, HANDLE hContact)
 {
     TlenProtocol *proto = (TlenProtocol *)ptr;
     SENDACKTHREADDATA *tdata = (SENDACKTHREADDATA*) mir_alloc(sizeof(SENDACKTHREADDATA));
     tdata->proto = proto;
     tdata->hContact = hContact;
 	JabberForkThread((void (__cdecl *)(void*))TlenGetAwayMsgThread, 0, (void *) tdata);
-	return 1;
+	return (HANDLE)1;
 }
 
-int TlenFileAllow(PROTO_INTERFACE *ptr, HANDLE hContact, HANDLE hTransfer, const char* szPath)
+HANDLE TlenFileAllow(PROTO_INTERFACE *ptr, HANDLE hContact, HANDLE hTransfer, const char* szPath)
 {
 	TLEN_FILE_TRANSFER *ft;
 	JABBER_LIST_ITEM *item;
@@ -756,7 +760,7 @@ int TlenFileAllow(PROTO_INTERFACE *ptr, HANDLE hContact, HANDLE hTransfer, const
 		JabberSend(proto, "<f t='%s' i='%s' e='5' v='1'/>", nick, ft->iqId);
 	}
 	mir_free(nick);
-	return (int)hTransfer;
+	return (HANDLE)hTransfer;
 }
 
 int TlenFileDeny(PROTO_INTERFACE *ptr, HANDLE hContact, HANDLE hTransfer, const char* szReason)
@@ -799,7 +803,7 @@ int TlenFileCancel(PROTO_INTERFACE *ptr, HANDLE hContact, HANDLE hTransfer)
 	return 0;
 }
 
-int TlenSendFile(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szDescription, char** ppszFiles)
+HANDLE TlenSendFile(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szDescription, char** ppszFiles)
 {
 	TLEN_FILE_TRANSFER *ft;
 	int i, j;
@@ -842,7 +846,7 @@ int TlenSendFile(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szDescriptio
 		if (proto->tlenOptions.useNewP2P) {
 			JabberSend(proto, "<iq to='%s'><query xmlns='p2p'><fs t='%s' e='1' i='%s' c='%d' s='%d' v='%d'/></query></iq>",
 				ft->jid, ft->jid, idStr, ft->fileCount, ft->allFileTotalSize, ft->fileCount);
-			
+
 			ft->newP2P = TRUE;
 		} else {
 			if (ft->fileCount == 1) {
@@ -860,7 +864,7 @@ int TlenSendFile(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szDescriptio
 		mir_free(nick);
 	}
 
-	return (int) ft;
+	return (HANDLE) ft;
 }
 
 int TlenRecvMessage(PROTO_INTERFACE *ptr, HANDLE hContact, PROTORECVEVENT* evt)
@@ -1091,7 +1095,11 @@ static BOOL CALLBACK TlenChangeAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wPa
 	switch ( msg ) {
 	case WM_INITDIALOG:
 		TranslateDialogDefault( hwndDlg );
-		SendMessage(hwndDlg, WM_SETICON, (WPARAM) ICON_BIG, (LPARAM) tlenIcons[TLEN_IDI_TLEN]);
+		{
+			HICON hIcon = GetIcolibIcon(IDI_TLEN);
+			SendMessage(hwndDlg, WM_SETICON, (WPARAM) ICON_BIG, (LPARAM) hIcon);
+			ReleaseIcolibIcon(hIcon);
+		}
 		CheckDlgButton(hwndDlg, IDC_PUBLICAVATAR, TRUE);
 		return TRUE;
 	case WM_COMMAND:
@@ -1177,14 +1185,15 @@ int TlenOnEvent( PROTO_INTERFACE *ptr, PROTOEVENTTYPE eventType, WPARAM wParam, 
 	case EV_PROTO_ONOPTIONS: return TlenOptionsInit(proto, wParam, lParam );
 	case EV_PROTO_ONEXIT:    return TlenPreShutdown(proto, 0, 0 );
 	case EV_PROTO_ONRENAME:
-		{	
+		{
 			CLISTMENUITEM clmi = { 0 };
 			clmi.cbSize = sizeof( CLISTMENUITEM );
 			clmi.flags = CMIM_NAME | CMIF_TCHAR;
 			clmi.ptszName = proto->iface.m_tszUserName;
 			CallService( MS_CLIST_MODIFYMENUITEM, ( WPARAM )proto->hMenuRoot, ( LPARAM )&clmi );
-    	}	
-    }	
+			/* FIXME: Rename network user as well */
+    	}
+    }
 	return 1;
 }
 
@@ -1196,7 +1205,7 @@ int TlenAuthRecv(PROTO_INTERFACE *ptr,  HANDLE hContact, PROTORECVEVENT* evt )
 
 // PSS_AUTHREQUEST
 int TlenAuthRequest(PROTO_INTERFACE *ptr,  HANDLE hContact, const char* szMessage )
-{	
+{
 	return 1;
 }
 
@@ -1237,7 +1246,7 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
     proto->iface.vtbl->SearchByName = TlenSearchByName;
     proto->iface.vtbl->SearchAdvanced = TlenSearchAdvanced;
     proto->iface.vtbl->CreateExtendedSearchUI = TlenCreateAdvSearchUI;
-    
+
     proto->iface.vtbl->RecvContacts = TlenRecvContacts;
     proto->iface.vtbl->RecvFile = TlenRecvFile;
     proto->iface.vtbl->RecvMsg = TlenRecvMessage;
@@ -1247,13 +1256,13 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
     proto->iface.vtbl->SendFile = TlenSendFile;
     proto->iface.vtbl->SendMsg = TlenSendMessage;
     proto->iface.vtbl->SendUrl = NULL;
-    
+
     proto->iface.vtbl->GetCaps = TlenGetCaps;
     proto->iface.vtbl->GetIcon = TlenGetIcon;
     proto->iface.vtbl->GetInfo = JabberGetInfo;
     proto->iface.vtbl->SetApparentMode = TlenSetApparentMode;
     proto->iface.vtbl->SetStatus = TlenSetStatus;
-   
+
 
     proto->iface.vtbl->GetAwayMsg = TlenGetAwayMsg;
     proto->iface.vtbl->RecvAwayMsg = NULL;
@@ -1261,15 +1270,15 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
     proto->iface.vtbl->SetAwayMsg = TlenSetAwayMsg;
 
     proto->iface.vtbl->UserIsTyping = TlenUserIsTyping;
-    
+
     proto->iface.vtbl->OnEvent = TlenOnEvent;
 
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETNAME);
 	CreateServiceFunction_Ex(s, proto, TlenGetName);
-    
+
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_GETAVATARINFO);
 	CreateServiceFunction_Ex(s, proto, TlenGetAvatarInfo);
- 
+
 	sprintf(s, "%s%s", proto->iface.m_szModuleName, "/SendNudge");
 	CreateServiceFunction_Ex(s, proto, TlenSendAlert);
 
@@ -1287,6 +1296,6 @@ void TlenInitServicesVTbl(TlenProtocol *proto) {
 
     sprintf(s, "%s%s", proto->iface.m_szModuleName, PS_CREATEACCMGRUI);
 	CreateServiceFunction_Ex(s, proto, TlenAccMgrUI);
-    
+
 }
 

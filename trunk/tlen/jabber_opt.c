@@ -434,7 +434,7 @@ static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 			CheckDlgButton(hwndDlg, IDC_KEEPALIVE, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "KeepAlive", TRUE));
 
 			CheckDlgButton(hwndDlg, IDC_USE_SSL, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE));
-			
+
 			CheckDlgButton(hwndDlg, IDC_VISIBILITY_SUPPORT, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "VisibilitySupport", FALSE));
 			// File transfer options
 			bChecked = FALSE;
@@ -591,12 +591,14 @@ static void MailPopupPreview(DWORD colorBack, DWORD colorText, char *title, char
 	POPUPDATAEX ppd;
 	char * lpzContactName;
 	char * lpzText;
-
+	HICON hIcon;
 	lpzContactName = title;
 	lpzText = emailInfo;
 	ZeroMemory(&ppd, sizeof(ppd));
 	ppd.lchContact = NULL;
-	ppd.lchIcon = CopyIcon(tlenIcons[TLEN_IDI_MAIL]);
+	hIcon = GetIcolibIcon(IDI_MAIL);
+	ppd.lchIcon = CopyIcon(hIcon);
+	ReleaseIcolibIcon(hIcon);
 	strcpy(ppd.lpzContactName, lpzContactName);
 	strcpy(ppd.lpzText, lpzText);
 	ppd.colorBack = colorBack;
