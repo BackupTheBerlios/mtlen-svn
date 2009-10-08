@@ -44,7 +44,11 @@ HANDLE hMainThread;
 
 PLUGININFOEX pluginInfoEx = {
 	sizeof(PLUGININFOEX),
+#ifdef _UNICODE
+	"Tlen Protocol (Unicode)",
+#else
 	"Tlen Protocol",
+#endif
 	TLEN_VERSION,
 	"Tlen protocol plugin for Miranda IM ("TLEN_VERSION_STRING" "__DATE__")",
 	"Santithorn Bunchua, Adam Strzelecki, Piotr Piastucki",

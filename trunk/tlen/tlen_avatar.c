@@ -35,6 +35,7 @@ void TlenGetAvatarFileName(TlenProtocol *proto, JABBER_LIST_ITEM *item, char* ps
 	int tPathLen;
 	int format = PA_FORMAT_PNG;
 	char* szFileType;
+	char *tmpPath = Utils_ReplaceVars( "%miranda_avatarcache%" );
 	if (item != NULL) {
 		format = item->avatarFormat;
 	} else if (proto->threadData != NULL) {
@@ -42,9 +43,8 @@ void TlenGetAvatarFileName(TlenProtocol *proto, JABBER_LIST_ITEM *item, char* ps
 	} else {
 		format = DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "AvatarFormat", PA_FORMAT_UNKNOWN);
 	}
-	CallService( MS_DB_GETPROFILEPATH, cbLen, (LPARAM) pszDest );
-	tPathLen = strlen( pszDest );
-	tPathLen += mir_snprintf( pszDest + tPathLen, cbLen - tPathLen, "\\%s\\", proto->iface.m_szProtoName  );
+	tPathLen = mir_snprintf( pszDest, cbLen, "%s\\Tlen\\", tmpPath );
+    mir_free(tmpPath);
 	CreateDirectoryA( pszDest, NULL );
 	szFileType = "png";
 	switch(format) {
@@ -383,7 +383,9 @@ void TlenUploadAvatar(TlenProtocol *proto, unsigned char *data, int dataLen, int
 	char *request;
 	unsigned char *buffer;
 	if (proto->threadData != NULL && dataLen > 0 && data != NULL) {
-		int size, sizeHead, sizeTail;
+		char *mpartHead =  "--AaB03x\r\nContent-Disposition: form-data; name=\"filename\"; filename=\"plik.png\"\r\nContent-Type: image/png\r\n\r\n";
+		char *mpartTail =  "\r\n--AaB03x--\r\n";
+		int size, sizeHead = strlen(mpartHead), sizeTail = strlen(mpartTail);
 		request = replaceTokens(proto->threadData->tlenConfig.mailBase, proto->threadData->tlenConfig.avatarUpload, "", proto->threadData->avatarToken, 0, access);
 		threadData = (TLENUPLOADAVATARTHREADDATA *)mir_alloc(sizeof(TLENUPLOADAVATARTHREADDATA));
         threadData->proto = proto;
@@ -398,13 +400,11 @@ void TlenUploadAvatar(TlenProtocol *proto, unsigned char *data, int dataLen, int
 		headers[0].szValue = "multipart/form-data; boundary=AaB03x";
 		req->headersCount = 1;
 		req->headers = headers;
-		sizeHead = strlen("--AaB03x\r\nContent-Disposition: form-data; name=\"filename\"; filename=\"plik.png\"\r\nContent-Type: image/png\r\n\r\n");
-		sizeTail = strlen("\r\n--AaB03x--\r\n");
 		size = dataLen + sizeHead + sizeTail;
 		buffer = mir_alloc(size);
-		strcpy(buffer, "--AaB03x\r\nContent-Disposition: form-data; name=\"filename\"; filename=\"plik.png\"\r\nContent-Type: image/png\r\n\r\n");
+		memcpy(buffer, mpartHead, sizeHead);
 		memcpy(buffer + sizeHead, data, dataLen);
-		strcpy(buffer + sizeHead + dataLen, "\r\n--AaB03x--\r\n");
+		memcpy(buffer + sizeHead + dataLen, mpartTail, sizeTail);
 		req->dataLength = size;
 		req->pData = buffer;
 		threadData->req = req;
