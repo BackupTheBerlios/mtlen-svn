@@ -86,7 +86,6 @@ int TlenOptionsInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
 	int i;
 	OPTIONSDIALOGPAGE odp = { 0 };
 	odp.cbSize = sizeof(odp);
-	odp.position = 0;
 	odp.hInstance = hInst;
 	odp.ptszGroup = TranslateT("Network");
 	odp.ptszTitle = proto->iface.m_tszUserName;

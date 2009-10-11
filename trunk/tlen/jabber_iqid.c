@@ -281,7 +281,11 @@ void TlenIqResultVcard(TlenProtocol *proto, XmlNode *iqNode)
 		if ((itemNode=JabberXmlGetChild(queryNode, "item")) == NULL) return;
 		if ((jid=JabberXmlGetAttrValue(itemNode, "jid")) != NULL) {
 			if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) return;
-			sprintf(text, "%s@%s", jid, dbv.pszVal);	// Add @tlen.pl
+			if (strchr(jid, '@') != NULL) {
+				sprintf(text, "%s", jid);
+			} else {
+				sprintf(text, "%s@%s", jid, dbv.pszVal);	// Add @tlen.pl
+			}
 			DBFreeVariant(&dbv);
 			if ((hContact=JabberHContactFromJID(proto, text)) == NULL) {
 				if (DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) return;
@@ -438,7 +442,11 @@ void JabberIqResultSearch(TlenProtocol *proto, XmlNode *iqNode)
 				itemNode = queryNode->child[i];
 				if (!strcmp(itemNode->name, "item")) {
 					if ((jid=JabberXmlGetAttrValue(itemNode, "jid")) != NULL) {
-						_snprintf(jsr.jid, sizeof(jsr.jid), "%s@%s", jid, dbv.pszVal);
+						if (strchr(jid, '@') != NULL) {
+							_snprintf(jsr.jid, sizeof(jsr.jid), "%s", jid);
+						} else {
+							_snprintf(jsr.jid, sizeof(jsr.jid), "%s@%s", jid, dbv.pszVal);
+						}
 						jsr.jid[sizeof(jsr.jid)-1] = '\0';
 						if ((n=JabberXmlGetChild(itemNode, "nick"))!=NULL && n->text!=NULL)
 							jsr.hdr.nick = JabberTextDecode(n->text);
@@ -468,7 +476,11 @@ void JabberIqResultSearch(TlenProtocol *proto, XmlNode *iqNode)
 			}
 			if (proto->searchJID!=NULL) {
 				if (!found) {
-					_snprintf(jsr.jid, sizeof(jsr.jid), "%s@%s", proto->searchJID, dbv.pszVal);
+					if (strchr(proto->searchJID, '@') != NULL) {
+						_snprintf(jsr.jid, sizeof(jsr.jid), "%s", proto->searchJID);
+					} else {
+						_snprintf(jsr.jid, sizeof(jsr.jid), "%s@%s", proto->searchJID, dbv.pszVal);
+					}
 					jsr.jid[sizeof(jsr.jid)-1] = '\0';
 					jsr.hdr.nick = mir_strdup("");
 					jsr.hdr.firstName = mir_strdup("");

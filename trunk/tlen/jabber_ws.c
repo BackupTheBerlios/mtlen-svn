@@ -37,7 +37,7 @@ BOOL JabberWsInit(TlenProtocol *proto)
 	nlu.szSettingsModule = proto->iface.m_szModuleName;
 	proto->hNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
 
-	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_NOOPTIONS;
+	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_NOOPTIONS | NUF_TCHAR;
 	mir_sntprintf( name, SIZEOF(name), TranslateT("%s SOCKS connection"), proto->iface.m_tszUserName);
 	nlu.szDescriptiveName = name;
 	proto->hFileNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
