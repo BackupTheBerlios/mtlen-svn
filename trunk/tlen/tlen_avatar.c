@@ -32,10 +32,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void TlenGetAvatarFileName(TlenProtocol *proto, JABBER_LIST_ITEM *item, char* pszDest, int cbLen)
 {
+	DWORD dwAttributes;
 	int tPathLen;
 	int format = PA_FORMAT_PNG;
 	char* szFileType;
 	char *tmpPath = Utils_ReplaceVars( "%miranda_avatarcache%" );
+	tPathLen = mir_snprintf( pszDest, cbLen, "%s\\Tlen", tmpPath );
+    	mir_free(tmpPath);
+	dwAttributes = GetFileAttributesA( pszDest );
+	if ( dwAttributes == 0xffffffff || ( dwAttributes & FILE_ATTRIBUTE_DIRECTORY ) == 0 ) {
+		CallService( MS_UTILS_CREATEDIRTREE, 0, ( LPARAM )pszDest );
+	}
+	pszDest[ tPathLen++ ] = '\\';
 	if (item != NULL) {
 		format = item->avatarFormat;
 	} else if (proto->threadData != NULL) {
@@ -43,9 +51,6 @@ void TlenGetAvatarFileName(TlenProtocol *proto, JABBER_LIST_ITEM *item, char* ps
 	} else {
 		format = DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "AvatarFormat", PA_FORMAT_UNKNOWN);
 	}
-	tPathLen = mir_snprintf( pszDest, cbLen, "%s\\Tlen\\", tmpPath );
-    mir_free(tmpPath);
-	CreateDirectoryA( pszDest, NULL );
 	szFileType = "png";
 	switch(format) {
 		case PA_FORMAT_JPEG: szFileType = "jpg";   break;
