@@ -248,7 +248,7 @@ char *JabberSha1(char *str)
 
 	mir_sha1_init( &sha );
 	mir_sha1_append( &sha, (mir_sha1_byte_t* )str, strlen( str ));
-	mir_sha1_finish( &sha, digest );
+	mir_sha1_finish( &sha, (mir_sha1_byte_t* )digest );
 	if ((result=(char *)mir_alloc(41)) == NULL)
 		return NULL;
 	sprintf(result, "%08x%08x%08x%08x%08x", (int)htonl(digest[0]), (int)htonl(digest[1]), (int)htonl(digest[2]), (int)htonl(digest[3]), (int)htonl(digest[4]));

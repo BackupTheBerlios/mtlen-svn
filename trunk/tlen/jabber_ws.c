@@ -70,9 +70,6 @@ JABBER_SOCKET JabberWsConnect(TlenProtocol *proto, char *host, WORD port)
 int JabberWsSend(TlenProtocol *proto, JABBER_SOCKET s, char *data, int datalen)
 {
 	int len;
-    if (proto->threadData == NULL) {
-        return FALSE;
-    }
 	if ((len=Netlib_Send(s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT))==SOCKET_ERROR || len!=datalen) {
 		JabberLog(proto, "Netlib_Send() failed, error=%d", WSAGetLastError());
 		return FALSE;
@@ -83,9 +80,6 @@ int JabberWsSend(TlenProtocol *proto, JABBER_SOCKET s, char *data, int datalen)
 int JabberWsRecv(TlenProtocol *proto, JABBER_SOCKET s, char *data, long datalen)
 {
 	int ret;
-    if (proto->threadData == NULL) {
-        return 0;
-    }
 	ret = Netlib_Recv(s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT);
 	if(ret == SOCKET_ERROR) {
 		JabberLog(proto, "Netlib_Recv() failed, error=%d", WSAGetLastError());

@@ -63,7 +63,7 @@ void TlenLoadOptions(TlenProtocol *proto)
 	proto->tlenOptions.useNudge = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", FALSE);
 	proto->tlenOptions.logAlerts = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", FALSE);
     proto->tlenOptions.sendKeepAlive = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "KeepAlive", TRUE);
-	proto->tlenOptions.useNewP2P = FALSE;
+	proto->tlenOptions.useNewP2P = TRUE;
 }
 
 static int changed = 0;
