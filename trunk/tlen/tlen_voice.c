@@ -649,7 +649,7 @@ static void TlenVoiceSendParse(TLEN_FILE_TRANSFER *ft)
 		ft->proto->recordingControl->vuMeter = i;
 		for (i=0; i<MODE_FRAME_SIZE[codec]; i++) {
 			gsm_encode(ft->proto->recordingControl->gsmstate, in + i * 160);
-			TlenP2PPacketPackBuffer(packet, ft->proto->recordingControl->gsmstate->gsmFrame, 33);
+			TlenP2PPacketPackBuffer(packet, (char*)ft->proto->recordingControl->gsmstate->gsmFrame, 33);
 		}
 		TlenVoiceCrypt(packet->packet+4, packet->len-4);
 		if (!TlenP2PPacketSend(ft->s, packet)) {

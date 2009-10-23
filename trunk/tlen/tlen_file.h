@@ -25,9 +25,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _TLEN_FILE_H_
 
 #include <windows.h>
+#include "jabber.h"
 
 extern int TlenFileCancelAll(TlenProtocol *proto);
-extern void TlenProcessF(XmlNode *node, void *userdata);
+extern void TlenProcessF(XmlNode *node, ThreadData *userdata);
 extern TLEN_FILE_TRANSFER *TlenFileCreateFT(TlenProtocol *proto, const char *jid);
 #endif
 
