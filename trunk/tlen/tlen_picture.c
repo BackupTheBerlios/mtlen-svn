@@ -93,7 +93,7 @@ static void TlenPsGetThread(void *ptr) {
     TlenProtocol *proto = data->proto;
     JABBER_LIST_ITEM *item = data->item;
     snprintf(path, sizeof(path), "%s.%s", item->ft->files[0], "jpg");
-    FILE *fp = fopen( item->ft->files[0], "wb" );
+    FILE *fp = fopen( path, "wb" );
     if (fp) {
         JABBER_SOCKET socket = JabberWsConnect(proto, "ps.tlen.pl", 443);
         if (socket != NULL) {
@@ -107,32 +107,51 @@ static void TlenPsGetThread(void *ptr) {
 
 			JabberLog(proto, "Reveiving picture data...");
             {
-                int readcount = JabberWsRecv(proto, socket, fileBuffer, 2048);
-//                int parsed = JabberXmlParse(xmlState, fileBuffer + readcount, readcount);
-//                JabberLog("ps parsed %d", parsed);
-            }
-            /*
-            for (i = item->ft->filesSize[0]; i > 0; ) {
-                int toread = min(2048, i);
-                JabberLog(proto, "Getting data.. %d", toread);
-                {
+                int totalcount = 0;
+                int size = item->ft->filesSize[0];
+                BOOL bHeader = TRUE;
+                while (TRUE) {
+                    int readcount = JabberWsRecv(proto, socket, fileBuffer, 2048 - totalcount);
                     if (readcount == 0) {
                         break;
                     }
-                    fwrite(fileBuffer, 1, readcount, fp);
-                    i -= readcount;
+                    totalcount += readcount;
+                    if (bHeader) {
+                        char * tagend = memchr(fileBuffer, '/', totalcount);
+                        tagend = memchr(tagend + 1, '>', totalcount - (tagend - fileBuffer) - 1);
+                        if (tagend != NULL) {
+                            int parsed = JabberXmlParse(&xmlState, fileBuffer, tagend - fileBuffer + 1);
+                            if (parsed == 0) {
+                                continue;
+                            }
+                            bHeader = FALSE;
+                            totalcount -= parsed;
+                            memmove(fileBuffer, fileBuffer+parsed, totalcount);
+                        }
+                    }
+                    if (!bHeader) {
+                        if (totalcount > 0) {
+                            fwrite(fileBuffer, 1, totalcount, fp);
+                            size -= totalcount;
+                            totalcount = 0;
+                        }
+                        if (size == 0) {
+                            break;
+                        }
+                    }
                 }
             }
-            */
             Netlib_CloseHandle(socket);
             JabberLog(proto, "Picture received...");
         } else {
           /* cannot receive picture */
         }
-        TlenP2PFreeFileTransfer(item->ft);
-        JabberListRemove(proto, LIST_PICTURE, item->jid);
         fclose(fp);
+    } else {
+        /* cannot create file */
     }
+    TlenP2PFreeFileTransfer(item->ft);
+    JabberListRemove(proto, LIST_PICTURE, item->jid);
     mir_free(data);
 }
 
@@ -155,7 +174,6 @@ void TlenProcessPic(XmlNode *node, TlenProtocol *proto) {
     if (idt != NULL) {
         item = JabberListGetItemPtr(proto, LIST_PICTURE, idt);
     }
-    JabberLog(proto, "item found? %s : %s", idt, ((item != NULL) ? "true" : "false"));
     if (item != NULL) {
         if (!strcmp(from, "ps")) {
             char *st = JabberXmlGetAttrValue(node, "st");

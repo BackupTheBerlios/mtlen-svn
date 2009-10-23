@@ -93,17 +93,26 @@ static void JabberListFreeItemInternal(JABBER_LIST_ITEM *item)
 	if (item->id2) mir_free(item->id2);
 }
 
+static char * GetItemId(JABBER_LIST list, const char *jid)
+{
+	char *s, *p, *q;
+	s = mir_strdup(jid);
+    if (list != LIST_PICTURE) {
+        _strlwr(s);
+        // strip resouce name if any
+        if ((p=strchr(s, '@')) != NULL) {
+            if ((q=strchr(p, '/')) != NULL)
+                *q = '\0';
+        }
+    }
+    return s;
+}
+
 int JabberListExist(TlenProtocol *proto, JABBER_LIST list, const char *jid)
 {
 	int i, len;
-	char *s, *p, *q;
-
-	s = mir_strdup(jid); _strlwr(s);
-	// strip resouce name if any
-	if ((p=strchr(s, '@')) != NULL) {
-		if ((q=strchr(p, '/')) != NULL)
-			*q = '\0';
-	}
+	char *s, *p;
+    s = GetItemId(list, jid);
 	len = strlen(s);
 
 	EnterCriticalSection(&proto->csLists);
@@ -132,13 +141,7 @@ JABBER_LIST_ITEM *JabberListAdd(TlenProtocol *proto, JABBER_LIST list, const cha
 		return item;
 	}
 
-	s = mir_strdup(jid); _strlwr(s);
-	// strip resource name if any
-	if ((p=strchr(s, '@')) != NULL) {
-		if ((q=strchr(p, '/')) != NULL)
-			*q = '\0';
-	}
-
+	s = GetItemId(list, jid);
 	proto->lists = (JABBER_LIST_ITEM *) mir_realloc(proto->lists, sizeof(JABBER_LIST_ITEM)*(proto->listsCount+1));
 	item = &(proto->lists[proto->listsCount]);
 	memset(item, 0, sizeof(JABBER_LIST_ITEM));
