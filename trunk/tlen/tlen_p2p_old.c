@@ -250,7 +250,7 @@ static void __cdecl TlenFileBindSocks4Thread(TLEN_FILE_TRANSFER* ft)
 	int status;
 
 //	JabberLog("Waiting for the file to be sent via SOCKS...");
-	status = Netlib_Recv(ft->s, buf, 8, MSG_NODUMP);
+	status = Netlib_Recv(ft->s, (char*)buf, 8, MSG_NODUMP);
 //	JabberLog("accepted connection !!!");
 	if ( status == SOCKET_ERROR || status<8 || buf[1]!=90) {
 		status = 1;
@@ -276,7 +276,7 @@ static void __cdecl TlenFileBindSocks5Thread(TLEN_FILE_TRANSFER* ft)
 	int status;
 
 //	JabberLog("Waiting for the file to be sent via SOCKS...");
-	status = Netlib_Recv(ft->s, buf, sizeof(buf), MSG_NODUMP);
+	status = Netlib_Recv(ft->s, (char*)buf, sizeof(buf), MSG_NODUMP);
 //	JabberLog("accepted connection !!!");
 	if ( status == SOCKET_ERROR || status<7 || buf[1]!=0) {
 		status = 1;
@@ -320,26 +320,26 @@ static JABBER_SOCKET TlenP2PBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	*(PWORD)(buf+2) = htons(0); // port
 	*(PDWORD)(buf+4) = INADDR_ANY;
 	if (sb->useAuth) {
-		strcpy(buf+8, sb->szUser);
+		strcpy((char*)buf+8, sb->szUser);
 		len = strlen(sb->szUser);
 	} else {
 		buf[8] = 0;
 		len = 0;
 	}
 	len += 9;
-	status = Netlib_Send(s, buf, len, MSG_NODUMP);
+	status = Netlib_Send(s, (char*)buf, len, MSG_NODUMP);
 	if (status==SOCKET_ERROR || status<len) {
 //		JabberLog("Send failed (%d), thread ended", WSAGetLastError());
 		Netlib_CloseHandle(s);
 		return NULL;
 	}
-	status = Netlib_Recv(s, buf, 8, MSG_NODUMP);
+	status = Netlib_Recv(s, (char*)buf, 8, MSG_NODUMP);
 	if (status==SOCKET_ERROR || status<8 || buf[1]!=90) {
 //		JabberLog("SOCKS4 negotiation failed");
 		Netlib_CloseHandle(s);
 		return NULL;
 	}
-	status = Netlib_Recv(s, buf, sizeof(buf), MSG_NODUMP);
+	status = Netlib_Recv(s, (char*)buf, sizeof(buf), MSG_NODUMP);
 	if ( status == SOCKET_ERROR || status<7 || buf[0]!=5 || buf[1]!=0) {
 //		JabberLog("SOCKS5 request failed");
 		Netlib_CloseHandle(s);
@@ -373,13 +373,13 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	buf[0] = 5;  //yep, socks5
 	buf[1] = 1;  //one auth method
 	buf[2] = sb->useAuth?2:0; // authorization
-	status = Netlib_Send(s, buf, 3, MSG_NODUMP);
+	status = Netlib_Send(s, (char*)buf, 3, MSG_NODUMP);
 	if (status==SOCKET_ERROR || status<3) {
 		JabberLog(ft->proto, "Send failed (%d), thread ended", WSAGetLastError());
 		Netlib_CloseHandle(s);
 		return NULL;
 	}
-	status = Netlib_Recv(s, buf, 2, MSG_NODUMP);
+	status = Netlib_Recv(s, (char*)buf, 2, MSG_NODUMP);
 	if (status==SOCKET_ERROR || status<2 || (buf[1]!=0 && buf[1]!=2)) {
 		JabberLog(ft->proto, "SOCKS5 negotiation failed");
 		Netlib_CloseHandle(s);
@@ -397,14 +397,14 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 		memcpy(pAuthBuf+2, sb->szUser, nUserLen);
 		pAuthBuf[2+nUserLen]=nPassLen;
 		memcpy(pAuthBuf+3+nUserLen,sb->szPassword,nPassLen);
-		status = Netlib_Send(s, pAuthBuf, 3+nUserLen+nPassLen, MSG_NODUMP);
+		status = Netlib_Send(s, (char*)pAuthBuf, 3+nUserLen+nPassLen, MSG_NODUMP);
 		mir_free(pAuthBuf);
 		if (status==SOCKET_ERROR || status<3+nUserLen+nPassLen) {
 			JabberLog(ft->proto, "Send failed (%d), thread ended", WSAGetLastError());
 			Netlib_CloseHandle(s);
 			return NULL;
 		}
-		status = Netlib_Recv(s, buf, sizeof(buf), MSG_NODUMP);
+		status = Netlib_Recv(s, (char*)buf, sizeof(buf), MSG_NODUMP);
 		if (status==SOCKET_ERROR || status<2 || buf[1]!=0) {
 			JabberLog(ft->proto, "SOCKS5 sub-negotiation failed");
 			Netlib_CloseHandle(s);
@@ -422,7 +422,7 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 		pInit[3]=1;
 		*(PDWORD)(pInit+4)=hostIP;
 		*(PWORD)(pInit+4+nHostLen)=htons(0);
-		status = Netlib_Send(s, pInit, 6+nHostLen, MSG_NODUMP);
+		status = Netlib_Send(s, (char*)pInit, 6+nHostLen, MSG_NODUMP);
 		mir_free(pInit);
 		if (status==SOCKET_ERROR || status<6+nHostLen) {
 //			JabberLog("Send failed (%d), thread ended", WSAGetLastError());
@@ -430,7 +430,7 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 			return NULL;
 		}
 	}
-	status = Netlib_Recv(s, buf, sizeof(buf), MSG_NODUMP);
+	status = Netlib_Recv(s, (char*)buf, sizeof(buf), MSG_NODUMP);
 	if ( status == SOCKET_ERROR || status<7 || buf[0]!=5 || buf[1]!=0) {
 //		JabberLog("SOCKS5 request failed");
 		Netlib_CloseHandle(s);

@@ -73,7 +73,7 @@ void __cdecl TlenNewFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 			int j, n;
 			unsigned char buff[1024];
 			alen = sizeof(struct sockaddr);
-			n=recvfrom(ft->udps, buff,sizeof(buff),0, (struct sockaddr *) &cad, &alen);
+			n=recvfrom(ft->udps, (char*)buff,sizeof(buff),0, (struct sockaddr *) &cad, &alen);
 			if (n<0) {
 				break;
 			}
@@ -87,7 +87,7 @@ void __cdecl TlenNewFileReceiveThread(TLEN_FILE_TRANSFER *ft)
 			}
 			if (n == 1) {
 				alen = sizeof(struct sockaddr);
-				n = sendto(ft->udps, buff, n, 0,(struct sockaddr *) &toad, alen);
+				n = sendto(ft->udps, (char*)buff, n, 0,(struct sockaddr *) &toad, alen);
 				if (fout != NULL) {
 					fprintf(fout, "\n|SEND |");
 					for (j = 0; j < n; j++) {
@@ -152,7 +152,7 @@ void __cdecl TlenNewFileSendThread(TLEN_FILE_TRANSFER *ft)
 				buff[3] = '%';
 				n = 4;
 			}
-			n=sendto(ft->udps, buff, n, 0, (struct sockaddr *)&toad, alen);
+			n=sendto(ft->udps, (char*)buff, n, 0, (struct sockaddr *)&toad, alen);
 			logInfo("tlen_send.dxx", "UDP");
 			if (fout != NULL) {
 				fprintf(fout, "|send: %d %s %d|",n, inet_ntoa(toad.sin_addr), toad.sin_port);

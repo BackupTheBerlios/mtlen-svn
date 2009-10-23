@@ -65,9 +65,7 @@ typedef struct JABBER_LIST_ITEM_STRUCT {
 	char *roomName;
 
 	// LIST_FILE
-	// jid = string representation of port number
 	struct TLEN_FILE_TRANSFER_STRUCT *ft;
-	//WORD port;
 } JABBER_LIST_ITEM;
 
 
