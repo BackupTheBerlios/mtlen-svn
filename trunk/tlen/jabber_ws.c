@@ -67,26 +67,26 @@ JABBER_SOCKET JabberWsConnect(TlenProtocol *proto, char *host, WORD port)
 	return (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) proto->hNetlibUser, (LPARAM) &nloc);
 }
 
-int JabberWsSend(TlenProtocol *proto, char *data, int datalen)
+int JabberWsSend(TlenProtocol *proto, JABBER_SOCKET s, char *data, int datalen)
 {
 	int len;
     if (proto->threadData == NULL) {
         return FALSE;
     }
-	if ((len=Netlib_Send(proto->threadData->s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT))==SOCKET_ERROR || len!=datalen) {
+	if ((len=Netlib_Send(s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT))==SOCKET_ERROR || len!=datalen) {
 		JabberLog(proto, "Netlib_Send() failed, error=%d", WSAGetLastError());
 		return FALSE;
 	}
 	return TRUE;
 }
 
-int JabberWsRecv(TlenProtocol *proto, char *data, long datalen)
+int JabberWsRecv(TlenProtocol *proto, JABBER_SOCKET s, char *data, long datalen)
 {
 	int ret;
     if (proto->threadData == NULL) {
         return 0;
     }
-	ret = Netlib_Recv(proto->threadData->s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT);
+	ret = Netlib_Recv(s, data, datalen, /*MSG_NODUMP|*/MSG_DUMPASTEXT);
 	if(ret == SOCKET_ERROR) {
 		JabberLog(proto, "Netlib_Recv() failed, error=%d", WSAGetLastError());
 		return 0;
@@ -113,7 +113,7 @@ int JabberWsSendAES(TlenProtocol *proto, char *data, int datalen, aes_context *a
 			int pad = datalen < 16 ? 16 - datalen : 0;
 			memcpy(aes_input, data, datalen < 16 ? datalen : 16);
 			memset(aes_input + 16 - pad, ' ', pad);
-			aes_cbc_encrypt(aes_ctx, aes_iv, aes_input, aes_output + len, 16);
+			aes_crypt_cbc(aes_ctx, AES_ENCRYPT, 16, aes_iv, aes_input, aes_output + len);
 			datalen -= 16;
 			data += 16;
 			len += 16;
@@ -155,7 +155,7 @@ int JabberWsRecvAES(TlenProtocol *proto, char *data, long datalen, aes_context *
 	ret = len;
 	while (len > 15) {
 		memcpy(aes_input, aes_output, 16);
-		aes_cbc_decrypt(aes_ctx, aes_iv, aes_input, aes_output, 16);
+		aes_crypt_cbc(aes_ctx, AES_DECRYPT, 16, aes_iv, aes_input, aes_output);
 		aes_output += 16;
 		len -= 16;
 	}

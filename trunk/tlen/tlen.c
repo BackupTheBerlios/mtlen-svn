@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber_list.h"
 #include "jabber_iq.h"
 #include "resource.h"
+#include "tlen_picture.h"
 #include <m_file.h>
 #include <richedit.h>
 #include <ctype.h>
@@ -53,7 +54,7 @@ PLUGININFOEX pluginInfoEx = {
 	"Tlen protocol plugin for Miranda IM ("TLEN_VERSION_STRING" "__DATE__")",
 	"Santithorn Bunchua, Adam Strzelecki, Piotr Piastucki",
 	"the_leech@users.berlios.de",
-	"(c) 2002-2008 Santithorn Bunchua, Piotr Piastucki",
+	"(c) 2002-2009 Santithorn Bunchua, Piotr Piastucki",
 	"http://mtlen.berlios.de",
 	0,
 	0,
@@ -255,14 +256,9 @@ int TlenContactMenuHandleGrantAuth(void *ptr, WPARAM wParam, LPARAM lParam)
 int TlenContactMenuHandleSendPicture(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	HANDLE hContact;
-	DBVARIANT dbv;
     TlenProtocol *proto = (TlenProtocol *)ptr;
 	if ((hContact=(HANDLE) wParam)!=NULL && proto->isOnline) {
-		if (!DBGetContactSetting(hContact, proto->iface.m_szModuleName, "jid", &dbv)) {
-			JabberSend(proto, "<message type='pic' to='the_leech7@tlen.pl' crc='da4fe23' idt='2174' size='21161'/>");
-//			JabberSend(proto, "<message type='pic' to='%s' crc='b4f7bdd' idt='6195' size='5583'/>", dbv.pszVal);
-			DBFreeVariant(&dbv);
-		}
+        SendPicture(proto, hContact);
 	}
 	return 0;
 }
@@ -481,7 +477,7 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.position = -2000001002;
 	mi.icolibItem = GetIconHandle(IDI_GRANT);
 	mi.pszService = text;
-	//CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi); //hMenuContactGrantAuth = (HANDLE)
+	proto->hMenuPicture = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
 	mi.position = -2000020000;
 	mi.flags = CMIF_NOTONLINE;
@@ -502,6 +498,7 @@ static void uninitMenuItems(TlenProtocol *proto) {
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactRequestAuth, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactGrantAuth, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactFile, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuPicture, (LPARAM) 0);
 }
 
 

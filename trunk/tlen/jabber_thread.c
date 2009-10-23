@@ -33,6 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tlen_muc.h"
 #include "tlen_voice.h"
 #include "tlen_avatar.h"
+#include "tlen_presence.h"
+#include "tlen_picture.h"
 #include <io.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -45,7 +47,6 @@ static void JabberProcessStreamOpening(XmlNode *node, ThreadData *info);
 static void JabberProcessStreamClosing(XmlNode *node, ThreadData *info);
 static void JabberProcessProtocol(XmlNode *node, ThreadData *info);
 static void JabberProcessMessage(XmlNode *node, ThreadData *info);
-static void JabberProcessPresence(XmlNode *node, ThreadData *info);
 static void JabberProcessIq(XmlNode *node, ThreadData *info);
 static void TlenProcessW(XmlNode *node, ThreadData *info);
 static void TlenProcessM(XmlNode *node, ThreadData *info);
@@ -316,7 +317,7 @@ void __cdecl JabberServerThread(ThreadData *info)
 				if (info->useAES) {
 					recvResult = JabberWsRecvAES(info->proto, buffer+datalen, jabberNetworkBufferSize-datalen, &info->aes_in_context, info->aes_in_iv);
 				} else {
-					recvResult = JabberWsRecv(info->proto, buffer+datalen, jabberNetworkBufferSize-datalen);
+					recvResult = JabberWsRecv(info->proto, info->s, buffer+datalen, jabberNetworkBufferSize-datalen);
 				}
 
 				if (recvResult <= 0)
@@ -460,8 +461,7 @@ static void JabberProcessStreamOpening(XmlNode *node, ThreadData *info)
 		memset(&info->aes_out_context, 0, sizeof (aes_context));
 		memset(&aes_mpi, 0, sizeof (mpi));
 		mpi_read_string(&aes_mpi, 16, k3);
-		slen = 16;
-		mpi_write_binary(&aes_mpi, info->aes_in_iv, &slen);
+		mpi_write_binary(&aes_mpi, info->aes_in_iv, 16);
 		for (i = 0; i < 16; i++) {
 			info->aes_out_iv[i] = rand();
 			aes_key[i] = rand();
@@ -470,8 +470,8 @@ static void JabberProcessStreamOpening(XmlNode *node, ThreadData *info)
 		mpi_read_binary(&aes_mpi, info->aes_out_iv, 16);
 		slen = 40;
 		mpi_write_string(&aes_mpi, 16, aes_iv_str, &slen);
-		aes_set_key(&info->aes_in_context, aes_key, 128);
-		aes_set_key(&info->aes_out_context, aes_key, 128);
+		aes_setkey_dec(&info->aes_in_context, aes_key, 128);
+		aes_setkey_enc(&info->aes_out_context, aes_key, 128);
 		memset(&aes_mpi, 0, sizeof (mpi));
 		mpi_read_binary(&aes_mpi, aes_key, 16);
 		memset(&k1_mpi, 0, sizeof (mpi));
@@ -501,7 +501,7 @@ static void JabberProcessProtocol(XmlNode *node, ThreadData *info)
 	if (!strcmp(node->name, "message"))
 		JabberProcessMessage(node, info);
 	else if (!strcmp(node->name, "presence"))
-		JabberProcessPresence(node, info);
+		TlenProcessPresence(node, info->proto);
 	else if (!strcmp(node->name, "iq"))
 		JabberProcessIq(node, info);
 	else if (!strcmp(node->name, "f"))
@@ -633,31 +633,7 @@ static void JabberProcessMessage(XmlNode *node, ThreadData *info)
 			if (isChatRoomJid && type!=NULL && !strcmp(type, "groupchat")) {
 				//JabberGroupchatProcessMessage(node, userdata);
 			} else if (type!=NULL && !strcmp(type, "pic")) {
-				//1.  <message type='pic' to='piastucki@tlen.pl' crc='3baccc1' idt='7709' size='1434'/>
-				//2.  <message to='the_leech7@tlen.pl' from='ps' type='pic' pid='1014' st='CtIO' rt='nWGa' idt='7709'/>
-				char *crc, *crc_c, *idt, *size, *rt, *pid, *st;
-				idt = JabberXmlGetAttrValue(node, "idt");
-				size = JabberXmlGetAttrValue(node, "size");
-				pid = JabberXmlGetAttrValue(node, "pid");
-				crc_c = JabberXmlGetAttrValue(node, "crc_c");
-				crc = JabberXmlGetAttrValue(node, "crc");
-				rt = JabberXmlGetAttrValue(node, "rt");
-				st = JabberXmlGetAttrValue(node, "st");
-				if (strcmp(from, "ps")) {
-					if (pid == NULL && crc != NULL) {
-						JabberSend(info->proto, "<message type='pic' to='%s' crc_c='n' idt='%s'/>", from, idt);
-					} else if (crc_c != NULL) {
-						/* crc_c = f, if the picure has been already received */
-						/* crc_c = n, if the picture should be transferred */
-						if (!strcmp(crc, "n")) {
-
-						}
-					} else if (rt != NULL) {
-						// retrieve the picture here
-					}
-				} else {
-					//from ps
-				}
+                TlenProcessPic(node, info->proto);
 			} else if (type!=NULL && !strcmp(type, "iq")) {
 				XmlNode *iqNode;
 				// Jabber-compatible iq
@@ -795,154 +771,6 @@ static void JabberProcessMessage(XmlNode *node, ThreadData *info)
 								}
 							}
 						}
-					}
-				}
-			}
-		}
-	}
-}
-
-static void JabberProcessPresence(XmlNode *node, ThreadData *info)
-{
-	HANDLE hContact;
-	XmlNode *showNode, *statusNode;
-	JABBER_LIST_ITEM *item;
-	char *from, *type, *nick, *show;
-	int status, laststatus = ID_STATUS_OFFLINE;
-	char *p;
-
-	if (!node || !node->name || strcmp(node->name, "presence")) return;
-
-	if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
-		if (JabberListExist(info->proto, LIST_CHATROOM, from)); //JabberGroupchatProcessPresence(node, userdata);
-
-		else {
-			type = JabberXmlGetAttrValue(node, "type");
-			item = JabberListGetItemPtr(info->proto, LIST_ROSTER, from);
-			if (item != NULL) {
-				if (info->proto->tlenOptions.enableAvatars) {
-					TlenProcessPresenceAvatar(info->proto, node, item);
-				}
-			}
-			if (type==NULL || (!strcmp(type, "available"))) {
-				if ((nick=JabberLocalNickFromJID(from)) != NULL) {
-					if ((hContact=JabberHContactFromJID(info->proto, from)) == NULL)
-						hContact = JabberDBCreateContact(info->proto, from, nick, FALSE);
-					if (!JabberListExist(info->proto, LIST_ROSTER, from)) {
-						JabberLog(info->proto, "Receive presence online from %s (who is not in my roster)", from);
-						JabberListAdd(info->proto, LIST_ROSTER, from);
-					}
-					status = ID_STATUS_ONLINE;
-					if ((showNode=JabberXmlGetChild(node, "show")) != NULL) {
-						if ((show=showNode->text) != NULL) {
-							if (!strcmp(show, "away")) status = ID_STATUS_AWAY;
-							else if (!strcmp(show, "xa")) status = ID_STATUS_NA;
-							else if (!strcmp(show, "dnd")) status = ID_STATUS_DND;
-							else if (!strcmp(show, "chat")) status = ID_STATUS_FREECHAT;
-							else if (!strcmp(show, "unavailable")) {
-								// Always show invisible (on old Tlen client) as invisible (not offline)
-								status = ID_STATUS_OFFLINE;
-							}
-						}
-					}
-
-					statusNode = JabberXmlGetChild(node, "status");
-					if (statusNode)
-						p = JabberTextDecode(statusNode->text);
-					else
-						p = NULL;
-					JabberListAddResource(info->proto, LIST_ROSTER, from, status, statusNode?p:NULL);
-					if (p) {
-						DBWriteContactSettingString(hContact, "CList", "StatusMsg", p);
-						mir_free(p);
-					} else {
-						DBDeleteContactSetting(hContact, "CList", "StatusMsg");
-					}
-					// Determine status to show for the contact and request version information
-					if (item != NULL) {
-						laststatus = item->status;
-						item->status = status;
-					}
-					if (strchr(from, '@')!=NULL || DBGetContactSettingByte(NULL, info->proto->iface.m_szModuleName, "ShowTransport", TRUE)==TRUE) {
-						if (DBGetContactSettingWord(hContact, info->proto->iface.m_szModuleName, "Status", ID_STATUS_OFFLINE) != status)
-							DBWriteContactSettingWord(hContact, info->proto->iface.m_szModuleName, "Status", (WORD) status);
-					}
-					if (item != NULL) {
-						if (!item->infoRequested) {
-							int iqId = JabberSerialNext(info->proto);
-							item->infoRequested = TRUE;
-							JabberSend( info->proto, "<iq type='get' id='"JABBER_IQID"%d'><query xmlns='jabber:iq:info' to='%s'></query></iq>", iqId, from);
-						}
-						if (info->proto->tlenOptions.enableVersion && !item->versionRequested) {
-							item->versionRequested = TRUE;
-							if (info->proto->iface.m_iStatus != ID_STATUS_INVISIBLE) {
-								JabberSend( info->proto, "<message to='%s' type='iq'><iq type='get'><query xmlns='jabber:iq:version'/></iq></message>", from );
-							}
-						}
-					}
-					JabberLog(info->proto, "%s (%s) online, set contact status to %d", nick, from, status);
-					mir_free(nick);
-				}
-			}
-			else if (!strcmp(type, "unavailable")) {
-				if (!JabberListExist(info->proto, LIST_ROSTER, from)) {
-					JabberLog(info->proto, "Receive presence offline from %s (who is not in my roster)", from);
-					JabberListAdd(info->proto, LIST_ROSTER, from);
-				}
-				else {
-					JabberListRemoveResource(info->proto, LIST_ROSTER, from);
-				}
-				status = ID_STATUS_OFFLINE;
-				statusNode = JabberXmlGetChild(node, "status");
-				if (statusNode) {
-					if (info->proto->tlenOptions.offlineAsInvisible) {
-						status = ID_STATUS_INVISIBLE;
-					}
-					p = JabberTextDecode(statusNode->text);
-					JabberListAddResource(info->proto, LIST_ROSTER, from, status, p);
-					if ((hContact=JabberHContactFromJID(info->proto, from)) != NULL) {
-						if (p) {
-							DBWriteContactSettingString(hContact, "CList", "StatusMsg", p);
-						} else {
-							DBDeleteContactSetting(hContact, "CList", "StatusMsg");
-						}
-					}
-					if (p) mir_free(p);
-				}
-				if ((item=JabberListGetItemPtr(info->proto, LIST_ROSTER, from)) != NULL) {
-					// Determine status to show for the contact based on the remaining resources
-					item->status = status;
-					item->versionRequested = FALSE;
-					item->infoRequested = FALSE;
-				}
-				if ((hContact=JabberHContactFromJID(info->proto, from)) != NULL) {
-					if (strchr(from, '@')!=NULL || DBGetContactSettingByte(NULL, info->proto->iface.m_szModuleName, "ShowTransport", TRUE)==TRUE) {
-						if (DBGetContactSettingWord(hContact, info->proto->iface.m_szModuleName, "Status", ID_STATUS_OFFLINE) != status)
-							DBWriteContactSettingWord(hContact, info->proto->iface.m_szModuleName, "Status", (WORD) status);
-					}
-					if (item != NULL && item->isTyping) {
-						item->isTyping = FALSE;
-						CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
-					}
-					JabberLog(info->proto, "%s offline, set contact status to %d", from, status);
-				}
-			}
-			else if (!strcmp(type, "subscribe")) {
-				if (strchr(from, '@') == NULL) {
-					// automatically send authorization allowed to agent/transport
-					JabberSend(info->proto, "<presence to='%s' type='subscribed'/>", from);
-				}
-				else if ((nick=JabberNickFromJID(from)) != NULL) {
-					JabberLog(info->proto, "%s (%s) requests authorization", nick, from);
-					JabberDBAddAuthRequest(info->proto, from, nick);
-					mir_free(nick);
-				}
-			}
-			else if (!strcmp(type, "subscribed")) {
-				if ((item=JabberListGetItemPtr(info->proto, LIST_ROSTER, from)) != NULL) {
-					if (item->subscription == SUB_FROM) item->subscription = SUB_BOTH;
-					else if (item->subscription == SUB_NONE) {
-						item->subscription = SUB_TO;
 					}
 				}
 			}

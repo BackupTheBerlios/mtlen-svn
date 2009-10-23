@@ -80,14 +80,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <m_avatars.h>
 
 #include "jabber_xml.h"
-#include "crypto/aes.h"
-#include "crypto/bignum.h"
+#include "crypto/polarssl/aes.h"
+#include "crypto/polarssl/bignum.h"
 
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,8,0,2)
-#define TLEN_VERSION_STRING  "1.8.0.2"
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(1,9,0,0)
+#define TLEN_VERSION_STRING  "1.9.0.0"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "mim_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"
@@ -220,6 +220,7 @@ typedef struct {
     HANDLE hMenuContactVoice;
     HANDLE hMenuContactGrantAuth;
     HANDLE hMenuContactRequestAuth;
+    HANDLE hMenuPicture;
 
     HANDLE* hServices;
     unsigned serviceNum;
@@ -365,8 +366,8 @@ void __cdecl JabberServerThread(ThreadData *info);
 BOOL JabberWsInit(TlenProtocol *proto);
 void JabberWsUninit(TlenProtocol *proto);
 JABBER_SOCKET JabberWsConnect(TlenProtocol *proto, char *host, WORD port);
-int JabberWsSend(TlenProtocol *proto, char *data, int datalen);
-int JabberWsRecv(TlenProtocol *proto, char *data, long datalen);
+int JabberWsSend(TlenProtocol *proto, JABBER_SOCKET s, char *data, int datalen);
+int JabberWsRecv(TlenProtocol *proto, JABBER_SOCKET s, char *data, long datalen);
 int JabberWsSendAES(TlenProtocol *proto, char *data, int datalen, aes_context *aes_ctx, unsigned char *aes_iv);
 int JabberWsRecvAES(TlenProtocol *proto, char *data, long datalen, aes_context *aes_ctx, unsigned char *aes_iv);
 // jabber_util.c

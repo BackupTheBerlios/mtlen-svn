@@ -158,7 +158,7 @@ int JabberSend(TlenProtocol *proto, const char *fmt, ...)
         if (proto->threadData->useAES) {
             result = JabberWsSendAES(proto, str, size, &proto->threadData->aes_out_context, proto->threadData->aes_out_iv);
         } else {
-            result = JabberWsSend(proto, str, size);
+            result = JabberWsSend(proto, proto->threadData->s, str, size);
         }
     }
 	LeaveCriticalSection(&proto->csSend);
@@ -240,9 +240,8 @@ char *JabberLocalNickFromJID(const char *jid)
 char *JabberSha1(char *str)
 {
 	mir_sha1_ctx sha;
-	mir_sha1_byte_t digest[20];
+    DWORD digest[5];
 	char* result;
-	int i;
 
 	if ( str == NULL )
 		return NULL;
@@ -252,8 +251,7 @@ char *JabberSha1(char *str)
 	mir_sha1_finish( &sha, digest );
 	if ((result=(char *)mir_alloc(41)) == NULL)
 		return NULL;
-	for (i=0; i<20; i++)
-		sprintf(result+(i<<1), "%02x", digest[i]);
+	sprintf(result, "%08x%08x%08x%08x%08x", (int)htonl(digest[0]), (int)htonl(digest[1]), (int)htonl(digest[2]), (int)htonl(digest[3]), (int)htonl(digest[4]));
 	return result;
 }
 

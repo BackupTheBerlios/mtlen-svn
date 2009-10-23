@@ -1,28 +1,57 @@
 /**
- * \file bn_asm.h
+ * \file bn_mul.h
  *
+ *  Based on XySSL: Copyright (C) 2006-2008  Christophe Devine
+ *
+ *  Copyright (C) 2009  Paul Bakker <polarssl_maintainer at polarssl dot org>
+ *
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *  
+ *    * Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *    * Neither the names of PolarSSL or XySSL nor the names of its contributors
+ *      may be used to endorse or promote products derived from this software
+ *      without specific prior written permission.
+ *  
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ *  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+/*
  *      Multiply source vector [s] with b, add result
  *       to destination vector [d] and set carry c.
  *
  *      Currently supports:
  *
- *         . IA-32 (386+)
- *         . IA-32 (SSE2)
- *         . AMD64 / EM64T
- *         . Motorola 68000
- *         . PowerPC, 32-bit
- *         . PowerPC, 64-bit
- *         . SPARC v8
- *         . MicroBlaze
- *         . TriCore
- *         . ARM v3+
- *         . Alpha
- *         . MIPS32
- *         . C, generic
- *         . C, longlong
+ *         . IA-32 (386+)         . AMD64 / EM64T
+ *         . IA-32 (SSE2)         . Motorola 68000
+ *         . PowerPC, 32-bit      . MicroBlaze
+ *         . PowerPC, 64-bit      . TriCore
+ *         . SPARC v8             . ARM v3+
+ *         . Alpha                . MIPS32
+ *         . C, longlong          . C, generic
  */
-#ifndef _BN_ASM_H
-#define _BN_ASM_H
+#ifndef POLARSSL_BN_MUL_H
+#define POLARSSL_BN_MUL_H
+
+#include "config.h"
+
+#if defined(POLARSSL_HAVE_ASM)
 
 #if defined(__GNUC__)
 #if defined(__i386__)
@@ -44,14 +73,7 @@
     asm( "movl   %edx,   %ecx   " );            \
     asm( "stosl                 " );
 
-#define MULADDC_STOP                            \
-    asm( "movl   %%ecx, %0      " : "=m" (c));  \
-    asm( "movl   %%edi, %0      " : "=m" (d));  \
-    asm( "movl   %%esi, %0      " : "=m" (s));  \
-    asm( "movl   %0, %%ebx      " :: "m" (t) :  \
-    "eax", "ecx", "edx", "esi", "edi" );
-
-#if defined(HAVE_SSE2)
+#if defined(POLARSSL_HAVE_SSE2)
 
 #define MULADDC_HUIT                            \
     asm( "movd     %ecx,     %mm1     " );      \
@@ -115,6 +137,23 @@
     asm( "addl     $32,      %esi     " );      \
     asm( "psrlq    $32,      %mm1     " );      \
     asm( "movd     %mm1,     %ecx     " );
+
+#define MULADDC_STOP                            \
+    asm( "emms                        " );      \
+    asm( "movl   %0, %%ebx      " :: "m" (t));  \
+    asm( "movl   %%ecx, %0      " : "=m" (c));  \
+    asm( "movl   %%edi, %0      " : "=m" (d));  \
+    asm( "movl   %%esi, %0      " : "=m" (s) :: \
+    "eax", "ecx", "edx", "esi", "edi" );
+
+#else
+
+#define MULADDC_STOP                            \
+    asm( "movl   %0, %%ebx      " :: "m" (t));  \
+    asm( "movl   %%ecx, %0      " : "=m" (c));  \
+    asm( "movl   %%edi, %0      " : "=m" (d));  \
+    asm( "movl   %%esi, %0      " : "=m" (s) :: \
+    "eax", "ecx", "edx", "esi", "edi" );
 
 #endif /* SSE2 */
 #endif /* i386 */
@@ -220,6 +259,38 @@
 #if defined(__powerpc__)   || defined(__ppc__)
 #if defined(__powerpc64__) || defined(__ppc64__)
 
+#if defined(__MACH__) && defined(__APPLE__)
+
+#define MULADDC_INIT                            \
+    asm( "ld     r3, %0         " :: "m" (s));  \
+    asm( "ld     r4, %0         " :: "m" (d));  \
+    asm( "ld     r5, %0         " :: "m" (c));  \
+    asm( "ld     r6, %0         " :: "m" (b));  \
+    asm( "addi   r3, r3, -8     " );            \
+    asm( "addi   r4, r4, -8     " );            \
+    asm( "addic  r5, r5,  0     " );
+
+#define MULADDC_CORE                            \
+    asm( "ldu    r7, 8(r3)      " );            \
+    asm( "mulld  r8, r7, r6     " );            \
+    asm( "mulhdu r9, r7, r6     " );            \
+    asm( "adde   r8, r8, r5     " );            \
+    asm( "ld     r7, 8(r4)      " );            \
+    asm( "addze  r5, r9         " );            \
+    asm( "addc   r8, r8, r7     " );            \
+    asm( "stdu   r8, 8(r4)      " );
+
+#define MULADDC_STOP                            \
+    asm( "addze  r5, r5         " );            \
+    asm( "addi   r4, r4, 8      " );            \
+    asm( "addi   r3, r3, 8      " );            \
+    asm( "std    r5, %0         " : "=m" (c));  \
+    asm( "std    r4, %0         " : "=m" (d));  \
+    asm( "std    r3, %0         " : "=m" (s) :: \
+    "r3", "r4", "r5", "r6", "r7", "r8", "r9" );
+
+#else
+
 #define MULADDC_INIT                            \
     asm( "ld     %%r3, %0       " :: "m" (s));  \
     asm( "ld     %%r4, %0       " :: "m" (d));  \
@@ -246,6 +317,40 @@
     asm( "std    %%r5, %0       " : "=m" (c));  \
     asm( "std    %%r4, %0       " : "=m" (d));  \
     asm( "std    %%r3, %0       " : "=m" (s) :: \
+    "r3", "r4", "r5", "r6", "r7", "r8", "r9" );
+
+#endif
+
+#else /* PPC32 */
+
+#if defined(__MACH__) && defined(__APPLE__)
+
+#define MULADDC_INIT                            \
+    asm( "lwz    r3, %0         " :: "m" (s));  \
+    asm( "lwz    r4, %0         " :: "m" (d));  \
+    asm( "lwz    r5, %0         " :: "m" (c));  \
+    asm( "lwz    r6, %0         " :: "m" (b));  \
+    asm( "addi   r3, r3, -4     " );            \
+    asm( "addi   r4, r4, -4     " );            \
+    asm( "addic  r5, r5,  0     " );
+
+#define MULADDC_CORE                            \
+    asm( "lwzu   r7, 4(r3)      " );            \
+    asm( "mullw  r8, r7, r6     " );            \
+    asm( "mulhwu r9, r7, r6     " );            \
+    asm( "adde   r8, r8, r5     " );            \
+    asm( "lwz    r7, 4(r4)      " );            \
+    asm( "addze  r5, r9         " );            \
+    asm( "addc   r8, r8, r7     " );            \
+    asm( "stwu   r8, 4(r4)      " );
+
+#define MULADDC_STOP                            \
+    asm( "addze  r5, r5         " );            \
+    asm( "addi   r4, r4, 4      " );            \
+    asm( "addi   r3, r3, 4      " );            \
+    asm( "stw    r5, %0         " : "=m" (c));  \
+    asm( "stw    r4, %0         " : "=m" (d));  \
+    asm( "stw    r3, %0         " : "=m" (s) :: \
     "r3", "r4", "r5", "r6", "r7", "r8", "r9" );
 
 #else
@@ -277,6 +382,8 @@
     asm( "stw    %%r4, %0       " : "=m" (d));  \
     asm( "stw    %%r3, %0       " : "=m" (s) :: \
     "r3", "r4", "r5", "r6", "r7", "r8", "r9" );
+
+#endif
 
 #endif /* PPC32 */
 #endif /* PPC64 */
@@ -489,12 +596,7 @@
     __asm   mov     ecx, edx                    \
     __asm   stosd
 
-#define MULADDC_STOP                            \
-    __asm   mov     c, ecx                      \
-    __asm   mov     d, edi                      \
-    __asm   mov     s, esi                      \
-
-#if defined HAVE_SSE2
+#if defined(POLARSSL_HAVE_SSE2)
 
 #define EMIT __asm _emit
 
@@ -561,11 +663,26 @@
     EMIT 0x0F  EMIT 0x73  EMIT 0xD1  EMIT 0x20  \
     EMIT 0x0F  EMIT 0x7E  EMIT 0xC9
 
+#define MULADDC_STOP                            \
+    EMIT 0x0F  EMIT 0x77                        \
+    __asm   mov     c, ecx                      \
+    __asm   mov     d, edi                      \
+    __asm   mov     s, esi                      \
+
+#else
+
+#define MULADDC_STOP                            \
+    __asm   mov     c, ecx                      \
+    __asm   mov     d, edi                      \
+    __asm   mov     s, esi                      \
+
 #endif /* SSE2 */
 #endif /* MSVC */
 
+#endif /* POLARSSL_HAVE_ASM */
+
 #if !defined(MULADDC_CORE)
-#if defined(HAVE_LONGLONG)
+#if defined(POLARSSL_HAVE_LONGLONG)
 
 #define MULADDC_INIT                    \
 {                                       \
@@ -611,4 +728,4 @@
 #endif /* C (generic)  */
 #endif /* C (longlong) */
 
-#endif /* bn_asm.h */
+#endif /* bn_mul.h */
