@@ -92,8 +92,9 @@ static void TlenPsGetThread(void *ptr) {
     TLENPSREQUESTTHREADDATA *data = (TLENPSREQUESTTHREADDATA *)ptr;
     TlenProtocol *proto = data->proto;
     JABBER_LIST_ITEM *item = data->item;
-    snprintf(path, sizeof(path), "%s.%s", item->ft->files[0], "jpg");
-    FILE *fp = fopen( path, "wb" );
+	FILE *fp;
+    _snprintf(path, sizeof(path), "%s.%s", item->ft->files[0], "jpg");
+    fp = fopen( path, "wb" );
     if (fp) {
         JABBER_SOCKET socket = JabberWsConnect(proto, "ps.tlen.pl", 443);
         if (socket != NULL) {
@@ -220,8 +221,8 @@ BOOL SendPicture(TlenProtocol *proto, HANDLE hContact) {
         char *jid = dbv.pszVal;
         char szFilter[512];
         char *szFileName = (char*) mir_alloc(_MAX_PATH);
-        CallService( MS_UTILS_GETBITMAPFILTERSTRINGS, ( WPARAM ) sizeof( szFilter ), ( LPARAM )szFilter );
         OPENFILENAMEA ofn = {0};
+        CallService( MS_UTILS_GETBITMAPFILTERSTRINGS, ( WPARAM ) sizeof( szFilter ), ( LPARAM )szFilter );
         ofn.lStructSize = OPENFILENAME_SIZE_VERSION_400;
         ofn.hwndOwner = NULL;
         ofn.lpstrFilter = szFilter;

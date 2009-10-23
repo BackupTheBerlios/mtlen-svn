@@ -9,7 +9,7 @@ UPX = upx -9 -q --compress-icons=0
 SRC = codec/gsm_preprocess.c codec/gsm_long.c codec/gsm_short.c codec/gsm_rpe.c codec/gsm_lpc.c codec/gsm_codec.c crypto/aes.c crypto/bignum.c crypto/padlock.c tlen_p2p_new.c tlen_p2p_old.c tlen_file.c tlen_voice.c tlen_muc.c jabber_iq.c jabber_iqid.c jabber_list.c jabber_misc.c jabber_opt.c jabber_svc.c jabber_thread.c tlen_userinfo.c jabber_util.c jabber_ws.c jabber_xml.c tlen.c tlen_advsearch.c tlen_avatar.c tlen_presence.c tlen_picture.c
 RES  = tlen.res
 OBJ = $(SRC:.c=.o) $(RES)
-BIN  = /home/ppiastucki/Desktop/miranda/miranda/Plugins/tlen.dll
+BIN  = /home/piotr/Desktop/miranda/Plugins/tlen.dll
 INCS =  -I"../../include"
 CFLAGS = $(INCS) -DBUILDING_DLL=1 -DUNICODE -fno-exceptions -fexpensive-optimizations -O3 -Os -Wno-error -Wall
 # -save-temps

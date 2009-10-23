@@ -265,9 +265,7 @@ int TlenContactMenuHandleSendPicture(void *ptr, WPARAM wParam, LPARAM lParam)
 
 int TlenMenuHandleInbox(void *ptr, WPARAM wParam, LPARAM lParam)
 {
-	BOOL loggedIn = FALSE;
 	char szFileName[ MAX_PATH ];
-	/*
 	DBVARIANT dbv;
 	NETLIBHTTPREQUEST req;
 	NETLIBHTTPHEADER headers[2];
@@ -276,22 +274,23 @@ int TlenMenuHandleInbox(void *ptr, WPARAM wParam, LPARAM lParam)
 	char form[1024];
 	char cookie[1024];
     TlenProtocol *proto = (TlenProtocol *)ptr;
+	if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
+		login = mir_strdup(dbv.pszVal);
+		DBFreeVariant(&dbv);
+	}
     if (DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", TRUE) == TRUE) {
-		if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
-			login = mir_strdup(dbv.pszVal);
-			DBFreeVariant(&dbv);
-		}
 		if (!DBGetContactSetting(NULL, proto->iface.m_szModuleName, "Password", &dbv)) {
 			CallService(MS_DB_CRYPT_DECODESTRING, strlen(dbv.pszVal)+1, (LPARAM) dbv.pszVal);
 			password = mir_strdup(dbv.pszVal);
 			DBFreeVariant(&dbv);
 		}
+	} else if (proto->threadData != NULL && strlen(proto->threadData->password) > 0) {
+		password = mir_strdup(proto->threadData->password);
 	}
 
+	ZeroMemory(&cookie, sizeof(cookie));
 	if (login != NULL && password != NULL) {
 		mir_snprintf( form, SIZEOF(form), "username=%s&password=%s", login, password);
-
-		ZeroMemory(&cookie, sizeof(cookie));
 		headers[0].szName = "Content-Type";
 		headers[0].szValue = "application/x-www-form-urlencoded";
 		ZeroMemory(&req, sizeof(req));
@@ -309,8 +308,14 @@ int TlenMenuHandleInbox(void *ptr, WPARAM wParam, LPARAM lParam)
 				int i;
 				for (i=0; i<resp->headersCount; i++ ) {
 					if (strcmpi(resp->headers[i].szName, "Set-Cookie")==0) {
-						if (strstr(resp->headers[i].szValue, "ssid")!=NULL) {
-							strcpy(cookie, resp->headers[i].szValue);
+						char *start = strstr(resp->headers[i].szValue, "ssid=");
+						if (start != NULL) {
+							char *end = strstr(resp->headers[i].szValue, ";");
+							start = start + 5;
+							if (end == NULL) {
+								end = resp->headers[i].szValue + strlen(resp->headers[i].szValue);
+							}
+							strncpy(cookie, start, (end - start));
 							break;
 						}
 					}
@@ -318,29 +323,10 @@ int TlenMenuHandleInbox(void *ptr, WPARAM wParam, LPARAM lParam)
 			}
 			CallService(MS_NETLIB_FREEHTTPREQUESTSTRUCT, 0, (LPARAM)resp);
 		}
-		if (strlen(cookie) != 0) {
-			FILE *out;
-			int tPathLen;
-			CallService( MS_DB_GETPROFILEPATH, MAX_PATH, (LPARAM) szFileName );
-			tPathLen = strlen( szFileName );
-			tPathLen += mir_snprintf( szFileName + tPathLen, MAX_PATH - tPathLen, "\\%s\\", proto->iface.m_szProtoName);
-			CreateDirectoryA( szFileName, NULL );
-			mir_snprintf( szFileName + tPathLen, MAX_PATH - tPathLen, "openinbox.html" );
-			out = fopen( szFileName, "wt" );
-			if ( out != NULL ) {
-				fprintf(out, "<html><head><script type=\"text/javascript\">function openInbox() {} </script></head><body onload=\"openInbox();></body></html>", cookie);
-				fclose( out );
-				loggedIn = TRUE;
-			}
-		}
 	}
 	mir_free(login);
 	mir_free(password);
-	*/
-	if (!loggedIn) {
-		strcpy(szFileName, "http://poczta.o2.pl/");
-	}
-
+	_snprintf(szFileName, sizeof(szFileName), "http://poczta.o2.pl/login.html?sid=%s", cookie);
 	CallService(MS_UTILS_OPENURL, (WPARAM) 1, (LPARAM) szFileName);
 	return 0;
 }

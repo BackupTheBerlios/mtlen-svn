@@ -903,6 +903,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\crypto\padlock.c"
+				>
+			</File>
+			<File
 				RelativePath=".\tlen.c"
 				>
 			</File>
@@ -935,6 +939,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\tlen_picture.c"
+				>
+			</File>
+			<File
+				RelativePath=".\tlen_presence.c"
+				>
+			</File>
+			<File
 				RelativePath=".\tlen_userinfo.c"
 				>
 			</File>
@@ -948,15 +960,19 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath=".\crypto\aes.h"
+				RelativePath=".\crypto\polarssl\aes.h"
 				>
 			</File>
 			<File
-				RelativePath=".\crypto\bignum.h"
+				RelativePath=".\crypto\polarssl\bignum.h"
 				>
 			</File>
 			<File
-				RelativePath=".\crypto\bn_asm.h"
+				RelativePath=".\crypto\polarssl\bn_mul.h"
+				>
+			</File>
+			<File
+				RelativePath=".\crypto\polarssl\config.h"
 				>
 			</File>
 			<File
@@ -984,6 +1000,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\crypto\polarssl\padlock.h"
+				>
+			</File>
+			<File
 				RelativePath=".\resource.h"
 				>
 			</File>
@@ -1005,6 +1025,14 @@
 			</File>
 			<File
 				RelativePath=".\tlen_p2p_old.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tlen_picture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tlen_presence.h"
 				>
 			</File>
 			<File
