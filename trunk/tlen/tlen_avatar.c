@@ -38,7 +38,7 @@ void TlenGetAvatarFileName(TlenProtocol *proto, JABBER_LIST_ITEM *item, char* ps
 	char* szFileType;
 	char *tmpPath = Utils_ReplaceVars( "%miranda_avatarcache%" );
 	tPathLen = mir_snprintf( pszDest, cbLen, "%s\\Tlen", tmpPath );
-    	mir_free(tmpPath);
+   	mir_free(tmpPath);
 	dwAttributes = GetFileAttributesA( pszDest );
 	if ( dwAttributes == 0xffffffff || ( dwAttributes & FILE_ATTRIBUTE_DIRECTORY ) == 0 ) {
 		CallService( MS_UTILS_CREATEDIRTREE, 0, ( LPARAM )pszDest );

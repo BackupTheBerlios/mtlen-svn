@@ -504,32 +504,6 @@ LBL_Exit:
 }
 
 /*
-char *JabberGetVersionText()
-{
-	char filename[MAX_PATH], *fileVersion, *res;
-	DWORD unused;
-	DWORD verInfoSize, blockSize;
-	PVOID pVerInfo;
-
-	GetModuleFileName(hInst, filename, sizeof(filename));
-	verInfoSize = GetFileVersionInfoSize(filename, &unused);
-	if ((pVerInfo=mir_alloc(verInfoSize)) != NULL) {
-		GetFileVersionInfo(filename, 0, verInfoSize, pVerInfo);
-		VerQueryValue(pVerInfo, "\\StringFileInfo\\041504e3\\FileVersion", (PVOID *)&fileVersion, (UINT *)&blockSize);
-		if (strstr(fileVersion, "cvs")) {
-			res = (char *) mir_alloc(strlen(fileVersion) + strlen(__DATE__) + 2);
-			sprintf(res, "%s %s", fileVersion, __DATE__);
-		}
-		else {
-			res = mir_strdup(fileVersion);
-		}
-		mir_free(pVerInfo);
-		return res;
-	}
-	return NULL;
-}
-*/
-/*
  *	Apply Polish Daylight Saving Time rules to get "DST-unbiased" timestamp
  */
 
@@ -788,22 +762,6 @@ void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...)
 	}
 	va_end(vararg);
 }
-/*
-static char clientJID[3072];
-
-char *JabberGetClientJID(char *jid)
-{
-	char *p;
-
-	if (jid == NULL) return NULL;
-	strncpy(clientJID, jid, sizeof(clientJID));
-	clientJID[sizeof(clientJID)-1] = '\0';
-	if ((p=strchr(clientJID, '/')) == NULL) {
-		p = clientJID + strlen(clientJID);
-	}
-	return clientJID;
-}
-*/
 
 int JabberGetPictureType( const char* buf )
 {
@@ -811,6 +769,17 @@ int JabberGetPictureType( const char* buf )
 		if ( memcmp( buf, "GIF89", 5 ) == 0 )    return PA_FORMAT_GIF;
 		if ( memcmp( buf, "\x89PNG", 4 ) == 0 )  return PA_FORMAT_PNG;
 		if ( memcmp( buf, "BM", 2 ) == 0 )       return PA_FORMAT_BMP;
-		if ( memcmp( buf, "\xFF\xD8", 2 ) == 0 ) return PA_FORMAT_JPEG;	}
+		if ( memcmp( buf, "\xFF\xD8", 2 ) == 0 ) return PA_FORMAT_JPEG;
+    }
 	return PA_FORMAT_UNKNOWN;
+}
+
+void TlenLogMessage(TlenProtocol *proto, HANDLE hContact, DWORD flags, const char *message)
+{
+    DWORD size = strlen(message) + 2;
+    char *localMessage = (char *)mir_alloc(size);
+    strcpy(localMessage, message);
+    localMessage[size - 1] = '\0';
+    JabberDBAddEvent(proto, hContact, EVENTTYPE_MESSAGE, flags, message, size);
+    mir_free(localMessage);
 }

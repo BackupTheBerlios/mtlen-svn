@@ -133,14 +133,14 @@ void __cdecl JabberServerThread(ThreadData *info)
 	}
 
     info->proto->threadData = info;
-    
+
 	if (!DBGetContactSetting(NULL, info->proto->iface.m_szModuleName, "LoginName", &dbv)) {
 		strncpy(info->username, dbv.pszVal, sizeof(info->username));
 		info->username[sizeof(info->username)-1] = '\0';
 		_strlwr(info->username);
 		DBWriteContactSettingString(NULL, info->proto->iface.m_szModuleName, "LoginName", info->username);
 		DBFreeVariant(&dbv);
-        
+
 	} else {
 		JabberLog(info->proto, "Thread ended, login name is not configured");
         loginErr = LOGINERR_BADUSERID;
@@ -189,8 +189,8 @@ void __cdecl JabberServerThread(ThreadData *info)
                 loginErr = LOGINERR_BADUSERID;
             }
         }
-    }    
-	
+    }
+
     jabberNetworkBufferSize = 2048;
 	if ((buffer=(char *) mir_alloc(jabberNetworkBufferSize+1)) == NULL) {	// +1 is for '\0' when debug logging this buffer
 		JabberLog(info->proto, "Thread ended, network buffer cannot be allocated");
@@ -206,7 +206,7 @@ void __cdecl JabberServerThread(ThreadData *info)
 		mir_free(info);
 		return;
 	}
-    
+
 	_snprintf(jidStr, sizeof(jidStr), "%s@%s", info->username, info->server);
 	DBWriteContactSettingString(NULL, info->proto->iface.m_szModuleName, "jid", jidStr);
 
@@ -232,7 +232,7 @@ void __cdecl JabberServerThread(ThreadData *info)
 	}
 	info->avatarFormat = DBGetContactSettingDword(NULL, info->proto->iface.m_szModuleName, "AvatarFormat", PA_FORMAT_UNKNOWN);
 
-    
+
 	reconnectMaxTime = 10;
 	numRetry = 0;
 
@@ -303,7 +303,7 @@ void __cdecl JabberServerThread(ThreadData *info)
 
 			if (info->useEncryption) {
 				JabberSend(info->proto, "<s s='1' v='9' t='06000106'>");
-				
+
 			} else {
 				JabberSend(info->proto, "<s v='3'>");
 			}
@@ -438,7 +438,7 @@ static void JabberProcessStreamOpening(XmlNode *node, ThreadData *info)
 {
 	char *sid, *s;
 
-	if (node->name==NULL || strcmp(node->name, "s")) 
+	if (node->name==NULL || strcmp(node->name, "s"))
 		return;
 
 	if ((sid=JabberXmlGetAttrValue(node, "i")) != NULL) {
@@ -815,7 +815,7 @@ static void JabberProcessIq(XmlNode *node, ThreadData *info)
 	// MORE GENERAL ROUTINES, WHEN ID DOES NOT MATCH
 	/////////////////////////////////////////////////////////////////////////
 	// new p2p connections
-	} else if (xmlns != NULL && !strcmp(xmlns, "p2p")) { 
+	} else if (xmlns != NULL && !strcmp(xmlns, "p2p")) {
 		if (info->proto->tlenOptions.useNewP2P) {
 			TlenProcessP2P(node, info);
 		}
@@ -1106,19 +1106,7 @@ static void TlenProcessM(XmlNode *node, ThreadData *info)
 							NotifyEventHooks(info->proto->hTlenNudge,(WPARAM) hContact,0);
 						} else {
 							if (info->proto->tlenOptions.logAlerts) {
-								CCSDATA ccs;
-								PROTORECVEVENT recv;
-								char *localMessage = mir_strdup(Translate("An alert has been received."));
-								recv.flags = 0;
-								recv.timestamp = (DWORD) time(NULL);
-								recv.szMessage = localMessage;
-								recv.lParam = 0;
-								ccs.hContact = hContact;
-								ccs.wParam = 0;
-								ccs.szProtoService = PSR_MESSAGE;
-								ccs.lParam = (LPARAM) &recv;
-								CallService(MS_PROTO_CHAINRECV, 0, (LPARAM) &ccs);
-								mir_free(localMessage);
+							    TlenLogMessage(info->proto, hContact, 0, Translate("An alert has been received."));
 							}
 							SkinPlaySound("TlenAlertNotify");
 						}
@@ -1247,7 +1235,7 @@ static void TlenMailPopup(TlenProtocol *proto, char *title, char *emailInfo)
  * Incoming e-mail notification
  */
 static void TlenProcessN(XmlNode *node, ThreadData *info)
-{	
+{
 	char *f, *s;
 	char *str, *popupTitle, *popupText;
 	int strSize;

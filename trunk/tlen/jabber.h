@@ -397,6 +397,7 @@ char *JabberTextDecode(const char *str);
 char *JabberBase64Encode(const char *buffer, int bufferLen);
 char *JabberBase64Decode(const char *buffer, int *resultLen);
 int JabberGetPictureType(const char* buf);
+void TlenLogMessage(TlenProtocol *proto, HANDLE hContact, DWORD flags, const char *message);
 //char *JabberGetVersionText();
 time_t JabberIsoToUnixTime(char *stamp);
 time_t TlenTimeToUTC(time_t time);
@@ -405,6 +406,7 @@ void JabberSendPresence(TlenProtocol *proto,int status);
 void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 //char *JabberGetClientJID(char *jid);
 // jabber_misc.c
+void JabberDBAddEvent(TlenProtocol *proto, HANDLE hContact, int eventType, DWORD flags, PBYTE pBlob, DWORD cbBlob);
 void JabberDBAddAuthRequest(TlenProtocol *proto, char *jid, char *nick);
 HANDLE JabberDBCreateContact(TlenProtocol *proto, char *jid, char *nick, BOOL temporary);
 void JabberContactListCreateGroup(char *groupName);

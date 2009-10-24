@@ -24,11 +24,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jabber.h"
 #include "jabber_list.h"
 
+void JabberDBAddEvent(TlenProtocol *proto, HANDLE hContact, int eventType, DWORD flags, PBYTE pBlob, DWORD cbBlob)
+{
+	DBEVENTINFO dbei = {0};
+	dbei.cbSize = sizeof(DBEVENTINFO);
+	dbei.szModule = proto->iface.m_szModuleName;
+	dbei.timestamp = (DWORD) time(NULL);
+	dbei.flags = flags;
+	dbei.eventType = eventType;
+	dbei.cbBlob = cbBlob;
+	dbei.pBlob = pBlob;
+	CallService(MS_DB_EVENT_ADD, (WPARAM) hContact, (LPARAM) &dbei);
+}
 void JabberDBAddAuthRequest(TlenProtocol *proto, char *jid, char *nick)
 {
 	char *s;
-	DBEVENTINFO dbei = {0};
 	PBYTE pCurBlob;
+	DWORD cbBlob;
 	HANDLE hContact;
 
 	if ((hContact=JabberHContactFromJID(proto, jid)) == NULL) {
@@ -44,16 +56,11 @@ void JabberDBAddAuthRequest(TlenProtocol *proto, char *jid, char *nick)
 		DBDeleteContactSetting(hContact, proto->iface.m_szModuleName, "Hidden");
 	}
 	DBWriteContactSettingString(hContact, proto->iface.m_szModuleName, "Nick", nick);
-
+	JabberLog("auth request: %s, %s", jid, nick);
 	//blob is: uin(DWORD), hContact(HANDLE), nick(ASCIIZ), first(ASCIIZ), last(ASCIIZ), email(ASCIIZ), reason(ASCIIZ)
 	//blob is: 0(DWORD), hContact(HANDLE), nick(ASCIIZ), ""(ASCIIZ), ""(ASCIIZ), email(ASCIIZ), ""(ASCIIZ)
-	dbei.cbSize = sizeof(DBEVENTINFO);
-	dbei.szModule = proto->iface.m_szModuleName;
-	dbei.timestamp = (DWORD) time(NULL);
-	dbei.flags = 0;
-	dbei.eventType = EVENTTYPE_AUTHREQUEST;
-	dbei.cbBlob = sizeof(DWORD) + sizeof(HANDLE) + strlen(nick) + strlen(jid) + 5;
-	pCurBlob = dbei.pBlob = (PBYTE) mir_alloc(dbei.cbBlob);
+	cbBlob = sizeof(DWORD) + sizeof(HANDLE) + strlen(nick) + strlen(jid) + 5;
+	pCurBlob = (PBYTE) mir_alloc(cbBlob);
 	*((PDWORD) pCurBlob) = 0; pCurBlob += sizeof(DWORD);
 	*((PHANDLE) pCurBlob) = hContact; pCurBlob += sizeof(HANDLE);
 	strcpy((char *) pCurBlob, nick); pCurBlob += strlen(nick)+1;
@@ -61,8 +68,7 @@ void JabberDBAddAuthRequest(TlenProtocol *proto, char *jid, char *nick)
 	*pCurBlob = '\0'; pCurBlob++;		//lastName
 	strcpy((char *) pCurBlob, jid); pCurBlob += strlen(jid)+1;
 	*pCurBlob = '\0';					//reason
-
-	CallService(MS_DB_EVENT_ADD, (WPARAM) (HANDLE) NULL, (LPARAM) &dbei);
+    JabberDBAddEvent(proto, NULL, EVENTTYPE_AUTHREQUEST, 0, pCurBlob, cbBlob);
 }
 
 char *JabberJIDFromHContact(TlenProtocol *proto, HANDLE hContact)

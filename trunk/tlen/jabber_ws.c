@@ -114,7 +114,7 @@ int JabberWsSendAES(TlenProtocol *proto, char *data, int datalen, aes_context *a
 		}
 		if (len > 0) {
 			JabberLog(proto, "Sending %d bytes", len);
-			if ((sendlen=Netlib_Send(proto->threadData->s, aes_output, len, MSG_NODUMP))==SOCKET_ERROR || len!=sendlen) {
+			if ((sendlen=Netlib_Send(proto->threadData->s, (char *)aes_output, len, MSG_NODUMP))==SOCKET_ERROR || len!=sendlen) {
 				JabberLog(proto, "Netlib_Send() failed, error=%d", WSAGetLastError());
 				return FALSE;
 			}
