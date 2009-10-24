@@ -216,7 +216,6 @@ typedef struct {
     HANDLE hMenuChats;
     HANDLE hMenuInbox;
     HANDLE hMenuContactMUC;
-    HANDLE hMenuContactFile;
     HANDLE hMenuContactVoice;
     HANDLE hMenuContactGrantAuth;
     HANDLE hMenuContactRequestAuth;

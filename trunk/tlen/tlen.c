@@ -110,14 +110,15 @@ struct
 static iconList[] =
 {
 	{ _T("Protocol icon"),		"PROTO",		IDI_TLEN		},
-	{ _T("Mail"),					"MAIL",		IDI_MAIL		},
+	{ _T("Tlen inbox"),					"MAIL",		IDI_MAIL		},
 	{ _T("Group chats"),			"MUC",		IDI_MUC 		},
 	{ _T("Tlen chats"),			"CHATS",		IDI_CHATS		},
 	{ _T("Grant authorization"),	"GRANT",		IDI_GRANT		},
 	{ _T("Request authorization"),"REQUEST",		IDI_REQUEST	},
 	{ _T("Voice chat"),			"VOICE",		IDI_VOICE		},
 	{ _T("Microphone"),			"MICROPHONE",	IDI_MICROPHONE	},
-	{ _T("Speaker"),				"SPEAKER",		IDI_SPEAKER	}
+	{ _T("Speaker"),				"SPEAKER",		IDI_SPEAKER	},
+	{ _T("Send image"),				"IMAGE",		IDI_IMAGE	}
 };
 
 static HANDLE GetIconHandle(int iconId) {
@@ -207,6 +208,12 @@ static int TlenPrebuildContactMenu(void *ptr, WPARAM wParam, LPARAM lParam)
 					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
 				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactVoice, (LPARAM) &clmi);
 
+				if (item->status!=ID_STATUS_OFFLINE)
+					clmi.flags = CMIM_FLAGS;
+				else
+					clmi.flags = CMIM_FLAGS|CMIF_HIDDEN;
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuPicture, (LPARAM) &clmi);
+
 				DBFreeVariant(&dbv);
 				return 0;
 			}
@@ -218,10 +225,6 @@ static int TlenPrebuildContactMenu(void *ptr, WPARAM wParam, LPARAM lParam)
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactVoice, (LPARAM) &clmi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactRequestAuth, (LPARAM) &clmi);
 	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactGrantAuth, (LPARAM) &clmi);
-    if (proto->isOnline) {
-    	clmi.flags = CMIM_FLAGS|CMIF_NOTONLINE;
-    }
-    CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuContactFile, (LPARAM) &clmi);
 	return 0;
 }
 
@@ -428,6 +431,15 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.pszService = text;
 	proto->hMenuContactMUC = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
+	// "Send picture"
+	sprintf(text, "%s/SendPicture", proto->iface.m_szModuleName);
+	CreateServiceFunction_Ex(text, proto, TlenContactMenuHandleSendPicture);
+	mi.pszName = "Send picture";
+	mi.position = -2000019000;
+	mi.icolibItem = GetIconHandle(IDI_IMAGE);
+	mi.pszService = text;
+	proto->hMenuPicture = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+
 	// "Invite to voice chat"
 	sprintf(text, "%s/ContactMenuVoice", proto->iface.m_szModuleName);
 	CreateServiceFunction_Ex(text, proto, TlenVoiceContactMenuHandleVoice);
@@ -454,24 +466,6 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.icolibItem = GetIconHandle(IDI_GRANT);
 	mi.pszService = text;
 	proto->hMenuContactGrantAuth = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
-
-	// "Send picture"
-	sprintf(text, "%s/SendPicture", proto->iface.m_szModuleName);
-	CreateServiceFunction_Ex(text, proto, TlenContactMenuHandleSendPicture);
-	mi.pszName = "Send picture";
-//	clmi.flags = CMIM_FLAGS | CMIF_NOTOFFLINE;// | CMIF_GRAYED;
-	mi.position = -2000001002;
-	mi.icolibItem = GetIconHandle(IDI_GRANT);
-	mi.pszService = text;
-	proto->hMenuPicture = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
-
-	mi.position = -2000020000;
-	mi.flags = CMIF_NOTONLINE;
-	mi.hIcon = LoadSkinnedIcon(SKINICON_EVENT_FILE);
-	mi.pszName = "File";
-	mi.pszService = MS_FILE_SENDFILE;
-	proto->hMenuContactFile = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
-
 }
 
 static void uninitMenuItems(TlenProtocol *proto) {
@@ -480,11 +474,10 @@ static void uninitMenuItems(TlenProtocol *proto) {
 	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuMUC, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuInbox, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactMUC, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuPicture, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactVoice, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactRequestAuth, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactGrantAuth, (LPARAM) 0);
-	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactFile, (LPARAM) 0);
-	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuPicture, (LPARAM) 0);
 }
 
 

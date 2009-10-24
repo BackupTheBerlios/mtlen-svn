@@ -12,6 +12,7 @@
 #define IDI_VOICE			106
 #define IDI_MICROPHONE		107
 #define IDI_SPEAKER			108
+#define IDI_IMAGE			109
 
 #define IDD_OPTIONS_BASIC              	151
 #define IDD_OPTIONS_VOICE            	152

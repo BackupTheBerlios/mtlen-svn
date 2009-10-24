@@ -373,8 +373,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,8,0,2
- PRODUCTVERSION 1,8,0,2
+ FILEVERSION 1,9,0,0
+ PRODUCTVERSION 1,9,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -392,14 +392,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Tlen Protocol Plugin for Miranda IM\0"
-            VALUE "FileVersion", "1.8.0.2\0"
+            VALUE "FileVersion", "1.9.0.0\0"
             VALUE "InternalName", "tlen\0"
             VALUE "LegalCopyright", "Copyright (c) 2002-2009 Santithorn Bunchua, Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "tlen.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Tlen Protocol Plugin\0"
-            VALUE "ProductVersion", "1.8.0.2\0"
+            VALUE "ProductVersion", "1.9.0.0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -419,15 +419,16 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_TLEN                ICON    DISCARDABLE     "icos/tlen.ico"
-IDI_MAIL                ICON    DISCARDABLE     "icos/mail.ico"
-IDI_MUC                 ICON    DISCARDABLE     "icos/groupchats.ico"
+IDI_TLEN               ICON    DISCARDABLE     "icos/tlen.ico"
+IDI_MAIL               ICON    DISCARDABLE     "icos/mail.ico"
+IDI_MUC                ICON    DISCARDABLE     "icos/groupchats.ico"
 IDI_CHATS              ICON    DISCARDABLE     "icos/tlenchats.ico"
-IDI_GRANT               ICON    DISCARDABLE     "icos/auth_grant.ico"
+IDI_GRANT              ICON    DISCARDABLE     "icos/auth_grant.ico"
 IDI_REQUEST            ICON    DISCARDABLE     "icos/auth_request.ico"
-IDI_VOICE			ICON    DISCARDABLE     "icos/voicechat.ico"
-IDI_MICROPHONE      ICON    DISCARDABLE     "icos/microphone.ico"
+IDI_VOICE			   ICON    DISCARDABLE     "icos/voicechat.ico"
+IDI_MICROPHONE         ICON    DISCARDABLE     "icos/microphone.ico"
 IDI_SPEAKER            ICON    DISCARDABLE     "icos/speaker.ico"
+IDI_IMAGE              ICON    DISCARDABLE     "icos/image.ico"
 #endif    // English (U.S.) resources
 
 
