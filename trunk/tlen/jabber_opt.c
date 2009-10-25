@@ -50,14 +50,15 @@ void TlenLoadOptions(TlenProtocol *proto)
     proto->tlenOptions.savePassword = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", TRUE);
 	proto->tlenOptions.useEncryption = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseEncryption", TRUE);
 	proto->tlenOptions.reconnect = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "Reconnect", TRUE);
-	proto->tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", 0);
+	proto->tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", TLEN_ALERTS_IGNORE_NIR);
 	proto->tlenOptions.rosterSync = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "RosterSync", FALSE);
 	proto->tlenOptions.offlineAsInvisible = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "OfflineAsInvisible", FALSE);
 	proto->tlenOptions.leaveOfflineMessage = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", FALSE);
 	proto->tlenOptions.offlineMessageOption = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", 0);
 	proto->tlenOptions.ignoreAdvertisements = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "IgnoreAdvertisements", TRUE);
-	proto->tlenOptions.groupChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "GroupChatPolicy", 0);
-	proto->tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceChatPolicy", 0);
+	proto->tlenOptions.groupChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "GroupChatPolicy", TLEN_MUC_ASK);
+	proto->tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceChatPolicy", TLEN_MUC_ASK);
+	proto->tlenOptions.imagePolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "ImagePolicy",TLEN_IMAGES_IGNORE_NIR);
 	proto->tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableAvatars", TRUE);
 	proto->tlenOptions.enableVersion = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", FALSE);
 	proto->tlenOptions.useNudge = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", FALSE);
@@ -254,6 +255,11 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore all invitation"));
 			SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_SETCURSEL, proto->tlenOptions.groupChatPolicy, 0);
 
+			SendDlgItemMessage(hwndDlg, IDC_IMAGE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept all images"));
+			SendDlgItemMessage(hwndDlg, IDC_IMAGE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore images from unauthorized contacts"));
+			SendDlgItemMessage(hwndDlg, IDC_IMAGE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Ignore all images"));
+			SendDlgItemMessage(hwndDlg, IDC_IMAGE_POLICY, CB_SETCURSEL, proto->tlenOptions.imagePolicy, 0);
+
 			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)TranslateT("<Last message>"));
 	        //SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)TranslateT("<Ask me>"));
 	        SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)TranslateT("Online"));
@@ -340,6 +346,7 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", (WORD) SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_ALERT_POLICY, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "GroupChatPolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_MUC_POLICY, CB_GETCURSEL, 0, 0));
+				DBWriteContactSettingWord(NULL, proto->iface.m_szModuleName, "ImagePolicy", (WORD) SendDlgItemMessage(hwndDlg, IDC_IMAGE_POLICY, CB_GETCURSEL, 0, 0));
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableAvatars", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_AVATARS));
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_VERSIONINFO));
 				DBWriteContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", (BYTE) IsDlgButtonChecked(hwndDlg, IDC_NUDGE_SUPPORT));

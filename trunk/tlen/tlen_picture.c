@@ -209,39 +209,41 @@ void TlenProcessPic(XmlNode *node, TlenProtocol *proto) {
             }
         }
     } else if (crc != NULL) {
-        /* TODO: apply policy */
-        FILE* fp;
-        char fileName[MAX_PATH];
-        char *ext = JabberXmlGetAttrValue(node, "ext");
-        char *tmpPath = Utils_ReplaceVars( "%miranda_userdata%" );
-        int tPathLen = mir_snprintf( fileName, MAX_PATH, "%s\\Images\\Tlen", tmpPath );
-        long oldSize = 0, lSize = atol(size);
-        DWORD dwAttributes = GetFileAttributesA( fileName );
-        if ( dwAttributes == 0xffffffff || ( dwAttributes & FILE_ATTRIBUTE_DIRECTORY ) == 0 ) {
-            CallService( MS_UTILS_CREATEDIRTREE, 0, ( LPARAM )fileName );
-        }
-        mir_free(tmpPath);
-        fileName[ tPathLen++ ] = '\\';
-		mir_snprintf( fileName + tPathLen, MAX_PATH - tPathLen, "%s.%s", crc, ext );
-        fp = fopen( fileName, "rb" );
-        if (fp) {
-            fseek(fp, 0, SEEK_END);
-            oldSize = ftell(fp);
-            fclose(fp);
-        }
-        if (oldSize != lSize) {
-            item = JabberListAdd(proto, LIST_PICTURE, idt);
-            item->ft = TlenFileCreateFT(proto, from);
-            item->ft->files = (char **) mir_alloc(sizeof(char *));
-            item->ft->filesSize = (long *) mir_alloc(sizeof(long));
-            item->ft->files[0] = mir_strdup(fileName);
-            item->ft->filesSize[0] = lSize;
-            item->ft->fileTotalSize = item->ft->filesSize[0];
-            JabberSend(proto, "<message type='pic' to='%s' crc_c='n' idt='%s'/>", from, idt);
-        } else {
-            JabberSend(proto, "<message type='pic' to='%s' crc_c='f' idt='%s'/>", from, idt);
-            LogPictureMessage(proto, from, fileName, FALSE);
-        }
+		BOOL bAccept = proto->tlenOptions.imagePolicy == TLEN_IMAGES_ACCEPT_ALL || (proto->tlenOptions.imagePolicy == TLEN_IMAGES_IGNORE_NIR && IsAuthorized(proto, from));
+		if (bAccept) {
+			FILE* fp;
+			char fileName[MAX_PATH];
+			char *ext = JabberXmlGetAttrValue(node, "ext");
+			char *tmpPath = Utils_ReplaceVars( "%miranda_userdata%" );
+			int tPathLen = mir_snprintf( fileName, MAX_PATH, "%s\\Images\\Tlen", tmpPath );
+			long oldSize = 0, lSize = atol(size);
+			DWORD dwAttributes = GetFileAttributesA( fileName );
+			if ( dwAttributes == 0xffffffff || ( dwAttributes & FILE_ATTRIBUTE_DIRECTORY ) == 0 ) {
+				CallService( MS_UTILS_CREATEDIRTREE, 0, ( LPARAM )fileName );
+			}
+			mir_free(tmpPath);
+			fileName[ tPathLen++ ] = '\\';
+			mir_snprintf( fileName + tPathLen, MAX_PATH - tPathLen, "%s.%s", crc, ext );
+			fp = fopen( fileName, "rb" );
+			if (fp) {
+				fseek(fp, 0, SEEK_END);
+				oldSize = ftell(fp);
+				fclose(fp);
+			}
+			if (oldSize != lSize) {
+				item = JabberListAdd(proto, LIST_PICTURE, idt);
+				item->ft = TlenFileCreateFT(proto, from);
+				item->ft->files = (char **) mir_alloc(sizeof(char *));
+				item->ft->filesSize = (long *) mir_alloc(sizeof(long));
+				item->ft->files[0] = mir_strdup(fileName);
+				item->ft->filesSize[0] = lSize;
+				item->ft->fileTotalSize = item->ft->filesSize[0];
+				JabberSend(proto, "<message type='pic' to='%s' crc_c='n' idt='%s'/>", from, idt);
+			} else {
+				JabberSend(proto, "<message type='pic' to='%s' crc_c='f' idt='%s'/>", from, idt);
+				LogPictureMessage(proto, from, fileName, FALSE);
+			}
+		}
     }
 }
 

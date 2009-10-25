@@ -295,10 +295,7 @@ int TlenMUCRecvInvitation(TlenProtocol *proto, const char *roomId, const char *r
 		} else {
 			strcpy(jid, from);
 		}
-		item = JabberListGetItemPtr(proto, LIST_ROSTER, jid);
-		ignore = FALSE;
-		if (item == NULL) ignore = TRUE;
-		else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) ignore = TRUE;
+		ignore = !IsAuthorized(proto, jid);
 		ask = TRUE;
 	} else if (groupChatPolicy == TLEN_MUC_ACCEPT_IR) {
 		char jid[256];
@@ -311,9 +308,7 @@ int TlenMUCRecvInvitation(TlenProtocol *proto, const char *roomId, const char *r
 			strcpy(jid, from);
 		}
 		item = JabberListGetItemPtr(proto, LIST_ROSTER, jid);
-		ask = FALSE;
-		if (item == NULL) ask = TRUE;
-		else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) ask = TRUE;
+		ask = !IsAuthorized(proto, jid);
 		ignore = FALSE;
 	} else if (groupChatPolicy == TLEN_MUC_ACCEPT_ALL) {
 		ask = FALSE;

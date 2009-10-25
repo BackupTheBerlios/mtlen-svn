@@ -60,6 +60,7 @@
 #define IDC_IGNORE_ADVERTISEMENTS		1056
 #define IDC_AVATARS						1057
 #define IDC_VERSIONINFO					1058
+#define IDC_IMAGE_POLICY				1059
 #define IDC_CITY                        1060
 #define IDC_FULLNAME                    1061
 #define IDC_NICKNAME                    1062

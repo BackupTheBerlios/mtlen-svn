@@ -1098,8 +1098,7 @@ static void TlenProcessM(XmlNode *node, ThreadData *info)
 					if (info->proto->tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_ALL) {
 						bAlert = FALSE;
 					} else if (info->proto->tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_NIR) {
-						if (item == NULL) bAlert = FALSE;
-						else if (item->subscription==SUB_NONE || item->subscription==SUB_TO) bAlert = FALSE;
+						bAlert = IsAuthorized(info->proto, f);
 					}
 					if (bAlert) {
 						if (info->proto->tlenOptions.useNudge) {

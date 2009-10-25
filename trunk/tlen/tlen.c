@@ -383,6 +383,7 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.pszContactOwner = proto->iface.m_szModuleName;
 	mi.popupPosition = 500090000;
 
+	strcpy(text, proto->iface.m_szModuleName);
 	mi.pszService = text;
 	mi.ptszName = proto->iface.m_tszUserName;
 	mi.position = -1999901009;
@@ -421,30 +422,30 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.pszService = text;
 	proto->hMenuInbox = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
 
-	// "Invite to MUC"
-	sprintf(text, "%s/ContactMenuMUC", proto->iface.m_szModuleName);
-	CreateServiceFunction_Ex(text, proto, TlenMUCContactMenuHandleMUC);
-	mi.flags = CMIF_ICONFROMICOLIB;
-	mi.pszName = "Multi-User Conference";
-	mi.position = -2000020000;
-	mi.icolibItem = GetIconHandle(IDI_MUC);
-	mi.pszService = text;
-	proto->hMenuContactMUC = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
-
 	// "Send picture"
 	sprintf(text, "%s/SendPicture", proto->iface.m_szModuleName);
 	CreateServiceFunction_Ex(text, proto, TlenContactMenuHandleSendPicture);
+	mi.flags = CMIF_ICONFROMICOLIB;
 	mi.pszName = "Send picture";
-	mi.position = -2000019000;
+	mi.position = -2000019030;
 	mi.icolibItem = GetIconHandle(IDI_IMAGE);
 	mi.pszService = text;
 	proto->hMenuPicture = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
+
+	// "Invite to MUC"
+	sprintf(text, "%s/ContactMenuMUC", proto->iface.m_szModuleName);
+	CreateServiceFunction_Ex(text, proto, TlenMUCContactMenuHandleMUC);
+	mi.pszName = "Multi-User Conference";
+	mi.position = -2000019020;
+	mi.icolibItem = GetIconHandle(IDI_MUC);
+	mi.pszService = text;
+	proto->hMenuContactMUC = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);
 
 	// "Invite to voice chat"
 	sprintf(text, "%s/ContactMenuVoice", proto->iface.m_szModuleName);
 	CreateServiceFunction_Ex(text, proto, TlenVoiceContactMenuHandleVoice);
 	mi.pszName = "Voice Chat";
-	mi.position = -2000018000;
+	mi.position = -2000019010;
 	mi.icolibItem = GetIconHandle(IDI_VOICE);
 	mi.pszService = text;
 	proto->hMenuContactVoice = (HANDLE) CallService(MS_CLIST_ADDCONTACTMENUITEM, 0, (LPARAM) &mi);

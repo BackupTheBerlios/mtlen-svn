@@ -117,6 +117,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define TLEN_ALERTS_IGNORE_NIR 1
 #define TLEN_ALERTS_IGNORE_ALL 2
 
+#define TLEN_IMAGES_ACCEPT_ALL 0
+#define TLEN_IMAGES_IGNORE_NIR 1
+#define TLEN_IMAGES_IGNORE_ALL 2
+
 #define TLEN_MUC_ASK		0
 #define TLEN_MUC_ACCEPT_IR  1
 #define TLEN_MUC_ACCEPT_ALL 2
@@ -190,6 +194,7 @@ typedef struct {
 	int alertPolicy;
 	int groupChatPolicy;
 	int voiceChatPolicy;
+	int imagePolicy;
 	BOOL enableAvatars;
 	BOOL enableVersion;
 	BOOL useNudge;
@@ -397,6 +402,7 @@ char *JabberBase64Encode(const char *buffer, int bufferLen);
 char *JabberBase64Decode(const char *buffer, int *resultLen);
 int JabberGetPictureType(const char* buf);
 void TlenLogMessage(TlenProtocol *proto, HANDLE hContact, DWORD flags, const char *message);
+BOOL IsAuthorized(TlenProtocol *proto, const char *jid);
 //char *JabberGetVersionText();
 time_t JabberIsoToUnixTime(char *stamp);
 time_t TlenTimeToUTC(time_t time);

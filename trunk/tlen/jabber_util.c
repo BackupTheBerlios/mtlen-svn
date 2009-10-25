@@ -774,6 +774,16 @@ int JabberGetPictureType( const char* buf )
 	return PA_FORMAT_UNKNOWN;
 }
 
+BOOL IsAuthorized(TlenProtocol *proto, const char *jid)
+{
+	JABBER_LIST_ITEM *item = JabberListGetItemPtr(proto, LIST_ROSTER, jid);
+	if (item != NULL) {
+		return item->subscription == SUB_BOTH || item->subscription == SUB_FROM;
+	}
+	return FALSE;
+}
+
+
 void TlenLogMessage(TlenProtocol *proto, HANDLE hContact, DWORD flags, const char *message)
 {
     DWORD size = strlen(message) + 2;
