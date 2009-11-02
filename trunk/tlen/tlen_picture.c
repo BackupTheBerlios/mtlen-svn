@@ -33,7 +33,7 @@ typedef struct {
 static void LogPictureMessage(TlenProtocol *proto, const char *jid, const char *filename, BOOL isSent)
 {
     char message[1024];
-    const char *msg = isSent ? "Image sent: %s" : "Image received: %s";
+    const char *msg = isSent ? "Image sent, file://%s" : "Image received, file://%s";
     _snprintf(message, sizeof(message), Translate(msg), filename);
     TlenLogMessage(proto, JabberHContactFromJID(proto, jid), isSent ? DBEF_SENT : 0, message);
 }
@@ -151,7 +151,7 @@ static void TlenPsGetThread(void *ptr) {
             JabberLog(proto, "Picture received...");
             LogPictureMessage(proto, item->ft->jid, item->ft->files[0], FALSE);
         } else {
-          /* cannot receive picture */
+          /* cannot connect to ps server */
         }
         fclose(fp);
     } else {

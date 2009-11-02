@@ -406,7 +406,6 @@ BOOL IsAuthorized(TlenProtocol *proto, const char *jid);
 //char *JabberGetVersionText();
 time_t JabberIsoToUnixTime(char *stamp);
 time_t TlenTimeToUTC(time_t time);
-void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to, char *extra);
 void JabberSendPresence(TlenProtocol *proto,int status);
 void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 //char *JabberGetClientJID(char *jid);
