@@ -33,7 +33,7 @@ typedef struct {
 static void LogPictureMessage(TlenProtocol *proto, const char *jid, const char *filename, BOOL isSent)
 {
     char message[1024];
-    const char *msg = isSent ? "Image sent, file://%s" : "Image received, file://%s";
+    const char *msg = isSent ? "Image sent file://%s" : "Image received file://%s";
     _snprintf(message, sizeof(message), Translate(msg), filename);
     TlenLogMessage(proto, JabberHContactFromJID(proto, jid), isSent ? DBEF_SENT : 0, message);
 }
@@ -43,6 +43,7 @@ static void TlenPsPostThread(void *ptr) {
     TlenProtocol *proto = data->proto;
     JABBER_LIST_ITEM *item = data->item;
     JABBER_SOCKET socket = JabberWsConnect(proto, "ps.tlen.pl", 443);
+    BOOL bSent = FALSE;
     if (socket != NULL) {
         char header[512];
         DWORD ret;
@@ -72,8 +73,7 @@ static void TlenPsPostThread(void *ptr) {
                     }
                 }
                 fclose(fp);
-                JabberSend(proto, "<message to='%s' idt='%s' rt='%s' pid='1001' type='pic' />", item->ft->jid, item->jid, item->ft->id2);
-                LogPictureMessage(proto, item->ft->jid, item->ft->files[0], TRUE);
+                bSent = TRUE;
             } else {
               /* picture not found */
             }
@@ -81,6 +81,10 @@ static void TlenPsPostThread(void *ptr) {
             /* 5 minutes passed */
         }
         Netlib_CloseHandle(socket);
+        if (bSent) {
+            JabberSend(proto, "<message to='%s' idt='%s' rt='%s' pid='1001' type='pic' />", item->ft->jid, item->jid, item->ft->id2);
+            LogPictureMessage(proto, item->ft->jid, item->ft->files[0], TRUE);
+        }
         TlenP2PFreeFileTransfer(item->ft);
         JabberListRemove(proto, LIST_PICTURE, item->jid);
     } else {
