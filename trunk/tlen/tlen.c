@@ -86,8 +86,8 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvReserved)
 
 __declspec(dllexport) PLUGININFOEX *MirandaPluginInfoEx( DWORD mirandaVersion )
 {
-	if ( mirandaVersion < PLUGIN_MAKE_VERSION( 0,8,0,10 )) {
-		MessageBox( NULL, TranslateT("The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.7 or later."), TranslateT("Tlen Protocol Plugin"), MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST );
+	if ( mirandaVersion < PLUGIN_MAKE_VERSION( 0,8,0,15 )) {
+		MessageBox( NULL, TranslateT("The Tlen protocol plugin cannot be loaded. It requires Miranda IM 0.8.0.15 or later."), TranslateT("Tlen Protocol Plugin"), MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST );
 		return NULL;
 	}
 
