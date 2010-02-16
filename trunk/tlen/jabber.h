@@ -37,6 +37,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _WIN32_WINNT 0x0501
 #define _WIN32_IE 0x0501
 
+#define __try
+#define __except(x) if (0)
+#define __finally
+
+#define _try __try
+#define _except __except
+#define _finally __finally
+
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>

@@ -718,7 +718,7 @@ static int TlenGetAvatarInfo(void *ptr, WPARAM wParam, LPARAM lParam)
 		return GAIR_NOAVATAR;
 	}
 	if (avatarHash != NULL && !downloadingAvatar) {
-		TlenGetAvatarFileName(proto, item, AI->filename, sizeof AI->filename);
+		TlenGetAvatarFileName(proto, item, AI->filename, sizeof(AI->filename));
 		AI->format = ( AI->hContact == NULL ) ? proto->threadData->avatarFormat : item->avatarFormat;
 		return GAIR_SUCCESS;
 	}
