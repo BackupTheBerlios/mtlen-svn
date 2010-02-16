@@ -623,11 +623,12 @@ static void JabberProcessMessage(XmlNode *node, ThreadData *info)
 	}
 	else {
 		if ((from=JabberXmlGetAttrValue(node, "from")) != NULL) {
+            char *fromJid = JabberLoginFromJID(from);
 			if (info->proto->tlenOptions.ignoreAdvertisements && strstr(from, "b73@tlen.pl") == from) {
 				return;
 			}
 			// If message is from a stranger (not in roster), item is NULL
-			item = JabberListGetItemPtr(info->proto, LIST_ROSTER, from);
+			item = JabberListGetItemPtr(info->proto, LIST_ROSTER, fromJid);
 			isChatRoomJid = JabberListExist(info->proto, LIST_CHATROOM, from);
 
 			if (isChatRoomJid && type!=NULL && !strcmp(type, "groupchat")) {
@@ -686,12 +687,12 @@ static void JabberProcessMessage(XmlNode *node, ThreadData *info)
 							item->wantComposingEvent = composing;
 							if (item->isTyping) {
 								item->isTyping = FALSE;
-								if ((hContact=JabberHContactFromJID(info->proto, from)) != NULL)
+								if ((hContact=JabberHContactFromJID(info->proto, fromJid)) != NULL)
 									CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
 							}
 						}
 
-						if ((hContact=JabberHContactFromJID(info->proto, from)) == NULL) {
+						if ((hContact=JabberHContactFromJID(info->proto, fromJid)) == NULL) {
 							// Create a temporary contact
 							if (isChatRoomJid) {
 								if ((p=strchr(from, '/'))!=NULL && p[1]!='\0')
@@ -737,43 +738,8 @@ static void JabberProcessMessage(XmlNode *node, ThreadData *info)
 						mir_free(localMessage);
 					}
 				}
-				else {	// bodyNode==NULL - check for message event notification (ack, composing)
-					if ((xNode=JabberXmlGetChild(node, "x")) != NULL) {
-						if ((p=JabberXmlGetAttrValue(xNode, "xmlns"))!=NULL && !strcmp(p, "jabber:x:event")) {
-							idNode = JabberXmlGetChild(xNode, "id");
-							if (JabberXmlGetChild(xNode, "delivered")!=NULL ||
-								JabberXmlGetChild(xNode, "offline")!=NULL) {
-
-								id = -1;
-								if (idNode!=NULL && idNode->text!=NULL) {
-									if (!strncmp(idNode->text, JABBER_IQID, strlen(JABBER_IQID)))
-										id = atoi((idNode->text)+strlen(JABBER_IQID));
-								}
-								if (id == item->idMsgAckPending) {
-									ProtoBroadcastAck(info->proto->iface.m_szModuleName, JabberHContactFromJID(info->proto, from), ACKTYPE_MESSAGE, ACKRESULT_SUCCESS, (HANDLE) 1, 0);
-								}
-							}
-							if (JabberXmlGetChild(xNode, "composing") != NULL) {
-								if ((hContact=JabberHContactFromJID(info->proto, from)) != NULL) {
-									if (item != NULL) {
-										item->isTyping = TRUE;
-										CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_INFINITE);
-									}
-								}
-							}
-							if (xNode->numChild==0 || (xNode->numChild==1 && idNode!=NULL)) {
-								// Maybe a cancel to the previous composing
-								if ((hContact=JabberHContactFromJID(info->proto, from)) != NULL) {
-									if (item != NULL && item->isTyping) {
-										item->isTyping = FALSE;
-										CallService(MS_PROTO_CONTACTISTYPING, (WPARAM) hContact, PROTOTYPE_CONTACTTYPING_OFF);
-									}
-								}
-							}
-						}
-					}
-				}
 			}
+            mir_free(fromJid);
 		}
 	}
 }
