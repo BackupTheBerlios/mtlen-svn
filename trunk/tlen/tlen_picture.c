@@ -73,6 +73,7 @@ static void TlenPsPostThread(void *ptr) {
                     }
                 }
                 fclose(fp);
+                SleepEx(3000, TRUE);
                 bSent = TRUE;
             } else {
               /* picture not found */
