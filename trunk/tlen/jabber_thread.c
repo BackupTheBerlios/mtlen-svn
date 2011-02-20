@@ -428,7 +428,7 @@ static void TlenSendAuth(TlenProtocol *proto) {
 	if ((p=JabberTextEncode(proto->threadData->username)) != NULL) {
 		iqId = JabberSerialNext(proto->threadData->proto);
 		JabberIqAdd(proto, iqId, IQ_PROC_NONE, JabberIqResultAuth);
-		JabberSend(proto, "<iq type='set' id='"JABBER_IQID"%d'><query xmlns='jabber:iq:auth'><username>%s</username><digest>%s</digest><resource>t</resource></query></iq>", iqId, p /*info->username*/, str);
+		JabberSend(proto, "<iq type='set' id='"JABBER_IQID"%d'><query xmlns='jabber:iq:auth'><username>%s</username><digest>%s</digest><resource>t</resource><host>tlen.pl</host></query></iq>", iqId, p /*info->username*/, str);
 		mir_free(p);
 	}
 	mir_free(str);
@@ -1044,9 +1044,10 @@ static void TlenProcessM(XmlNode *node, ThreadData *info)
 	if (!node->name || strcmp(node->name, "m")) return;
 
 	if ((f=JabberXmlGetAttrValue(node, "f")) != NULL) {
-		if ((hContact=JabberHContactFromJID(info->proto, f)) != NULL) {
+		char *fLogin = JabberLoginFromJID(f);
+		if ((hContact=JabberHContactFromJID(info->proto, fLogin)) != NULL) {
 			if ((tp=JabberXmlGetAttrValue(node, "tp")) != NULL) {
-				JABBER_LIST_ITEM *item = JabberListGetItemPtr(info->proto, LIST_ROSTER, f);
+				JABBER_LIST_ITEM *item = JabberListGetItemPtr(info->proto, LIST_ROSTER, fLogin);
 				if(!strcmp(tp, "t")) { //contact is writing
 					if (item!=NULL ) {
 						item->isTyping = TRUE;
@@ -1064,7 +1065,7 @@ static void TlenProcessM(XmlNode *node, ThreadData *info)
 					if (info->proto->tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_ALL) {
 						bAlert = FALSE;
 					} else if (info->proto->tlenOptions.alertPolicy == TLEN_ALERTS_IGNORE_NIR) {
-						bAlert = IsAuthorized(info->proto, f);
+						bAlert = IsAuthorized(info->proto, fLogin);
 					}
 					if (bAlert) {
 						if (info->proto->tlenOptions.useNudge) {
@@ -1079,6 +1080,7 @@ static void TlenProcessM(XmlNode *node, ThreadData *info)
 				}
 			}
 		}
+		mir_free(fLogin);
 		if ((p=strchr(f, '@')) != NULL) {
 			if ((p=strchr(p, '/'))!=NULL && p[1]!='\0') { // message from user
 				time_t timestamp;
@@ -1094,7 +1096,7 @@ static void TlenProcessM(XmlNode *node, ThreadData *info)
 				tp=JabberXmlGetAttrValue(node, "tp");
 				bNode = JabberXmlGetChild(node, "b");
 				f = JabberTextDecode(f);
-				if (bNode->text != NULL) {
+				if (bNode != NULL && bNode->text != NULL) {
 					if (tp != NULL && !strcmp(tp, "p")) {
 						/* MUC private message */
 						str = JabberResourceFromJID(f);
