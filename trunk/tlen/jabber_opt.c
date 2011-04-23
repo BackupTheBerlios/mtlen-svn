@@ -53,16 +53,16 @@ void TlenLoadOptions(TlenProtocol *proto)
 	proto->tlenOptions.alertPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "AlertPolicy", TLEN_ALERTS_IGNORE_NIR);
 	proto->tlenOptions.rosterSync = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "RosterSync", FALSE);
 	proto->tlenOptions.offlineAsInvisible = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "OfflineAsInvisible", FALSE);
-	proto->tlenOptions.leaveOfflineMessage = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", FALSE);
+	proto->tlenOptions.leaveOfflineMessage = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LeaveOfflineMessage", TRUE);
 	proto->tlenOptions.offlineMessageOption = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "OfflineMessageOption", 0);
 	proto->tlenOptions.ignoreAdvertisements = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "IgnoreAdvertisements", TRUE);
 	proto->tlenOptions.groupChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "GroupChatPolicy", TLEN_MUC_ASK);
 	proto->tlenOptions.voiceChatPolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "VoiceChatPolicy", TLEN_MUC_ASK);
 	proto->tlenOptions.imagePolicy = DBGetContactSettingWord(NULL, proto->iface.m_szModuleName, "ImagePolicy",TLEN_IMAGES_IGNORE_NIR);
 	proto->tlenOptions.enableAvatars = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableAvatars", TRUE);
-	proto->tlenOptions.enableVersion = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", FALSE);
+	proto->tlenOptions.enableVersion = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "EnableVersion", TRUE);
 	proto->tlenOptions.useNudge = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "UseNudge", FALSE);
-	proto->tlenOptions.logAlerts = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", FALSE);
+	proto->tlenOptions.logAlerts = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "LogAlerts", TRUE);
     proto->tlenOptions.sendKeepAlive = DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "KeepAlive", TRUE);
 	proto->tlenOptions.useNewP2P = TRUE;
 }
