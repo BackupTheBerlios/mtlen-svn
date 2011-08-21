@@ -1,42 +1,39 @@
 /**
  * \file aes.h
  *
- *  Based on XySSL: Copyright (C) 2006-2008  Christophe Devine
+ * \brief AES block cipher
  *
- *  Copyright (C) 2009  Paul Bakker <polarssl_maintainer at polarssl dot org>
+ *  Copyright (C) 2006-2010, Brainspark B.V.
+ *
+ *  This file is part of PolarSSL (http://www.polarssl.org)
+ *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
  *
  *  All rights reserved.
  *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *  
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of PolarSSL or XySSL nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
- *  
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- *  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #ifndef POLARSSL_AES_H
 #define POLARSSL_AES_H
 
+#include <string.h>
+
 #define AES_ENCRYPT     1
 #define AES_DECRYPT     0
+
+#define POLARSSL_ERR_AES_INVALID_KEY_LENGTH                -0x0020  /**< Invalid key length. */
+#define POLARSSL_ERR_AES_INVALID_INPUT_LENGTH              -0x0022  /**< Invalid data input length. */
 
 /**
  * \brief          AES context structure
@@ -59,8 +56,10 @@ extern "C" {
  * \param ctx      AES context to be initialized
  * \param key      encryption key
  * \param keysize  must be 128, 192 or 256
+ *
+ * \return         0 if successful, or POLARSSL_ERR_AES_INVALID_KEY_LENGTH
  */
-void aes_setkey_enc( aes_context *ctx, unsigned char *key, int keysize );
+int aes_setkey_enc( aes_context *ctx, const unsigned char *key, unsigned int keysize );
 
 /**
  * \brief          AES key schedule (decryption)
@@ -68,8 +67,10 @@ void aes_setkey_enc( aes_context *ctx, unsigned char *key, int keysize );
  * \param ctx      AES context to be initialized
  * \param key      decryption key
  * \param keysize  must be 128, 192 or 256
+ *
+ * \return         0 if successful, or POLARSSL_ERR_AES_INVALID_KEY_LENGTH
  */
-void aes_setkey_dec( aes_context *ctx, unsigned char *key, int keysize );
+int aes_setkey_dec( aes_context *ctx, const unsigned char *key, unsigned int keysize );
 
 /**
  * \brief          AES-ECB block encryption/decryption
@@ -78,14 +79,18 @@ void aes_setkey_dec( aes_context *ctx, unsigned char *key, int keysize );
  * \param mode     AES_ENCRYPT or AES_DECRYPT
  * \param input    16-byte input block
  * \param output   16-byte output block
+ *
+ * \return         0 if successful
  */
-void aes_crypt_ecb( aes_context *ctx,
+int aes_crypt_ecb( aes_context *ctx,
                     int mode,
-                    unsigned char input[16],
+                    const unsigned char input[16],
                     unsigned char output[16] );
 
 /**
  * \brief          AES-CBC buffer encryption/decryption
+ *                 Length should be a multiple of the block
+ *                 size (16 bytes)
  *
  * \param ctx      AES context
  * \param mode     AES_ENCRYPT or AES_DECRYPT
@@ -93,16 +98,18 @@ void aes_crypt_ecb( aes_context *ctx,
  * \param iv       initialization vector (updated after use)
  * \param input    buffer holding the input data
  * \param output   buffer holding the output data
+ *
+ * \return         0 if successful, or POLARSSL_ERR_AES_INVALID_INPUT_LENGTH
  */
-void aes_crypt_cbc( aes_context *ctx,
+int aes_crypt_cbc( aes_context *ctx,
                     int mode,
-                    int length,
+                    size_t length,
                     unsigned char iv[16],
-                    unsigned char *input,
+                    const unsigned char *input,
                     unsigned char *output );
 
 /**
- * \brief          AES-CFB128 buffer encryption/decryption
+ * \brief          AES-CFB128 buffer encryption/decryption.
  *
  * \param ctx      AES context
  * \param mode     AES_ENCRYPT or AES_DECRYPT
@@ -111,15 +118,41 @@ void aes_crypt_cbc( aes_context *ctx,
  * \param iv       initialization vector (updated after use)
  * \param input    buffer holding the input data
  * \param output   buffer holding the output data
+ *
+ * \return         0 if successful
  */
-void aes_crypt_cfb128( aes_context *ctx,
+int aes_crypt_cfb128( aes_context *ctx,
                        int mode,
-                       int length,
-                       int *iv_off,
+                       size_t length,
+                       size_t *iv_off,
                        unsigned char iv[16],
-                       unsigned char *input,
+                       const unsigned char *input,
                        unsigned char *output );
 
+/*
+ * \brief               AES-CTR buffer encryption/decryption
+ *
+ * Warning: You have to keep the maximum use of your counter in mind!
+ *
+ * \param length        The length of the data
+ * \param nc_off        The offset in the current stream_block (for resuming
+ *                      within current cipher stream). The offset pointer to
+ *                      should be 0 at the start of a stream.
+ * \param nonce_counter The 128-bit nonce and counter.
+ * \param stream_block  The saved stream-block for resuming. Is overwritten
+ *                      by the function.
+ * \param input         The input data stream
+ * \param output        The output data stream
+ *
+ * \return         0 if successful
+ */
+int aes_crypt_ctr( aes_context *ctx,
+                       size_t length,
+                       size_t *nc_off,
+                       unsigned char nonce_counter[16],
+                       unsigned char stream_block[16],
+                       const unsigned char *input,
+                       unsigned char *output );
 /**
  * \brief          Checkup routine
  *

@@ -1,36 +1,26 @@
 /*
  *  VIA PadLock support functions
  *
- *  Based on XySSL: Copyright (C) 2006-2008  Christophe Devine
+ *  Copyright (C) 2006-2010, Brainspark B.V.
  *
- *  Copyright (C) 2009  Paul Bakker <polarssl_maintainer at polarssl dot org>
+ *  This file is part of PolarSSL (http://www.polarssl.org)
+ *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
  *
  *  All rights reserved.
  *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *  
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of PolarSSL or XySSL nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
- *  
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- *  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 /*
  *  This implementation is based on the VIA PadLock Programming Guide:
@@ -43,12 +33,9 @@
 
 #if defined(POLARSSL_PADLOCK_C)
 
-#include "polarssl/aes.h"
 #include "polarssl/padlock.h"
 
 #if defined(POLARSSL_HAVE_X86)
-
-#include <string.h>
 
 /*
  * PadLock detection routine
@@ -86,7 +73,7 @@ int padlock_supports( int feature )
  */
 int padlock_xcryptecb( aes_context *ctx,
                        int mode,
-                       unsigned char input[16],
+                       const unsigned char input[16],
                        unsigned char output[16] )
 {
     int ebx;
@@ -125,12 +112,13 @@ int padlock_xcryptecb( aes_context *ctx,
  */
 int padlock_xcryptcbc( aes_context *ctx,
                        int mode,
-                       int length,
+                       size_t length,
                        unsigned char iv[16],
-                       unsigned char *input,
+                       const unsigned char *input,
                        unsigned char *output )
 {
-    int ebx, count;
+    int ebx;
+    size_t count;
     unsigned long *rk;
     unsigned long *iw;
     unsigned long *ctrl;
@@ -138,7 +126,7 @@ int padlock_xcryptcbc( aes_context *ctx,
 
     if( ( (long) input  & 15 ) != 0 ||
         ( (long) output & 15 ) != 0 )
-        return( 1 );
+        return( POLARSSL_ERR_PADLOCK_DATA_MISALIGNED );
 
     rk = ctx->rk;
     iw = PADLOCK_ALIGN16( buf );
