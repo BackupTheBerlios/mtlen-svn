@@ -1,3 +1,23 @@
+Version 2.0.3.2
+-------
+* update PolarSSL library to polarssl-1.0.0
+* change compile options to not require microsoft visual studio runtime libs on user system, (100KB larger file but no problems with msvcr90.dll not found on user system)
+Version 2.0.2.0
+-------
+* "Leave status message after disconnection", "Send and receive client version information" and  "Log alerts as messages" options enabled by default (AL|EN suggestion)
+Version 2.0.1.0
+-------
+merge changes from wsx22 mod
+* fix in typing notify message handling
+* fix in logging to server message
+Version 2.0.0.0
+-------
++ Image transfer
+* other bug fixes and improvements
+Version 1.8.0.2
+-------
+improved icons handling
+minor fixes on account unloading
 1.8.0.1
 -------
 * bugfix: removed ME_SYSTEM_MODULESLOADED hook
