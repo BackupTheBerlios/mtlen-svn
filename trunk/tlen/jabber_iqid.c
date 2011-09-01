@@ -425,8 +425,8 @@ void JabberIqResultSearch(TlenProtocol *proto, XmlNode *iqNode)
 	XmlNode *queryNode, *itemNode, *n;
 	char *type, *jid, *str;
 	int id, i, found;
-	JABBER_SEARCH_RESULT jsr;
-	DBVARIANT dbv;
+    JABBER_SEARCH_RESULT jsr = {0};
+	DBVARIANT dbv = {0};
 
 	found = 0;
 //	JabberLog("<iq/> iqIdGetSearch");
@@ -448,6 +448,8 @@ void JabberIqResultSearch(TlenProtocol *proto, XmlNode *iqNode)
 							_snprintf(jsr.jid, sizeof(jsr.jid), "%s@%s", jid, dbv.pszVal);
 						}
 						jsr.jid[sizeof(jsr.jid)-1] = '\0';
+						jsr.hdr.id = jid;
+                        jsr.hdr.flags = 0; //results are ansi
 						if ((n=JabberXmlGetChild(itemNode, "nick"))!=NULL && n->text!=NULL)
 							jsr.hdr.nick = JabberTextDecode(n->text);
 						else
@@ -486,6 +488,7 @@ void JabberIqResultSearch(TlenProtocol *proto, XmlNode *iqNode)
 					jsr.hdr.firstName = mir_strdup("");
 					jsr.hdr.lastName = mir_strdup("");
 					jsr.hdr.email = mir_strdup("");
+					jsr.hdr.id = mir_strdup("");
 					ProtoBroadcastAck(proto->iface.m_szModuleName, NULL, ACKTYPE_SEARCH, ACKRESULT_DATA, (HANDLE) id, (LPARAM) &jsr);
 					mir_free(jsr.hdr.nick);
 					mir_free(jsr.hdr.firstName);

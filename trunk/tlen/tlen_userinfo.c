@@ -81,14 +81,14 @@ static void InitComboBox(HWND hwndCombo, JABBER_FIELD_MAP *fieldMap)
 {
 	int i, n;
 
-	n = SendMessageA(hwndCombo, CB_ADDSTRING, 0, (LPARAM) "");
-	SendMessageA(hwndCombo, CB_SETITEMDATA, n, 0);
-	SendMessageA(hwndCombo, CB_SETCURSEL, n, 0);
+	n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM)_T(""));
+	SendMessage(hwndCombo, CB_SETITEMDATA, n, 0);
+	SendMessage(hwndCombo, CB_SETCURSEL, n, 0);
 	for(i=0;;i++) {
 		if (fieldMap[i].name == NULL)
 			break;
-		n = SendMessageA(hwndCombo, CB_ADDSTRING, 0, (LPARAM) Translate(fieldMap[i].name));
-		SendMessageA(hwndCombo, CB_SETITEMDATA, n, fieldMap[i].id);
+		n = SendMessage(hwndCombo, CB_ADDSTRING, 0, (LPARAM) TranslateTS(fieldMap[i].name));
+		SendMessage(hwndCombo, CB_SETITEMDATA, n, fieldMap[i].id);
 	}
 }
 

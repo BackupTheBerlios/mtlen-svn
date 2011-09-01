@@ -33,13 +33,13 @@ BOOL JabberWsInit(TlenProtocol *proto)
 	nlu.cbSize = sizeof(nlu);
 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_HTTPCONNS | NUF_TCHAR;	// | NUF_HTTPGATEWAY;
 	mir_sntprintf( name, SIZEOF(name), TranslateT("%s connection"), proto->iface.m_tszUserName);
-	nlu.szDescriptiveName = name;
+	nlu.ptszDescriptiveName = name;
 	nlu.szSettingsModule = proto->iface.m_szModuleName;
 	proto->hNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
 
 	nlu.flags = NUF_OUTGOING | NUF_INCOMING | NUF_NOOPTIONS | NUF_TCHAR;
 	mir_sntprintf( name, SIZEOF(name), TranslateT("%s SOCKS connection"), proto->iface.m_tszUserName);
-	nlu.szDescriptiveName = name;
+	nlu.ptszDescriptiveName = name;
 	proto->hFileNetlibUser = (HANDLE) CallService(MS_NETLIB_REGISTERUSER, 0, (LPARAM) &nlu);
 	nlus.cbSize = sizeof(nlus);
 	nlus.useProxy = 0;
