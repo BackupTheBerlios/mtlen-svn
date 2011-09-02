@@ -56,7 +56,7 @@ static void TlenProcessV(XmlNode *node, ThreadData *info);
 static void TlenProcessAvatar(XmlNode* node, ThreadData *info);
 static void TlenProcessCipher(XmlNode *node, ThreadData *info);
 
-static VOID CALLBACK JabberDummyApcFunc(DWORD param)
+static VOID NTAPI JabberDummyApcFunc(ULONG_PTR param)
 {
 	return;
 }
@@ -64,7 +64,7 @@ static VOID CALLBACK JabberDummyApcFunc(DWORD param)
 static char onlinePassword[128];
 static HANDLE hEventPasswdDlg;
 
-static BOOL CALLBACK JabberPasswordDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK JabberPasswordDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	char text[128];
 
@@ -93,7 +93,7 @@ static BOOL CALLBACK JabberPasswordDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam
 	return FALSE;
 }
 
-static VOID CALLBACK JabberPasswordCreateDialogApcProc(DWORD param)
+static VOID NTAPI JabberPasswordCreateDialogApcProc(ULONG_PTR param)
 {
 	CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_PASSWORD), NULL, JabberPasswordDlgProc, (LPARAM) param);
 }
@@ -451,7 +451,7 @@ static void JabberProcessStreamOpening(XmlNode *node, ThreadData *info)
 		unsigned char aes_key[32];
 		char aes_key_str[140], aes_iv_str[40];
 		mpi k1_mpi, k2_mpi, aes_mpi;
-		int slen;
+		size_t slen;
 
 		k1=JabberXmlGetAttrValue(node, "k1");
 		k2=JabberXmlGetAttrValue(node, "k2");

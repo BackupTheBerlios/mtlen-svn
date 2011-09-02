@@ -175,17 +175,17 @@ void TlenProcessPresenceAvatar(TlenProtocol *proto, XmlNode *node, JABBER_LIST_I
 static char *replaceTokens(const char *base, const char *uri, const char *login, const char* token, int type, int access) {
 	char *result;
 	int i, l, size;
-	l = strlen(uri);
-	size = strlen(base);
+	l = (int)strlen(uri);
+	size = (int)strlen(base);
 	for (i = 0; i < l; ) {
 		if (!strncmp(uri + i, "^login^", 7)) {
-			size += strlen(login);
+			size += (int)strlen(login);
 			i += 7;
 		} else if (!strncmp(uri + i, "^type^", 6)) {
 			size++;
 			i += 6;
 		} else if (!strncmp(uri + i, "^token^", 7)) {
-			size += strlen(token);
+			size += (int)strlen(token);
 			i += 7;
 		} else if (!strncmp(uri + i, "^access^", 8)) {
 			size++;
@@ -197,18 +197,18 @@ static char *replaceTokens(const char *base, const char *uri, const char *login,
 	}
 	result = (char *)mir_alloc(size +1);
 	strcpy(result, base);
-	size = strlen(base);
+	size = (int)strlen(base);
 	for (i = 0; i < l; ) {
 		if (!strncmp(uri + i, "^login^", 7)) {
 			strcpy(result + size, login);
-			size += strlen(login);
+			size += (int)strlen(login);
 			i += 7;
 		} else if (!strncmp(uri + i, "^type^", 6)) {
 			result[size++] = '0' + type;
 			i += 6;
 		} else if (!strncmp(uri + i, "^token^", 7)) {
 			strcpy(result + size, token);
-			size += strlen(token);
+			size += (int)strlen(token);
 			i += 7;
 		} else if (!strncmp(uri + i, "^access^", 8)) {
 			result[size++] = '0' + access;
@@ -390,7 +390,7 @@ void TlenUploadAvatar(TlenProtocol *proto, unsigned char *data, int dataLen, int
 	if (proto->threadData != NULL && dataLen > 0 && data != NULL) {
 		char *mpartHead =  "--AaB03x\r\nContent-Disposition: form-data; name=\"filename\"; filename=\"plik.png\"\r\nContent-Type: image/png\r\n\r\n";
 		char *mpartTail =  "\r\n--AaB03x--\r\n";
-		int size, sizeHead = strlen(mpartHead), sizeTail = strlen(mpartTail);
+		int size, sizeHead = (int)strlen(mpartHead), sizeTail = (int)strlen(mpartTail);
 		request = replaceTokens(proto->threadData->tlenConfig.mailBase, proto->threadData->tlenConfig.avatarUpload, "", proto->threadData->avatarToken, 0, access);
 		threadData = (TLENUPLOADAVATARTHREADDATA *)mir_alloc(sizeof(TLENUPLOADAVATARTHREADDATA));
         threadData->proto = proto;

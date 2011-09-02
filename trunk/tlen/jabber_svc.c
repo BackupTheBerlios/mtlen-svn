@@ -54,7 +54,7 @@ DWORD TlenGetCaps(PROTO_INTERFACE *ptr, int type, HANDLE hContact)
 	return 0;
 }
 
-int TlenGetName(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenGetName(void *ptr, WPARAM wParam, LPARAM lParam)
 {
     TlenProtocol *proto = (TlenProtocol *)ptr;
 	strncpy((char *) lParam, proto->iface.m_szProtoName, wParam);
@@ -438,7 +438,7 @@ int TlenSetStatus(PROTO_INTERFACE *ptr, int iNewStatus)
 	return 0;
 }
 
-int TlenGetStatus(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenGetStatus(void *ptr, WPARAM wParam, LPARAM lParam)
 {
     TlenProtocol *proto = (TlenProtocol *)ptr;
 	return proto->iface.m_iStatus;
@@ -609,7 +609,7 @@ static void __cdecl TlenGetAwayMsgThread(void *ptr)
     mir_free(data);
 }
 
-int TlenSendAlert(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenSendAlert(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	HANDLE hContact = ( HANDLE )wParam;
 	DBVARIANT dbv;
@@ -691,7 +691,7 @@ int TlenSendMessage(PROTO_INTERFACE *ptr, HANDLE hContact, int flags, const char
 /////////////////////////////////////////////////////////////////////////////////////////
 // JabberGetAvatarInfo - retrieves the avatar info
 
-static int TlenGetAvatarInfo(void *ptr, WPARAM wParam, LPARAM lParam)
+static INT_PTR TlenGetAvatarInfo(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	BOOL downloadingAvatar = FALSE;
 	char *avatarHash = NULL;
@@ -1078,7 +1078,7 @@ int TlenUserIsTyping(PROTO_INTERFACE *ptr, HANDLE hContact, int type)
 	return 0;
 }
 
-int TlenGetMyAvatar(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenGetMyAvatar(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	char* buf = ( char* )wParam;
 	int  size = ( int )lParam;
@@ -1091,7 +1091,7 @@ int TlenGetMyAvatar(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-static BOOL CALLBACK TlenChangeAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam )
+static INT_PTR CALLBACK TlenChangeAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam )
 {
 	switch ( msg ) {
 	case WM_INITDIALOG:
@@ -1120,7 +1120,7 @@ static BOOL CALLBACK TlenChangeAvatarDlgProc( HWND hwndDlg, UINT msg, WPARAM wPa
 	return 0;
 }
 
-int TlenSetMyAvatar(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenSetMyAvatar(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	char* szFileName = ( char* )lParam;
    	char tFileName[ MAX_PATH ];
@@ -1150,7 +1150,7 @@ int TlenSetMyAvatar(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenGetAvatarCaps(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenGetAvatarCaps(void *ptr, WPARAM wParam, LPARAM lParam)
 {
     TlenProtocol *proto = (TlenProtocol *)ptr;
 	switch (wParam) {
@@ -1205,7 +1205,7 @@ int TlenAuthRecv(PROTO_INTERFACE *ptr,  HANDLE hContact, PROTORECVEVENT* evt )
 }
 
 // PSS_AUTHREQUEST
-int TlenAuthRequest(PROTO_INTERFACE *ptr,  HANDLE hContact, const TCHAR* szMessage )
+DWORD_PTR TlenAuthRequest(PROTO_INTERFACE *ptr,  HANDLE hContact, const TCHAR* szMessage )
 {
 	return 1;
 }
@@ -1221,9 +1221,9 @@ int TlenRecvContacts(PROTO_INTERFACE *ptr,   HANDLE hContact, PROTORECVEVENT* ev
 }
 
 
-extern BOOL CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+extern INT_PTR CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
-int TlenAccMgrUI(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenAccMgrUI(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	return (int) CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_ACCMGRUI), (HWND)lParam, TlenAccMgrUIDlgProc, (LPARAM) ptr);
 }

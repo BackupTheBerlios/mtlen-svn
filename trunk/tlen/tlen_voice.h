@@ -58,7 +58,7 @@ typedef struct TLEN_VOICE_CONTROL_STRUCT {
 extern void __cdecl TlenVoiceSendingThread(TLEN_FILE_TRANSFER *ft);
 extern void __cdecl TlenVoiceReceiveThread(TLEN_FILE_TRANSFER *ft);
 extern int TlenVoiceIsInUse(TlenProtocol *proto);
-extern int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam);
+extern INT_PTR TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int TlenVoiceCancelAll(TlenProtocol *proto);
 extern int TlenVoiceStart(TLEN_FILE_TRANSFER *ft, int mode) ;
 extern int TlenVoiceAccept(TlenProtocol *proto, const char *id, const char *from);

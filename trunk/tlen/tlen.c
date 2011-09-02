@@ -46,7 +46,11 @@ HANDLE hMainThread;
 PLUGININFOEX pluginInfoEx = {
 	sizeof(PLUGININFOEX),
 #ifdef _UNICODE
+#ifdef _X64
+	"Tlen Protocol (x64, Unicode)",
+#else
 	"Tlen Protocol (Unicode)",
+#endif
 #else
 	"Tlen Protocol",
 #endif
@@ -228,7 +232,7 @@ static int TlenPrebuildContactMenu(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenContactMenuHandleRequestAuth(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenContactMenuHandleRequestAuth(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	HANDLE hContact;
 	DBVARIANT dbv;
@@ -242,7 +246,7 @@ int TlenContactMenuHandleRequestAuth(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenContactMenuHandleGrantAuth(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenContactMenuHandleGrantAuth(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	HANDLE hContact;
 	DBVARIANT dbv;
@@ -256,7 +260,7 @@ int TlenContactMenuHandleGrantAuth(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenContactMenuHandleSendPicture(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenContactMenuHandleSendPicture(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	HANDLE hContact;
     TlenProtocol *proto = (TlenProtocol *)ptr;
@@ -266,7 +270,7 @@ int TlenContactMenuHandleSendPicture(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenMenuHandleInbox(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenMenuHandleInbox(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	char szFileName[ MAX_PATH ];
 	DBVARIANT dbv;
@@ -303,7 +307,7 @@ int TlenMenuHandleInbox(void *ptr, WPARAM wParam, LPARAM lParam)
 		req.headersCount = 1;
 		req.headers = headers;
 		req.pData = form;
-		req.dataLength = strlen(form);
+		req.dataLength = (int)strlen(form);
 		req.szUrl = "http://poczta.o2.pl/login.html";
 		resp = (NETLIBHTTPREQUEST *)CallService(MS_NETLIB_HTTPTRANSACTION, (WPARAM)proto->hNetlibUser, (LPARAM)&req);
 		if (resp != NULL) {

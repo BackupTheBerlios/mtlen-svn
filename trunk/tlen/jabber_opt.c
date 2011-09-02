@@ -27,10 +27,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <commctrl.h>
 #include "resource.h"
 
-static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
 typedef struct TabDefStruct {
 	DLGPROC dlgProc;
@@ -118,7 +118,7 @@ int TlenOptionsInit(TlenProtocol *proto, WPARAM wParam, LPARAM lParam)
 
 static LRESULT CALLBACK JabberValidateUsernameWndProc(HWND hwndEdit, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	WNDPROC oldProc = (WNDPROC) GetWindowLong(hwndEdit, GWL_USERDATA);
+	WNDPROC oldProc = (WNDPROC) GetWindowLongPtr(hwndEdit, GWLP_USERDATA);
 
 	switch (msg) {
 	case WM_CHAR:
@@ -129,18 +129,18 @@ static LRESULT CALLBACK JabberValidateUsernameWndProc(HWND hwndEdit, UINT msg, W
 	return CallWindowProc(oldProc, hwndEdit, msg, wParam, lParam);
 }
 
-BOOL CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	char text[256];
 	WNDPROC oldProc;
 
-    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		{
 			DBVARIANT dbv;
 			proto = (TlenProtocol *)lParam;
-            SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)proto);
 			TranslateDialogDefault(hwndDlg);
 			if (!DBGetContactSettingTString(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, dbv.ptszVal);
@@ -153,9 +153,9 @@ BOOL CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM 
 			}
 			CheckDlgButton(hwndDlg, IDC_SAVEPASSWORD, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", TRUE));
 
-			oldProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_USERDATA, (LONG) oldProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC, (LONG) JabberValidateUsernameWndProc);
+			oldProc = (WNDPROC) GetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_USERDATA);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_USERDATA, (LONG_PTR) oldProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_WNDPROC, (LONG_PTR) JabberValidateUsernameWndProc);
 			return TRUE;
 		}
 	case WM_COMMAND:
@@ -209,18 +209,18 @@ BOOL CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM 
 	return FALSE;
 }
 
-static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	char text[256];
 	WNDPROC oldProc;
 
-    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		{
 			DBVARIANT dbv;
 			proto = (TlenProtocol *)lParam;
-            SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)proto);
 			TranslateDialogDefault(hwndDlg);
 			if (!DBGetContactSettingTString(NULL, proto->iface.m_szModuleName, "LoginName", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_USERNAME, dbv.ptszVal);
@@ -270,9 +270,9 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 	        SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_ADDSTRING, 0, (LPARAM)TranslateT("Invisible"));
 			SendDlgItemMessage(hwndDlg, IDC_OFFLINE_MESSAGE_OPTION, CB_SETCURSEL, proto->tlenOptions.offlineMessageOption, 0);
 
-			oldProc = (WNDPROC) GetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_USERDATA, (LONG) oldProc);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWL_WNDPROC, (LONG) JabberValidateUsernameWndProc);
+			oldProc = (WNDPROC) GetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_WNDPROC);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_USERDATA, (LONG_PTR) oldProc);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_WNDPROC, (LONG_PTR) JabberValidateUsernameWndProc);
 			return TRUE;
 		}
 	case WM_COMMAND:
@@ -362,14 +362,14 @@ static BOOL CALLBACK TlenBasicOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 	return FALSE;
 }
 
-static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		{
 			proto = (TlenProtocol *)lParam;
-            SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)proto);
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Always ask me"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept invitations from authorized contacts"));
 			SendDlgItemMessage(hwndDlg, IDC_VOICE_POLICY, CB_ADDSTRING, 0, (LPARAM)TranslateT("Accept all invitations"));
@@ -407,18 +407,18 @@ static BOOL CALLBACK TlenVoiceOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, 
 	return FALSE;
 }
 
-static BOOL CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK TlenAdvOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	char text[256];
 	BOOL bChecked;
-    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (msg) {
 	case WM_INITDIALOG:
 		{
 			DBVARIANT dbv;
 			proto = (TlenProtocol *)lParam;
-            SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)proto);
 			TranslateDialogDefault(hwndDlg);
 			if (!DBGetContactSettingTString(NULL, proto->iface.m_szModuleName, "LoginServer", &dbv)) {
 				SetDlgItemText(hwndDlg, IDC_EDIT_LOGIN_SERVER, dbv.ptszVal);
@@ -621,15 +621,15 @@ static void MailPopupPreview(DWORD colorBack, DWORD colorText, char *title, char
 	}
 }
 
-static BOOL CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK TlenPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 		case WM_INITDIALOG:
 			{
 				BYTE delayMode;
 				proto = (TlenProtocol *)lParam;
-                SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
+				SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)proto);
 				TranslateDialogDefault(hwndDlg);
 				CheckDlgButton(hwndDlg, IDC_ENABLEPOPUP, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "MailPopupEnabled", TRUE));
 				SendDlgItemMessage(hwndDlg, IDC_COLORBKG, CPM_SETCOLOUR, 0, DBGetContactSettingDword(NULL, proto->iface.m_szModuleName, "MailPopupBack", POPUP_DEFAULT_COLORBKG));

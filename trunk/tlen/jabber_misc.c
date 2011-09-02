@@ -60,7 +60,7 @@ void JabberDBAddAuthRequest(TlenProtocol *proto, char *jid, char *nick)
 	JabberLog(proto, "auth request: %s, %s", jid, nick);
 	//blob is: uin(DWORD), hContact(HANDLE), nick(ASCIIZ), first(ASCIIZ), last(ASCIIZ), email(ASCIIZ), reason(ASCIIZ)
 	//blob is: 0(DWORD), hContact(HANDLE), nick(ASCIIZ), ""(ASCIIZ), ""(ASCIIZ), email(ASCIIZ), ""(ASCIIZ)
-	cbBlob = sizeof(DWORD) + sizeof(HANDLE) + strlen(nick) + strlen(jid) + 5;
+	cbBlob = sizeof(DWORD) + sizeof(HANDLE) + (int)strlen(nick) + (int)strlen(jid) + 5;
 	pBlob = pCurBlob = (PBYTE) mir_alloc(cbBlob);
 	*((PDWORD) pCurBlob) = 0; pCurBlob += sizeof(DWORD);
 	*((PHANDLE) pCurBlob) = hContact; pCurBlob += sizeof(HANDLE);

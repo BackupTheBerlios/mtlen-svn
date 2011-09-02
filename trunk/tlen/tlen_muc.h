@@ -32,9 +32,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define USER_FLAGS_KICKED			0x80
 
 extern BOOL TlenMUCInit(TlenProtocol *proto);
-extern int TlenMUCMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam);
-extern int TlenMUCMenuHandleChats(void *ptr, WPARAM wParam, LPARAM lParam);
-extern int TlenMUCContactMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam);
+extern INT_PTR TlenMUCMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam);
+extern INT_PTR TlenMUCMenuHandleChats(void *ptr, WPARAM wParam, LPARAM lParam);
+extern INT_PTR TlenMUCContactMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int TlenMUCCreateWindow(TlenProtocol *proto, const char *roomID, const char *roomName, int roomFlags, const char *nick, const char *iqId);
 extern int TlenMUCRecvInvitation(TlenProtocol *proto, const char *roomJid, const char *roomName, const char *from, const char *reason);
 extern int TlenMUCRecvPresence(TlenProtocol *proto, const char *from, int status, int flags,  const char *kick);

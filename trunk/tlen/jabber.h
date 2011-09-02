@@ -432,7 +432,7 @@ extern JABBER_FIELD_MAP tlenFieldStatus[];
 extern JABBER_FIELD_MAP tlenFieldOccupation[];
 extern JABBER_FIELD_MAP tlenFieldPlan[];
 
-BOOL CALLBACK TlenAdvSearchDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK TlenAdvSearchDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 char *TlenAdvSearchCreateQuery(HWND hwndDlg, int iqId);
 
 

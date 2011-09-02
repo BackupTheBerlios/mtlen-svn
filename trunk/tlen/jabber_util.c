@@ -153,7 +153,7 @@ int JabberSend(TlenProtocol *proto, const char *fmt, ...)
 	va_end(vararg);
 
 	JabberLog(proto, "SEND:%s", str);
-	size = strlen(str);
+	size = (int)strlen(str);
     if (proto->threadData != NULL) {
         if (proto->threadData->useAES) {
             result = JabberWsSendAES(proto, str, size, &proto->threadData->aes_out_context, proto->threadData->aes_out_iv);
@@ -247,7 +247,7 @@ char *JabberSha1(char *str)
 		return NULL;
 
 	mir_sha1_init( &sha );
-	mir_sha1_append( &sha, (mir_sha1_byte_t* )str, strlen( str ));
+	mir_sha1_append( &sha, (mir_sha1_byte_t* )str, (int)strlen( str ));
 	mir_sha1_finish( &sha, (mir_sha1_byte_t* )digest );
 	if ((result=(char *)mir_alloc(41)) == NULL)
 		return NULL;
@@ -588,8 +588,8 @@ void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...)
 		len = 0;
 	}
 	else {
-		len = strlen(*str);
-		size = *sizeAlloced - strlen(*str);
+		len = (int)strlen(*str);
+		size = *sizeAlloced - (int)strlen(*str);
 	}
 
 	p = *str + len;

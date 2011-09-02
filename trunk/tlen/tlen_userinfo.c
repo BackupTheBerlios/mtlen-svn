@@ -75,7 +75,7 @@ JABBER_FIELD_MAP tlenFieldPlan[] = {
 	{ 0, NULL }
 };
 
-static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
 static void InitComboBox(HWND hwndCombo, JABBER_FIELD_MAP *fieldMap)
 {
@@ -164,15 +164,15 @@ typedef struct {
 }TLENUSERINFODLGDATA;
 
 
-static BOOL CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK TlenUserInfoDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    TLENUSERINFODLGDATA *data = (TLENUSERINFODLGDATA *) GetWindowLong(hwndDlg, GWL_USERDATA);
+    TLENUSERINFODLGDATA *data = (TLENUSERINFODLGDATA *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 
         data = (TLENUSERINFODLGDATA*)mir_alloc(sizeof(TLENUSERINFODLGDATA));
         data->hContact = (HANDLE) lParam;
-        SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)data);
+        SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)data);
 		// lParam is hContact
 		TranslateDialogDefault(hwndDlg);
 		InitComboBox(GetDlgItem(hwndDlg, IDC_GENDER), tlenFieldGender);

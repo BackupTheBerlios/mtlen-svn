@@ -50,7 +50,7 @@ static void TlenPsPostThread(void *ptr) {
         item->ft->s = socket;
         item->ft->hFileEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
         _snprintf(header, sizeof(header), "<pic auth='%s' t='p' to='%s' size='%d' idt='%s'/>", proto->threadData->username, item->ft->jid, item->ft->fileTotalSize, item->jid);
-        JabberWsSend(proto, socket, header, strlen(header));
+        JabberWsSend(proto, socket, header, (int)strlen(header));
         ret = WaitForSingleObject(item->ft->hFileEvent, 1000 * 60 * 5);
         if (ret == WAIT_OBJECT_0) {
             FILE *fp = fopen( item->ft->files[0], "rb" );
@@ -59,11 +59,11 @@ static void TlenPsPostThread(void *ptr) {
                 char header[512];
                 char fileBuffer[2048];
                 _snprintf(header, sizeof(header), "<pic st='%s' idt='%s'/>", item->ft->iqId, item->jid);
-                JabberWsSend(proto, socket, header, strlen(header));
+                JabberWsSend(proto, socket, header, (int)strlen(header));
                 JabberLog(proto, "Sending picture data...");
                 for (i = item->ft->filesSize[0]; i > 0; ) {
                     int toread = min(2048, i);
-                    int readcount = fread(fileBuffer, 1, toread, fp);
+                    int readcount = (int)fread(fileBuffer, (size_t)1, (size_t)toread, fp);
                     i -= readcount;
                     if (readcount > 0) {
                         JabberWsSend(proto, socket, fileBuffer, readcount);
@@ -115,7 +115,7 @@ static void TlenPsGetThread(void *ptr) {
 			char fileBuffer[2048];
 			JabberXmlInitState(&xmlState);
             _snprintf(header, sizeof(header), "<pic auth='%s' t='g' to='%s' pid='1001' idt='%s' rt='%s'/>", proto->threadData->username, item->ft->jid, item->jid, item->ft->id2);
-            JabberWsSend(proto, socket, header, strlen(header));
+            JabberWsSend(proto, socket, header, (int)strlen(header));
             JabberLog(proto, "Reveiving picture data...");
             {
                 int totalcount = 0;
@@ -294,7 +294,7 @@ BOOL SendPicture(TlenProtocol *proto, HANDLE hContact) {
                     mir_sha1_init( &sha );
                     for (i = item->ft->filesSize[0]; i > 0; ) {
                         int toread = min(2048, i);
-                        int readcount = fread(fileBuffer, 1, toread, fp);
+                        int readcount = (int)fread(fileBuffer, (size_t)1, (size_t)toread, fp);
                         i -= readcount;
                         if (readcount > 0) {
                             mir_sha1_append( &sha, (mir_sha1_byte_t* )fileBuffer, readcount);

@@ -697,7 +697,7 @@ int TlenVoiceCancelAll(TlenProtocol *proto)
 	return 0;
 }
 
-int TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenVoiceContactMenuHandleVoice(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	HANDLE hContact;
 	DBVARIANT dbv;
@@ -794,16 +794,16 @@ static void TlenVoiceInitVUMeters()
 	mir_free(pBits);
 }
 
-static BOOL CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK TlenVoiceDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     HDC hDC, hMemDC;
     int v;
     static int counter;
-    TlenProtocol *proto = (TlenProtocol *)GetWindowLong(hwndDlg, GWL_USERDATA);
+    TlenProtocol *proto = (TlenProtocol *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
     switch (msg) {
 	case WM_INITDIALOG:
             proto = (TlenProtocol *)lParam;
-            SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)proto);
+            SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)proto);
             proto->voiceDlgHWND = hwndDlg;
             TranslateDialogDefault(hwndDlg);
             SendDlgItemMessage(hwndDlg, IDC_VCQUALITY, CB_ADDSTRING, 0, (LPARAM) TranslateT("8000 Hz / 13.8 kbps"));
@@ -968,7 +968,7 @@ typedef struct {
     JABBER_LIST_ITEM *item;
 }ACCEPTDIALOGDATA;
 
-static BOOL CALLBACK TlenVoiceAcceptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK TlenVoiceAcceptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	ACCEPTDIALOGDATA * data;
 	char *str;

@@ -166,7 +166,7 @@ void TlenP2PEstablishOutgoingConnection(TLEN_FILE_TRANSFER *ft, BOOL sendAck)
 		TlenP2PPacketPackDword(packet, 1);
 		TlenP2PPacketPackDword(packet, (DWORD) atoi(ft->iqId));
 		_snprintf(str, sizeof(str), "%08X%s%d", atoi(ft->iqId), proto->threadData->username, atoi(ft->iqId));
-		hash = TlenSha1(str, strlen(str));
+		hash = TlenSha1(str, (int)strlen(str));
 		TlenP2PPacketPackBuffer(packet, hash, 20);
 		mir_free(hash);
 		TlenP2PPacketSend(ft->s, packet);
@@ -216,7 +216,7 @@ TLEN_FILE_TRANSFER* TlenP2PEstablishIncomingConnection(TlenProtocol *proto, JABB
 				nick = JabberNickFromJID(item->ft->jid);
 				_snprintf(str, sizeof(str), "%08X%s%d", iqId, nick, iqId);
 				mir_free(nick);
-				hash = TlenSha1(str, strlen(str));
+				hash = TlenSha1(str, (int)strlen(str));
 				for (j=0;j<20;j++) {
 					if (hash[j]!=packet->packet[2*sizeof(DWORD)+j]) break;
 				}
@@ -321,7 +321,7 @@ static JABBER_SOCKET TlenP2PBindSocks4(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 	*(PDWORD)(buf+4) = INADDR_ANY;
 	if (sb->useAuth) {
 		strcpy((char*)buf+8, sb->szUser);
-		len = strlen(sb->szUser);
+		len = (int)strlen(sb->szUser);
 	} else {
 		buf[8] = 0;
 		len = 0;
@@ -389,8 +389,8 @@ static JABBER_SOCKET TlenP2PBindSocks5(SOCKSBIND * sb, TLEN_FILE_TRANSFER *ft)
 		int nUserLen, nPassLen;
 		PBYTE pAuthBuf;
 
-		nUserLen = strlen(sb->szUser);
-		nPassLen = strlen(sb->szPassword);
+		nUserLen = (int)strlen(sb->szUser);
+		nPassLen = (int)strlen(sb->szPassword);
 		pAuthBuf = (PBYTE)mir_alloc(3+nUserLen+nPassLen);
 		pAuthBuf[0] = 1;		//auth version
 		pAuthBuf[1] = nUserLen;

@@ -1010,7 +1010,7 @@ static int TlenMUCQueryContacts(TlenProtocol *proto, const char *roomId) {
 }
 
 
-int TlenMUCMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenMUCMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	TlenProtocol *proto = (TlenProtocol *)ptr;
 	if (!proto->isOnline) {
@@ -1033,7 +1033,7 @@ int TlenMUCMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenMUCMenuHandleChats(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenMUCMenuHandleChats(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	MUCCWINDOW mucw;
 	TlenProtocol *proto = (TlenProtocol *)ptr;
@@ -1048,7 +1048,7 @@ int TlenMUCMenuHandleChats(void *ptr, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int TlenMUCContactMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam)
+INT_PTR TlenMUCContactMenuHandleMUC(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 	HANDLE hContact;
 	DBVARIANT dbv;

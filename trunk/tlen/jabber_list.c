@@ -110,7 +110,8 @@ static char * GetItemId(JABBER_LIST list, const char *jid)
 
 int JabberListExist(TlenProtocol *proto, JABBER_LIST list, const char *jid)
 {
-	int i, len;
+	int i;
+	size_t len;
 	char *s, *p;
     s = GetItemId(list, jid);
 	len = strlen(s);
@@ -119,7 +120,7 @@ int JabberListExist(TlenProtocol *proto, JABBER_LIST list, const char *jid)
 	for(i=0; i<proto->listsCount; i++)
 		if (proto->lists[i].list==list) {
 			p = proto->lists[i].jid;
-			if (p && (int)strlen(p)>=len && (p[len]=='\0'||p[len]=='/') && !strncmp(p, s, len)) {
+			if (p && strlen(p)>=len && (p[(int)len]=='\0'||p[(int)len]=='/') && !strncmp(p, s, len)) {
 			  	LeaveCriticalSection(&proto->csLists);
 				mir_free(s);
 				return i+1;
@@ -278,7 +279,8 @@ JABBER_LIST_ITEM *JabberListGetItemPtr(TlenProtocol *proto, JABBER_LIST list, co
 JABBER_LIST_ITEM *JabberListFindItemPtrById2(TlenProtocol *proto, JABBER_LIST list, const char *id)
 {
 
-	int i, len;
+	int i;
+	size_t len;
 	char *p;
 
 	len = strlen(id);
