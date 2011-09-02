@@ -65,7 +65,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdarg.h>
 #include <time.h>
 #include <limits.h>
-#define TV_KEYDOWN
 #include <win2k.h>
 
 #include <newpluginapi.h>
@@ -94,8 +93,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*******************************************************************
  * Global constants
  *******************************************************************/
-#define TLEN_VERSION PLUGIN_MAKE_VERSION(2,0,3,2)
-#define TLEN_VERSION_STRING  "2.0.3.2"
+#define TLEN_VERSION PLUGIN_MAKE_VERSION(2,0,3,5)
+#define TLEN_VERSION_STRING  "2.0.3.5"
 #define TLEN_DEFAULT_PORT 443
 #define JABBER_IQID "mim_"
 #define TLEN_REGISTER   "http://reg.tlen.pl/"

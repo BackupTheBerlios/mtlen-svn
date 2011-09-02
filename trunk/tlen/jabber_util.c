@@ -626,10 +626,10 @@ BOOL IsAuthorized(TlenProtocol *proto, const char *jid)
 
 void TlenLogMessage(TlenProtocol *proto, HANDLE hContact, DWORD flags, const char *message)
 {
-    DWORD size = strlen(message) + 2;
+    int size = (int)strlen(message) + 2;
     char *localMessage = (char *)mir_alloc(size);
     strcpy(localMessage, message);
     localMessage[size - 1] = '\0';
-    JabberDBAddEvent(proto, hContact, EVENTTYPE_MESSAGE, flags, message, size);
+    JabberDBAddEvent(proto, hContact, EVENTTYPE_MESSAGE, flags, (PBYTE)message, (DWORD)size);
     mir_free(localMessage);
 }

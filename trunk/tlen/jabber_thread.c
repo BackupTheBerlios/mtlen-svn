@@ -609,11 +609,11 @@ static void JabberProcessMessage(XmlNode *node, ThreadData *info)
 	HANDLE hContact;
 	CCSDATA ccs;
 	PROTORECVEVENT recv;
-	XmlNode *bodyNode, *subjectNode, *xNode, *idNode, *n;
+	XmlNode *bodyNode, *subjectNode, *xNode, *n;
 	char *from, *type, *nick, *p, *localMessage, *idStr;
 	DWORD msgTime;
 	BOOL delivered, composing;
-	int i, id;
+	int i;
 	JABBER_LIST_ITEM *item;
 	BOOL isChatRoomJid;
 

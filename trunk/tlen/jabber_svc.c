@@ -334,7 +334,7 @@ int TlenAuthAllow(PROTO_INTERFACE *ptr, HANDLE hContact)
 	return 0;
 }
 
-int TlenAuthDeny(PROTO_INTERFACE *ptr, HANDLE hContact, const char* szReason)
+int TlenAuthDeny(PROTO_INTERFACE *ptr, HANDLE hContact, const TCHAR* szReason)
 {
 	DBEVENTINFO dbei;
 	char *nick, *firstName, *lastName, *jid;
@@ -1205,7 +1205,7 @@ int TlenAuthRecv(PROTO_INTERFACE *ptr,  HANDLE hContact, PROTORECVEVENT* evt )
 }
 
 // PSS_AUTHREQUEST
-int TlenAuthRequest(PROTO_INTERFACE *ptr,  HANDLE hContact, const char* szMessage )
+int TlenAuthRequest(PROTO_INTERFACE *ptr,  HANDLE hContact, const TCHAR* szMessage )
 {
 	return 1;
 }

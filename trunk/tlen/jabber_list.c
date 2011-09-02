@@ -132,7 +132,7 @@ int JabberListExist(TlenProtocol *proto, JABBER_LIST list, const char *jid)
 
 JABBER_LIST_ITEM *JabberListAdd(TlenProtocol *proto, JABBER_LIST list, const char *jid)
 {
-	char *s, *p, *q;
+	char *s;
 	JABBER_LIST_ITEM *item;
 
 	EnterCriticalSection(&proto->csLists);
