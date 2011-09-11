@@ -423,8 +423,7 @@ int TlenSetStatus(PROTO_INTERFACE *ptr, int iNewStatus)
 			}
 		}
 	}
-	//else if (iNewStatus != proto->iface.m_iStatus) {
-	else if (iNewStatus != proto->iface.m_iStatus&& !proto->threadData && !( proto->iface.m_iStatus >= ID_STATUS_CONNECTING && proto->iface.m_iStatus < ID_STATUS_CONNECTING + MAX_CONNECT_RETRIES)) {
+	else if (iNewStatus != proto->iface.m_iStatus) {
 		if (!proto->isConnected)
 			TlenConnect(proto, iNewStatus);
 		else {
