@@ -36,8 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern int TlenOnModulesLoaded(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int TlenOptionsInit(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int TlenPreShutdown(void *ptr, WPARAM wParam, LPARAM lParam);
-
-DWORD TlenGetCaps(PROTO_INTERFACE *ptr, int type, HANDLE hContact)
+DWORD_PTR TlenGetCaps(PROTO_INTERFACE *ptr, int type, HANDLE hContact)
 {
 	if (type == PFLAGNUM_1)
 		return PF1_IM|PF1_AUTHREQ|PF1_SERVERCLIST|PF1_MODEMSG|PF1_BASICSEARCH|PF1_SEARCHBYEMAIL|PF1_EXTSEARCH|PF1_EXTSEARCHUI|PF1_SEARCHBYNAME|PF1_FILE;//|PF1_VISLIST|PF1_INVISLIST;
@@ -1204,7 +1203,7 @@ int TlenAuthRecv(PROTO_INTERFACE *ptr,  HANDLE hContact, PROTORECVEVENT* evt )
 }
 
 // PSS_AUTHREQUEST
-DWORD_PTR TlenAuthRequest(PROTO_INTERFACE *ptr,  HANDLE hContact, const TCHAR* szMessage )
+int TlenAuthRequest(PROTO_INTERFACE *ptr,  HANDLE hContact, const TCHAR* szMessage )
 {
 	return 1;
 }
