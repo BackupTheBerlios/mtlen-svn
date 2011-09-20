@@ -287,7 +287,7 @@ typedef struct ThreadDataStruct{
 	WORD port;
 	BOOL useEncryption;
 
-    JABBER_SOCKET s;
+    JABBER_SOCKET s;    //HANDLE from CallService(MS_NETLIB_OPENCONNECTION (jabber_ws.c:68)
 	aes_context aes_in_context;
 	aes_context aes_out_context;
 	unsigned char aes_in_iv[16];

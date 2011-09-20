@@ -58,12 +58,13 @@ void JabberWsUninit(TlenProtocol *proto)
 
 JABBER_SOCKET JabberWsConnect(TlenProtocol *proto, char *host, WORD port)
 {
-	NETLIBOPENCONNECTION nloc;
+    NETLIBOPENCONNECTION nloc = {0};
 
-	nloc.cbSize = NETLIBOPENCONNECTION_V1_SIZE;//sizeof(NETLIBOPENCONNECTION);
+	nloc.cbSize = sizeof(NETLIBOPENCONNECTION); //NETLIBOPENCONNECTION_V1_SIZE;
 	nloc.szHost = host;
 	nloc.wPort = port;
 	nloc.flags = 0;
+    nloc.timeout = 6;
 	return (HANDLE) CallService(MS_NETLIB_OPENCONNECTION, (WPARAM) proto->hNetlibUser, (LPARAM) &nloc);
 }
 
