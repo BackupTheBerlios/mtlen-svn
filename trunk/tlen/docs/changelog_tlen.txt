@@ -1,3 +1,13 @@
+Version 2.0.4.1
+-------
+- fix accounts... dialog
+Version 2.0.4.0
+-------
++ x64 version
+* set timeout to NETLIBOPENCONNECTION (patch by piotrw)
+* fix for display texts at comboboxes in unicode (patch by piotrw)
+* fixes in Find/Add Contacts search (by piotrw, dezeath and wsx22)
+* fix warnings, project files changes (add VS2010)
 Version 2.0.3.2
 -------
 * update PolarSSL library to polarssl-1.0.0
