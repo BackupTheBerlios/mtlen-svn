@@ -1223,7 +1223,7 @@ extern INT_PTR CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wPara
 
 INT_PTR TlenAccMgrUI(void *ptr, WPARAM wParam, LPARAM lParam)
 {
-	return (int) CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_ACCMGRUI), (HWND)lParam, TlenAccMgrUIDlgProc, (LPARAM) ptr);
+	return (INT_PTR) CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_ACCMGRUI), (HWND)lParam, TlenAccMgrUIDlgProc, (LPARAM) ptr);
 }
 
 void TlenInitServicesVTbl(TlenProtocol *proto) {

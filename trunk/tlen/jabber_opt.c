@@ -153,7 +153,7 @@ INT_PTR CALLBACK TlenAccMgrUIDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPAR
 			}
 			CheckDlgButton(hwndDlg, IDC_SAVEPASSWORD, DBGetContactSettingByte(NULL, proto->iface.m_szModuleName, "SavePassword", TRUE));
 
-			oldProc = (WNDPROC) GetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_USERDATA);
+			oldProc = (WNDPROC) GetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_WNDPROC);
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_USERDATA, (LONG_PTR) oldProc);
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_USERNAME), GWLP_WNDPROC, (LONG_PTR) JabberValidateUsernameWndProc);
 			return TRUE;
