@@ -1,4 +1,5 @@
 #include "resource.h"
+#include "../tlen_build/tlen_commons.h"
 #ifdef __MINGW32__
 	#define WINVER 0x500
 	#define _WIN32_IE 0x500
@@ -376,8 +377,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,4,1
- PRODUCTVERSION 2,0,4,1
+ FILEVERSION TLEN_FILEVERSION_STRING
+ PRODUCTVERSION TLEN_FILEVERSION_STRING
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -395,14 +396,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Tlen Protocol Plugin for Miranda IM\0"
-            VALUE "FileVersion", "2.0.4.1\0"
+            VALUE "FileVersion", TLEN_VERSION_STRING
             VALUE "InternalName", "tlen\0"
             VALUE "LegalCopyright", "Copyright (c) 2002-2011 Santithorn Bunchua, Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "tlen.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Tlen Protocol Plugin\0"
-            VALUE "ProductVersion", "2.0.4.1\0"
+            VALUE "ProductVersion", TLEN_VERSION_STRING
             VALUE "SpecialBuild", "\0"
         END
     END
