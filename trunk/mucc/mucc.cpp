@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#include "../tlen_build/tlen_commons.h"
 #include "mucc.h"
 #include "mucc_services.h"
 #include "HelperDialog.h"
@@ -33,17 +34,34 @@ HICON muccIcon[MUCC_ICON_TOTAL];
 static int ModulesLoaded(WPARAM wParam, LPARAM lParam);
 static int PreShutdown(WPARAM wParam, LPARAM lParam);
 
-PLUGININFO pluginInfo = {
-	sizeof(PLUGININFO),
+PLUGININFOEX pluginInfoEx = {
+	sizeof(PLUGININFOEX),
+#ifdef _UNICODE
+#ifdef _X64
+	"MUCC Plugin (x64, Unicode)",
+#else
+	"MUCC Plugin (Unicode)",
+#endif
+#else
 	"MUCC Plugin",
-	PLUGIN_MAKE_VERSION(1,0,6,8),
-	"Group chats GUI plugin for Miranda IM (1.0.6.8 "__DATE__")",
+#endif
+	PLUGIN_MAKE_VERSION(MUCC_MAJOR_VERSION,MUCC_MINOR_VERSION,MUCC_RELEASE_NUM,MUCC_BUILD_NUM),
+	"Group chats GUI plugin for Miranda IM (version: "MUCC_VERSION_STRING" ; compiled: "__DATE__" "__TIME__")",
 	"Piotr Piastucki",
 	"the_leech@users.berlios.de",
 	"(c) 2004-2005 Piotr Piastucki",
 	"http://mtlen.berlios.de",
 	0,
-	0
+	0,
+#if defined( _UNICODE )
+#ifdef _X64
+	{0x9061ae31, 0x3d33, 0x49ce, { 0xaf, 0x00, 0x78, 0x9c, 0xbc, 0x25, 0xd9, 0xba }}
+#else
+	{0xadd9390c, 0x1dd4, 0x4c0d, { 0x9b, 0xa9, 0xcc, 0x76, 0x5d, 0x3d, 0xe5, 0x97 }}
+#endif
+#else
+    {0x5cf4792c, 0xa050, 0x46b6, { 0xaf, 0xd0, 0x03, 0x2d, 0x6e, 0xfc, 0xd3, 0x9c }}
+#endif
 };
 
 extern "C" BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvReserved)
@@ -52,13 +70,27 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvRese
 	return TRUE;
 }
 
-extern "C" __declspec(dllexport) PLUGININFO *MirandaPluginInfo(DWORD mirandaVersion)
+extern "C" __declspec(dllexport) PLUGININFOEX *MirandaPluginInfoEx(DWORD mirandaVersion)
 {
-	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,3,4,0)) {
-		MessageBox(NULL, "The MUCC plugin cannot be loaded. It requires Miranda IM 0.3.4 or later.", "Tlen Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
+	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,8,0,15)) {
+		MessageBox(NULL, "The MUCC plugin cannot be loaded. It requires Miranda IM 0.8.15 or later.", "Tlen Protocol Plugin (MUCC Plugin)", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
 		return NULL;
 	}
-	return &pluginInfo;
+	return &pluginInfoEx;
+}
+
+#ifndef MIID_TLEN_MUCC
+#define MIID_TLEN_MUCC	{ 0xba658997, 0x0bce, 0x4f96, { 0xba, 0x48, 0x54, 0x55, 0x34, 0x16, 0x73, 0xea } }
+#endif
+
+static const MUUID interfaces[] = {
+		MIID_TLEN_MUCC,
+		MIID_LAST
+	};
+
+extern "C" __declspec(dllexport) const MUUID* MirandaPluginInterfaces(void)
+{
+	return interfaces;
 }
 
 
