@@ -1,5 +1,4 @@
 #include "resource.h"
-#include "../tlen_build/tlen_commons.h"
 #ifdef __MINGW32__
 	#define WINVER 0x500
 	#define _WIN32_IE 0x500
@@ -8,13 +7,9 @@
 	#define IDC_STATIC (-1)
 #endif
 #else
-//	  #define APSTUDIO_READONLY_SYMBOLS
-//    #include "winres.h"
-//    #undef APSTUDIO_READONLY_SYMBOLS
-    #include <windows.h>
-	#ifndef IDC_STATIC
-	#define IDC_STATIC (-1)
-    #endif
+	#define APSTUDIO_READONLY_SYMBOLS
+	#include "winres.h"
+	#undef APSTUDIO_READONLY_SYMBOLS
 #endif
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -496,8 +491,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION MUCC_FILEVERSION_STRING
- PRODUCTVERSION MUCC_FILEVERSION_STRING
+ FILEVERSION 1,0,6,8
+ PRODUCTVERSION 1,0,6,8
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -515,14 +510,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Group Chats GUI Plugin for Miranda IM\0"
-            VALUE "FileVersion", MUCC_VERSION_STRING
+            VALUE "FileVersion", "1.0.6.8\0"
             VALUE "InternalName", "mucc\0"
             VALUE "LegalCopyright", "Copyright (c) 2004-2005 Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "mucc.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "MUCC Plugin\0"
-            VALUE "ProductVersion", MUCC_VERSION_STRING
+            VALUE "ProductVersion", "1.0.6.8\0"
             VALUE "SpecialBuild", "\0"
         END
     END

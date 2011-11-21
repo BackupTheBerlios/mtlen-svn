@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "../tlen_build/tlen_commons.h"
 #include "jabber.h"
 #include "tlen_muc.h"
 #include "tlen_file.h"
@@ -34,7 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ctype.h>
 #include <m_icolib.h>
 #include <m_genmenu.h>
-#include "m_updater.h"
 
 
 struct MM_INTERFACE mmi;
@@ -56,8 +54,8 @@ PLUGININFOEX pluginInfoEx = {
 #else
 	"Tlen Protocol",
 #endif
-	PLUGIN_MAKE_VERSION(TLEN_MAJOR_VERSION,TLEN_MINOR_VERSION,TLEN_RELEASE_NUM,TLEN_BUILD_NUM),
-	"Tlen protocol plugin for Miranda IM (version: "TLEN_VERSION_STRING" ; compiled: "__DATE__" "__TIME__")",
+	TLEN_VERSION,
+	"Tlen protocol plugin for Miranda IM ("TLEN_VERSION_STRING" "__DATE__")",
 	"Santithorn Bunchua, Adam Strzelecki, Piotr Piastucki",
 	"the_leech@users.berlios.de",
 	"(c) 2002-2010 Santithorn Bunchua, Piotr Piastucki",
@@ -541,31 +539,6 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
     return proto;
 }
 
-int onSystemModulesLoaded(WPARAM wParam, LPARAM lParam)
-{
-
-    PLUGININFO* pluginInfoPtr = (PLUGININFO*)&pluginInfoEx;
-
-    // updater plugin support
-    if(ServiceExists(MS_UPDATE_REGISTERFL))
-	{
-    	
-		#ifdef _UNICODE
-		#ifdef _X64
-		CallService(MS_UPDATE_REGISTERFL, (WPARAM)4435, (LPARAM)pluginInfoPtr); //x64 version
-		#else
-		CallService(MS_UPDATE_REGISTERFL, (WPARAM)4405, (LPARAM)pluginInfoPtr); //Unicode version
-		#endif
-		#else
-		CallService(MS_UPDATE_REGISTERFL, (WPARAM)4404, (LPARAM)pluginInfoPtr); //ANSI version
-		#endif
-	
-	}
-
-
-	return 0;
-}
-
 static int tlenProtoUninit( TlenProtocol *proto )
 {
 	uninitMenuItems(proto);
@@ -615,8 +588,6 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	pd.fnUninit = ( pfnUninitProto )tlenProtoUninit;
 	pd.type = PROTOTYPE_PROTOCOL;
 	CallService(MS_PROTO_REGISTERMODULE, 0, (LPARAM) &pd);
-
-    HookEvent(ME_SYSTEM_MODULESLOADED, onSystemModulesLoaded);
 
 	return 0;
 }
