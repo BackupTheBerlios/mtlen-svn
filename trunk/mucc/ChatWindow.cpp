@@ -266,7 +266,7 @@ void ChatWindow::setRoomName(const char *roomName) {
 	Utils::copyString(&this->roomName, roomName);
 //	sprintf(str, "%s %08X", roomName, roomFlags);
 //	SetWindowText(hWnd, str);
-	SetWindowText(hWnd, roomName);
+	SetWindowTextA(hWnd, roomName);
 }
 
 void ChatWindow::setRoomFlags(int flags) {
@@ -493,18 +493,22 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 			tvis.item.mask = TVIF_TEXT | TVIF_PARAM | TVIF_CHILDREN;
 			tvis.item.lParam = (LPARAM) NULL;
 			tvis.item.cChildren = 1;
-			tvis.item.pszText = (char *)Translate(groupNames[group]);
+			LPTSTR lps1 = Utils::mucc_mir_a2t(Translate(groupNames[group]));
+			tvis.item.pszText = lps1;
 			//tvis.item.state = INDEXTOSTATEIMAGEMASK(1);
 			//tvis.item.stateMask = TVIS_STATEIMAGEMASK ;
 			setTreeItem(group, TreeView_InsertItem(GetDlgItem(hWnd, IDC_TREELIST), &tvis));
+			Utils::mucc_mir_free(lps1);
 		}
 		tvis.hParent = getTreeItem(group);
 		tvis.hInsertAfter = TVI_SORT;
 		tvis.item.mask = TVIF_TEXT  | TVIF_PARAM;
-		tvis.item.pszText = (char *)user->getNick();
+		LPTSTR lps2 = Utils::mucc_mir_a2t(user->getNick());
+		tvis.item.pszText = lps2;
 		tvis.item.lParam = (LPARAM) user;
 		user->setHTreeItem(TreeView_InsertItem(GetDlgItem(hWnd, IDC_TREELIST), &tvis));
 		TreeView_Expand(GetDlgItem(hWnd, IDC_TREELIST), getTreeItem(group), TVE_EXPAND);
+		Utils::mucc_mir_free(lps2);
 	}
 	else {
 		if (user != NULL) {
@@ -526,7 +530,7 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 }
 int ChatWindow::changeTopic(const MUCCEVENT *event) {
 
-	SetDlgItemText(hWnd, IDC_TOPIC, event->pszText);
+	SetDlgItemTextA(hWnd, IDC_TOPIC, event->pszText);
 //if (wasFirstMessage) {
 		logEvent(event);
 //	}
@@ -585,7 +589,7 @@ void ChatWindow::refreshSettings(int force) {
 	}
 	Font * font = Options::getFont(Options::FONT_USERLIST);
 	colorListText = font->getColor();
-	hListFont = CreateFont (font->getSize(), 0, 0, 0,
+	hListFont = CreateFontA(font->getSize(), 0, 0, 0,
 							font->getStyle() & Font::BOLD ? FW_BOLD : FW_NORMAL,
 							font->getStyle() & Font::ITALIC ? 1 : 0,
 							font->getStyle() & Font::UNDERLINE ? 1 : 0, 0,
@@ -594,7 +598,7 @@ void ChatWindow::refreshSettings(int force) {
                             font->getFace());
 	font = Options::getFont(Options::FONT_USERLISTGROUP);
 	colorListGroupText = font->getColor();
-	hListGroupFont = CreateFont (font->getSize(), 0, 0, 0,
+	hListGroupFont = CreateFontA(font->getSize(), 0, 0, 0,
 								 font->getStyle() & Font::BOLD ? FW_BOLD : FW_NORMAL,
 								 font->getStyle() & Font::ITALIC ? 1 : 0,
 								 font->getStyle() & Font::UNDERLINE ? 1 : 0, 0,
@@ -649,7 +653,7 @@ void ChatWindow::clearLog() {
 		iee.pszProto = getModule();
 		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
 	} else {
-		SetDlgItemText(getHWND(), IDC_LOG, "");
+		SetDlgItemTextA(getHWND(), IDC_LOG, "");
 	}
 	isEmpty = true;
 	eventList.clear();
@@ -670,7 +674,7 @@ void ChatWindow::rebuildLog() {
 		iee.pszProto = getModule();
 		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
 	} else {
-		SetDlgItemText(getHWND(), IDC_LOG, "");
+		SetDlgItemTextA(getHWND(), IDC_LOG, "");
 	}
 	isEmpty = true;
 	for (ChatEvent* event=eventList.getEvents();event!=NULL;event=event->getNext()) {
@@ -1069,7 +1073,7 @@ void ChatWindow::setFont(int font, int size, int bBold, int bItalic, int bUnderl
 	if (hEditFont!=NULL) {
 		DeleteObject(hEditFont);
 	}
-	hEditFont = CreateFont (MulDiv(-size, logPixelSY, 74), 0, 0, 0, bBold?FW_BOLD:FW_NORMAL,
+	hEditFont = CreateFontA(MulDiv(-size, logPixelSY, 74), 0, 0, 0, bBold?FW_BOLD:FW_NORMAL,
                                     bItalic, bUnderline, 0, 238, OUT_DEFAULT_PRECIS,
                                     CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
                                     FIXED_PITCH | FF_ROMAN,
@@ -1259,7 +1263,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_USERDATA, (LONG) chatWindow);
 			chatWindow->refreshSettings();
 
-			SetWindowText(hwndDlg, chatWindow->getRoomName());
+			SetWindowTextA(hwndDlg, chatWindow->getRoomName());
 			SendDlgItemMessage(hwndDlg, IDC_BOLD, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_BOLD]);
 			SendDlgItemMessage(hwndDlg, IDC_ITALIC, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_ITALIC]);
 			SendDlgItemMessage(hwndDlg, IDC_UNDERLINE, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_UNDERLINE]);
@@ -1292,12 +1296,12 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			for(i=0;i<chatWindow->getFontSizeNum();i++) {
 				char str[10];
 				sprintf(str, "%d", chatWindow->getFontSize(i));
-				int n = SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_ADDSTRING, 0, (LPARAM) str);
+				int n = SendDlgItemMessageA(hwndDlg, IDC_FONTSIZE, CB_ADDSTRING, 0, (LPARAM) str);
 				SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_SETITEMDATA, n, chatWindow->getFontSize(i));
 			}
 			SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_SETCURSEL, Options::getChatWindowFontSize(), 0);
 			for(i=0;i<chatWindow->getFontNameNum();i++) {
-				int n = SendDlgItemMessage(hwndDlg, IDC_FONT, CB_ADDSTRING, 0, (LPARAM) chatWindow->getFontName(i));
+				int n = SendDlgItemMessageA(hwndDlg, IDC_FONT, CB_ADDSTRING, 0, (LPARAM) chatWindow->getFontName(i));
 				SendDlgItemMessage(hwndDlg, IDC_FONT, CB_SETITEMDATA, n, i);
 			}
 			SendDlgItemMessage(hwndDlg, IDC_FONT, CB_SETCURSEL, Options::getChatWindowFont(), 0);
@@ -1678,8 +1682,8 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					{
 						MUCCEVENT muce;
 						char text[2048];
-						GetDlgItemText(hwndDlg, IDC_EDIT, text, sizeof(text));
-						SetDlgItemText(hwndDlg, IDC_EDIT, "");
+						GetDlgItemTextA(hwndDlg, IDC_EDIT, text, sizeof(text));
+						SetDlgItemTextA(hwndDlg, IDC_EDIT, "");
 						muce.cbSize = sizeof(MUCCEVENT);
 						muce.iType = MUCC_EVENT_MESSAGE;
 						muce.pszModule =  chatWindow->getModule();
@@ -1818,11 +1822,11 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 							{
 								TVITEM tvi;;
 								HICON hIcon;
-								char str[200];
+								TCHAR str[200];
 								RECT rc = pCustomDraw->nmcd.rc;
 								tvi.mask = TVIF_HANDLE | TVIF_STATE | TVIF_TEXT | TVIF_PARAM;
 								tvi.pszText = str;
-								tvi.cchTextMax = sizeof(str);
+								tvi.cchTextMax = sizeof(str)/sizeof(TCHAR);
 								tvi.hItem = (HTREEITEM)pCustomDraw->nmcd.dwItemSpec;
 								TreeView_GetItem(pCustomDraw->nmcd.hdr.hwndFrom, &tvi);
 								ChatUser * user= (ChatUser *)pCustomDraw->nmcd.lItemlParam;
@@ -1866,7 +1870,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 									SetTextColor(pCustomDraw->nmcd.hdc, pCustomDraw->clrText);
 									TextOut(pCustomDraw->nmcd.hdc,
 											rc.left+pCustomDraw->iLevel*GetSystemMetrics(SM_CXSMICON)+2,
-											rc.top, tvi.pszText, strlen(tvi.pszText));
+											rc.top, tvi.pszText, _tcslen(tvi.pszText));
 								}
 								SetWindowLong(hwndDlg,DWL_MSGRESULT, CDRF_SKIPDEFAULT );
 								return TRUE;

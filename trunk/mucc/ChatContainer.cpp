@@ -176,7 +176,7 @@ void ChatContainer::activateChild(ChatWindow *window) {
 		if (prev!=NULL) {
 			ShowWindow(prev->getHWND(), SW_HIDE);
 		}
-		SetWindowText(hWnd, window->getRoomName());
+		SetWindowTextA(hWnd, window->getRoomName());
 	}
 	TCITEM tci;
 	tci.mask = TCIF_IMAGE;
@@ -193,10 +193,12 @@ void ChatContainer::addChild(ChatWindow *child) {
 	HWND hwndTabs = GetDlgItem(hWnd, IDC_TABS);
 	childCount++;
 	tci.mask = TCIF_TEXT | TCIF_PARAM;
-	tci.pszText = (char *)child->getRoomName();
+	LPTSTR lps1 = Utils::mucc_mir_a2t(child->getRoomName());
+	tci.pszText = lps1;
 	tci.lParam = (LPARAM) child;
 	tabId = TabCtrl_InsertItem(hwndTabs, childCount-1, &tci);
 	TabCtrl_SetCurSel(hwndTabs, tabId);
+	Utils::mucc_mir_free(lps1);
 	activateChild(child);
 	SendMessage(hWnd, WM_SIZE, 0, 0);
 	ShowWindow(hWnd, SW_SHOWNORMAL);
@@ -210,11 +212,13 @@ void ChatContainer::changeChildData(ChatWindow *child) {
 	if (tabId >=0) {
 		TCITEM tci;
 		tci.mask = TCIF_TEXT;
-		tci.pszText = (char *)child->getRoomName();
+		LPTSTR lps1 = Utils::mucc_mir_a2t(child->getRoomName());
+		tci.pszText = lps1;
 		TabCtrl_SetItem(hwndTabs, childCount-1, &tci);
+		Utils::mucc_mir_free(lps1);
 	}
 	if (child == active) {
-		SetWindowText(hWnd, child->getRoomName());
+		SetWindowTextA(hWnd, child->getRoomName());
 	}
 }
 

@@ -257,7 +257,8 @@ void ManagerWindow::queryResultGroups(MUCCQUERYRESULT *queryResult)
 		}
 		tvis.hInsertAfter = TVI_SORT;
 		tvis.item.mask = TVIF_TEXT | TVIF_CHILDREN | TVIF_PARAM;
-		tvis.item.pszText = (char *)queryResult->pItems[i].pszName;
+		LPTSTR lps1 = Utils::mucc_mir_a2t(queryResult->pItems[i].pszName);
+		tvis.item.pszText = lps1;
 		tvis.item.cChildren = queryResult->pItems[i].iCount;
 		tvis.item.lParam = (LPARAM) group;
 		group->setTreeItem(TreeView_InsertItem(GetDlgItem(hWnd, IDC_GROUP), &tvis));
@@ -266,6 +267,7 @@ void ManagerWindow::queryResultGroups(MUCCQUERYRESULT *queryResult)
 		if (par != NULL) {
 			TreeView_Expand(GetDlgItem(hWnd, IDC_GROUP), par->getTreeItem(), TVE_EXPAND);
 		}
+		Utils::mucc_mir_free(lps1);
 	}
 }
 
@@ -277,7 +279,7 @@ void ManagerWindow::queryResultRooms(MUCCQUERYRESULT *queryResult)
 		rooms = rooms->getNext();
 		delete room;
 	}
-	char str[100];
+	TCHAR str[100];
 	if (getCurrentGroup()==NULL || strcmp(getCurrentGroup()->getId(), queryResult->pszParent) || queryResult->iPage!=getCurrentRoomsPage()) return;
 	setLastRoomsPage(queryResult->iLastPage);
 	if (queryResult->iLastPage) {
@@ -301,13 +303,15 @@ void ManagerWindow::queryResultRooms(MUCCQUERYRESULT *queryResult)
 		lvItem.mask = LVIF_TEXT | LVIF_PARAM;
 		lvItem.iSubItem = 0;
 		lvItem.iItem = ListView_GetItemCount(GetDlgItem(getChatRoomsTabHWND(), IDC_ROOM));
-		lvItem.pszText = (char *) queryResult->pItems[i].pszName;
+		LPTSTR lps1 = Utils::mucc_mir_a2t(queryResult->pItems[i].pszName);
+		lvItem.pszText = lps1;
 		lvItem.lParam = (LPARAM) room;
 		ListView_InsertItem(GetDlgItem(getChatRoomsTabHWND(), IDC_ROOM), &lvItem);
 		lvItem.iSubItem = 1;
 		ListView_InsertItem(GetDlgItem(getChatRoomsTabHWND(), IDC_ROOM), &lvItem);
-		sprintf(str, "%d", queryResult->pItems[i].iCount);
+		_stprintf(str, _TEXT("%d"), queryResult->pItems[i].iCount);
 		ListView_SetItemText(GetDlgItem(getChatRoomsTabHWND(), IDC_ROOM), lvItem.iItem, 1, str);
+		Utils::mucc_mir_free(lps1);
 	}
 }
 
@@ -330,9 +334,11 @@ void ManagerWindow::queryResultUserRooms(MUCCQUERYRESULT *queryResult)
 		lvItem.mask = LVIF_TEXT | LVIF_PARAM;
 		lvItem.iSubItem = 0;
 		lvItem.iItem = ListView_GetItemCount(GetDlgItem(getMyRoomsTabHWND(), IDC_LIST));
-		lvItem.pszText = (char *) queryResult->pItems[i].pszName;
+		LPTSTR lps1 = Utils::mucc_mir_a2t(queryResult->pItems[i].pszName);
+		lvItem.pszText = lps1;
 		lvItem.lParam = (LPARAM) room;
 		ListView_InsertItem(GetDlgItem(getMyRoomsTabHWND(), IDC_LIST), &lvItem);
+		Utils::mucc_mir_free(lps1);
 	}
 	userRoomList = 1;
 }
@@ -345,8 +351,10 @@ void ManagerWindow::queryResultUserNick(MUCCQUERYRESULT *queryResult)
 		lvItem.mask = LVIF_TEXT;
 		lvItem.iSubItem = 0;
 		lvItem.iItem = ListView_GetItemCount(GetDlgItem(getMyNicksTabHWND(), IDC_LIST));
-		lvItem.pszText = (char *) queryResult->pItems[i].pszName;
+		LPTSTR lps1 = Utils::mucc_mir_a2t(queryResult->pItems[i].pszName);
+		lvItem.pszText = lps1;
 		ListView_InsertItem(GetDlgItem(getMyNicksTabHWND(), IDC_LIST), &lvItem);
+		Utils::mucc_mir_free(lps1);
 	}
 	userNickList = 1;
 }
@@ -383,15 +391,15 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 		lv = GetDlgItem(hwndDlg, IDC_ROOM);
 		ListView_SetExtendedListViewStyle(lv, LVS_EX_FULLROWSELECT);
 		lvCol.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
-		lvCol.pszText = Translate("Name");
+		lvCol.pszText = TranslateT("Name");
 		lvCol.cx = 270;
 		lvCol.iSubItem = 0;
 		ListView_InsertColumn(lv, 0, &lvCol);
-		lvCol.pszText = Translate("Persons");
+		lvCol.pszText = TranslateT("Persons");
 		lvCol.cx = 50;
 		lvCol.iSubItem = 1;
 		ListView_InsertColumn(lv, 1, &lvCol);
-		lvCol.pszText = "";//Translate("");
+		lvCol.pszText = _TEXT("");//Translate("");
 		lvCol.cx = 46;
 		lvCol.iSubItem = 2;
 		ListView_InsertColumn(lv, 2, &lvCol);
@@ -489,7 +497,7 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 //			if (ListView_GetItem(GetDlgItem(hwndDlg, IDC_ROOM), &item)) {
 				room = (ChatRoom *)lpDis->itemData;// (ChatRoom *)item.lParam;
 //			}
-			char text[256];
+			TCHAR text[256];
 			switch (lpDis->itemAction) {
 				default:
 				case ODA_SELECT:
@@ -511,7 +519,7 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 					}
 					x = lpDis->rcItem.left;
 					for (col=0;col<3;col++) {
-						ListView_GetItemText(GetDlgItem(hwndDlg, IDC_ROOM), lpDis->itemID, col, text, sizeof(text));
+						ListView_GetItemText(GetDlgItem(hwndDlg, IDC_ROOM), lpDis->itemID, col, text, sizeof(text)/sizeof(TCHAR));
 						w = ListView_GetColumnWidth(GetDlgItem(hwndDlg, IDC_ROOM), col);
 						rc.left = x;
 						rc.top = lpDis->rcItem.top;
@@ -520,10 +528,10 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 						if (col==0) {
 							rc.left+=2;
 							rc.right-=2;
-							DrawText(lpDis->hDC, text, strlen(text), &rc, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+							DrawText(lpDis->hDC, text, _tcslen(text), &rc, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 						}
 						else if (col<2) {
-							DrawText(lpDis->hDC, text, strlen(text), &rc, DT_CENTER|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+							DrawText(lpDis->hDC, text, _tcslen(text), &rc, DT_CENTER|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 						} else {
 							if (room->getFlags()&MUCC_EF_ROOM_MODERATED) {
 								DrawIconEx(lpDis->hDC, x, rc.top, muccIcon[MUCC_IDI_R_MODERATED], GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0, NULL, DI_NORMAL);
@@ -605,9 +613,9 @@ static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				{
 					MUCCEVENT muce;
 					if (manager->getCurrentGroup()!=NULL) {
-						char name[256];
+						TCHAR name[256];
 						GetDlgItemText(hwndDlg, IDC_NAME, name, 255);
-						if (strlen(name)!=0) {
+						if (_tcslen(name)!=0) {
 							int flags = 0;
 							if (IsDlgButtonChecked(hwndDlg, IDC_CHECK_PUBLIC)) {
 								flags |= MUCC_EF_ROOM_PUBLIC;
@@ -625,10 +633,12 @@ static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 							muce.iType = MUCC_EVENT_REGISTER_ROOM;
 							muce.pszModule = manager->getModule();
 							muce.pszID = manager->getCurrentGroup()->getId();
-							muce.pszName = name;
+							char* lps1 = Utils::mucc_mir_t2a(name);
+							muce.pszName = lps1;
 							muce.pszNick = NULL;
 							muce.dwFlags = flags;
 							NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
+							Utils::mucc_mir_free(lps1);
 						}
 					} else {
 						muce.pszText = "Please select a group first.";
@@ -647,7 +657,7 @@ static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		break;
 	case WM_DRAWITEM:
 		if (wParam == IDC_LIST) {
-			char text[256];
+			TCHAR text[256];
 			DRAWITEMSTRUCT *lpDis = (DRAWITEMSTRUCT *) lParam;
 			switch (lpDis->itemAction) {
 				default:
@@ -665,8 +675,8 @@ static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 						SetTextColor(lpDis->hDC, RGB(0, 0, 0));//GetSysColor(COLOR_WINDOWTEXT));
 						SetBkMode(lpDis->hDC, TRANSPARENT);
 					}
-					ListView_GetItemText(GetDlgItem(hwndDlg, IDC_LIST), lpDis->itemID, 0, text, sizeof(text));
-					DrawText(lpDis->hDC, text, strlen(text), &(lpDis->rcItem), DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+					ListView_GetItemText(GetDlgItem(hwndDlg, IDC_LIST), lpDis->itemID, 0, text, sizeof(text)/sizeof(TCHAR));
+					DrawText(lpDis->hDC, text, _tcslen(text), &(lpDis->rcItem), DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 				break;
 			}
 		}
@@ -711,7 +721,7 @@ static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			case IDC_REGISTER:
 				{
 					char nick[256];
-					GetDlgItemText(hwndDlg, IDC_NICK, nick, 255);
+					GetDlgItemTextA(hwndDlg, IDC_NICK, nick, 255);
 					if (strlen(nick)!=0) {
 						MUCCEVENT muce;
 						muce.cbSize = sizeof(MUCCEVENT);
@@ -727,7 +737,7 @@ static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 					LVITEM item;
 					item.iItem = ListView_GetSelectionMark(GetDlgItem(hwndDlg, IDC_LIST));
 					if (item.iItem >= 0) {
-						char text[256];
+						TCHAR text[256];
 						item.iSubItem = 0;
 						item.mask = LVIF_TEXT;
 						item.pszText = text;
@@ -737,8 +747,10 @@ static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 							muce.cbSize = sizeof(MUCCEVENT);
 							muce.iType = MUCC_EVENT_REMOVE_NICK;
 							muce.pszModule = manager->getModule();
-							muce.pszNick = text;
+							char* lps2 = Utils::mucc_mir_t2a(text);
+							muce.pszNick = lps2;
 							NotifyEventHooks(hHookEvent, 0,(WPARAM)&muce);
+							Utils::mucc_mir_free(lps2);
 						}
 					}
 				}
@@ -753,7 +765,7 @@ static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		break;
 	case WM_DRAWITEM:
 		if (wParam == IDC_LIST) {
-			char text[256];
+			TCHAR text[256];
 			DRAWITEMSTRUCT *lpDis = (DRAWITEMSTRUCT *) lParam;
 			switch (lpDis->itemAction) {
 				default:
@@ -771,8 +783,8 @@ static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 						SetTextColor(lpDis->hDC, RGB(0, 0, 0));//GetSysColor(COLOR_WINDOWTEXT));
 						SetBkMode(lpDis->hDC, TRANSPARENT);
 					}
-					ListView_GetItemText(GetDlgItem(hwndDlg, IDC_LIST), lpDis->itemID, 0, text, sizeof(text));
-					DrawText(lpDis->hDC, text, strlen(text), &(lpDis->rcItem), DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+					ListView_GetItemText(GetDlgItem(hwndDlg, IDC_LIST), lpDis->itemID, 0, text, sizeof(text)/sizeof(TCHAR));
+					DrawText(lpDis->hDC, text, _tcslen(text), &(lpDis->rcItem), DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 				break;
 			}
 		}
@@ -800,7 +812,7 @@ static BOOL CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		manager = (ManagerWindow *)lParam;
 		manager->setHWND(hwndDlg);
 		sprintf(text, "%s Chats", manager->getModuleName());
-		SetWindowText(hwndDlg, text);
+		SetWindowTextA(hwndDlg, text);
 		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) manager);
 		SendMessage(hwndDlg, WM_SETICON, ICON_BIG, (LPARAM) muccIcon[MUCC_IDI_CHAT]);
 
@@ -810,12 +822,12 @@ static BOOL CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		tc = GetDlgItem(hwndDlg, IDC_TABS);
 		tci.mask = TCIF_TEXT;
 		// Public rooms tab
-		tci.pszText = Translate("Chat rooms");
+		tci.pszText = TranslateT("Chat rooms");
 		TabCtrl_InsertItem(tc, 0, &tci);
 		// Create room tab
-		tci.pszText = Translate("My rooms");
+		tci.pszText = TranslateT("My rooms");
 		TabCtrl_InsertItem(tc, 1, &tci);
-		tci.pszText = Translate("My nicknames");
+		tci.pszText = TranslateT("My nicknames");
 		TabCtrl_InsertItem(tc, 2, &tci);
 		hwnd = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_TAB_CHATROOMS), hwndDlg, ChatRoomsDlgProc, (LPARAM) manager);
 		SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);

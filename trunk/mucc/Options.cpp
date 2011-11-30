@@ -192,7 +192,7 @@ int MUCCOptInit(WPARAM wParam, LPARAM lParam)
 	odp.position = 0;
 	odp.hInstance = hInst;
 	odp.pszGroup = Translate("Events");
-	odp.pszTemplate = MAKEINTRESOURCE(IDD_OPTIONS);
+	odp.pszTemplate = MAKEINTRESOURCEA(IDD_OPTIONS);
 	odp.pszTitle = muccModuleName;
 	odp.flags = ODPF_BOLDGROUPS;
 	odp.pfnDlgProc = MUCCOptDlgProc;
@@ -273,11 +273,14 @@ static int addOption(HWND hTreeControl, HTREEITEM hParent, const char *text, int
 	tvis.hInsertAfter = TVI_LAST;
 	tvis.hParent = hParent;
 	tvis.item.mask = TVIF_TEXT | TVIF_STATE | TVIF_PARAM;
-	tvis.item.pszText = Translate(text);
+	char* textA = Translate(text);
+	LPTSTR textT = Utils::mucc_mir_a2t(textA);
+	tvis.item.pszText = textT;
 	tvis.item.lParam = flag;
 	tvis.item.stateMask = TVIS_STATEIMAGEMASK;
 	tvis.item.state = Options::getChatWindowOptions() & flag ? INDEXTOSTATEIMAGEMASK(2) : INDEXTOSTATEIMAGEMASK(1);
 	TreeView_InsertItem(hTreeControl, &tvis);
+	Utils::mucc_mir_free(textT);
 	return (Options::getChatWindowOptions() & flag) != 0;
 
 }
@@ -322,7 +325,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 			tvi.mask = TVIF_HANDLE | TVIF_STATE;
 			tvi.stateMask = TVIS_STATEIMAGEMASK;
 
-			tvis.item.pszText = Translate("Default Log Appearence");
+			tvis.item.pszText = TranslateT("Default Log Appearence");
 			hItem = TreeView_InsertItem(hTreeControl, &tvis);
 			bCheckParent = 1;
 			bCheckParent &= addOption(hTreeControl, hItem, "Show nicknames", ChatWindow::FLAG_SHOW_NICKNAMES);
@@ -334,7 +337,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				TreeView_Expand(hTreeControl, hItem, TVE_EXPAND);
 			}
 
-			tvis.item.pszText = Translate("Default Timestamp Settings");
+			tvis.item.pszText = TranslateT("Default Timestamp Settings");
 			hItem = TreeView_InsertItem(hTreeControl, &tvis);
 			bCheckParent = 1;
 			bCheckParent &= addOption(hTreeControl, hItem, "Show date", ChatWindow::FLAG_SHOW_DATE);
@@ -348,7 +351,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				TreeView_Expand(hTreeControl, hItem, TVE_EXPAND);
 			}
 
-			tvis.item.pszText = Translate("Default Text Formatting Filter");
+			tvis.item.pszText = TranslateT("Default Text Formatting Filter");
 			hItem = TreeView_InsertItem(hTreeControl, &tvis);
 			bCheckParent = 1;
 			bCheckParent &= addOption(hTreeControl, hItem, "Font name", ChatWindow::FLAG_FORMAT_FONT);
@@ -362,7 +365,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				TreeView_Expand(hTreeControl, hItem, TVE_EXPAND);
 			}
 
-			tvis.item.pszText = Translate("Default Event Filter");
+			tvis.item.pszText = TranslateT("Default Event Filter");
 			hItem = TreeView_InsertItem(hTreeControl, &tvis);
 			bCheckParent = 1;
 			bCheckParent &= addOption(hTreeControl, hItem, "Messages", ChatWindow::FLAG_LOG_MESSAGES);
@@ -376,7 +379,7 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				TreeView_Expand(hTreeControl, hItem, TVE_EXPAND);
 			}
 
-			tvis.item.pszText = Translate("Default Window Flashing");
+			tvis.item.pszText = TranslateT("Default Window Flashing");
 			hItem = TreeView_InsertItem(hTreeControl, &tvis);
 			bCheckParent = 1;
 			bCheckParent &= addOption(hTreeControl, hItem, "Messages", ChatWindow::FLAG_FLASH_MESSAGES);
@@ -407,15 +410,21 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
             int iItem = lpMis->itemData - 1;
 			Font *font = Options::getFontSettings(iItem);
 			if (font != NULL) {
+
+				LPTSTR lps1 = Utils::mucc_mir_a2t(font->getFace());
 				hFont = CreateFont(font->getSize(), 0, 0, 0,
 								   font->getStyle() & Font::BOLD ? FW_BOLD : FW_NORMAL,
 								   font->getStyle() & Font::ITALIC ? 1 : 0, 0, 0,
 								   font->getCharSet(),
-								   OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, font->getFace());
+								   OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, lps1);
+				Utils::mucc_mir_free(lps1);
+
 				hDC = GetDC(GetDlgItem(hwndDlg, lpMis->CtlID));
 				hoFont = (HFONT) SelectObject(hDC, hFont);
 				pszText = Translate(Options::getFontSettings(iItem)->getName());
-				GetTextExtentPoint32(hDC, pszText, lstrlen(pszText), &fontSize);
+				LPTSTR pszTextT1 = Utils::mucc_mir_a2t(pszText);
+				GetTextExtentPoint32(hDC, pszTextT1, lstrlen(pszTextT1), &fontSize);
+				Utils::mucc_mir_free(pszTextT1);
 				SelectObject(hDC, hoFont);
 				ReleaseDC(GetDlgItem(hwndDlg, lpMis->CtlID), hDC);
 				DeleteObject(hFont);
@@ -440,13 +449,17 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 					color = (COLORREF) SendDlgItemMessage(hwndDlg, IDC_COLORINPUT, CPM_GETCOLOUR, 0, 0);
 				}
 				hBrush = CreateSolidBrush(color);
+
+				LPTSTR lps2 = Utils::mucc_mir_a2t(font->getFace());
 				hFont = CreateFont(font->getSize(), 0, 0, 0,
 								   font->getStyle() & Font::BOLD ? FW_BOLD : FW_NORMAL,
 								   font->getStyle() & Font::ITALIC ? 1 : 0,
 								   font->getStyle() & Font::UNDERLINE ? 1 : 0, 0,
 								   font->getCharSet(),
 								   OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-								   font->getFace());
+								   lps2);
+				Utils::mucc_mir_free(lps2);
+
 				hFont = (HFONT) SelectObject(lpDis->hDC, hFont);
 				SetBkMode(lpDis->hDC, TRANSPARENT);
 				FillRect(lpDis->hDC, &lpDis->rcItem, hBrush);
@@ -455,7 +468,9 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 				}
 				SetTextColor(lpDis->hDC, font->getColor());
 				pszText = Translate(font->getName());
-				TextOut(lpDis->hDC, lpDis->rcItem.left, lpDis->rcItem.top, pszText, lstrlen(pszText));
+				LPTSTR pszTextT2 = Utils::mucc_mir_a2t(pszText);
+				TextOut(lpDis->hDC, lpDis->rcItem.left, lpDis->rcItem.top, pszTextT2, lstrlen(pszTextT2));
+				Utils::mucc_mir_free(pszTextT2);
 				hFont = (HFONT) SelectObject(lpDis->hDC, hFont);
 				DeleteObject(hBrush);
 				DeleteObject(hFont);
@@ -540,7 +555,9 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 						lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
 						lf.lfQuality = DEFAULT_QUALITY;
 						lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-						lstrcpy(lf.lfFaceName, font->getFace());
+						LPTSTR lps3 = Utils::mucc_mir_a2t(font->getFace());
+						lstrcpy(lf.lfFaceName, lps3);
+						Utils::mucc_mir_free(lps3);
 						cf.lStructSize = sizeof(cf);
 						cf.hwndOwner = hwndDlg;
 						cf.lpLogFont = &lf;
@@ -556,7 +573,9 @@ static BOOL CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 									font2->setStyle((lf.lfWeight >= FW_BOLD ? Font::BOLD : 0) | (lf.lfItalic ? Font::ITALIC : 0));
 									font2->setCharSet(lf.lfCharSet);
 									font2->setSize(lf.lfHeight);
-									font2->setFace(lf.lfFaceName);
+									char* lps4 = Utils::mucc_mir_t2a(lf.lfFaceName);
+									font2->setFace(lps4);
+									Utils::mucc_mir_free(lps4);
 									MEASUREITEMSTRUCT mis;
 									ZeroMemory(&mis, sizeof(mis));
 									mis.CtlID = IDC_FONTLIST;

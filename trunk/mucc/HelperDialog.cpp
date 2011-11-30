@@ -305,7 +305,7 @@ static BOOL CALLBACK InviteDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM
 		switch (LOWORD(wParam)) {
 		case IDC_INVITE:
 			MUCCEVENT muce;
-			GetDlgItemText(hwndDlg, IDC_USER, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_USER, str, 255);
 			if (strlen(str)>0) {
 				for (contactList = dialog->getContactList();contactList!=NULL;contactList=contactList->getNext()) {
 					if (!strcmp(str, contactList->getName())) {
@@ -354,13 +354,13 @@ static BOOL CALLBACK AcceptInvitationDlgProc(HWND hwndDlg, UINT msg, WPARAM wPar
 			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) dialog);
 			dialog->setHWND(hwndDlg);
 			if (dialog->getNick() != NULL) {
-				SetDlgItemText(hwndDlg, IDC_FROM, dialog->getNick());
+				SetDlgItemTextA(hwndDlg, IDC_FROM, dialog->getNick());
 			}
 			if (dialog->getRoomName() != NULL) {
-				SetDlgItemText(hwndDlg, IDC_ROOM, dialog->getRoomName());
+				SetDlgItemTextA(hwndDlg, IDC_ROOM, dialog->getRoomName());
 			}
 			if (dialog->getReason() != NULL) {
-				SetDlgItemText(hwndDlg, IDC_REASON, dialog->getReason());
+				SetDlgItemTextA(hwndDlg, IDC_REASON, dialog->getReason());
 			}
 
 //			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
@@ -376,7 +376,7 @@ static BOOL CALLBACK AcceptInvitationDlgProc(HWND hwndDlg, UINT msg, WPARAM wPar
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDC_ACCEPT:
-			GetDlgItemText(hwndDlg, IDC_NICK, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_NICK, str, 255);
 			dialog->setNick(str);
 			MUCCEVENT muce;
 			muce.iType = MUCC_EVENT_JOIN;
@@ -432,10 +432,10 @@ static BOOL CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM l
 			SendDlgItemMessage(hwndDlg, IDC_NICK, EM_SETREADONLY, (WPARAM)TRUE, 0);
 		}
 		if (dialog->getRoomName()!=NULL) {
-			SetDlgItemText(hwndDlg, IDC_ROOM, dialog->getRoomName());
+			SetDlgItemTextA(hwndDlg, IDC_ROOM, dialog->getRoomName());
 		}
 		if (dialog->getNick()!=NULL) {
-			SetDlgItemText(hwndDlg, IDC_NICK, dialog->getNick());
+			SetDlgItemTextA(hwndDlg, IDC_NICK, dialog->getNick());
 		}
 		return FALSE;
 	case WM_COMMAND:
@@ -443,13 +443,13 @@ static BOOL CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM l
 		case IDOK:
 			MUCCEVENT muce;
 			if (dialog->getRoomId()==NULL) {
-				GetDlgItemText(hwndDlg, IDC_ROOM, str, 255);
+				GetDlgItemTextA(hwndDlg, IDC_ROOM, str, 255);
 				if (strlen(str)>0) {
 					//dialog->setRoomId(str);
 					dialog->setRoomName(str);
 				}
 			}
-			GetDlgItemText(hwndDlg, IDC_NICK, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_NICK, str, 255);
 			if (strlen(str)>0) {
 				dialog->setNick(str);
 			} else {
@@ -480,7 +480,7 @@ static BOOL CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM l
 static void __cdecl ErrorDlgThread(void *vDialog)
 {
 	HelperDialog *dialog=(HelperDialog *)vDialog;
-	MessageBox(NULL, dialog->getReason(), Translate("Error"), MB_OK | MB_ICONERROR);
+	MessageBoxA(NULL, dialog->getReason(), Translate("Error"), MB_OK | MB_ICONERROR);
 	/*
 	int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_GROUPCHAT_JOIN), NULL, JoinDlgProc, (LPARAM) dialog);
 	if (result!=0) {
@@ -509,23 +509,23 @@ static BOOL CALLBACK ErrorDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM 
 		dialog->setHWND(hwndDlg);
 		SetFocus(GetDlgItem(hwndDlg, IDOK));
 		if (dialog->getRoomName()!=NULL) {
-			SetDlgItemText(hwndDlg, IDC_ROOM, dialog->getRoomName());
+			SetDlgItemTextA(hwndDlg, IDC_ROOM, dialog->getRoomName());
 		}
 		if (dialog->getNick()!=NULL) {
-			SetDlgItemText(hwndDlg, IDC_NICK, dialog->getNick());
+			SetDlgItemTextA(hwndDlg, IDC_NICK, dialog->getNick());
 		}
 		return FALSE;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
 			if (dialog->getRoomId()==NULL) {
-				GetDlgItemText(hwndDlg, IDC_ROOM, str, 255);
+				GetDlgItemTextA(hwndDlg, IDC_ROOM, str, 255);
 				if (strlen(str)>0) {
 					//dialog->setRoomId(str);
 					dialog->setRoomName(str);
 				}
 			}
-			GetDlgItemText(hwndDlg, IDC_NICK, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_NICK, str, 255);
 			if (strlen(str)>0) {
 				dialog->setNick(str);
 			} else {
@@ -562,7 +562,7 @@ static BOOL CALLBACK TopicDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM 
 		switch (LOWORD(wParam)) {
 		case IDOK:
 			MUCCEVENT muce;
-			GetDlgItemText(hwndDlg, IDC_TOPIC, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_TOPIC, str, 255);
 			dialog->setReason(str);
 			muce.cbSize = sizeof(MUCCEVENT);
 			muce.iType = MUCC_EVENT_TOPIC;

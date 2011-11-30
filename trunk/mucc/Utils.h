@@ -27,6 +27,12 @@ public:
 	static unsigned long forkThread(void (__cdecl *threadcode)(void*),unsigned long stacksize,void *arg);
 	static void			 copyString(char **, const char *b);
 	static void			 log(const char *fmt, ...);
+
+	static MM_INTERFACE  mmi;
+	static void			 mucc_mir_free(void*);
+	static char*		 mucc_mir_t2a(LPCTSTR);
+	static LPTSTR		 mucc_mir_a2t(const char* );
+
 };
 
 #endif

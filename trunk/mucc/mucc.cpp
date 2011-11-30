@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "mucc_services.h"
 #include "HelperDialog.h"
 #include "Options.h"
+#include "Utils.h"
 
 char *muccModuleName;
 HINSTANCE hInst;
@@ -73,7 +74,7 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvRese
 extern "C" __declspec(dllexport) PLUGININFOEX *MirandaPluginInfoEx(DWORD mirandaVersion)
 {
 	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,8,0,15)) {
-		MessageBox(NULL, "The MUCC plugin cannot be loaded. It requires Miranda IM 0.8.15 or later.", "Tlen Protocol Plugin (MUCC Plugin)", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
+		MessageBox(NULL, _TEXT("The MUCC plugin cannot be loaded. It requires Miranda IM 0.8.15 or later."), _TEXT("Tlen Protocol Plugin (MUCC Plugin)"), MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
 		return NULL;
 	}
 	return &pluginInfoEx;
@@ -135,7 +136,7 @@ extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 {
 	char text[_MAX_PATH];
 	char *p, *q;
-	GetModuleFileName(hInst, text, sizeof(text));
+	GetModuleFileNameA(hInst, text, sizeof(text));
 	p = strrchr(text, '\\');
 	p++;
 	q = strrchr(p, '.');
@@ -152,6 +153,8 @@ extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(MS_MUCC_NEW_WINDOW, MUCCNewWindow);
 	CreateServiceFunction(MS_MUCC_EVENT, MUCCEvent);
 	hHookEvent = CreateHookableEvent(ME_MUCC_EVENT);
+
+	mir_getMMI(&(Utils::mmi));
 
 	LoadIcons();
 	return 0;
