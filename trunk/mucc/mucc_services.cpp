@@ -58,7 +58,7 @@ int MUCCQueryUserNicks(MUCCQUERYRESULT *queryResult)
 	return 1;
 }
 
-int MUCCQueryResult(WPARAM wParam, LPARAM lParam)
+INT_PTR MUCCQueryResult(WPARAM wParam, LPARAM lParam)
 {
 	MUCCQUERYRESULT *queryResult=(MUCCQUERYRESULT *)lParam;
 	ChatWindow * chatWindow = NULL;
@@ -86,7 +86,7 @@ int MUCCQueryResult(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int MUCCNewWindow(WPARAM wParam, LPARAM lParam)  
+INT_PTR MUCCNewWindow(WPARAM wParam, LPARAM lParam)
 {
 	MUCCWINDOW *mucWindow = (MUCCWINDOW *) lParam;
 	if (mucWindow->iType == MUCC_WINDOW_CHATROOM) {
@@ -106,7 +106,7 @@ int MUCCNewWindow(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int MUCCEvent(WPARAM wParam, LPARAM lParam)  
+INT_PTR MUCCEvent(WPARAM wParam, LPARAM lParam)
 {
 	MUCCEVENT* mucEvent = (MUCCEVENT *) lParam;
 	ChatWindow * chatWindow = NULL;

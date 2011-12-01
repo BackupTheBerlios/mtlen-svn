@@ -50,7 +50,7 @@ private:
 	ChatWindow * active;
 	ChatContainer();
 protected:
-	friend BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+	friend INT_PTR CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 	void			addChild(ChatWindow *);
 	void			activateChild(ChatWindow *);
 	void			changeChildData(ChatWindow *);

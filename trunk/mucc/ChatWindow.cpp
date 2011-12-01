@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "m_chat.h"
 
 static int logPixelSY;
-static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 static char *JabberRtfEscape(char *str);
 static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb);
@@ -1136,7 +1136,7 @@ static DWORD CALLBACK EditStreamCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG
     FILE *file;
 	file = fopen(szFilename, "ab");
 	if (file != NULL) {
-		*pcb = fwrite(pbBuff, cb, 1, file);
+		*pcb = (LONG)fwrite(pbBuff, (size_t)cb, (size_t)1, file);
 		fclose(file);
 		return 0;
 	}
@@ -1146,7 +1146,7 @@ static DWORD CALLBACK EditStreamCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG
 static BOOL CALLBACK EditWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	ChatWindow *chat;
-	chat = (ChatWindow *) GetWindowLong(GetParent(hwnd), GWL_USERDATA);
+	chat = (ChatWindow *) GetWindowLongPtr(GetParent(hwnd), GWLP_USERDATA);
 	switch (msg) {
 //	case WM_GETDLGCODE:
 //		return DLGC_WANTALLKEYS; //DLGC_WANTARROWS|DLGC_WANTCHARS|DLGC_HASSETSEL|DLGC_WANTALLKEYS;
@@ -1173,7 +1173,7 @@ static BOOL CALLBACK EditWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 static BOOL CALLBACK SplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	ChatWindow *chat;
-	chat = (ChatWindow *) GetWindowLong(GetParent(hwnd), GWL_USERDATA);
+	chat = (ChatWindow *) GetWindowLongPtr(GetParent(hwnd), GWLP_USERDATA);
 	switch (msg) {
 	case WM_NCHITTEST:
 		return HTCLIENT;
@@ -1229,11 +1229,11 @@ static BOOL CALLBACK SplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 
 
 
-static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
 	ChatWindow *chatWindow;
-	chatWindow = (ChatWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	chatWindow = (ChatWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	if (msg!=WM_INITDIALOG && chatWindow==NULL) {
 		return FALSE;
 	}
@@ -1249,9 +1249,9 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			chatWindow = (ChatWindow *) lParam;
 			chatWindow->setHWND(hwndDlg);
 			ChatWindow::refreshSettings(0);
-			oldSplitterWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) SplitterWndProc);
-			oldSplitterWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) SplitterWndProc);
-			oldEditWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) EditWndProc);
+			oldSplitterWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_HSPLIT), GWLP_WNDPROC, (LONG_PTR) SplitterWndProc);
+			oldSplitterWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_VSPLIT), GWLP_WNDPROC, (LONG_PTR) SplitterWndProc);
+			oldEditWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT), GWLP_WNDPROC, (LONG_PTR) EditWndProc);
 			ShowWindow(GetDlgItem(hwndDlg, IDC_LIST), SW_HIDE);
 			chatWindow->hSplitterMinTop = 90;
 			chatWindow->hSplitterMinBottom = 40;
@@ -1259,8 +1259,8 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			chatWindow->vSplitterMinLeft = 100;
 			chatWindow->vSplitterMinRight = 80;
 			chatWindow->vSplitterPos=110;
-			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) chatWindow);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_USERDATA, (LONG) chatWindow);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) chatWindow);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT), GWLP_USERDATA, (LONG_PTR) chatWindow);
 			chatWindow->refreshSettings();
 
 			SetWindowTextA(hwndDlg, chatWindow->getRoomName());
@@ -1468,10 +1468,10 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					ieWindow.hwnd = chatWindow->getHWNDLog();
 					CallService(MS_IEVIEW_WINDOW, 0, (LPARAM)&ieWindow);
 				}
-				SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) NULL);
-				SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
-				SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
-				SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) oldEditWndProc);
+				SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) NULL);
+				SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_HSPLIT), GWLP_WNDPROC, (LONG_PTR) oldSplitterWndProc);
+				SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_VSPLIT), GWLP_WNDPROC, (LONG_PTR) oldSplitterWndProc);
+				SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT), GWLP_WNDPROC, (LONG_PTR) oldEditWndProc);
 				delete chatWindow;
 				break;
 			}
@@ -1750,7 +1750,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					{
 						LPNMTREEVIEW pnmtv = (LPNMTREEVIEW) lParam;
 						if (pnmtv->action==TVE_COLLAPSE) {
-							SetWindowLong(hwndDlg,DWL_MSGRESULT, TRUE);
+							SetWindowLongPtr(hwndDlg,DWLP_MSGRESULT, TRUE);
 							return TRUE;
 						}
 					}
@@ -1816,7 +1816,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					LPNMTVCUSTOMDRAW pCustomDraw = (LPNMTVCUSTOMDRAW)lParam;
 					switch (pCustomDraw->nmcd.dwDrawStage) {
 						case CDDS_PREPAINT:
-							SetWindowLong(hwndDlg,DWL_MSGRESULT,CDRF_NOTIFYITEMDRAW);
+							SetWindowLongPtr(hwndDlg,DWLP_MSGRESULT,CDRF_NOTIFYITEMDRAW);
 							return TRUE;
 						case CDDS_ITEMPREPAINT:
 							{
@@ -1870,9 +1870,9 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 									SetTextColor(pCustomDraw->nmcd.hdc, pCustomDraw->clrText);
 									TextOut(pCustomDraw->nmcd.hdc,
 											rc.left+pCustomDraw->iLevel*GetSystemMetrics(SM_CXSMICON)+2,
-											rc.top, tvi.pszText, _tcslen(tvi.pszText));
+											rc.top, tvi.pszText, (int)_tcslen(tvi.pszText));
 								}
-								SetWindowLong(hwndDlg,DWL_MSGRESULT, CDRF_SKIPDEFAULT );
+								SetWindowLongPtr(hwndDlg,DWLP_MSGRESULT, CDRF_SKIPDEFAULT );
 								return TRUE;
 							}
 						}
@@ -1934,7 +1934,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 								break;
 							}
 							DestroyMenu(hMenu);
-							SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+							SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
 							return TRUE;
 						}
 					}
@@ -1943,7 +1943,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					switch (((ENLINK *) lParam)->msg) {
 					case WM_SETCURSOR:
 						SetCursor(hCurHyperlinkHand);
-						SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
 						return TRUE;
 					case WM_RBUTTONDOWN:
 					case WM_LBUTTONUP:
@@ -1994,7 +1994,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 								}
 								free(tr.lpstrText);
 								DestroyMenu(hMenu);
-								SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+								SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
 								return TRUE;
 							}
 							else {
@@ -2068,8 +2068,8 @@ static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ..
 		len = 0;
 	}
 	else {
-		len = strlen(*str);
-		size = *sizeAlloced - strlen(*str);
+		len = (int)strlen(*str);
+		size = *sizeAlloced - (int)strlen(*str);
 	}
 
 	p = *str + len;

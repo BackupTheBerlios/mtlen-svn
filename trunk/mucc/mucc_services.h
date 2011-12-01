@@ -27,9 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern int MUCCServicesInit(WPARAM wParam, LPARAM lParam);
 
-extern int MUCCQueryResult(WPARAM wParam, LPARAM lParam) ;
-extern int MUCCNewWindow(WPARAM wParam, LPARAM lParam) ;
-extern int MUCCEvent(WPARAM wParam, LPARAM lParam) ;
+extern INT_PTR MUCCQueryResult(WPARAM wParam, LPARAM lParam) ;
+extern INT_PTR MUCCNewWindow(WPARAM wParam, LPARAM lParam) ;
+extern INT_PTR MUCCEvent(WPARAM wParam, LPARAM lParam) ;
 
 #endif
 

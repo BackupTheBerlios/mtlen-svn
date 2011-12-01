@@ -22,9 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 #include "HelperDialog.h"
 
-static BOOL CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
 ManagerWindow *	ManagerWindow::list = NULL;
 bool ManagerWindow::released = false;
@@ -369,16 +369,16 @@ ChatGroup *ManagerWindow::findGroup(const char *id)
 }
 
 
-static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	HWND lv;
 	LVCOLUMN lvCol;
 	ManagerWindow *manager;
-	manager = (ManagerWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	manager = (ManagerWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		manager = (ManagerWindow *)lParam;
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) manager);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) manager);
 		TranslateDialogDefault(hwndDlg);
 		manager->setChatRoomsTabHWND(hwndDlg);
 		SendDlgItemMessage(hwndDlg, IDC_PREV, BUTTONSETASFLATBTN, 0, 0);
@@ -528,10 +528,10 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 						if (col==0) {
 							rc.left+=2;
 							rc.right-=2;
-							DrawText(lpDis->hDC, text, _tcslen(text), &rc, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+							DrawText(lpDis->hDC, text, (int)_tcslen(text), &rc, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 						}
 						else if (col<2) {
-							DrawText(lpDis->hDC, text, _tcslen(text), &rc, DT_CENTER|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+							DrawText(lpDis->hDC, text, (int)_tcslen(text), &rc, DT_CENTER|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 						} else {
 							if (room->getFlags()&MUCC_EF_ROOM_MODERATED) {
 								DrawIconEx(lpDis->hDC, x, rc.top, muccIcon[MUCC_IDI_R_MODERATED], GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0, NULL, DI_NORMAL);
@@ -553,17 +553,17 @@ static BOOL CALLBACK ChatRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPA
 	return FALSE;
 }
 
-static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	RECT rc;
 	HWND lv;
 	LVCOLUMN lvCol;
 	ManagerWindow *manager;
-	manager = (ManagerWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	manager = (ManagerWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		manager = (ManagerWindow *)lParam;
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) manager);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) manager);
 		TranslateDialogDefault(hwndDlg);
 		manager->setMyRoomsTabHWND(hwndDlg);
 		lv = GetDlgItem(hwndDlg, IDC_LIST);
@@ -676,7 +676,7 @@ static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 						SetBkMode(lpDis->hDC, TRANSPARENT);
 					}
 					ListView_GetItemText(GetDlgItem(hwndDlg, IDC_LIST), lpDis->itemID, 0, text, sizeof(text)/sizeof(TCHAR));
-					DrawText(lpDis->hDC, text, _tcslen(text), &(lpDis->rcItem), DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+					DrawText(lpDis->hDC, text, (int)_tcslen(text), &(lpDis->rcItem), DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 				break;
 			}
 		}
@@ -686,17 +686,17 @@ static BOOL CALLBACK MyRoomsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 	return FALSE;
 }
 
-static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	RECT rc;
 	HWND lv;
 	LVCOLUMN lvCol;
 	ManagerWindow *manager;
-	manager = (ManagerWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	manager = (ManagerWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		manager = (ManagerWindow *)lParam;
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) manager);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) manager);
 		TranslateDialogDefault(hwndDlg);
 		manager->setMyNicksTabHWND(hwndDlg);
 		lv = GetDlgItem(hwndDlg, IDC_LIST);
@@ -784,7 +784,7 @@ static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 						SetBkMode(lpDis->hDC, TRANSPARENT);
 					}
 					ListView_GetItemText(GetDlgItem(hwndDlg, IDC_LIST), lpDis->itemID, 0, text, sizeof(text)/sizeof(TCHAR));
-					DrawText(lpDis->hDC, text, _tcslen(text), &(lpDis->rcItem), DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+					DrawText(lpDis->hDC, text, (int)_tcslen(text), &(lpDis->rcItem), DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 				break;
 			}
 		}
@@ -793,7 +793,7 @@ static BOOL CALLBACK MyNicksDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 	return FALSE;
 }
 
-static BOOL CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	HWND hwnd, tc;
 	TCITEM tci;
@@ -804,7 +804,7 @@ static BOOL CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 	int dlgWidth, dlgHeight, tabPos;
 	RECT rc2;
 
-	manager = (ManagerWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	manager = (ManagerWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	if (manager==NULL && msg!=WM_INITDIALOG) return FALSE;
 	switch (msg) {
 	case WM_INITDIALOG:
@@ -813,7 +813,7 @@ static BOOL CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 		manager->setHWND(hwndDlg);
 		sprintf(text, "%s Chats", manager->getModuleName());
 		SetWindowTextA(hwndDlg, text);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) manager);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) manager);
 		SendMessage(hwndDlg, WM_SETICON, ICON_BIG, (LPARAM) muccIcon[MUCC_IDI_CHAT]);
 
 		TranslateDialogDefault(hwndDlg);
@@ -941,7 +941,7 @@ static BOOL CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 						LPNMTVCUSTOMDRAW pCustomDraw = (LPNMTVCUSTOMDRAW)lParam;
 						switch (pCustomDraw->nmcd.dwDrawStage) {
 							case CDDS_PREPAINT:
-								SetWindowLong(hwndDlg,DWL_MSGRESULT,CDRF_NOTIFYITEMDRAW);
+								SetWindowLongPtr(hwndDlg,DWLP_MSGRESULT,CDRF_NOTIFYITEMDRAW);
 								return TRUE;
 							case CDDS_ITEMPREPAINT:
 								{
@@ -956,7 +956,7 @@ static BOOL CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARA
 							//	hBr = CreateSolidBrush(pCustomDraw->clrTextBk);//g_LogOptions.crUserListBGColor ) ;
 							//	FillRect(pCustomDraw->nmcd.hdc, &rc, hBr);
 							//	DeleteObject(hBr);
-								SetWindowLong(hwndDlg,DWL_MSGRESULT, CDRF_NEWFONT);
+								SetWindowLongPtr(hwndDlg,DWLP_MSGRESULT, CDRF_NEWFONT);
 								return TRUE;
 							}
 						}

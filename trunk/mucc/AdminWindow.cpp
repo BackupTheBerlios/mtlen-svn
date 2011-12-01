@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 
 
-static BOOL CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	int i;
 	const char *banOptions[]={"No ban", "1 minute", "5 minutes", "15 minutes", "30 minutes",
@@ -32,12 +32,12 @@ static BOOL CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPAR
 	const char *roleOptions[]={"No role", "Member", "Admin", "Moderator"};
 	const int roleMask[] = {0, MUCC_EF_USER_MEMBER, MUCC_EF_USER_ADMIN, MUCC_EF_USER_MODERATOR};
 	AdminWindow *adminWindow;
-	adminWindow = (AdminWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	adminWindow = (AdminWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		adminWindow = (AdminWindow *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) adminWindow);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) adminWindow);
 		adminWindow->setKickTabHWND(hwndDlg);
 		for (i=0;i<12;i++) {
 			SendDlgItemMessage(hwndDlg, IDC_KICK_OPTIONS, CB_ADDSTRING, 0, (LPARAM) banOptions[i]);
@@ -92,19 +92,19 @@ static BOOL CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPAR
 	return FALSE;
 }
 
-static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	int i;
 	const char *browseOptions[]={"Banned", "Owners", "Administrators", "Members", "Moderators"};
 	const int browserFlags[]={MUCC_EF_USER_BANNED, MUCC_EF_USER_OWNER, MUCC_EF_USER_ADMIN, MUCC_EF_USER_MEMBER, MUCC_EF_USER_MODERATOR};
 	LVCOLUMN lvCol;
 	HWND lv;
 	AdminWindow *adminWindow;
-	adminWindow = (AdminWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	adminWindow = (AdminWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		adminWindow = (AdminWindow *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) adminWindow);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) adminWindow);
 		adminWindow->setBrowserTabHWND(hwndDlg);
 		lv = GetDlgItem(hwndDlg, IDC_LIST);
 		ListView_SetExtendedListViewStyle(lv, LVS_EX_FULLROWSELECT);
@@ -196,7 +196,7 @@ static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, L
 						if (_tcslen(text)==0) {
 							_tcscpy(text, _TEXT("-"));
 						}
-						DrawText(lpDis->hDC, text, _tcslen(text), &rc, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+						DrawText(lpDis->hDC, text, (int)_tcslen(text), &rc, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 						x+=w;
 					}
 				break;
@@ -246,18 +246,18 @@ static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, L
 	return FALSE;
 }
 
-static BOOL CALLBACK AdminDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK AdminDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	HWND hwnd;
 	TCITEM tci;
 	HWND tc;
 	AdminWindow *adminWindow;
-	adminWindow = (AdminWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	adminWindow = (AdminWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		adminWindow = (AdminWindow *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) adminWindow);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) adminWindow);
 		SendMessage(hwndDlg, WM_SETICON, ICON_BIG, (LPARAM) muccIcon[MUCC_IDI_ADMINISTRATION]);
 
 		hwnd = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_USER_KICK), hwndDlg, UserKickDlgProc, (LPARAM) adminWindow);
