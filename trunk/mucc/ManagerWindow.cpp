@@ -937,7 +937,7 @@ static INT_PTR CALLBACK ManagerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LP
 				break;
 				case NM_CUSTOMDRAW:
 				{
-					if (((LPNMHDR)lParam)->idFrom = IDC_GROUP) {
+					if (((LPNMHDR)lParam)->idFrom == IDC_GROUP) {
 						LPNMTVCUSTOMDRAW pCustomDraw = (LPNMTVCUSTOMDRAW)lParam;
 						switch (pCustomDraw->nmcd.dwDrawStage) {
 							case CDDS_PREPAINT:

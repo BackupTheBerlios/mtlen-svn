@@ -31,7 +31,7 @@ static int logPixelSY;
 static INT_PTR CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 static char *JabberRtfEscape(char *str);
-static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb);
+//static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb);
 
 COLORREF ChatWindow::colorListBg, ChatWindow::colorListText, ChatWindow::colorListGroupText;
 HFONT ChatWindow::hListGroupFont=NULL;
@@ -810,7 +810,7 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 	DBTIMETOSTRING dbtts;
 	CHARRANGE sel;
 	SETTEXTEX stt;
-	tm *ltime;
+	//tm *ltime;
 
 	if (event->iType!=MUCC_EVENT_STATUS && event->iType!=MUCC_EVENT_STATUS && event->iType!=MUCC_EVENT_ERROR
 		&& event->iType!=MUCC_EVENT_TOPIC && event->iType != MUCC_EVENT_MESSAGE) {
@@ -905,7 +905,7 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 			escapedStr = JabberRtfEscape(str);
 		}
 	}
-	ltime = localtime(&event->time);
+	//ltime = localtime(&event->time);
 	JabberStringAppend(&rtf, &msgSize, "{\\rtf1\\ansi\\deff0{\\fonttbl");
 	JabberStringAppend(&rtf, &msgSize, "{\\f0\\fnil\\fcharset%u %s;}", fontTimestamp->getCharSet(), fontTimestamp->getFace());
 	JabberStringAppend(&rtf, &msgSize, "{\\f1\\fnil\\fcharset%u %s;}", fontName->getCharSet(), fontName->getFace());
@@ -2084,9 +2084,9 @@ static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ..
 }
 
 
-static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb)
-{
-    StreamData *stream = (StreamData *) dwCookie;
+//static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb)
+//{
+//    StreamData *stream = (StreamData *) dwCookie;
 /*
 	if (lstrdat->buffer == NULL)
 	{
@@ -2104,5 +2104,5 @@ static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb,
         lstrdat->buffer = NULL;
     }
 */
-    return 0;
-}
+//    return 0;
+//}

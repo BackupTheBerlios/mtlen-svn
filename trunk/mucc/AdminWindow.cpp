@@ -206,7 +206,7 @@ static INT_PTR CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam
 	case WM_NOTIFY:
 		LPNMHDR pNmhdr;
 		pNmhdr = (LPNMHDR)lParam;
-		if (pNmhdr->idFrom = IDC_LIST && adminWindow->getBrowserMode() == MUCC_EF_USER_BANNED) {
+		if (pNmhdr->idFrom == IDC_LIST && adminWindow->getBrowserMode() == MUCC_EF_USER_BANNED) {
 			switch (pNmhdr->code) {
 			case NM_RCLICK:
 				{

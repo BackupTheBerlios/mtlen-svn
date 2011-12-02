@@ -28,8 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "m_ieview.h"
 
 static INT_PTR CALLBACK MUCCOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static INT_PTR CALLBACK MUCCLogOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static INT_PTR CALLBACK MUCCPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+//static INT_PTR CALLBACK MUCCLogOptDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+//static INT_PTR CALLBACK MUCCPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 COLORREF Options::colorListBg, Options::colorInputBg, Options::colorLogBg, Options::chatWindowFontColor;
@@ -707,8 +707,8 @@ static void MailPopupPreview(DWORD colorBack, DWORD colorText, char *title, char
 	}
 }
 */
-static INT_PTR CALLBACK MUCCPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
+//static INT_PTR CALLBACK MUCCPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+//{
 	/*
 	switch (msg) {
 		case WM_INITDIALOG:
@@ -783,6 +783,6 @@ static INT_PTR CALLBACK MUCCPopupsDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam,
 			break;
 
 	}*/
-	return FALSE;
-}
+//	return FALSE;
+//}
 
