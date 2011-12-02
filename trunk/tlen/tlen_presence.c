@@ -288,26 +288,27 @@ static void JabberSendPresenceTo(TlenProtocol *proto, int status, char *to)
 	LeaveCriticalSection(&proto->modeMsgMutex);
 }
 
-void JabberSendPresence(TlenProtocol *proto, int status)
+void JabberSendPresence(TlenProtocol *proto, int statusIn)
 {
-	switch (status) {
+	int statusOut;
+	switch (statusIn) {
 		case ID_STATUS_ONLINE:
 		case ID_STATUS_OFFLINE:
 		case ID_STATUS_NA:
 		case ID_STATUS_FREECHAT:
 		case ID_STATUS_INVISIBLE:
-			status = status;
+			statusOut = statusIn;
 			break;
 		case ID_STATUS_AWAY:
 		case ID_STATUS_ONTHEPHONE:
 		case ID_STATUS_OUTTOLUNCH:
 		default:
-			status = ID_STATUS_AWAY;
+			statusOut = ID_STATUS_AWAY;
 			break;
 		case ID_STATUS_DND:
 		case ID_STATUS_OCCUPIED:
-			status = ID_STATUS_DND;
+			statusOut = ID_STATUS_DND;
 			break;
 	}
-	JabberSendPresenceTo(proto, status, NULL);
+	JabberSendPresenceTo(proto, statusOut, NULL);
 }
