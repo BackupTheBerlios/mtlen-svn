@@ -70,6 +70,27 @@ void Utils::copyString(char **a, const char *b) {
 
 }
 
+
+
+MM_INTERFACE Utils::mmi;
+
+void Utils::mucc_mir_free(void* ptr)
+{
+	mir_free(ptr);
+}
+
+char* Utils::mucc_mir_t2a(LPCTSTR src)
+{
+	return mir_t2a(src);
+}
+
+LPTSTR Utils::mucc_mir_a2t(const char* src)
+{
+	return mir_a2t(src);
+}
+
+
+
 void Utils::log(const char *fmt, ...)
 {
 #ifdef ENABLE_LOGGING

@@ -10,7 +10,7 @@ SRC = codec/gsm_preprocess.c codec/gsm_long.c codec/gsm_short.c codec/gsm_rpe.c 
 RES  = tlen.res
 OBJ = $(SRC:.c=.o) $(RES)
 BIN  = /home/piotr/Desktop/miranda/Plugins/tlen.dll
-INCS =  -I"../../include"
+INCS =  -I"../../include" -I"./ExternalAPI"
 CFLAGS = $(INCS) -DBUILDING_DLL=1 -DUNICODE -fno-exceptions -fexpensive-optimizations -O3 -Os -Wno-error -Wall
 # -save-temps
 LIBS =  -lversion -lwsock32 -lwinmm

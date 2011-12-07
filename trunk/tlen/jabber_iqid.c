@@ -246,7 +246,9 @@ void JabberIqResultRoster(TlenProtocol *proto, XmlNode *iqNode)
 				clmi.cbSize = sizeof(CLISTMENUITEM);
 				clmi.flags = CMIM_FLAGS;
 				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuMUC, (LPARAM) &clmi);
-				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuChats, (LPARAM) &clmi);
+				if (proto->hMenuChats != NULL){
+					CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuChats, (LPARAM) &clmi);
+				}
 			}
 
 			proto->isOnline = TRUE;

@@ -176,7 +176,7 @@ void ChatContainer::activateChild(ChatWindow *window) {
 		if (prev!=NULL) {
 			ShowWindow(prev->getHWND(), SW_HIDE);
 		}
-		SetWindowText(hWnd, window->getRoomName());
+		SetWindowTextA(hWnd, window->getRoomName());
 	}
 	TCITEM tci;
 	tci.mask = TCIF_IMAGE;
@@ -193,10 +193,12 @@ void ChatContainer::addChild(ChatWindow *child) {
 	HWND hwndTabs = GetDlgItem(hWnd, IDC_TABS);
 	childCount++;
 	tci.mask = TCIF_TEXT | TCIF_PARAM;
-	tci.pszText = (char *)child->getRoomName();
+	LPTSTR lps1 = Utils::mucc_mir_a2t(child->getRoomName());
+	tci.pszText = lps1;
 	tci.lParam = (LPARAM) child;
 	tabId = TabCtrl_InsertItem(hwndTabs, childCount-1, &tci);
 	TabCtrl_SetCurSel(hwndTabs, tabId);
+	Utils::mucc_mir_free(lps1);
 	activateChild(child);
 	SendMessage(hWnd, WM_SIZE, 0, 0);
 	ShowWindow(hWnd, SW_SHOWNORMAL);
@@ -210,11 +212,13 @@ void ChatContainer::changeChildData(ChatWindow *child) {
 	if (tabId >=0) {
 		TCITEM tci;
 		tci.mask = TCIF_TEXT;
-		tci.pszText = (char *)child->getRoomName();
+		LPTSTR lps1 = Utils::mucc_mir_a2t(child->getRoomName());
+		tci.pszText = lps1;
 		TabCtrl_SetItem(hwndTabs, childCount-1, &tci);
+		Utils::mucc_mir_free(lps1);
 	}
 	if (child == active) {
-		SetWindowText(hWnd, child->getRoomName());
+		SetWindowTextA(hWnd, child->getRoomName());
 	}
 }
 
@@ -320,10 +324,10 @@ void ChatContainer::remoteFlashWindow() {
 	SendMessage(hWnd, DM_FLASHWINDOW, 0, 0);
 }
 
-BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	ChatContainer *container;
-	container = (ChatContainer *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	container = (ChatContainer *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	if (container==NULL && msg!=WM_INITDIALOG) return FALSE;
 	switch (msg) {
 		case WM_INITDIALOG:
@@ -331,7 +335,7 @@ BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lPa
 			container = (ChatContainer *) lParam;
 			container->setHWND(hwndDlg);
 			TabCtrl_SetImageList(GetDlgItem(hwndDlg, IDC_TABS), hImageList);
-			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) container);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) container);
 			ShowWindow(hwndDlg, SW_SHOW);
 			SetEvent(container->getEvent());
 			return TRUE;
@@ -370,7 +374,7 @@ BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lPa
 			}
 			return TRUE;
 		case DM_CREATECHILD:
-			SetWindowLong(hwndDlg, DWL_MSGRESULT, (LONG)CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_GROUPCHAT_LOG), hwndDlg, (DLGPROC) wParam, (LPARAM) lParam));
+			SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, (LONG_PTR)CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_GROUPCHAT_LOG), hwndDlg, (DLGPROC) wParam, (LPARAM) lParam));
 			return TRUE;
 		case DM_ADDCHILD:
 			container->addChild((ChatWindow *) lParam);
@@ -458,7 +462,7 @@ BOOL CALLBACK ContainerDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lPa
 			}
 			break;
 		case WM_DESTROY:
-			SetWindowLong(hwndDlg, GWL_USERDATA, 0);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)0);
 			delete container;
 			return TRUE;
 

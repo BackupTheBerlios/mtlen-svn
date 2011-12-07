@@ -28,10 +28,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "m_chat.h"
 
 static int logPixelSY;
-static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ...);
 static char *JabberRtfEscape(char *str);
-static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb);
+//static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb);
 
 COLORREF ChatWindow::colorListBg, ChatWindow::colorListText, ChatWindow::colorListGroupText;
 HFONT ChatWindow::hListGroupFont=NULL;
@@ -266,7 +266,7 @@ void ChatWindow::setRoomName(const char *roomName) {
 	Utils::copyString(&this->roomName, roomName);
 //	sprintf(str, "%s %08X", roomName, roomFlags);
 //	SetWindowText(hWnd, str);
-	SetWindowText(hWnd, roomName);
+	SetWindowTextA(hWnd, roomName);
 }
 
 void ChatWindow::setRoomFlags(int flags) {
@@ -493,18 +493,22 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 			tvis.item.mask = TVIF_TEXT | TVIF_PARAM | TVIF_CHILDREN;
 			tvis.item.lParam = (LPARAM) NULL;
 			tvis.item.cChildren = 1;
-			tvis.item.pszText = (char *)Translate(groupNames[group]);
+			LPTSTR lps1 = Utils::mucc_mir_a2t(Translate(groupNames[group]));
+			tvis.item.pszText = lps1;
 			//tvis.item.state = INDEXTOSTATEIMAGEMASK(1);
 			//tvis.item.stateMask = TVIS_STATEIMAGEMASK ;
 			setTreeItem(group, TreeView_InsertItem(GetDlgItem(hWnd, IDC_TREELIST), &tvis));
+			Utils::mucc_mir_free(lps1);
 		}
 		tvis.hParent = getTreeItem(group);
 		tvis.hInsertAfter = TVI_SORT;
 		tvis.item.mask = TVIF_TEXT  | TVIF_PARAM;
-		tvis.item.pszText = (char *)user->getNick();
+		LPTSTR lps2 = Utils::mucc_mir_a2t(user->getNick());
+		tvis.item.pszText = lps2;
 		tvis.item.lParam = (LPARAM) user;
 		user->setHTreeItem(TreeView_InsertItem(GetDlgItem(hWnd, IDC_TREELIST), &tvis));
 		TreeView_Expand(GetDlgItem(hWnd, IDC_TREELIST), getTreeItem(group), TVE_EXPAND);
+		Utils::mucc_mir_free(lps2);
 	}
 	else {
 		if (user != NULL) {
@@ -526,7 +530,7 @@ int ChatWindow::changePresence(const MUCCEVENT *event) {
 }
 int ChatWindow::changeTopic(const MUCCEVENT *event) {
 
-	SetDlgItemText(hWnd, IDC_TOPIC, event->pszText);
+	SetDlgItemTextA(hWnd, IDC_TOPIC, event->pszText);
 //if (wasFirstMessage) {
 		logEvent(event);
 //	}
@@ -585,7 +589,7 @@ void ChatWindow::refreshSettings(int force) {
 	}
 	Font * font = Options::getFont(Options::FONT_USERLIST);
 	colorListText = font->getColor();
-	hListFont = CreateFont (font->getSize(), 0, 0, 0,
+	hListFont = CreateFontA(font->getSize(), 0, 0, 0,
 							font->getStyle() & Font::BOLD ? FW_BOLD : FW_NORMAL,
 							font->getStyle() & Font::ITALIC ? 1 : 0,
 							font->getStyle() & Font::UNDERLINE ? 1 : 0, 0,
@@ -594,7 +598,7 @@ void ChatWindow::refreshSettings(int force) {
                             font->getFace());
 	font = Options::getFont(Options::FONT_USERLISTGROUP);
 	colorListGroupText = font->getColor();
-	hListGroupFont = CreateFont (font->getSize(), 0, 0, 0,
+	hListGroupFont = CreateFontA(font->getSize(), 0, 0, 0,
 								 font->getStyle() & Font::BOLD ? FW_BOLD : FW_NORMAL,
 								 font->getStyle() & Font::ITALIC ? 1 : 0,
 								 font->getStyle() & Font::UNDERLINE ? 1 : 0, 0,
@@ -649,7 +653,7 @@ void ChatWindow::clearLog() {
 		iee.pszProto = getModule();
 		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
 	} else {
-		SetDlgItemText(getHWND(), IDC_LOG, "");
+		SetDlgItemTextA(getHWND(), IDC_LOG, "");
 	}
 	isEmpty = true;
 	eventList.clear();
@@ -670,7 +674,7 @@ void ChatWindow::rebuildLog() {
 		iee.pszProto = getModule();
 		CallService(MS_IEVIEW_EVENT, 0, (LPARAM)&iee);
 	} else {
-		SetDlgItemText(getHWND(), IDC_LOG, "");
+		SetDlgItemTextA(getHWND(), IDC_LOG, "");
 	}
 	isEmpty = true;
 	for (ChatEvent* event=eventList.getEvents();event!=NULL;event=event->getNext()) {
@@ -806,7 +810,7 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 	DBTIMETOSTRING dbtts;
 	CHARRANGE sel;
 	SETTEXTEX stt;
-	tm *ltime;
+	//tm *ltime;
 
 	if (event->iType!=MUCC_EVENT_STATUS && event->iType!=MUCC_EVENT_STATUS && event->iType!=MUCC_EVENT_ERROR
 		&& event->iType!=MUCC_EVENT_TOPIC && event->iType != MUCC_EVENT_MESSAGE) {
@@ -901,7 +905,7 @@ int ChatWindow::appendMessage(const MUCCEVENT *event) {
 			escapedStr = JabberRtfEscape(str);
 		}
 	}
-	ltime = localtime(&event->time);
+	//ltime = localtime(&event->time);
 	JabberStringAppend(&rtf, &msgSize, "{\\rtf1\\ansi\\deff0{\\fonttbl");
 	JabberStringAppend(&rtf, &msgSize, "{\\f0\\fnil\\fcharset%u %s;}", fontTimestamp->getCharSet(), fontTimestamp->getFace());
 	JabberStringAppend(&rtf, &msgSize, "{\\f1\\fnil\\fcharset%u %s;}", fontName->getCharSet(), fontName->getFace());
@@ -1069,7 +1073,7 @@ void ChatWindow::setFont(int font, int size, int bBold, int bItalic, int bUnderl
 	if (hEditFont!=NULL) {
 		DeleteObject(hEditFont);
 	}
-	hEditFont = CreateFont (MulDiv(-size, logPixelSY, 74), 0, 0, 0, bBold?FW_BOLD:FW_NORMAL,
+	hEditFont = CreateFontA(MulDiv(-size, logPixelSY, 74), 0, 0, 0, bBold?FW_BOLD:FW_NORMAL,
                                     bItalic, bUnderline, 0, 238, OUT_DEFAULT_PRECIS,
                                     CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
                                     FIXED_PITCH | FF_ROMAN,
@@ -1132,7 +1136,7 @@ static DWORD CALLBACK EditStreamCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG
     FILE *file;
 	file = fopen(szFilename, "ab");
 	if (file != NULL) {
-		*pcb = fwrite(pbBuff, cb, 1, file);
+		*pcb = (LONG)fwrite(pbBuff, (size_t)cb, (size_t)1, file);
 		fclose(file);
 		return 0;
 	}
@@ -1142,7 +1146,7 @@ static DWORD CALLBACK EditStreamCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG
 static BOOL CALLBACK EditWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	ChatWindow *chat;
-	chat = (ChatWindow *) GetWindowLong(GetParent(hwnd), GWL_USERDATA);
+	chat = (ChatWindow *) GetWindowLongPtr(GetParent(hwnd), GWLP_USERDATA);
 	switch (msg) {
 //	case WM_GETDLGCODE:
 //		return DLGC_WANTALLKEYS; //DLGC_WANTARROWS|DLGC_WANTCHARS|DLGC_HASSETSEL|DLGC_WANTALLKEYS;
@@ -1169,7 +1173,7 @@ static BOOL CALLBACK EditWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 static BOOL CALLBACK SplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	ChatWindow *chat;
-	chat = (ChatWindow *) GetWindowLong(GetParent(hwnd), GWL_USERDATA);
+	chat = (ChatWindow *) GetWindowLongPtr(GetParent(hwnd), GWLP_USERDATA);
 	switch (msg) {
 	case WM_NCHITTEST:
 		return HTCLIENT;
@@ -1225,11 +1229,11 @@ static BOOL CALLBACK SplitterWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 
 
 
-static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
 	ChatWindow *chatWindow;
-	chatWindow = (ChatWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	chatWindow = (ChatWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	if (msg!=WM_INITDIALOG && chatWindow==NULL) {
 		return FALSE;
 	}
@@ -1245,9 +1249,9 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			chatWindow = (ChatWindow *) lParam;
 			chatWindow->setHWND(hwndDlg);
 			ChatWindow::refreshSettings(0);
-			oldSplitterWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) SplitterWndProc);
-			oldSplitterWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) SplitterWndProc);
-			oldEditWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) EditWndProc);
+			oldSplitterWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_HSPLIT), GWLP_WNDPROC, (LONG_PTR) SplitterWndProc);
+			oldSplitterWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_VSPLIT), GWLP_WNDPROC, (LONG_PTR) SplitterWndProc);
+			oldEditWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT), GWLP_WNDPROC, (LONG_PTR) EditWndProc);
 			ShowWindow(GetDlgItem(hwndDlg, IDC_LIST), SW_HIDE);
 			chatWindow->hSplitterMinTop = 90;
 			chatWindow->hSplitterMinBottom = 40;
@@ -1255,11 +1259,11 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			chatWindow->vSplitterMinLeft = 100;
 			chatWindow->vSplitterMinRight = 80;
 			chatWindow->vSplitterPos=110;
-			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) chatWindow);
-			SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_USERDATA, (LONG) chatWindow);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) chatWindow);
+			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT), GWLP_USERDATA, (LONG_PTR) chatWindow);
 			chatWindow->refreshSettings();
 
-			SetWindowText(hwndDlg, chatWindow->getRoomName());
+			SetWindowTextA(hwndDlg, chatWindow->getRoomName());
 			SendDlgItemMessage(hwndDlg, IDC_BOLD, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_BOLD]);
 			SendDlgItemMessage(hwndDlg, IDC_ITALIC, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_ITALIC]);
 			SendDlgItemMessage(hwndDlg, IDC_UNDERLINE, BM_SETIMAGE, IMAGE_ICON, (LPARAM) muccIcon[MUCC_IDI_UNDERLINE]);
@@ -1292,12 +1296,12 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 			for(i=0;i<chatWindow->getFontSizeNum();i++) {
 				char str[10];
 				sprintf(str, "%d", chatWindow->getFontSize(i));
-				int n = SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_ADDSTRING, 0, (LPARAM) str);
+				int n = SendDlgItemMessageA(hwndDlg, IDC_FONTSIZE, CB_ADDSTRING, 0, (LPARAM) str);
 				SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_SETITEMDATA, n, chatWindow->getFontSize(i));
 			}
 			SendDlgItemMessage(hwndDlg, IDC_FONTSIZE, CB_SETCURSEL, Options::getChatWindowFontSize(), 0);
 			for(i=0;i<chatWindow->getFontNameNum();i++) {
-				int n = SendDlgItemMessage(hwndDlg, IDC_FONT, CB_ADDSTRING, 0, (LPARAM) chatWindow->getFontName(i));
+				int n = SendDlgItemMessageA(hwndDlg, IDC_FONT, CB_ADDSTRING, 0, (LPARAM) chatWindow->getFontName(i));
 				SendDlgItemMessage(hwndDlg, IDC_FONT, CB_SETITEMDATA, n, i);
 			}
 			SendDlgItemMessage(hwndDlg, IDC_FONT, CB_SETCURSEL, Options::getChatWindowFont(), 0);
@@ -1464,10 +1468,10 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					ieWindow.hwnd = chatWindow->getHWNDLog();
 					CallService(MS_IEVIEW_WINDOW, 0, (LPARAM)&ieWindow);
 				}
-				SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) NULL);
-				SetWindowLong(GetDlgItem(hwndDlg, IDC_HSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
-				SetWindowLong(GetDlgItem(hwndDlg, IDC_VSPLIT), GWL_WNDPROC, (LONG) oldSplitterWndProc);
-				SetWindowLong(GetDlgItem(hwndDlg, IDC_EDIT), GWL_WNDPROC, (LONG) oldEditWndProc);
+				SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) NULL);
+				SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_HSPLIT), GWLP_WNDPROC, (LONG_PTR) oldSplitterWndProc);
+				SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_VSPLIT), GWLP_WNDPROC, (LONG_PTR) oldSplitterWndProc);
+				SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT), GWLP_WNDPROC, (LONG_PTR) oldEditWndProc);
 				delete chatWindow;
 				break;
 			}
@@ -1678,8 +1682,8 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					{
 						MUCCEVENT muce;
 						char text[2048];
-						GetDlgItemText(hwndDlg, IDC_EDIT, text, sizeof(text));
-						SetDlgItemText(hwndDlg, IDC_EDIT, "");
+						GetDlgItemTextA(hwndDlg, IDC_EDIT, text, sizeof(text));
+						SetDlgItemTextA(hwndDlg, IDC_EDIT, "");
 						muce.cbSize = sizeof(MUCCEVENT);
 						muce.iType = MUCC_EVENT_MESSAGE;
 						muce.pszModule =  chatWindow->getModule();
@@ -1746,7 +1750,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					{
 						LPNMTREEVIEW pnmtv = (LPNMTREEVIEW) lParam;
 						if (pnmtv->action==TVE_COLLAPSE) {
-							SetWindowLong(hwndDlg,DWL_MSGRESULT, TRUE);
+							SetWindowLongPtr(hwndDlg,DWLP_MSGRESULT, TRUE);
 							return TRUE;
 						}
 					}
@@ -1812,17 +1816,17 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					LPNMTVCUSTOMDRAW pCustomDraw = (LPNMTVCUSTOMDRAW)lParam;
 					switch (pCustomDraw->nmcd.dwDrawStage) {
 						case CDDS_PREPAINT:
-							SetWindowLong(hwndDlg,DWL_MSGRESULT,CDRF_NOTIFYITEMDRAW);
+							SetWindowLongPtr(hwndDlg,DWLP_MSGRESULT,CDRF_NOTIFYITEMDRAW);
 							return TRUE;
 						case CDDS_ITEMPREPAINT:
 							{
 								TVITEM tvi;;
 								HICON hIcon;
-								char str[200];
+								TCHAR str[200];
 								RECT rc = pCustomDraw->nmcd.rc;
 								tvi.mask = TVIF_HANDLE | TVIF_STATE | TVIF_TEXT | TVIF_PARAM;
 								tvi.pszText = str;
-								tvi.cchTextMax = sizeof(str);
+								tvi.cchTextMax = sizeof(str)/sizeof(TCHAR);
 								tvi.hItem = (HTREEITEM)pCustomDraw->nmcd.dwItemSpec;
 								TreeView_GetItem(pCustomDraw->nmcd.hdr.hwndFrom, &tvi);
 								ChatUser * user= (ChatUser *)pCustomDraw->nmcd.lItemlParam;
@@ -1866,9 +1870,9 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 									SetTextColor(pCustomDraw->nmcd.hdc, pCustomDraw->clrText);
 									TextOut(pCustomDraw->nmcd.hdc,
 											rc.left+pCustomDraw->iLevel*GetSystemMetrics(SM_CXSMICON)+2,
-											rc.top, tvi.pszText, strlen(tvi.pszText));
+											rc.top, tvi.pszText, (int)_tcslen(tvi.pszText));
 								}
-								SetWindowLong(hwndDlg,DWL_MSGRESULT, CDRF_SKIPDEFAULT );
+								SetWindowLongPtr(hwndDlg,DWLP_MSGRESULT, CDRF_SKIPDEFAULT );
 								return TRUE;
 							}
 						}
@@ -1930,7 +1934,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 								break;
 							}
 							DestroyMenu(hMenu);
-							SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+							SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
 							return TRUE;
 						}
 					}
@@ -1939,7 +1943,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 					switch (((ENLINK *) lParam)->msg) {
 					case WM_SETCURSOR:
 						SetCursor(hCurHyperlinkHand);
-						SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
 						return TRUE;
 					case WM_RBUTTONDOWN:
 					case WM_LBUTTONUP:
@@ -1990,7 +1994,7 @@ static BOOL CALLBACK LogDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lP
 								}
 								free(tr.lpstrText);
 								DestroyMenu(hMenu);
-								SetWindowLong(hwndDlg, DWL_MSGRESULT, TRUE);
+								SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
 								return TRUE;
 							}
 							else {
@@ -2064,8 +2068,8 @@ static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ..
 		len = 0;
 	}
 	else {
-		len = strlen(*str);
-		size = *sizeAlloced - strlen(*str);
+		len = (int)strlen(*str);
+		size = *sizeAlloced - (int)strlen(*str);
 	}
 
 	p = *str + len;
@@ -2080,9 +2084,9 @@ static void JabberStringAppend(char **str, int *sizeAlloced, const char *fmt, ..
 }
 
 
-static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb)
-{
-    StreamData *stream = (StreamData *) dwCookie;
+//static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG * pcb)
+//{
+//    StreamData *stream = (StreamData *) dwCookie;
 /*
 	if (lstrdat->buffer == NULL)
 	{
@@ -2100,5 +2104,5 @@ static DWORD CALLBACK Log_StreamCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb,
         lstrdat->buffer = NULL;
     }
 */
-    return 0;
-}
+//    return 0;
+//}

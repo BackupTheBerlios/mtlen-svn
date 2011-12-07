@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utils.h"
 
 
-static BOOL CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	int i;
 	const char *banOptions[]={"No ban", "1 minute", "5 minutes", "15 minutes", "30 minutes",
@@ -32,12 +32,12 @@ static BOOL CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPAR
 	const char *roleOptions[]={"No role", "Member", "Admin", "Moderator"};
 	const int roleMask[] = {0, MUCC_EF_USER_MEMBER, MUCC_EF_USER_ADMIN, MUCC_EF_USER_MODERATOR};
 	AdminWindow *adminWindow;
-	adminWindow = (AdminWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	adminWindow = (AdminWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		adminWindow = (AdminWindow *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) adminWindow);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) adminWindow);
 		adminWindow->setKickTabHWND(hwndDlg);
 		for (i=0;i<12;i++) {
 			SendDlgItemMessage(hwndDlg, IDC_KICK_OPTIONS, CB_ADDSTRING, 0, (LPARAM) banOptions[i]);
@@ -47,15 +47,15 @@ static BOOL CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPAR
 			SendDlgItemMessage(hwndDlg, IDC_ROLE_OPTIONS, CB_ADDSTRING, 0, (LPARAM) roleOptions[i]);
 		}
 		SendDlgItemMessage(hwndDlg, IDC_ROLE_OPTIONS, CB_SETCURSEL, 0, 0);
-		SetDlgItemText(hwndDlg, IDC_NICK, adminWindow->getNick());
+		SetDlgItemTextA(hwndDlg, IDC_NICK, adminWindow->getNick());
 		return FALSE;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
 			{
 				char nick[256], reason[256];
-				GetDlgItemText(hwndDlg, IDC_NICK, nick, sizeof(nick));
-				GetDlgItemText(hwndDlg, IDC_REASON, reason, sizeof(reason));
+				GetDlgItemTextA(hwndDlg, IDC_NICK, nick, sizeof(nick));
+				GetDlgItemTextA(hwndDlg, IDC_REASON, reason, sizeof(reason));
 				if (strlen(nick)>0) {
 					int iSel = SendDlgItemMessage(hwndDlg, IDC_KICK_OPTIONS, CB_GETCURSEL, 0, 0);
 					if (iSel>=0 && iSel<12) {
@@ -69,7 +69,7 @@ static BOOL CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPAR
 		case IDC_SET_ROLE:
 			{
 				char nick[256];
-				GetDlgItemText(hwndDlg, IDC_NICK, nick, sizeof(nick));
+				GetDlgItemTextA(hwndDlg, IDC_NICK, nick, sizeof(nick));
 				if (strlen(nick)>0) {
 					int iSel = SendDlgItemMessage(hwndDlg, IDC_ROLE_OPTIONS, CB_GETCURSEL, 0, 0);
 					if (iSel>=0 && iSel<3) {
@@ -92,44 +92,44 @@ static BOOL CALLBACK UserKickDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPAR
 	return FALSE;
 }
 
-static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	int i;
 	const char *browseOptions[]={"Banned", "Owners", "Administrators", "Members", "Moderators"};
 	const int browserFlags[]={MUCC_EF_USER_BANNED, MUCC_EF_USER_OWNER, MUCC_EF_USER_ADMIN, MUCC_EF_USER_MEMBER, MUCC_EF_USER_MODERATOR};
 	LVCOLUMN lvCol;
 	HWND lv;
 	AdminWindow *adminWindow;
-	adminWindow = (AdminWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	adminWindow = (AdminWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		adminWindow = (AdminWindow *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) adminWindow);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) adminWindow);
 		adminWindow->setBrowserTabHWND(hwndDlg);
 		lv = GetDlgItem(hwndDlg, IDC_LIST);
 		ListView_SetExtendedListViewStyle(lv, LVS_EX_FULLROWSELECT);
 		lvCol.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
-		lvCol.pszText = Translate("Login");
+		lvCol.pszText = TranslateT("Login");
 		lvCol.cx = 80;
 		lvCol.iSubItem = 0;
 		ListView_InsertColumn(lv, 0, &lvCol);
-		lvCol.pszText = Translate("Nick name");
+		lvCol.pszText = TranslateT("Nick name");
 		lvCol.cx = 80;
 		lvCol.iSubItem = 1;
 		ListView_InsertColumn(lv, 1, &lvCol);
-		lvCol.pszText = Translate("When");
+		lvCol.pszText = TranslateT("When");
 		lvCol.cx = 95;
 		lvCol.iSubItem = 2;
 		ListView_InsertColumn(lv, 2, &lvCol);
-		lvCol.pszText = Translate("Admin");
+		lvCol.pszText = TranslateT("Admin");
 		lvCol.cx = 80;
 		lvCol.iSubItem = 2;
 		ListView_InsertColumn(lv, 3, &lvCol);
-		lvCol.pszText = Translate("Reason");
+		lvCol.pszText = TranslateT("Reason");
 		lvCol.cx = 70;
 		lvCol.iSubItem = 2;
 		ListView_InsertColumn(lv, 5, &lvCol);
-		lvCol.pszText = Translate("Remaining");
+		lvCol.pszText = TranslateT("Remaining");
 		lvCol.cx = 80;
 		lvCol.iSubItem = 2;
 		ListView_InsertColumn(lv, 4, &lvCol);
@@ -167,7 +167,7 @@ static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, L
 		if (wParam == IDC_LIST) {
 			RECT rc;
 			int x, w;
-			char text[256];
+			TCHAR text[256];
 			DRAWITEMSTRUCT *lpDis = (DRAWITEMSTRUCT *) lParam;
 			switch (lpDis->itemAction) {
 				default:
@@ -192,11 +192,11 @@ static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, L
 						rc.top = lpDis->rcItem.top;
 						rc.bottom = lpDis->rcItem.bottom;
 						rc.right = x+w-2;
-						ListView_GetItemText(GetDlgItem(hwndDlg, IDC_LIST), lpDis->itemID, col, text, sizeof(text));
-						if (strlen(text)==0) {
-							strcpy(text, "-");
+						ListView_GetItemText(GetDlgItem(hwndDlg, IDC_LIST), lpDis->itemID, col, text, sizeof(text)/sizeof(TCHAR));
+						if (_tcslen(text)==0) {
+							_tcscpy(text, _TEXT("-"));
 						}
-						DrawText(lpDis->hDC, text, strlen(text), &rc, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
+						DrawText(lpDis->hDC, text, (int)_tcslen(text), &rc, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_VCENTER);
 						x+=w;
 					}
 				break;
@@ -206,7 +206,7 @@ static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, L
 	case WM_NOTIFY:
 		LPNMHDR pNmhdr;
 		pNmhdr = (LPNMHDR)lParam;
-		if (pNmhdr->idFrom = IDC_LIST && adminWindow->getBrowserMode() == MUCC_EF_USER_BANNED) {
+		if (pNmhdr->idFrom == IDC_LIST && adminWindow->getBrowserMode() == MUCC_EF_USER_BANNED) {
 			switch (pNmhdr->code) {
 			case NM_RCLICK:
 				{
@@ -219,19 +219,21 @@ static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, L
 						LVITEM lvi = {0};
 						HMENU hMenu;
 						int iSelection;
-						char nick[256];
+						TCHAR nick[256];
 						lvi.mask = TVIF_TEXT;
 						lvi.iItem = hitItem;
 						lvi.iSubItem = 0;
 						lvi.pszText = nick;
-						lvi.cchTextMax = sizeof(nick);
+						lvi.cchTextMax = sizeof(nick)/sizeof(TCHAR);
 						ListView_GetItem(pNmhdr->hwndFrom, &lvi);
 						hMenu=GetSubMenu(LoadMenu(hInst, MAKEINTRESOURCE(IDR_CHATOPTIONS)), 3);
 						CallService(MS_LANGPACK_TRANSLATEMENU,(WPARAM)hMenu,0);
 						iSelection = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, (short)LOWORD(GetMessagePos()), (short)HIWORD(GetMessagePos()), 0, hwndDlg, NULL);
 						DestroyMenu(hMenu);
 						if (iSelection == ID_USERMENU_UNBAN) {
-							adminWindow->getParent()->unban(nick);
+							char* lps1 = Utils::mucc_mir_t2a(nick);
+							adminWindow->getParent()->unban(lps1);
+							Utils::mucc_mir_free(lps1);
 						} 
 					}
 
@@ -244,18 +246,18 @@ static BOOL CALLBACK UserBrowserDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, L
 	return FALSE;
 }
 
-static BOOL CALLBACK AdminDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK AdminDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	HWND hwnd;
 	TCITEM tci;
 	HWND tc;
 	AdminWindow *adminWindow;
-	adminWindow = (AdminWindow *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	adminWindow = (AdminWindow *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		adminWindow = (AdminWindow *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) adminWindow);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) adminWindow);
 		SendMessage(hwndDlg, WM_SETICON, ICON_BIG, (LPARAM) muccIcon[MUCC_IDI_ADMINISTRATION]);
 
 		hwnd = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_USER_KICK), hwndDlg, UserKickDlgProc, (LPARAM) adminWindow);
@@ -269,9 +271,9 @@ static BOOL CALLBACK AdminDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM 
 
 		tc = GetDlgItem(hwndDlg, IDC_TABS);
 		tci.mask = TCIF_TEXT;
-		tci.pszText = Translate("Administration");
+		tci.pszText = TranslateT("Administration");
 		TabCtrl_InsertItem(tc, 0, &tci);
-		tci.pszText = Translate("Browser");
+		tci.pszText = TranslateT("Browser");
 		TabCtrl_InsertItem(tc, 1, &tci);
 
 		return FALSE;
@@ -393,21 +395,27 @@ ChatWindow * AdminWindow::getParent() {
 void AdminWindow::queryResultUsers(MUCCQUERYRESULT *queryResult) {
 	ListView_DeleteAllItems(GetDlgItem(getBrowserTabHWND(), IDC_LIST));
 	for (int i=0;i<queryResult->iItemsNum;i++) {
+
 		char timestampStr[100];
 		DBTIMETOSTRING dbtts;
 		LVITEM lvItem;
+
 		lvItem.mask = LVIF_TEXT;// | LVIF_PARAM;
 		lvItem.iSubItem = 0;
 		lvItem.iItem = ListView_GetItemCount(GetDlgItem(getBrowserTabHWND(), IDC_LIST));
-		lvItem.pszText = (char *) queryResult->pItems[i].pszID;
-		if (lvItem.pszText == NULL) lvItem.pszText = "";
+		lvItem.pszText = Utils::mucc_mir_a2t(queryResult->pItems[i].pszID);
+		if (lvItem.pszText == NULL) lvItem.pszText = _TEXT("");
 //		lvItem.lParam = (LPARAM) room;
 		ListView_InsertItem(GetDlgItem(getBrowserTabHWND(), IDC_LIST), &lvItem);
+		Utils::mucc_mir_free(lvItem.pszText);
+
 		lvItem.iSubItem = 1;
-		lvItem.pszText = (char *) queryResult->pItems[i].pszName;
-		if (lvItem.pszText == NULL) lvItem.pszText = "";
+		lvItem.pszText = Utils::mucc_mir_a2t(queryResult->pItems[i].pszName);
+		if (lvItem.pszText == NULL) lvItem.pszText = _TEXT("");
 		ListView_InsertItem(GetDlgItem(getBrowserTabHWND(), IDC_LIST), &lvItem);
 		ListView_SetItemText(GetDlgItem(getBrowserTabHWND(), IDC_LIST), lvItem.iItem, lvItem.iSubItem, lvItem.pszText);
+		Utils::mucc_mir_free(lvItem.pszText);
+
 		lvItem.iSubItem = 2;
 		dbtts.cbDest = 90;
 		dbtts.szDest = timestampStr;
@@ -416,15 +424,19 @@ void AdminWindow::queryResultUsers(MUCCQUERYRESULT *queryResult) {
 		if (queryResult->pItems[i].dwFlags) {
 			CallService(MS_DB_TIME_TIMESTAMPTOSTRING, (WPARAM)queryResult->pItems[i].dwFlags, (LPARAM) & dbtts);
 		}
-		lvItem.pszText = timestampStr;
-		if (lvItem.pszText == NULL) lvItem.pszText = "";
+		lvItem.pszText = Utils::mucc_mir_a2t(timestampStr);
+		if (lvItem.pszText == NULL) lvItem.pszText = _TEXT("");
 		ListView_InsertItem(GetDlgItem(getBrowserTabHWND(), IDC_LIST), &lvItem);
 		ListView_SetItemText(GetDlgItem(getBrowserTabHWND(), IDC_LIST), lvItem.iItem, lvItem.iSubItem, lvItem.pszText);
+		Utils::mucc_mir_free(lvItem.pszText);
+
 		lvItem.iSubItem = 3;
-		lvItem.pszText = (char *) queryResult->pItems[i].pszNick;
-		if (lvItem.pszText == NULL) lvItem.pszText = "";
+		lvItem.pszText = Utils::mucc_mir_a2t(queryResult->pItems[i].pszNick);
+		if (lvItem.pszText == NULL) lvItem.pszText = _TEXT("");
 		ListView_InsertItem(GetDlgItem(getBrowserTabHWND(), IDC_LIST), &lvItem);
 		ListView_SetItemText(GetDlgItem(getBrowserTabHWND(), IDC_LIST), lvItem.iItem, lvItem.iSubItem, lvItem.pszText);
+		Utils::mucc_mir_free(lvItem.pszText);
+
 		lvItem.iSubItem = 4;
 		timestampStr[0] = '\0';
 		if (queryResult->pItems[i].iCount > 0) {
@@ -442,15 +454,18 @@ void AdminWindow::queryResultUsers(MUCCQUERYRESULT *queryResult) {
 				sprintf(timestampStr, "%ds", seconds);
 			}
 		}
-		lvItem.pszText = timestampStr;
-		if (lvItem.pszText == NULL) lvItem.pszText = "";
+		lvItem.pszText = Utils::mucc_mir_a2t(timestampStr);
+		if (lvItem.pszText == NULL) lvItem.pszText = _TEXT("");
 		ListView_InsertItem(GetDlgItem(getBrowserTabHWND(), IDC_LIST), &lvItem);
 		ListView_SetItemText(GetDlgItem(getBrowserTabHWND(), IDC_LIST), lvItem.iItem, lvItem.iSubItem, lvItem.pszText);
+		Utils::mucc_mir_free(lvItem.pszText);
+
 		lvItem.iSubItem = 5;
-		lvItem.pszText = (char *) queryResult->pItems[i].pszText;
-		if (lvItem.pszText == NULL) lvItem.pszText = "";
+		lvItem.pszText = Utils::mucc_mir_a2t(queryResult->pItems[i].pszText);
+		if (lvItem.pszText == NULL) lvItem.pszText = _TEXT("");
 		ListView_InsertItem(GetDlgItem(getBrowserTabHWND(), IDC_LIST), &lvItem);
 		ListView_SetItemText(GetDlgItem(getBrowserTabHWND(), IDC_LIST), lvItem.iItem, lvItem.iSubItem, lvItem.pszText);
+		Utils::mucc_mir_free(lvItem.pszText);
 
 /*
 		ptr = new HelperContact(queryResult->pItems[i].pszID, queryResult->pItems[i].pszName);

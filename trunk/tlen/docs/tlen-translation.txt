@@ -1,6 +1,7 @@
 ;***********************************
 ;******* Tlen language by raq ******
 
+[Tlen czaty]
 ;[Authentication failed for]
 ;[Tlen Authentication]
 [Network]

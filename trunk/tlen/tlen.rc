@@ -1,5 +1,5 @@
 #include "resource.h"
-#include "../tlen_build/tlen_commons.h"
+#include "commons.h"
 #ifdef __MINGW32__
 	#define WINVER 0x500
 	#define _WIN32_IE 0x500

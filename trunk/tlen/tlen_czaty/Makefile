@@ -1,4 +1,4 @@
-# Project: mtlen
+# Project: tlen_czaty (mucc)
 # Makefile created by Dev-C++ 4.9.9.0
 
 CPP  = g++.exe
@@ -9,8 +9,8 @@ UPX = upx -9 -q --compress-icons=0
 SRC = AdminWindow.cpp ChatContainer.cpp ChatEvent.cpp ChatGroup.cpp ChatRoom.cpp ChatUser.cpp ChatWindow.cpp FontList.cpp HelperDialog.cpp ManagerWindow.cpp mucc.cpp Options.cpp mucc_services.cpp Utils.cpp
 RES  = mucc.res
 OBJ = $(SRC:.cpp=.o) $(RES)
-BIN  = tlen_chat.dll
-INCS =  -I"../../include"
+BIN  = tlen_czaty.dll
+INCS =  -I"../../../include" -I"../ExternalAPI"
 CFLAGS = $(INCS) -DBUILDING_DLL=1 -fno-exceptions -fexpensive-optimizations -O3 -Os -Wno-error -Wall
 CXXFLAGS = $(INCS) -DBUILDING_DLL=1 -fno-exceptions -fno-rtti -fexpensive-optimizations -O3 -Os -Wno-error -Wall
 # -save-temps

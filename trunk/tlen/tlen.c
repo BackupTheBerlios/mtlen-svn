@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "../tlen_build/tlen_commons.h"
+#include "commons.h"
 #include "jabber.h"
 #include "tlen_muc.h"
 #include "tlen_file.h"
@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ctype.h>
 #include <m_icolib.h>
 #include <m_genmenu.h>
+#include "m_mucc.h"
 #include "m_updater.h"
 
 
@@ -60,7 +61,7 @@ PLUGININFOEX pluginInfoEx = {
 	"Tlen protocol plugin for Miranda IM (version: "TLEN_VERSION_STRING" ; compiled: "__DATE__" "__TIME__")",
 	"Santithorn Bunchua, Adam Strzelecki, Piotr Piastucki",
 	"the_leech@users.berlios.de",
-	"(c) 2002-2010 Santithorn Bunchua, Piotr Piastucki",
+	"(c) 2002-2012 Santithorn Bunchua, Piotr Piastucki",
 	"http://mtlen.berlios.de",
 	0,
 	0,
@@ -80,6 +81,7 @@ PLUGININFOEX pluginInfoEx = {
 void TlenLoadOptions(TlenProtocol *proto);
 int TlenOptionsInit(void *ptr, WPARAM wParam, LPARAM lParam);
 int TlenUserInfoInit(void *ptr, WPARAM wParam, LPARAM lParam);
+int TlenSystemModulesLoaded(void *ptr, WPARAM wParam, LPARAM lParam);
 extern void TlenInitServicesVTbl(TlenProtocol *proto);
 extern int JabberContactDeleted(void *ptr, WPARAM wParam, LPARAM lParam);
 extern int JabberDbSettingChanged(void *ptr, WPARAM wParam, LPARAM lParam);
@@ -382,6 +384,7 @@ int TlenPreShutdown(void *ptr, WPARAM wParam, LPARAM lParam)
 
 static void initMenuItems(TlenProtocol *proto)
 {
+
 	char text[_MAX_PATH];
 	CLISTMENUITEM mi, clmi;
 	memset(&mi, 0, sizeof(CLISTMENUITEM));
@@ -403,16 +406,21 @@ static void initMenuItems(TlenProtocol *proto)
 	proto->hMenuRoot = (HANDLE)CallService( MS_CLIST_ADDMAINMENUITEM,  (WPARAM)0, (LPARAM)&mi);
 
     mi.flags = CMIF_CHILDPOPUP | CMIF_ICONFROMICOLIB;
+    //mi.pszPopupName = (char *)proto->hMenuRoot;
+    mi.hParentMenu = (HGENMENU)proto->hMenuRoot;
 
-	sprintf(text, "%s/MainMenuChats", proto->iface.m_szModuleName);
-	CreateServiceFunction_Ex(text, proto, TlenMUCMenuHandleChats);
-	mi.pszName = "Tlen Chats";
-	mi.position = 2000050001;
-	mi.icolibItem = GetIconHandle(IDI_CHATS);
-	mi.pszService = text;
-    mi.pszPopupName = (char *)proto->hMenuRoot;
-	proto->hMenuChats = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
-	CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuChats, (LPARAM) &clmi);
+    proto->hMenuChats = NULL;
+    if(ServiceExists(MS_MUCC_NEW_WINDOW))
+	{
+    	sprintf(text, "%s/MainMenuChats", proto->iface.m_szModuleName);
+		CreateServiceFunction_Ex(text, proto, TlenMUCMenuHandleChats);
+		mi.pszName = "Tlen Chats";
+		mi.position = 2000050001;
+		mi.icolibItem = GetIconHandle(IDI_CHATS);
+		mi.pszService = text;
+		proto->hMenuChats = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
+		CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) proto->hMenuChats, (LPARAM) &clmi);
+	}
 
 	// "Multi-User Conference"
 	sprintf(text, "%s/MainMenuMUC", proto->iface.m_szModuleName);
@@ -431,6 +439,9 @@ static void initMenuItems(TlenProtocol *proto)
 	mi.icolibItem = GetIconHandle(IDI_MAIL);
 	mi.pszService = text;
 	proto->hMenuInbox = (HANDLE) CallService(MS_CLIST_ADDMAINMENUITEM, 0, (LPARAM) &mi);
+
+	mi.hParentMenu = NULL;
+
 
 	// "Send picture"
 	sprintf(text, "%s/SendPicture", proto->iface.m_szModuleName);
@@ -480,10 +491,10 @@ static void initMenuItems(TlenProtocol *proto)
 }
 
 static void uninitMenuItems(TlenProtocol *proto) {
-	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuRoot, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuChats, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuMUC, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuInbox, (LPARAM) 0);
+	CallService(MS_CLIST_REMOVEMAINMENUITEM, (WPARAM)proto->hMenuRoot, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactMUC, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuPicture, (LPARAM) 0);
 	CallService(MS_CLIST_REMOVECONTACTMENUITEM, (WPARAM)proto->hMenuContactVoice, (LPARAM) 0);
@@ -512,6 +523,7 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
 	sprintf(text, "%s/%s", proto->iface.m_szModuleName, "Nudge");
 	proto->hTlenNudge = CreateHookableEvent(text);
 
+	HookEventObj_Ex(ME_SYSTEM_MODULESLOADED, proto, TlenSystemModulesLoaded);
 	HookEventObj_Ex(ME_OPT_INITIALISE, proto, TlenOptionsInit);
 	HookEventObj_Ex(ME_DB_CONTACT_SETTINGCHANGED, proto, JabberDbSettingChanged);
 	HookEventObj_Ex(ME_DB_CONTACT_DELETED, proto, JabberContactDeleted);
@@ -536,20 +548,20 @@ static TlenProtocol *tlenProtoInit( const char* pszProtoName, const TCHAR* tszUs
 	JabberSerialInit(proto);
 	JabberIqInit(proto);
 	JabberListInit(proto);
-    initMenuItems(proto);
 
     return proto;
 }
 
-int onSystemModulesLoaded(WPARAM wParam, LPARAM lParam)
+int TlenSystemModulesLoaded(void *ptr, WPARAM wParam, LPARAM lParam)
 {
 
-    PLUGININFO* pluginInfoPtr = (PLUGININFO*)&pluginInfoEx;
+    TlenProtocol *proto = (TlenProtocol *)ptr;
+    initMenuItems(proto);
 
     // updater plugin support
     if(ServiceExists(MS_UPDATE_REGISTERFL))
 	{
-    	
+    	PLUGININFO* pluginInfoPtr = (PLUGININFO*)&pluginInfoEx;
 		#ifdef _UNICODE
 		#ifdef _X64
 		CallService(MS_UPDATE_REGISTERFL, (WPARAM)4435, (LPARAM)pluginInfoPtr); //x64 version
@@ -559,9 +571,7 @@ int onSystemModulesLoaded(WPARAM wParam, LPARAM lParam)
 		#else
 		CallService(MS_UPDATE_REGISTERFL, (WPARAM)4404, (LPARAM)pluginInfoPtr); //ANSI version
 		#endif
-	
 	}
-
 
 	return 0;
 }
@@ -615,8 +625,6 @@ int __declspec(dllexport) Load(PLUGINLINK *link)
 	pd.fnUninit = ( pfnUninitProto )tlenProtoUninit;
 	pd.type = PROTOTYPE_PROTOCOL;
 	CallService(MS_PROTO_REGISTERMODULE, 0, (LPARAM) &pd);
-
-    HookEvent(ME_SYSTEM_MODULESLOADED, onSystemModulesLoaded);
 
 	return 0;
 }

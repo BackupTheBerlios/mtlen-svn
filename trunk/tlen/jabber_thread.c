@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "jabber.h"
 
-#include "../tlen_build/tlen_commons.h"
+#include "commons.h"
 #include "jabber_list.h"
 #include "jabber_iq.h"
 #include "resource.h"
@@ -355,7 +355,9 @@ void __cdecl JabberServerThread(ThreadData *info)
 			clmi.cbSize = sizeof(CLISTMENUITEM);
 			clmi.flags = CMIM_FLAGS | CMIF_GRAYED;
 			CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) info->proto->hMenuMUC, (LPARAM) &clmi);
-			CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) info->proto->hMenuChats, (LPARAM) &clmi);
+			if (info->proto->hMenuChats != NULL){
+				CallService(MS_CLIST_MODIFYMENUITEM, (WPARAM) info->proto->hMenuChats, (LPARAM) &clmi);
+			}
 
 			// Set status to offline
 			oldStatus = info->proto->iface.m_iStatus;

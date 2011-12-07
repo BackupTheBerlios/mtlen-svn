@@ -1,4 +1,5 @@
 #include "resource.h"
+#include "../commons.h"
 #ifdef __MINGW32__
 	#define WINVER 0x500
 	#define _WIN32_IE 0x500
@@ -7,9 +8,13 @@
 	#define IDC_STATIC (-1)
 #endif
 #else
-	#define APSTUDIO_READONLY_SYMBOLS
-	#include "winres.h"
-	#undef APSTUDIO_READONLY_SYMBOLS
+//	  #define APSTUDIO_READONLY_SYMBOLS
+//    #include "winres.h"
+//    #undef APSTUDIO_READONLY_SYMBOLS
+    #include <windows.h>
+	#ifndef IDC_STATIC
+	#define IDC_STATIC (-1)
+    #endif
 #endif
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -491,8 +496,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,7,3
- PRODUCTVERSION 1,0,7,3
+ FILEVERSION MUCC_FILEVERSION_STRING
+ PRODUCTVERSION MUCC_FILEVERSION_STRING
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -510,14 +515,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "http://mtlen.berlios.de\0"
             VALUE "FileDescription", "Group Chats GUI Plugin for Miranda IM\0"
-            VALUE "FileVersion", "1.0.7.3\0"
+            VALUE "FileVersion", MUCC_VERSION_STRING
             VALUE "InternalName", "tlen_chat\0"
             VALUE "LegalCopyright", "Copyright (c) 2004-2006 Piotr Piastucki\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "tlen_chat.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Tlen Chat Plugin\0"
-            VALUE "ProductVersion", "1.0.7.3\0"
+            VALUE "ProductVersion", MUCC_VERSION_STRING
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -537,28 +542,6 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-#ifdef __MINGW32__
-IDI_CHAT                ICON    DISCARDABLE     "chat\\icos\\chat.ico"
-IDI_BLANK               ICON    DISCARDABLE     "chat\\icos\\blank.ico"
-IDI_ITALIC              ICON    DISCARDABLE     "chat\\icos\\italic.ico"
-IDI_BOLD                ICON    DISCARDABLE     "chat\\icos\\bold.ico"
-IDI_UNDERLINE           ICON    DISCARDABLE     "chat\\icos\\underline.ico"
-IDI_OPTIONS             ICON    DISCARDABLE     "chat\\icos\\options.ico"
-IDI_OWNER               ICON    DISCARDABLE     "chat\\icos\\owner.ico"
-IDI_GLOBALOWNER         ICON    DISCARDABLE     "chat\\icos\\glowner.ico"
-IDI_ADMIN               ICON    DISCARDABLE     "chat\\icos\\admin.ico"
-IDI_REGISTERED          ICON    DISCARDABLE     "chat\\icos\\registered.ico"
-IDI_R_MODERATED         ICON    DISCARDABLE     "chat\\icos\\r_mod.ico"
-IDI_R_MEMBERS           ICON    DISCARDABLE     "chat\\icos\\r_memb.ico"
-IDI_R_ANONYMOUS         ICON    DISCARDABLE     "chat\\icos\\r_anon.ico"
-IDI_SEARCH              ICON    DISCARDABLE     "chat\\icos\\search.ico"
-IDI_PREV                ICON    DISCARDABLE     "chat\\icos\\prev.ico"
-IDI_NEXT                ICON    DISCARDABLE     "chat\\icos\\next.ico"
-IDI_INVITE              ICON    DISCARDABLE     "chat\\icos\\invite.ico"
-IDI_ADMINISTRATION      ICON    DISCARDABLE     "chat\\icos\\administration.ico"
-IDI_SMILEY				ICON    DISCARDABLE     "chat\\icos\\smile.ico"
-IDI_MESSAGE				ICON    DISCARDABLE     "chat\\icos\\message.ico"
-#else
 IDI_CHAT                ICON    DISCARDABLE     "icos\\chat.ico"
 IDI_BLANK               ICON    DISCARDABLE     "icos\\blank.ico"
 IDI_ITALIC              ICON    DISCARDABLE     "icos\\italic.ico"
@@ -579,7 +562,6 @@ IDI_INVITE              ICON    DISCARDABLE     "icos\\invite.ico"
 IDI_ADMINISTRATION      ICON    DISCARDABLE     "icos\\administration.ico"
 IDI_SMILEY				ICON    DISCARDABLE     "icos\\smile.ico"
 IDI_MESSAGE				ICON    DISCARDABLE     "icos\\message.ico"
-#endif
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

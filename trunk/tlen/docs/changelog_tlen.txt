@@ -1,3 +1,9 @@
+Version 2.0.5.0
+-------
+* Project cleanup
+ + change mucc.dll to tlen_czaty.dll
+ + compile tlen_czaty in Unicode and x64
+*  fix warnings, project files changes
 Version 2.0.4.1
 -------
 - fix accounts... dialog

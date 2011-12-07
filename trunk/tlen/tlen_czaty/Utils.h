@@ -18,18 +18,21 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-#ifndef MUCCSERVICES_INCLUDED
-#define MUCCSERVICES_INCLUDED
-
+#ifndef UTILS_INCLUDED
+#define UTILS_INCLUDED
 #include "mucc.h"
-#include "ManagerWindow.h"
-#include "ChatWindow.h"
 
-extern int MUCCServicesInit(WPARAM wParam, LPARAM lParam);
+class Utils {
+public:
+	static unsigned long forkThread(void (__cdecl *threadcode)(void*),unsigned long stacksize,void *arg);
+	static void			 copyString(char **, const char *b);
+	static void			 log(const char *fmt, ...);
 
-extern int MUCCQueryResult(WPARAM wParam, LPARAM lParam) ;
-extern int MUCCNewWindow(WPARAM wParam, LPARAM lParam) ;
-extern int MUCCEvent(WPARAM wParam, LPARAM lParam) ;
+	static MM_INTERFACE  mmi;
+	static void			 mucc_mir_free(void*);
+	static char*		 mucc_mir_t2a(LPCTSTR);
+	static LPTSTR		 mucc_mir_a2t(const char* );
+
+};
 
 #endif
-

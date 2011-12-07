@@ -19,10 +19,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#include "../commons.h"
 #include "mucc.h"
 #include "mucc_services.h"
 #include "HelperDialog.h"
 #include "Options.h"
+#include "Utils.h"
 
 char *muccModuleName;
 HINSTANCE hInst;
@@ -33,17 +35,34 @@ HICON muccIcon[MUCC_ICON_TOTAL];
 static int ModulesLoaded(WPARAM wParam, LPARAM lParam);
 static int PreShutdown(WPARAM wParam, LPARAM lParam);
 
-PLUGININFO pluginInfo = {
-	sizeof(PLUGININFO),
-	"MUCC Plugin",
-	PLUGIN_MAKE_VERSION(1,0,7,3),
-	"Group chats GUI plugin for Miranda IM (1.0.7.3 "__DATE__")",
+PLUGININFOEX pluginInfoEx = {
+	sizeof(PLUGININFOEX),
+#ifdef _UNICODE
+#ifdef _X64
+	"Tlen Czaty (x64, Unicode)",
+#else
+	"Tlen Czaty (Unicode)",
+#endif
+#else
+	"Tlen Czaty",
+#endif
+	PLUGIN_MAKE_VERSION(MUCC_MAJOR_VERSION,MUCC_MINOR_VERSION,MUCC_RELEASE_NUM,MUCC_BUILD_NUM),
+	"Group chats GUI plugin for Miranda IM (formerly known as mucc.dll) (version: "MUCC_VERSION_STRING" ; compiled: "__DATE__" "__TIME__")",
 	"Piotr Piastucki",
 	"the_leech@users.berlios.de",
-	"(c) 2004-2006 Piotr Piastucki",
+	"(c) 2004-2012 Piotr Piastucki",
 	"http://mtlen.berlios.de",
 	0,
-	0
+	0,
+#if defined( _UNICODE )
+#ifdef _X64
+	{0x9061ae31, 0x3d33, 0x49ce, { 0xaf, 0x00, 0x78, 0x9c, 0xbc, 0x25, 0xd9, 0xba }}
+#else
+	{0xadd9390c, 0x1dd4, 0x4c0d, { 0x9b, 0xa9, 0xcc, 0x76, 0x5d, 0x3d, 0xe5, 0x97 }}
+#endif
+#else
+    {0x5cf4792c, 0xa050, 0x46b6, { 0xaf, 0xd0, 0x03, 0x2d, 0x6e, 0xfc, 0xd3, 0x9c }}
+#endif
 };
 
 extern "C" BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvReserved)
@@ -52,13 +71,27 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvRese
 	return TRUE;
 }
 
-extern "C" __declspec(dllexport) PLUGININFO *MirandaPluginInfo(DWORD mirandaVersion)
+extern "C" __declspec(dllexport) PLUGININFOEX *MirandaPluginInfoEx(DWORD mirandaVersion)
 {
-	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,3,4,0)) {
-		MessageBox(NULL, "The MUCC plugin cannot be loaded. It requires Miranda IM 0.3.4 or later.", "Tlen Protocol Plugin", MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
+	if (mirandaVersion < PLUGIN_MAKE_VERSION(0,8,0,15)) {
+		MessageBox(NULL, _TEXT("The Tlen Czaty plugin cannot be loaded. It requires Miranda IM 0.8.15 or later."), _TEXT("Tlen Czaty plugin (MUCC)"), MB_OK|MB_ICONWARNING|MB_SETFOREGROUND|MB_TOPMOST);
 		return NULL;
 	}
-	return &pluginInfo;
+	return &pluginInfoEx;
+}
+
+#ifndef MIID_TLEN_MUCC
+#define MIID_TLEN_MUCC	{ 0xba658997, 0x0bce, 0x4f96, { 0xba, 0x48, 0x54, 0x55, 0x34, 0x16, 0x73, 0xea } }
+#endif
+
+static const MUUID interfaces[] = {
+		MIID_TLEN_MUCC,
+		MIID_LAST
+	};
+
+extern "C" __declspec(dllexport) const MUUID* MirandaPluginInterfaces(void)
+{
+	return interfaces;
 }
 
 
@@ -101,15 +134,17 @@ static void LoadIcons() {
 
 extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 {
-	char text[_MAX_PATH];
-	char *p, *q;
-	GetModuleFileName(hInst, text, sizeof(text));
-	p = strrchr(text, '\\');
-	p++;
-	q = strrchr(p, '.');
-	*q = '\0';
-	muccModuleName = _strdup(p);
-	_strupr(muccModuleName);
+//	char text[_MAX_PATH];
+//	char *p, *q;
+//	GetModuleFileNameA(hInst, text, sizeof(text));
+//	p = strrchr(text, '\\');
+//	p++;
+//	q = strrchr(p, '.');
+//	*q = '\0';
+//	muccModuleName = _strdup(p);
+//	_strupr(muccModuleName);
+
+	muccModuleName = "MUCC";
 
 	pluginLink = link;
 	HookEvent(ME_OPT_INITIALISE, MUCCOptInit);
@@ -120,6 +155,8 @@ extern "C" int __declspec(dllexport) Load(PLUGINLINK *link)
 	CreateServiceFunction(MS_MUCC_NEW_WINDOW, MUCCNewWindow);
 	CreateServiceFunction(MS_MUCC_EVENT, MUCCEvent);
 	hHookEvent = CreateHookableEvent(ME_MUCC_EVENT);
+
+	mir_getMMI(&(Utils::mmi));
 
 	LoadIcons();
 	return 0;

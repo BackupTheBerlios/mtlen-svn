@@ -22,11 +22,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "HelperDialog.h"
 #include "Utils.h"
 
-static BOOL CALLBACK InviteDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK AcceptInvitationDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK ErrorDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL CALLBACK TopicDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK InviteDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK AcceptInvitationDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+//static INT_PTR CALLBACK ErrorDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK TopicDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static void __cdecl InviteDlgThread(void *vDialog);
 static void __cdecl AcceptInvitationDlgThread(void *vDialog);
 static void __cdecl JoinDlgThread(void *vDialog);
@@ -285,16 +285,16 @@ static void __cdecl TopicDlgThread(void *vDialog)
 	DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_HELPER_TOPIC), NULL, TopicDlgProc, (LPARAM) vDialog);
 }
 
-static BOOL CALLBACK InviteDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK InviteDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	char str[256];
 	HelperDialog::HelperContact *contactList;
-	HelperDialog *dialog = (HelperDialog *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	HelperDialog *dialog = (HelperDialog *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		dialog = (HelperDialog *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) dialog);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) dialog);
 		dialog->setHWND(hwndDlg);
 		SendDlgItemMessage(hwndDlg, IDC_REASON, EM_SETREADONLY, (WPARAM)TRUE, 0);
 		for (contactList = dialog->getContactList();contactList!=NULL;contactList=contactList->getNext()) {
@@ -305,7 +305,7 @@ static BOOL CALLBACK InviteDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM
 		switch (LOWORD(wParam)) {
 		case IDC_INVITE:
 			MUCCEVENT muce;
-			GetDlgItemText(hwndDlg, IDC_USER, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_USER, str, 255);
 			if (strlen(str)>0) {
 				for (contactList = dialog->getContactList();contactList!=NULL;contactList=contactList->getNext()) {
 					if (!strcmp(str, contactList->getName())) {
@@ -341,26 +341,26 @@ static BOOL CALLBACK InviteDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM
 
 
 
-static BOOL CALLBACK AcceptInvitationDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK AcceptInvitationDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	char str[256];
 	HelperDialog *dialog;
-	dialog = (HelperDialog *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	dialog = (HelperDialog *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		{
 			dialog = (HelperDialog *) lParam;
 			TranslateDialogDefault(hwndDlg);
-			SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) dialog);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) dialog);
 			dialog->setHWND(hwndDlg);
 			if (dialog->getNick() != NULL) {
-				SetDlgItemText(hwndDlg, IDC_FROM, dialog->getNick());
+				SetDlgItemTextA(hwndDlg, IDC_FROM, dialog->getNick());
 			}
 			if (dialog->getRoomName() != NULL) {
-				SetDlgItemText(hwndDlg, IDC_ROOM, dialog->getRoomName());
+				SetDlgItemTextA(hwndDlg, IDC_ROOM, dialog->getRoomName());
 			}
 			if (dialog->getReason() != NULL) {
-				SetDlgItemText(hwndDlg, IDC_REASON, dialog->getReason());
+				SetDlgItemTextA(hwndDlg, IDC_REASON, dialog->getReason());
 			}
 
 //			if (!DBGetContactSetting(NULL, jabberProtoName, "LoginName", &dbv)) {
@@ -376,7 +376,7 @@ static BOOL CALLBACK AcceptInvitationDlgProc(HWND hwndDlg, UINT msg, WPARAM wPar
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDC_ACCEPT:
-			GetDlgItemText(hwndDlg, IDC_NICK, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_NICK, str, 255);
 			dialog->setNick(str);
 			MUCCEVENT muce;
 			muce.iType = MUCC_EVENT_JOIN;
@@ -409,16 +409,16 @@ static BOOL CALLBACK AcceptInvitationDlgProc(HWND hwndDlg, UINT msg, WPARAM wPar
 }
 
 
-static BOOL CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	char str[256];
 	HelperDialog *dialog;
-	dialog = (HelperDialog *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	dialog = (HelperDialog *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		dialog = (HelperDialog *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) dialog);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) dialog);
 		dialog->setHWND(hwndDlg);
 		SetFocus(GetDlgItem(hwndDlg, IDOK));
 		if (dialog->getRoomFlags() & MUCC_EF_ROOM_NAME) {
@@ -432,10 +432,10 @@ static BOOL CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM l
 			SendDlgItemMessage(hwndDlg, IDC_NICK, EM_SETREADONLY, (WPARAM)TRUE, 0);
 		}
 		if (dialog->getRoomName()!=NULL) {
-			SetDlgItemText(hwndDlg, IDC_ROOM, dialog->getRoomName());
+			SetDlgItemTextA(hwndDlg, IDC_ROOM, dialog->getRoomName());
 		}
 		if (dialog->getNick()!=NULL) {
-			SetDlgItemText(hwndDlg, IDC_NICK, dialog->getNick());
+			SetDlgItemTextA(hwndDlg, IDC_NICK, dialog->getNick());
 		}
 		return FALSE;
 	case WM_COMMAND:
@@ -443,13 +443,13 @@ static BOOL CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM l
 		case IDOK:
 			MUCCEVENT muce;
 			if (dialog->getRoomId()==NULL) {
-				GetDlgItemText(hwndDlg, IDC_ROOM, str, 255);
+				GetDlgItemTextA(hwndDlg, IDC_ROOM, str, 255);
 				if (strlen(str)>0) {
 					//dialog->setRoomId(str);
 					dialog->setRoomName(str);
 				}
 			}
-			GetDlgItemText(hwndDlg, IDC_NICK, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_NICK, str, 255);
 			if (strlen(str)>0) {
 				dialog->setNick(str);
 			} else {
@@ -480,7 +480,7 @@ static BOOL CALLBACK JoinDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM l
 static void __cdecl ErrorDlgThread(void *vDialog)
 {
 	HelperDialog *dialog=(HelperDialog *)vDialog;
-	MessageBox(NULL, dialog->getReason(), Translate("Error"), MB_OK | MB_ICONERROR);
+	MessageBoxA(NULL, dialog->getReason(), Translate("Error"), MB_OK | MB_ICONERROR);
 	/*
 	int result = DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_GROUPCHAT_JOIN), NULL, JoinDlgProc, (LPARAM) dialog);
 	if (result!=0) {
@@ -496,36 +496,37 @@ static void __cdecl ErrorDlgThread(void *vDialog)
 	delete dialog;
 }
 
-static BOOL CALLBACK ErrorDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+/*
+static INT_PTR CALLBACK ErrorDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	char str[256];
 	HelperDialog *dialog;
-	dialog = (HelperDialog *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	dialog = (HelperDialog *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		dialog = (HelperDialog *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) dialog);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) dialog);
 		dialog->setHWND(hwndDlg);
 		SetFocus(GetDlgItem(hwndDlg, IDOK));
 		if (dialog->getRoomName()!=NULL) {
-			SetDlgItemText(hwndDlg, IDC_ROOM, dialog->getRoomName());
+			SetDlgItemTextA(hwndDlg, IDC_ROOM, dialog->getRoomName());
 		}
 		if (dialog->getNick()!=NULL) {
-			SetDlgItemText(hwndDlg, IDC_NICK, dialog->getNick());
+			SetDlgItemTextA(hwndDlg, IDC_NICK, dialog->getNick());
 		}
 		return FALSE;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
 			if (dialog->getRoomId()==NULL) {
-				GetDlgItemText(hwndDlg, IDC_ROOM, str, 255);
+				GetDlgItemTextA(hwndDlg, IDC_ROOM, str, 255);
 				if (strlen(str)>0) {
 					//dialog->setRoomId(str);
 					dialog->setRoomName(str);
 				}
 			}
-			GetDlgItemText(hwndDlg, IDC_NICK, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_NICK, str, 255);
 			if (strlen(str)>0) {
 				dialog->setNick(str);
 			} else {
@@ -545,24 +546,25 @@ static BOOL CALLBACK ErrorDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM 
 	}
 	return FALSE;
 }
+*/
 
-static BOOL CALLBACK TopicDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK TopicDlgProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	char str[256];
 	HelperDialog *dialog;
-	dialog = (HelperDialog *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	dialog = (HelperDialog *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	switch (msg) {
 	case WM_INITDIALOG:
 		dialog = (HelperDialog *) lParam;
 		TranslateDialogDefault(hwndDlg);
-		SetWindowLong(hwndDlg, GWL_USERDATA, (LONG) dialog);
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR) dialog);
 		dialog->setHWND(hwndDlg);
 		return FALSE;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
 			MUCCEVENT muce;
-			GetDlgItemText(hwndDlg, IDC_TOPIC, str, 255);
+			GetDlgItemTextA(hwndDlg, IDC_TOPIC, str, 255);
 			dialog->setReason(str);
 			muce.cbSize = sizeof(MUCCEVENT);
 			muce.iType = MUCC_EVENT_TOPIC;

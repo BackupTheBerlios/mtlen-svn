@@ -176,8 +176,9 @@ static void TlenPsGet(TlenProtocol *proto, JABBER_LIST_ITEM *item) {
 
 void TlenProcessPic(XmlNode *node, TlenProtocol *proto) {
     JABBER_LIST_ITEM *item = NULL;
-    char *crc, *crc_c, *idt, *size, *from, *rt;
-    from=JabberXmlGetAttrValue(node, "from");
+    char *crc, *crc_c, *idt, *size, *from, *fromRaw, *rt;
+    from = JabberXmlGetAttrValue(node, "from");
+    fromRaw = JabberLoginFromJID(from);
     idt = JabberXmlGetAttrValue(node, "idt");
     size = JabberXmlGetAttrValue(node, "size");
     crc_c = JabberXmlGetAttrValue(node, "crc_c");
@@ -197,7 +198,7 @@ void TlenProcessPic(XmlNode *node, TlenProtocol *proto) {
                     item->ft->hFileEvent = NULL;
                 }
             }
-        } else if (!strcmp(item->ft->jid, from)) {
+        } else if (!strcmp(item->ft->jid, fromRaw)) {
             if (crc_c != NULL) {
                 if (!strcmp(crc_c, "n")) {
                     /* crc_c = n, picture transfer accepted */
@@ -250,6 +251,7 @@ void TlenProcessPic(XmlNode *node, TlenProtocol *proto) {
 			}
 		}
     }
+    mir_free(fromRaw);
 }
 
 BOOL SendPicture(TlenProtocol *proto, HANDLE hContact) {
